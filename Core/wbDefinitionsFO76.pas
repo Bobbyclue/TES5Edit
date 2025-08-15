@@ -6988,7 +6988,7 @@ begin
     {4}  wbInteger('String', itU32, wbConditionStringToStr, wbConditionStringToInt, cpIgnore),
     {5}  wbActorValue,
     {6}  wbInteger('Alias', itS32, wbConditionAliasToStr, wbAliasToInt),
-    {7}  wbInteger('Attack Data', itU32),
+    {7}  wbInteger('Attack Data', itU32, wbConditionStringToStr, wbConditionStringToInt, cpIgnore),
     {8}  wbInteger('Event', itU32, wbConditionEventToStr, wbConditionEventToInt),
     {9}  wbInteger('Packdata ID', itU32),
     {10} wbInteger('Quest Stage', itU32, wbConditionParam1QuestStageToStr, wbQuestStageToInt),
@@ -13806,72 +13806,72 @@ begin
       wbStruct(DATA, 'General', [  //0xE4
         wbUnion('Flags', wbFormVersionDecider(202), [
           wbInteger('Flags', itU32, wbFlags([
-            {0x00000001} 'Start Game Enabled',
+            {0x00000001} 'Enabled',
             {0x00000002} 'Completed',
             {0x00000004} 'Add Idle Topic To Hello',
-            {0x00000008} 'Allow repeated stages',
+            {0x00000008} 'Allow Repeat Stages',
             {0x00000010} 'Starts Enabled',
             {0x00000020} 'Displayed In HUD',
             {0x00000040} 'Failed',
             {0x00000080} 'Stage Wait',
             {0x00000100} 'Run Once',
             {0x00000200} 'Exclude from dialogue export',
-            {0x00000400} 'Warn on alias fill failure',
-            {0x00000800} 'Active',
+            {0x00000400} 'Warn on Alias Fill Failed',
+            {0x00000800} 'Tracked By UI',
             {0x00001000} 'Repeats Conditions',
-            {0x00002000} 'Keep Instance',
+            {0x00002000} 'Keep Instance Data',
             {0x00004000} 'Want Dormant',
             {0x00008000} 'Has Dialogue Data',
-            {0x00010000} 'Instanced Quest',
-            {0x00020000} 'Unknown 17',
-            {0x00040000} 'Unknown 18',
-            {0x00080000} 'Holotape Container Quest',
-            {0x00100000} 'Unknown 20',
-            {0x00200000} 'Unknown 21',
-            {0x00400000} 'Unknown 22',
-            {0x00800000} 'Unknown 23',
-            {0x01000000} 'Unknown 24',
-            {0x02000000} 'Uses Default Quest Expire Timer',
-            {0x04000000} 'Unknown 26',
-            {0x08000000} 'Event Quest',
-            {0x10000000} 'Raid Quest',
-            {0x20000000} 'Unknown 29',
-            {0x40000000} 'Unknown 30',
-            {0x80000000} 'Unknown 31'
+            {0x00010000} 'Unique Instance',
+            {0x00020000} 'Sharable',
+            {0x00040000} 'Always Tracked',
+            {0x00080000} 'Holotape Only',
+            {0x00100000} 'Saves Completion',
+            {0x00200000} 'UNUSED',
+            {0x00400000} 'Unique Per Player',
+            {0x00800000} 'Can Be Rejected When Active',
+            {0x01000000} 'Uses Custom Expire Time',
+            {0x02000000} 'Not Autotracked',
+            {0x04000000} 'Disable Event Announcement',
+            {0x08000000} 'Kick All Players From Instance on Shutdown',
+            {0x10000000} 'Disable Greeting Precheck',
+            {0x20000000} 'Incrementing Timer',
+            {0x40000000} 'Is Random Encounter',
+            {0x80000000} 'Not Tracked in UI After Completed'
           ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
           wbInteger('Flags', itU64, wbFlags([
-            {0x00000001} 'Start Game Enabled',
+            {0x00000001} 'Enabled',
             {0x00000002} 'Completed',
             {0x00000004} 'Add Idle Topic To Hello',
-            {0x00000008} 'Allow repeated stages',
+            {0x00000008} 'Allow Repeat Stages',
             {0x00000010} 'Starts Enabled',
             {0x00000020} 'Displayed In HUD',
             {0x00000040} 'Failed',
             {0x00000080} 'Stage Wait',
             {0x00000100} 'Run Once',
             {0x00000200} 'Exclude from dialogue export',
-            {0x00000400} 'Warn on alias fill failure',
-            {0x00000800} 'Active',
+            {0x00000400} 'Warn on Alias Fill Failed',
+            {0x00000800} 'Tracked By UI',
             {0x00001000} 'Repeats Conditions',
-            {0x00002000} 'Keep Instance',
+            {0x00002000} 'Keep Instance Data',
             {0x00004000} 'Want Dormant',
             {0x00008000} 'Has Dialogue Data',
-            {0x00010000} 'Instanced Quest',
-            {0x00020000} 'Unknown 17',
-            {0x00040000} 'Unknown 18',
-            {0x00080000} 'Holotape Container Quest',
-            {0x00100000} 'Unknown 20',
-            {0x00200000} 'Unknown 21',
-            {0x00400000} 'Unknown 22',
-            {0x00800000} 'Unknown 23',
-            {0x01000000} 'Unknown 24',
-            {0x02000000} 'Uses Default Quest Expire Timer',
-            {0x04000000} 'Unknown 26',
-            {0x08000000} 'Event Quest',
-            {0x10000000} 'Raid Quest',
-            {0x20000000} 'Unknown 29',
-            {0x40000000} 'Unknown 30',
-            {0x80000000} 'Unknown 31'
+            {0x00010000} 'Unique Instance',
+            {0x00020000} 'Sharable',
+            {0x00040000} 'Always Tracked',
+            {0x00080000} 'Holotape Only',
+            {0x00100000} 'Saves Completion',
+            {0x00200000} 'UNUSED',
+            {0x00400000} 'Unique Per Player',
+            {0x00800000} 'Can Be Rejected When Active',
+            {0x01000000} 'Uses Custom Expire Time',
+            {0x02000000} 'Not Autotracked',
+            {0x04000000} 'Disable Event Announcement',
+            {0x08000000} 'Kick All Players From Instance on Shutdown',
+            {0x10000000} 'Disable Greeting Precheck',
+            {0x20000000} 'Incrementing Timer',
+            {0x40000000} 'Is Random Encounter',
+            {0x80000000} 'Not Tracked in UI After Completed'
           ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
         ]),
         wbInteger('Priority',itU8), //0xE8
@@ -13897,19 +13897,19 @@ begin
       ]),
       wbStruct(DNAM, 'General', [
         wbInteger('Flags', itU16, wbFlags([
-          {0x0001} 'Start Game Enabled',
-          {0x0002} 'Unknown 2',
+          {0x0001} 'Enabled',
+          {0x0002} 'Completed',
           {0x0004} 'Add Idle Topic To Hello',
-          {0x0008} 'Allow repeated stages',
-          {0x0010} 'Unknown 5',
-          {0x0020} 'Unknown 6',
-          {0x0040} 'Unknown 7',
-          {0x0080} 'Unknown 8',
+          {0x0008} 'Allow Repeat Stages',
+          {0x0010} 'Starts Enabled',
+          {0x0020} 'Displayed In HUD',
+          {0x0040} 'Failed',
+          {0x0080} 'Stage Wait',
           {0x0100} 'Run Once',
           {0x0200} 'Exclude from dialogue export',
-          {0x0400} 'Warn on alias fill failure',
-          {0x0800} 'Unknown 12',
-          {0x1000} 'Unknown 13'
+          {0x0400} 'Warn on Alias Fill Failed',
+          {0x0800} 'Tracked By UI',
+          {0x1000} 'Repeats Conditions'
         ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
         wbInteger('Priority', itU8),
         wbUnused(1),
@@ -13935,14 +13935,24 @@ begin
     wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum),
     wbFormIDCk(LNAM, 'Location', [LCTN]),
     wbFormIDCk(XNAM, 'Quest Completion XP', [GLOB]),
-    wbUnknown(QMCI),
+    wbInteger(QMCI, 'Max Quest Instances', itU32),
     wbFormIDCk(QTLM, 'Quest Timer Length Max', [GLOB]),
     wbFormIDCk(QETL, 'Quest Expire Timer Length', [GLOB, NULL]),
     wbFormIDCk(QSSK, 'Start Keyword', [KYWD]),
     wbFormIDCk(QSLC, 'Quest Start Location', [LCTN]),
     wbFormIDCk(QECV, 'Enable Keyword', [KYWD]),
     wbFormIDCk(QUCF, 'Faction', [FACT]),
-    wbUnknown(QSDD),
+    wbStruct(QSDD, 'Quest Start Data', [
+      wbUnknown(4),
+      wbUnknown(4),
+      wbInteger('Flags', itU32, wbFlags([
+        {0x00000001} 'No Story Event',
+        {0x00000002} 'Auto Restart',
+        {0x00000004} 'No Repeat',
+        {0x00000008} 'No Guarantee',
+        {0x00000010} 'Guarantee Only if Visited'
+      ]))
+    ]),
     wbInteger(QETE, 'Quest Event Type', itU8, wbEnum([
       'Co-op',
       'Versus',
@@ -13976,15 +13986,15 @@ begin
       wbStructSK(INDX, [0], 'Stage Index', [
         wbInteger('Stage Index', itU16),
         wbInteger('Flags', itU8, wbFlags([
-          {0x01} 'Unknown 1',
+          {0x01} 'Done',
           {0x02} 'Run On Start',
           {0x04} 'Run On Stop',
           {0x08} 'Keep Instance Data From Here On',
-          {0x10} 'Unknown 4',
-          {0x20} 'Unknown 5',
-          {0x40} 'Unknown 6'
+          {0x10} 'Timer End',
+          {0x20} 'Start Timer',
+          {0x40} 'Checkpoint'
         ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbInteger('Unknown', itU8)
+        wbUnused(1)
       ]).IncludeFlag(dfCollapsed, wbCollapseOther),
       wbRArray('Log Entries', wbRStruct('Log Entry', [
         wbInteger(QSDT, 'Stage Flags', itU8, wbFlags([
@@ -14023,23 +14033,26 @@ begin
       wbInteger(SNAM, 'Stage to set', itU16),
       wbLString(NAM1, 'Quest Notes'),
       wbString(SCCM, 'Comments'),
-      wbLStringKC(PBLT, 'Unknown PBLT', 0, cpTranslate),
-      wbLStringKC(PBRT, 'Unknown PBRT', 0, cpTranslate),
+      wbLStringKC(PBLT, 'Progress Bar Left Text', 0, cpTranslate),
+      wbLStringKC(PBRT, 'Progress Bar Right Text', 0, cpTranslate),
       wbLStringKC(NNAM, 'Display Text', 0, cpTranslate, True),
       wbRArray('Targets', wbRStruct('Target', [
         wbStruct(QSTA, 'Target', [
           wbInteger('Alias', itS32, wbQuestAliasToStr, wbAliasToInt),
-          wbFromVersion(158, wbInteger('Target Flags', itU8, wbFlags([
+          wbFromVersion(158, wbInteger('Target Flags', itU16, wbFlags([
             {0x0001} 'Compass Marker Ignores Locks',
             {0x0002} 'Hostile',
-            {0x0004} 'Use Straight Line Pathing'
-          ])).IncludeFlag(dfCollapsed, wbCollapseFlags)),
-          wbFromVersion(158, wbInteger('Area Flags', itU8, wbFlags([
-            {0x0001} 'Use Global',
-            {0x0002} 'Unknown 1'
+            {0x0004} 'Use Straight Line Pathing',
+            {0x0008} 'Path Has Doors',
+            {0x0010} 'Path Has Spaces',
+            {0x0020} 'Path is World Only',
+            {0x0040} 'Is Shared From Team',
+            {0x0080} 'Is Dirty',
+            {0x0100} 'Use Global For Radius',
+            {0x0200} 'Centered'
           ])).IncludeFlag(dfCollapsed, wbCollapseFlags)),
           wbFromVersion(82, wbFormIDCk('Keyword', [KYWD, NULL])),
-          wbFromVersion(151, wbByteArray('Area',4))
+          wbFromVersion(151, wbFloat('Radius'))
         ]).SetSummaryKeyOnValue([0, 1])
           .SetSummaryPrefixSuffixOnValue(0, 'Alias[', ']')
           .SetSummaryPrefixSuffixOnValue(1, 'Flags{', '}')
@@ -14067,10 +14080,12 @@ begin
         wbRStructSK([0], 'Alias', [
           wbInteger(ALST, 'Reference Alias ID', itU32, nil, cpNormal, True),
           wbString(ALID, 'Alias Name', 0, cpNormal, True),
-          wbFloat(ESAV, 'Unknown'),
-          wbFloat(ESDA, 'Unknown'),
-          wbFloat(ESRV, 'Unknown'),
-          wbFloat(ESRP, 'Unknown'),
+          wbRStruct('Event Score Data', [
+            wbFloat(ESAV, 'Activate'),
+            wbFloat(ESDA, 'Damage'),
+            wbFloat(ESRV, 'Revive'),
+            wbFloat(ESRP, 'Repair')
+          ]),
           wbQUSTAliasFlags.IncludeFlag(dfCollapsed, wbCollapseFlags),
           wbInteger(ALFI, 'Force Into Alias When Filled', itS32, wbQuestAliasToStr, wbAliasToInt),
           //wbFormIDCk(ALFL, 'Specific Location', [LCTN]),
@@ -14149,10 +14164,12 @@ begin
         wbRStructSK([0], 'Alias', [
           wbInteger(ALLS, 'Location Alias ID', itU32),
           wbString(ALID, 'Alias Name'),
-          wbFloat(ESAV, 'Unknown'),
-          wbFloat(ESDA, 'Unknown'),
-          wbFloat(ESRV, 'Unknown'),
-          wbFloat(ESRP, 'Unknown'),
+          wbRStruct('Event Score Data', [
+            wbFloat(ESAV, 'Activate'),
+            wbFloat(ESDA, 'Damage'),
+            wbFloat(ESRV, 'Revive'),
+            wbFloat(ESRP, 'Repair')
+          ]),
           wbQUSTAliasFlags,
           wbInteger(ALFI, 'Force Into Alias When Filled', itS32, wbQuestAliasToStr, wbAliasToInt),
           wbFormIDCk(ALFL, 'Specific Location', [LCTN]),
@@ -14198,8 +14215,16 @@ begin
     wbString(SNAM, 'SWF File'),
     wbString(SCCM, 'Comments'),
     wbLString(QRWT, 'Reward Text'),
-    wbUnknown(QARV),
-    wbUnknown(QARF),
+    wbInteger(QARV, 'Actor Reserve Type', itU32, wbEnum([
+      'None',
+      'Vault Raid',
+      'Small',
+      'Medium',
+      'Large'
+    ])),
+    wbInteger(QARF, 'Actor Reserve Flags', itU16, wbFlags([
+      {0x0001} 'Unknown 0'
+    ])),
     wbRStruct('Public Event Data', [
       wbInteger(PEDF, 'Public Event Difficulty', itU32, wbEnum([
         'Very Easy',
@@ -14210,8 +14235,8 @@ begin
         'Nuclear'
       ])),
       wbString(PEPI, 'Public Event Popup Info'),
-      wbUnknown(PERM),
-      wbUnknown(PERT),
+      wbInteger(PERM, 'Max Respawn Timer', itU32),
+      wbFloat(PERT, 'Respawn Timer Increase Amount'),
       wbRArray('Possible Rewards',
         wbRStruct('Possible Reward', [
           wbString(PEWI, 'Icon'),
@@ -14227,7 +14252,7 @@ begin
       ])
     ),
     wbByteArray(QTFS, 'QTFS - Unknown 2 bytes', 2),
-    wbUnknown(QMDE)
+    wbArray(QMDE, 'Quest Modules', wbFormIDCK('Quest Module', [NULL,QMDL]))
   ]);
 
   wbPhonemeTargets := wbStruct(PHWT, 'Phoneme Target Weight', [
