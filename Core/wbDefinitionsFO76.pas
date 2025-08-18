@@ -8283,7 +8283,10 @@ begin
       wbInteger('', itU32, wbCELLFlags).IncludeFlag(dfCollapsed, wbCollapseFlags)
     ], cpNormal, True).SetAfterSet(wbCELLDATAAfterSet),
 
-    wbByteArray(VISI, 'PreVis File Hash', 4),//.SetToStr(wbTimeStampToString),
+    wbUnion(VISI, 'PreVis File Hash', wbRecordSizeDecider(4), [
+      wbByteArray('PreVis Files Timestamp', 2).SetToStr(wbTimeStampToString),
+      wbByteArray('PreVis File Hash', 4)
+    ]),
     wbFormIDCk(RVIS, 'In PreVis File Of', [CELL]),
     wbByteArray(PCMB, 'PreCombined Files Timestamp', 2).SetToStr(wbTimeStampToString),
 
@@ -11191,7 +11194,7 @@ begin
       wbFloat('Directional Fade'),
       wbFloat('Fog Clip Distance'),
       wbFloat('Fog Power'),
-      wbUnused(32),
+      wbAmbientColors,
       wbByteColors('Fog Color Far'),
       wbFloat('Fog Max'),
       wbFloat('Light Fade Begin'),
