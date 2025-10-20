@@ -2715,17 +2715,7 @@ begin
     wbEDID,
     wbICON,
     wbDESC.SetRequired,
-    wbRArrayS('Locations',
-      wbStructSK(LNAM, [0, 1], 'Location', [
-        wbFormIDCkNoReach('Direct', [CELL, WRLD, NULL]),
-        wbStructSK([0, 1], 'Indirect', [
-          wbFormIDCkNoReach('World', [WRLD, NULL]),
-          wbStructSK([0,1], 'Grid', [
-            wbInteger('Y', itS16),
-            wbInteger('X', itS16)
-          ])
-        ])
-      ]))
+    wbLoadScreenLocations
   ]).SetSummaryKey([2]);
 
   wbRecord(LTEX, 'Landscape Texture', [

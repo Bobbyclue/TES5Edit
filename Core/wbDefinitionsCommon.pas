@@ -78,6 +78,7 @@ var
   wbINOM: IwbRecordMemberDef;
   wbKWDAs: IwbRecordMemberDef;
   wbKeywords :IwbRecordMemberDef;
+  wbLoadScreenLocations: IwbRecordMemberDef;
   wbMagicEffectSounds: IwbRecordMemberDef;
   wbMDOB: IwbRecordMemberDef;
   wbMHDTCELL: IwbRecordMemberDef;
@@ -7290,6 +7291,19 @@ begin
         wbUnknown(IDLB)
       )
     ]);
+
+  wbLoadScreenLocations :=
+    wbRArrayS('Locations',
+      wbStructSK(LNAM, [0, 1], 'Location', [
+        wbFormIDCkNoReach('Direct', [CELL, WRLD, NULL]),
+        wbStructSK([0, 1], 'Indirect', [
+          wbFormIDCkNoReach('World', [WRLD, NULL]),
+          wbStructSK([0,1], 'Grid', [
+            wbInteger('Y', itS16),
+            wbInteger('X', itS16)
+          ])
+        ])
+      ]));
 
 {>>>Landscape Common Defs<<<}
   //TES4,FO3,FNV,TES5,FO4,FO76,SF1
