@@ -3774,7 +3774,7 @@ begin
     wbLANDDefaultTexture := lDefaultTexture;
 
   case aType of
-    ctToStr : aValue := wbLANDDefaultTexture + ' [LTEX:00000000]';
+    ctToStr, ctToSummary : aValue := wbLANDDefaultTexture + ' [LTEX:00000000]';
   end;
 end;
 
