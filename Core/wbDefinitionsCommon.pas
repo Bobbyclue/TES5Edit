@@ -154,12 +154,11 @@ function wbPlacedAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbROADAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbSCENAddInfo(const aMainRecord: IwbMainRecord): string;
 
-{>>> After Load Callbacks <<<} //12
+{>>> After Load Callbacks <<<} //11
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 procedure wbAVIFSkillAfterLoad(const aElement: IwbElement);
 procedure wbDialogueTextAfterLoad(const aElement: IwbElement);
 procedure wbDOBJObjectsAfterLoad(const aElement: IwbElement);
-procedure wbLANDLayerAfterLoad(const aElement: IwbElement);
 procedure wbPACKDateAfterLoad(const aElement: IwbElement);
 procedure wbPNDTAfterLoad(const aElement: IwbElement);
 procedure wbRPLDAfterLoad(const aElement: IwbElement);
@@ -657,8 +656,10 @@ uses
   Math,
   StrUtils,
   SysUtils,
-  System.Types,
-  wbHelpers;
+  Types,
+  IniFiles,
+  wbHelpers,
+  xeMainForm;
 
 {>>> Add Info Callbacks <<<} //10
 
@@ -808,7 +809,7 @@ begin
   end;
 end;
 
-{>>> After Load Callbacks <<<} //12
+{>>> After Load Callbacks <<<} //11
 
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 begin
@@ -869,36 +870,6 @@ begin
       if Supports(lArray.Elements[i], IwbContainerElementRef, lEntry) then
         if lEntry.ElementNativeValues['Use'] = 0 then
           lArray.RemoveElement(i, True);
-  finally
-    wbEndInternalEdit;
-  end;
-end;
-
-procedure wbLANDLayerAfterLoad(const aElement: IwbElement);
-begin
-  if not Assigned(aElement) then
-    Exit;
-
-  if wbBeginInternalEdit then try
-    var lContainer : IwbContainerElementRef;
-    if not Supports(aElement, IwbContainerElementRef, lContainer) then
-      Exit;
-
-    var lTexture := lContainer.Elements[0];
-    if not Assigned(lTexture) then
-      Exit;
-
-    if lTexture.NativeValue <> 0 then
-      Exit;
-
-    //Sets null LTEX's on Land Layers to the default that is used by the CK.
-    //Arthmoor helped debug/figure this out.
-    case wbGameMode of
-      gmTES4, gmTES4R:         lTexture.NativeValue := $000008C0; //TerrainHDDirt01dds
-      gmFO3,  gmFNV:           lTexture.NativeValue := $00015457; //LDirtWasteland01
-      gmTES5, gmTES5VR, gmSSE: lTexture.NativeValue := $00000C16; //LDirt02
-      gmFO4,  gmFO4VR:         lTexture.NativeValue := $000AB07D; //LCWDefault01Grass01
-    end;
   finally
     wbEndInternalEdit;
   end;
@@ -3752,6 +3723,54 @@ begin
     Exit;
 
   aValue := ItemString;
+end;
+
+var
+  wbLANDDefaultTexture : string;
+
+procedure wbLANDTextureToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if aElement.NativeValue <> 0 then
+    Exit;
+
+  var lDefaultTexture : string;
+  case wbGameMode of
+     gmTES4, gmTES4R         : lDefaultTexture := 'TerrainHDDirt01dds';
+     gmFO3,  gmFNV           : lDefaultTexture := 'LDirtWasteland01';
+     gmTES5, gmTES5VR, gmSSE : lDefaultTexture := 'LDirt02';
+     gmFO4,  gmFO4VR         : lDefaultTexture := 'LCWDefault01Grass01';
+  end;
+
+  if wbLANDDefaultTexture = '' then begin
+    for var lFile in frmMain.Files do begin
+      var lIniFile : string;
+      var lFileName := lFile.FileName;
+      if SameText(lFileName, wbGameMasterEsm) then
+        lIniFile := wbTheGameIniFileName
+      else if SameText(lFileName, wbGameExeName) then
+        lIniFile := wbCustomIniFileName
+      else
+        lIniFile := wbDataPath + ChangeFileExt(lFileName, '.ini');
+      if FileExists(lIniFile) then begin
+        with TMemIniFile.Create(lIniFile) do try
+          if ValueExists('Landscape', 'sDefaultLandDiffuseTexture') then
+            wbLANDDefaultTexture := ReadString('Landscape', 'sDefaultLandDiffuseTexture', lDefaultTexture);
+        finally
+          Free;
+        end;
+      end;
+    end;
+  end;
+
+  if wbLANDDefaultTexture = '' then
+    wbLANDDefaultTexture := lDefaultTexture;
+
+  case aType of
+    ctToStr : aValue := wbLANDDefaultTexture + ' [LTEX:00000000]';
+  end;
 end;
 
 procedure wbNPCPackageToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
@@ -7340,21 +7359,13 @@ begin
       33).SetSummaryName('Rows')
          .IncludeFlag(dfCollapsed, wbCollapseVertices));
 
-  var wbLandLayerDefault : variant;
-  case wbGameMode of
-     gmTES4, gmTES4R         : wbLandLayerDefault := $000008C0; //TerrainHDDirt01dds
-     gmFO3,  gmFNV           : wbLandLayerDefault := $00015457; //LDirtWasteland01
-     gmTES5, gmTES5VR, gmSSE : wbLandLayerDefault := $00000C16; //LDirt02
-     gmFO4,  gmFO4VR         : wbLandLayerDefault := $000AB07D; //LCWDefault01Grass01
-  end;
-
   //TES4,FO3,FNV,TES5,FO4,FO76
   wbLandLayers :=
     wbRArrayS('Layers',
       wbRUnion('Layer', [
         wbRStructSK([0], 'Base Layer', [
           wbStructSK(BTXT, [1, 3], 'Base Layer', [
-            wbFormIDCk('Texture', [LTEX]).SetDefaultNativeValue(wbLandLayerDefault),
+            wbFormIDCk('Texture', [LTEX,NULL]).SetToStr(wbLANDTextureToStr),
             wbInteger('Quadrant', itU8, wbQuadrantEnum),
             wbUnused(1),
             wbInteger('Layer', itS16)
@@ -7364,12 +7375,11 @@ begin
             .SetSummaryPrefixSuffixOnValue(3, 'on Layer [', ']')
             .IncludeFlagOnValue(dfSummaryMembersNoName)
             .IncludeFlagOnValue(dfSummaryNoSortKey)
-            .SetAfterLoad(wbLANDLayerAfterLoad)
             .IncludeFlag(dfCollapsed, wbCollapseOther)
         ]).IncludeFlag(dfCollapsed, wbCollapseOther),
         wbRStructSK([0], 'Alpha Layer', [
           wbStructSK(ATXT, [1, 3], 'Alpha Layer Header', [
-            wbFormIDCk('Texture', [LTEX]).SetDefaultNativeValue(wbLandLayerDefault),
+            wbFormIDCk('Texture', [LTEX,NULL]).SetToStr(wbLANDTextureToStr),
             wbInteger('Quadrant', itU8, wbQuadrantEnum),
             wbUnused(1),
             wbInteger('Layer', itS16)
@@ -7379,7 +7389,6 @@ begin
             .SetSummaryPrefixSuffixOnValue(3, 'on Layer [', ']')
             .IncludeFlagOnValue(dfSummaryMembersNoName)
             .IncludeFlagOnValue(dfSummaryNoSortKey)
-            .SetAfterLoad(wbLANDLayerAfterLoad)
             .IncludeFlag(dfCollapsed, wbCollapseOther),
           IfThen(wbSimpleRecords,
             wbByteArray(VTXT, 'Alpha Layer Data'),
