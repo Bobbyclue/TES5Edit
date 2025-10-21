@@ -5717,7 +5717,8 @@ begin
       wbRStruct(aName, [
         wbFormIDCk(aSig1, 'Effect', [ENCH]),
         wbInteger(aSig2, 'Capacity', itU16)
-      ]).IncludeFlag(dfAllowAnyMember);
+      ]).IncludeFlag(dfAllowAnyMember)
+        .IncludeFlag(dfStructFirstNotRequired);
 end;
 
 function wbLeveledListEntry(aObjectName: string; aSigs: TwbSignatures): IwbRecordMemberDef;
