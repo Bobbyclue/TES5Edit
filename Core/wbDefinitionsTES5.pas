@@ -8297,7 +8297,7 @@ begin
     wbEDID,
     wbDESCReq,
     wbConditions,
-    wbFormIDCk(NNAM, 'Loading Screen NIF', [STAT, NULL], False, cpNormal, True),
+    wbFormIDCk(NNAM, 'Loading Screen NIF', [STAT, NULL]),
     wbFloat(SNAM, 'Initial Scale'),
     wbStruct(RNAM, 'Initial Rotation', [
       wbInteger('X', itS16),
