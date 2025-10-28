@@ -5535,7 +5535,7 @@ begin
     {37} wbFormIDCkNoReach('Keyword', [FLST,KYWD,NULL]),
     {38} wbFormIDCkNoReach('Location', [LCTN]),
     {39} wbFormIDCkNoReach('Location Ref Type', [LCRT]),
-    {40} wbFormIDCkNoReach('Owner', [FACT,NPC_]),
+    {40} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]).SetToStr(wbConditionOwnerToStr),
     {41} wbFormIDCkNoReach('Package', [PACK]),
     {42} wbFormIDCkNoReach('Perk', [PERK]),
     {43} wbFormIDCkNoReach('Quest', [QUST]).AddOverlay(wbConditionQuestOverlay),

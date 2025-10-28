@@ -1400,7 +1400,7 @@ begin
   {21} wbFormIDCkNoReach('Inventory Object', [ALCH, AMMO, APPA, ARMO, BOOK, CLOT, INGR, KEYM, LIGH, LVLI, MISC, SGST, SLGM, WEAP]),
   {22} wbFormIDCkNoReach('Magic Effect', [MGEF]),
   {23} wbFormIDCkNoReach('Magic Item', [ALCH, ENCH, INGR, SPEL]),
-  {24} wbFormIDCkNoReach('Owner', [FACT, NPC_]),
+  {24} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]).SetToStr(wbConditionOwnerToStr),
   {25} wbFormIDCkNoReach('Package', [PACK]),
   {26} wbFormIDCkNoReach('Quest', [QUST]),
   {27} wbFormIDCkNoReach('Race', [RACE]),
