@@ -7039,7 +7039,7 @@ begin
     {49} wbFormIDCkNoReach('Location', [LCTN]),
     {50} wbFormIDCkNoReach('Location Ref Type', [LCRT]),
     {51} wbFormIDCkNoReach('Magic Effect', [MGEF]),
-    {52} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]),
+    {52} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]).SetToStr(wbConditionOwnerToStr),
     {53} wbFormIDCkNoReach('Package', [PACK]),
     {54} wbFormIDCkNoReach('Perk', [PERK]),
     {55} wbFormIDCkNoReach('Perk Card', [PCRD]),

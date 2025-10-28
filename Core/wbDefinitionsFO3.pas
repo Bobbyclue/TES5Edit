@@ -3042,7 +3042,7 @@ begin
     {32} wbFormIDCkNoReach('Idle', [IDLE]),
     {33} wbFormIDCkNoReach('Inventory Object', [ALCH, AMMO, ARMO, BOOK, FLST, KEYM, MISC, NOTE, WEAP]),
     {34} wbFormIDCkNoReach('Note', [NOTE]),
-    {35} wbFormIDCkNoReach('Owner', [FACT, NPC_]),
+    {35} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]).SetToStr(wbConditionOwnerToStr),
     {36} wbFormIDCkNoReach('Package', [PACK]),
     {37} wbFormIDCkNoReach('Perk', [PERK]),
     {38} wbFormIDCkNoReach('Quest', [QUST]),

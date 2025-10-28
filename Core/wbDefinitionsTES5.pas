@@ -4180,7 +4180,7 @@ begin
     {43} wbFormIDCkNoReach('Location', [LCTN]),
     {44} wbFormIDCkNoReach('Location Ref Type', [LCRT]),
     {45} wbFormIDCkNoReach('Magic Effect', [MGEF]),
-    {46} wbFormIDCkNoReach('Owner', [FACT,NPC_]),
+    {46} wbFormIDCkNoReach('Owner', [FACT,NPC_,NULL]).SetToStr(wbConditionOwnerToStr),
     {47} wbFormIDCkNoReach('Package', [PACK]),
     {48} wbFormIDCkNoReach('Perk', [PERK]),
     {49} wbFormIDCkNoReach('Quest', [QUST]),
