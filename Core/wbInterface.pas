@@ -4779,6 +4779,11 @@ function wbStringEnumSummary(const aNames       : array of string;
 function wbDiv(aValue     : Integer;
                aPrecision : Integer = wbFloatDigits)
                           : IwbIntegerDefFormater;
+
+function wbDivF(aValue     : Extended;
+                aPrecision : Integer = wbFloatDigits)
+                           : IwbIntegerDefFormater;
+
 function wbMul(aValue : Integer)
                       : IwbIntegerDefFormater;
 function wbCallback(const aToStr : TwbIntToStrCallback;
@@ -7745,6 +7750,24 @@ type
     function GetIsEditable(aInt: Int64; const aElement: IwbElement): Boolean; override;
   end;
 
+  TwbDivFDef = class(TwbIntegerDefFormater)
+  private
+    ddValue: Extended;
+    ddPrecision: Integer;
+  protected
+    constructor Clone(const aSource: TwbDef); override;
+    constructor Create(aValue: Extended; aPrecision: Integer);
+
+    {---IwbIntegerDefFormater---}
+    function ToString(aInt: Int64; const aElement: IwbElement; aForSummary: Boolean): string; override;
+    function ToSortKey(aInt: Int64; const aElement: IwbElement): string; override;
+    function CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean; override;
+
+    function ToEditValue(aInt: Int64; const aElement: IwbElement): string; override;
+    function FromEditValue(const aValue: string; const aElement: IwbElement): Int64; override;
+    function GetIsEditable(aInt: Int64; const aElement: IwbElement): Boolean; override;
+  end;
+
   TwbMulDef = class(TwbIntegerDefFormater)
   private
     mdValue: Integer;
@@ -10035,6 +10058,13 @@ function wbDiv(aValue     : Integer;
                           : IwbIntegerDefFormater;
 begin
   Result := TwbDivDef.Create(aValue, aPrecision);
+end;
+
+function wbDivF(aValue     : Extended;
+                aPrecision : Integer = wbFloatDigits)
+                           : IwbIntegerDefFormater;
+begin
+  Result := TwbDivFDef.Create(aValue, aPrecision);
 end;
 
 function wbMul(aValue : Integer)
@@ -19306,10 +19336,64 @@ function TwbDivDef.ToSortKey(aInt: Int64; const aElement: IwbElement): string;
 const
   PlusMinus : array[Boolean] of string = ('+', '-');
 begin
-  Result := PlusMinus[aInt < 0] + IntToHex64(Abs(aInt), 16);
+  Result := PlusMinus[aInt < 0] + IntToHex64(Abs(FromEditValue(aElement.EditValue, aElement)), 16);
 end;
 
 function TwbDivDef.ToString(aInt: Int64; const aElement: IwbElement; aForSummary: Boolean): string;
+begin
+  Result := FloatToStrF(aInt / ddValue, ffFixed, 99, ddPrecision);
+  Used(aElement, Result);
+end;
+
+{ TwbDivFDef }
+
+function TwbDivFDef.CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean;
+begin
+  if dfDontAssign in defFlags then
+    Exit(False);
+
+  Result := True;
+end;
+
+constructor TwbDivFDef.Clone(const aSource: TwbDef);
+begin
+  with aSource as TwbDivFDef do
+    Self.Create(ddValue, ddPrecision).AfterClone(aSource);
+end;
+
+constructor TwbDivFDef.Create(aValue: Extended; aPrecision: Integer);
+begin
+  ddValue := aValue;
+  ddPrecision := aPrecision;
+  inherited Create;
+end;
+
+function TwbDivFDef.FromEditValue(const aValue: string; const aElement: IwbElement): Int64;
+begin
+  Result := Round(StrToFloat(aValue) * ddValue);
+end;
+
+function TwbDivFDef.GetIsEditable(aInt: Int64; const aElement: IwbElement): Boolean;
+begin
+  Result := True;
+  if defInternalEditOnly then
+    if not wbIsInternalEdit then
+      Result := False;
+end;
+
+function TwbDivFDef.ToEditValue(aInt: Int64; const aElement: IwbElement): string;
+begin
+  Result := FloatToStrF(aInt / ddValue, ffFixed, 99, ddPrecision);
+end;
+
+function TwbDivFDef.ToSortKey(aInt: Int64; const aElement: IwbElement): string;
+const
+  PlusMinus : array[Boolean] of string = ('+', '-');
+begin
+  Result := PlusMinus[aInt < 0] + IntToHex64(Abs(FromEditValue(aElement.EditValue, aElement)), 16);
+end;
+
+function TwbDivfDef.ToString(aInt: Int64; const aElement: IwbElement; aForSummary: Boolean): string;
 begin
   Result := FloatToStrF(aInt / ddValue, ffFixed, 99, ddPrecision);
   Used(aElement, Result);

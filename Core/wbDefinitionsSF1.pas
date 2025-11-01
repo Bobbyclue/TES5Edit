@@ -12146,7 +12146,7 @@ begin
           ])
         ).IncludeFlag(dfCollapsed, wbCollapseFlags)
       ]),
-      wbInteger('Reset Hours', itU16, wbDiv(2730, 2))
+      wbInteger('Reset Hours', itU16, wbDivF(2730.625, 2))
     ]),
     wbFormIDCkNoReach(TPIC, 'Previous Topic', [DIAL]),
     wbFormIDCk(DNAM, 'Shared INFO', [INFO]),
