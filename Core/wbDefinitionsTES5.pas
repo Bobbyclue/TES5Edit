@@ -8089,7 +8089,7 @@ begin
         {14} 'Spends favor points'
         ])
       ).IncludeFlag(dfCollapsed, wbCollapseFlags),
-      wbInteger('Reset Hours', itU16, wbDiv(2730, 2))
+      wbInteger('Reset Hours', itU16, wbDivF(2730.625, 2))
     ]),
     wbFormIDCkNoReach(TPIC, 'Previous Topic', [DIAL]),
     wbFormIDCkNoReach(PNAM, 'Previous INFO', [INFO,NULL], False, cpBenign).SetAfterSet(wbINFOPNAMAfterSet),
