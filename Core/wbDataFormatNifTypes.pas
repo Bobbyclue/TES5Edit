@@ -1728,13 +1728,13 @@ end;
 function wbbhkCMSDChunk(const aName: string; const aEvents: array of const): TdfDef;
 begin
   Result := dfStruct(aName, [
-    wbVector4('Translation'),
+    wbVector4('Offset'),
     dfInteger('Material Index', dtU32),
     dfInteger('Reference', dtU16),
     dfInteger('Transform Index', dtU16),
     dfArray('Vertices', dfInteger('Vertices', dtU16), -4),
     dfArray('Indices', dfInteger('Indices', dtU16), -4),
-    dfArray('Strips', dfInteger('Strips', dtU16), -4),
+    dfArray('Strip Lengths', dfInteger('Strip Length', dtU16), -4),
     dfArray('Welding Info', dfInteger('Welding Info', dtU16), -4)
   ], aEvents);
 end;
