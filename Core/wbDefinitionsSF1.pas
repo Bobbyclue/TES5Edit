@@ -1623,29 +1623,6 @@ begin
   lContainer.Assign(2, lElement, False);
 end;
 
-procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-var
-  OldValue, NewValue : Integer;
-  Container          : IwbContainerElementRef;
-begin
-  if VarSameValue(aOldValue, aNewValue) then
-    Exit;
-
-  if not Supports(aElement.Container, IwbContainerElementRef, Container) then
-    Exit;
-
-  OldValue := Integer(aOldValue) and 1;
-  NewValue := Integer(aNewValue) and 1;
-
-  if NewValue = OldValue then
-    Exit;
-
-  if NewValue = 1 then
-    Container.RemoveElement('TNAM')
-  else
-    Container.Add('TNAM', True);
-end;
-
 procedure wbGMSTEDIDAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 var
   OldValue, NewValue : string;
@@ -2334,22 +2311,6 @@ begin
     Result := 3
   else
     Result := 0;
-end;
-
-function wbMESGTNAMDontShow(const aElement: IwbElement): Boolean;
-var
-  Container  : IwbContainerElementRef;
-  MainRecord : IwbMainRecord;
-begin
-  Result := False;
-  if not Supports(aElement, IwbMainRecord, MainRecord) then
-    Exit;
-
-  if not Supports(aElement, IwbContainerElementRef, Container) then
-    Exit;
-
-  if Integer(Container.ElementNativeValues['DNAM']) and 1 <> 0 then
-    Result := True;
 end;
 
 procedure wbCELLXCLWGetConflictPriority(const aElement: IwbElement; var aCP: TwbConflictPriority);
@@ -10671,9 +10632,9 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(MESG, 'Message',
     wbFlags(wbFlagsList([
-    2, 'Non-Playable',
-    4, 'Ground Piece',
-    9, 'Hidden From Local Map',
+    2,  'Non-Playable',
+    4,  'Ground Piece',
+    9,  'Hidden From Local Map',
     11, 'Used As Platform',
     19, 'Has Currents',
     26, 'Navmesh - Filter',
@@ -10682,29 +10643,42 @@ begin
     29, 'Navmesh - Ignore Erosion/Child Can Use',
     30, 'Navmesh - Ground'
     ])).SetFlagHasDontShow(26, wbFlagNavmeshFilterDontShow)
-      .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
-      .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
-      .SetFlagHasDontShow(29, wbFlagNavmeshIgnoreErosionDontShow)
-      .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
+       .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
+       .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
+       .SetFlagHasDontShow(29, wbFlagNavmeshIgnoreErosionDontShow)
+       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbVMAD,
     wbBaseFormComponents,
     wbDESCReq(),
     wbFULL,
-    wbFormIDCk(INAM, 'Icon (unused)', [NULL], False, cpIgnore, True), // leftover
+    wbFormIDCk(INAM, 'Icon (unused)', [NULL], False, cpIgnore).SetRequired, // leftover
     wbFormIDCk(QNAM, 'Owner Quest', [QUST]),
     wbICON,
-    wbInteger(DNAM, 'Flags', itU32, wbFlags([
-      'Message Box',
-      'Delay Initial Display',
-      'Allow Back Out'
-    ]), cpNormal, True, False, nil, wbMESGDNAMAfterSet).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbInteger(TNAM, 'Display Time', itU32, nil, cpNormal, False, False, wbMESGTNAMDontShow),
+    wbInteger(DNAM, 'Flags', itU32,
+      wbFlags([
+      {0} 'Message Box',
+      {1} 'Delay Initial Display',
+      {2} 'Allow Back Out'
+      ])
+    ).SetAfterSet(wbMESGDNAMAfterSet)
+     .SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(TNAM, 'Display Time', itU32)
+      .SetDefaultNativeValue(2)
+      .SetDontShow(wbMESGTNAMDontShow)
+      .SetIsRemovable(wbMessageTNAMIsRemovable),
     wbString(SNAM, 'SWF'),
     wbInteger(BNAM, 'Index Chosen On Back Out', itS32),
     wbLStringKC(NNAM, 'Short Title', 0, cpTranslate),
-    wbRArray('Menu Buttons', wbMenuButton)
-  ], False, nil, cpNormal, False);
+    wbRArray('Menu Buttons',
+      wbRStruct('Menu Button', [
+        wbLStringKC(ITXT, 'Button Text', 0, cpTranslate),
+        wbString(IBIN, 'Event Name'),  // unsure if localized or not
+        wbConditions,
+        wbFormIDCk(DODT, 'Reference', [PLYR,REFR,NULL])
+      ]))
+  ]).SetAfterLoad(wbMESGAfterLoad);
 
   var lDOBJUsesVarRecs1 := wbMakeVarRecs([
                   0, 'None',

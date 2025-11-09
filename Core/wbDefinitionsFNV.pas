@@ -104,7 +104,6 @@ var
   wbEffects: IwbSubRecordArrayDef;
   wbEffectsReq: IwbSubRecordArrayDef;
   wbEffect: IwbRecordMemberDef;
-  wbMenuButton: IwbRecordMemberDef;
   wbPerkEffect: IwbRecordMemberDef;
   wbPerkConditions: IwbRecordMemberDef;
   wbIngredient: IwbRecordMemberDef;
@@ -1247,29 +1246,6 @@ begin
   end;
 end;
 
-procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-var
-  OldValue, NewValue : Integer;
-  Container          : IwbContainerElementRef;
-begin
-  if VarSameValue(aOldValue, aNewValue) then
-    Exit;
-
-  if not Supports(aElement.Container, IwbContainerElementRef, Container) then
-    Exit;
-
-  OldValue := Integer(aOldValue) and 1;
-  NewValue := Integer(aNewValue) and 1;
-
-  if NewValue = OldValue then
-    Exit;
-
-  if NewValue = 1 then
-    Container.RemoveElement('TNAM')
-  else
-    Container.Add('TNAM', True);
-end;
-
 procedure wbGMSTEDIDAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 var
   OldValue, NewValue : string;
@@ -1919,20 +1895,6 @@ begin
         Result := 2
       else
         raise Exception.Create('"'+s+'" is not valid for this Entry Point');
-end;
-
-function wbMESGTNAMDontShow(const aElement: IwbElement): Boolean;
-var
-  Container  : IwbContainerElementRef;
-  MainRecord : IwbMainRecord;
-begin
-  Result := False;
-  if not Supports(aElement, IwbMainRecord, MainRecord) then
-    Exit;
-  if not Supports(aElement, IwbContainerElementRef, Container) then
-    Exit;
-  if Integer(Container.ElementNativeValues['DNAM']) and 1 <> 0 then
-    Result := True;
 end;
 
 function wbEPFDDontShow(const aElement: IwbElement): Boolean;
@@ -2805,35 +2767,6 @@ begin
     wbEndInternalEdit;
   end;
 end;
-
-procedure wbMESGAfterLoad(const aElement: IwbElement);
-var
-  Container    : IwbContainerElementRef;
-  MainRecord   : IwbMainRecord;
-  IsMessageBox : Boolean;
-  HasTimeDelay : Boolean;
-begin
-  if wbBeginInternalEdit then try
-    if not wbTryGetContainerWithValidMainRecord(aElement, Container, MainRecord) then
-      Exit;
-
-    IsMessageBox := (Integer(Container.ElementNativeValues['DNAM']) and 1) = 1;
-    HasTimeDelay := Container.ElementExists['TNAM'];
-
-    if IsMessageBox = HasTimeDelay then
-      if IsMessageBox then
-        Container.RemoveElement('TNAM')
-      else begin
-        if not Container.ElementExists['DNAM'] then
-          Container.Add('DNAM', True);
-        Container.ElementNativeValues['DNAM'] := Integer(Container.ElementNativeValues['DNAM']) or 1;
-      end;
-
-  finally
-    wbEndInternalEdit;
-  end;
-end;
-
 
 procedure wbEFSHAfterLoad(const aElement: IwbElement);
 var
@@ -6254,34 +6187,39 @@ begin
     ], cpNormal, True)
   ]);
 
-  wbMenuButton :=
-    wbRStruct('Menu Button', [
-      wbStringKC(ITXT, 'Button Text', 0, cpTranslate),
-      wbConditions
-    ]);
-
   wbRecord(MESG, 'Message', [
     wbEDIDReq,
     wbDESCReq,
     wbFULL,
-    wbFormIDCk(INAM, 'Icon', [MICN, NULL], False, cpNormal, True),
-    wbByteArray(NAM0, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM1, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM2, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM3, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM4, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM5, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM6, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM7, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM8, 'Unused', 0, cpIgnore),
-    wbByteArray(NAM9, 'Unused', 0, cpIgnore),
-    wbInteger(DNAM, 'Flags', itU32, wbFlags([
-      'Message Box',
-      'Auto Display'
-    ]), cpNormal, True, False, nil, wbMESGDNAMAfterSet).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbInteger(TNAM, 'Display Time', itU32, nil, cpNormal, False, False, wbMESGTNAMDontShow),
-    wbRArray('Menu Buttons', wbMenuButton)
-  ], False, nil, cpNormal, False, wbMESGAfterLoad);
+    wbFormIDCk(INAM, 'Icon', [MICN, NULL]).SetRequired,
+    wbUnused(NAM0, 0),
+    wbUnused(NAM1, 0),
+    wbUnused(NAM2, 0),
+    wbUnused(NAM3, 0),
+    wbUnused(NAM4, 0),
+    wbUnused(NAM5, 0),
+    wbUnused(NAM6, 0),
+    wbUnused(NAM7, 0),
+    wbUnused(NAM8, 0),
+    wbUnused(NAM9, 0),
+    wbInteger(DNAM, 'Flags', itU32,
+      wbFlags([
+      {0} 'Message Box',
+      {1} 'Auto Display'
+      ])
+    ).SetAfterSet(wbMESGDNAMAfterSet)
+     .SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(TNAM, 'Display Time', itU32)
+      .SetDefaultNativeValue(2)
+      .SetDontShow(wbMESGTNAMDontShow)
+      .SetIsRemovable(wbMessageTNAMIsRemovable),
+    wbRArray('Menu Buttons',
+      wbRStruct('Menu Button', [
+        wbStringKC(ITXT, 'Button Text', 0, cpTranslate),
+        wbConditions
+      ]))
+  ]).SetAfterLoad(wbMESGAfterLoad);
 
   wbRecord(RGDL, 'Ragdoll', [
     wbEDIDReq,
