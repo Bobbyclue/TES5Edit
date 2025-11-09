@@ -155,11 +155,12 @@ function wbPlacedAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbROADAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbSCENAddInfo(const aMainRecord: IwbMainRecord): string;
 
-{>>> After Load Callbacks <<<} //11
+{>>> After Load Callbacks <<<} //12
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 procedure wbAVIFSkillAfterLoad(const aElement: IwbElement);
 procedure wbDialogueTextAfterLoad(const aElement: IwbElement);
 procedure wbDOBJObjectsAfterLoad(const aElement: IwbElement);
+procedure wbMESGAfterLoad(const aElement: IwbElement);
 procedure wbPACKDateAfterLoad(const aElement: IwbElement);
 procedure wbPNDTAfterLoad(const aElement: IwbElement);
 procedure wbRPLDAfterLoad(const aElement: IwbElement);
@@ -168,13 +169,14 @@ procedure wbScrollTypeAfterLoad(const aElement: IwbElement);
 procedure wbSOUNAfterLoad(const aElement: IwbElement);
 procedure wbWorldAfterLoad(const aElement: IwbElement);
 
-{>>> After Set Callbacks <<<} //12
+{>>> After Set Callbacks <<<} //13
 procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionRunOnAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbDialogueTextAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbIdleMarkerPNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbIdleMarkerQNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbPACKDateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbPERKPRKETypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbSceneActionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
@@ -199,7 +201,7 @@ function wbFlagNavmeshGroundDontSHow(const aElement: IwbElement): Boolean;
 function wbFlagPartialFormDontShow(const aElement: IwbElement): Boolean;
 function wbFlagREFRSkyMarkerDontShow(const aElement: IwbElement): Boolean;
 
-{>>> Don't Show Callbacks <<<} //18
+{>>> Don't Show Callbacks <<<} //23
 function wbAlwaysDontShow(const aElement: IwbElement): Boolean;
 function wbCellInteriorDontShow(const aElement: IwbElement): Boolean;
 function wbCellExteriorDontShow(const aElement: IwbElement): Boolean;
@@ -209,6 +211,7 @@ function wbLIGHCarryDontShow(const aElement: IwbElement): Boolean;
 function wbLIGHFalloffDontShow(const aElement: IwbElement): Boolean;
 function wbLIGHFlickerDontShow(const aElement: IwbElement): Boolean;
 function wbLIGHShadowSpotDontShow(const aElement: IwbElement): Boolean;
+function wbMESGTNAMDontShow(const aElement: IwbElement): Boolean;
 function wbModelInfoDontShow(const aElement: IwbElement): Boolean;
 function wbLCTNCellDontShow(const aElement: IwbElement): Boolean;
 function wbPACKTemplateDontShow(const aElement: IwbElement): Boolean;
@@ -239,9 +242,10 @@ procedure wbModelInfoGetCP(const aElement: IwbElement; var aConflictPriority: Tw
 {>>> Integer Formaters <<<} //1
 function wbBoolEnumSummary(const aTrueSummary: string; const aFalseSummary: string = ''): IwbEnumDef;
 
-{>>> Is Removable Callbacks <<<} //8
+{>>> Is Removable Callbacks <<<} //9
 function wbCellGridIsRemovable(const aElement: IwbElement): Boolean;
 function wbCellLightingIsRemovable(const aElement: IwbElement): Boolean;
+function wbMessageTNAMIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldLandDataIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldLODDataIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldMapDataIsRemovable(const aElement: IwbElement): Boolean;
@@ -811,7 +815,7 @@ begin
   end;
 end;
 
-{>>> After Load Callbacks <<<} //11
+{>>> After Load Callbacks <<<} //12
 
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 begin
@@ -877,6 +881,24 @@ begin
     finally
       lArray.EndUpdate;
     end;
+  finally
+    wbEndInternalEdit;
+  end;
+end;
+
+procedure wbMESGAfterLoad(const aElement: IwbElement);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if wbBeginInternalEdit then try
+    var lMainRecord := aElement.ContainingMainRecord;
+    if not Assigned(lMainRecord) then
+      Exit;
+
+    if (lMainRecord.ElementNativeValues['DNAM'] and 1) <> 0 then
+      if lMainRecord.ElementExists['TNAM'] then
+        lMainRecord.RemoveElement('TNAM');
   finally
     wbEndInternalEdit;
   end;
@@ -1082,7 +1104,7 @@ begin
   end;
 end;
 
-{>>> After Set Callbacks <<<} //12
+{>>> After Set Callbacks <<<} //13
 
 procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 begin
@@ -1196,6 +1218,28 @@ begin
   if wbBeginInternalEdit then try
     if Assigned(aElement.ContainingMainRecord.ElementBySignature[PNAM]) then
       aElement.ContainingMainRecord.ElementBySignature[PNAM].Remove;
+  finally
+    wbEndInternalEdit;
+  end;
+end;
+
+procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if VarSameValue(aOldValue, aNewValue) then
+    Exit;
+
+  if wbBeginInternalEdit then try
+    var lMainRecord := aElement.ContainingMainRecord;
+    if not Assigned(lMainRecord) then
+      Exit;
+
+    if (aElement.NativeValue and 1) <> 0 then
+      lMainRecord.RemoveElement('TNAM')
+    else
+      lMainRecord.Add('TNAM', True);
   finally
     wbEndInternalEdit;
   end;
@@ -1622,7 +1666,7 @@ begin
     Exit(True);
 end;
 
-{>>> Don't Show Callbacks <<<} //17
+{>>> Don't Show Callbacks <<<} //23
 
 function wbAlwaysDontShow(const aElement: IwbElement): Boolean;
 begin
@@ -1747,6 +1791,17 @@ begin
   if (lFlagsValue and $400) = 0 then
     if ((wbCS = False) or ((lFlagsValue and $4000) = 0)) then
       Result := True;
+end;
+
+function wbMESGTNAMDontShow(const aElement: IwbElement): Boolean;
+begin
+  Result := False;
+  var lMainRecord := aElement.ContainingMainRecord;
+  if not Assigned(lMainRecord) then
+    Exit;
+
+  if (lMainRecord.ElementNativeValues['DNAM'] and 1) <> 0 then
+    Result := True;
 end;
 
 function wbModelInfoDontShow(const aElement: IwbElement): Boolean;
@@ -2053,7 +2108,7 @@ begin
     ]);
 end;
 
-{>>> Is Removable Callbacks <<<} //8
+{>>> Is Removable Callbacks <<<} //9
 
 function wbCellGridIsRemovable(const aElement: IwbElement): Boolean;
 begin
@@ -2063,6 +2118,11 @@ end;
 function wbCellLightingIsRemovable(const aElement: IwbElement): Boolean;
 begin
   Result := (aElement.ContainingMainRecord.ElementNativeValues['DATA'] and 1 = 0);
+end;
+
+function wbMessageTNAMIsRemovable(const aElement: IwbElement): Boolean;
+begin
+  Result := (aElement.ContainingMainRecord.ElementNativeValues['DNAM'] and 1 = 1);
 end;
 
 function wbWorldLandDataIsRemovable(const aElement: IwbElement): Boolean;
