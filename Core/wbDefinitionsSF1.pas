@@ -9288,33 +9288,37 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(HDPT, 'Head Part',
     wbFlags(wbFlagsList([
-      {0x00000004}  2, 'Non-Playable'
+    2, 'Non-Playable'
     ])), [
     wbEDID,
     wbVMAD,
     wbBaseFormComponents,
     wbFULL,
     wbGenericModel(True),
-    wbInteger(DATA, 'Flags', itU8, wbFlags([
-      {0x01} 'Playable',
-      {0x02} 'Male',
-      {0x04} 'Female',
-      {0x10} 'Is Extra Part',
-      {0x20} 'Use Solid Tint',
-      {0x40} 'Uses Body Texture',
-      {0x80} 'Hide with "HideEar" Morph'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbInteger(PNAM, 'Type', itU32, wbEnum([
-      { 0} 'Misc',
-      { 1} 'Face',
-      { 2} 'Right Eye',
-      { 3} 'Hair',
-      { 4} 'Facial Hair',
-      { 5} 'Scar',
-      { 6} 'Eyebrows',
-      { 7} 'Jewelry',
-      { 8} 'Meatcaps',
-      { 9} 'Teeth',
+    wbInteger(DATA, 'Flags', itU8,
+      wbFlags([
+      {0} 'Playable',
+      {1} 'Male',
+      {2} 'Female',
+      {3} 'Is Extra Part',
+      {4} 'Use Solid Tint',
+      {5} 'Uses Body Texture',
+      {6} 'Hide with "HideEar" Morph'
+      ])
+    ).SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(PNAM, 'Type', itU32,
+      wbEnum([
+      {0}  'Misc',
+      {1}  'Face',
+      {2}  'Right Eye',
+      {3}  'Hair',
+      {4}  'Facial Hair',
+      {5}  'Scar',
+      {6}  'Eyebrows',
+      {7}  'Jewelry',
+      {8}  'Meatcaps',
+      {9}  'Teeth',
       {10} 'Head Rear',
       {11} 'Extra Hair',
       {12} 'Left Eye',
@@ -9325,7 +9329,8 @@ begin
       {17} 'Creature Legs',
       {18} 'Creature Tail',
       {19} 'Creature Wings'
-    ]), cpNormal, True),
+      ])
+    ).SetRequired,
     wbRArrayS('Extra Parts',
       wbFormIDCk(HNAM, 'Part', [HDPT])
     ),
