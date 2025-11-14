@@ -9288,42 +9288,49 @@ begin
 
   wbRecord(HDPT, 'Head Part',
     wbFlags(wbFlagsList([
-      {0x00000004}  2, 'Non-Playable'
+    2, 'Non-Playable'
     ])), [
     wbEDID,
     wbXALG,
     wbFULL,
     wbGenericModel,
-    wbInteger(DATA, 'Flags', itU8, wbFlags([
-      {0x01} 'Playable',
-      {0x02} 'Male',
-      {0x04} 'Female',
-      {0x10} 'Is Extra Part',
-      {0x20} 'Use Solid Tint',
-      {0x40} 'Uses Body Texture'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbInteger(PNAM, 'Type', itU32, wbEnum([
-      'Misc',
-      'Face',
-      'Eyes',
-      'Hair',
-      'Facial Hair',
-      'Scar',
-      'Eyebrows',
-      'Meatcaps',
-      'Teeth',
-      'Head Rear'
-    ])),
+    wbInteger(DATA, 'Flags', itU8,
+      wbFlags([
+      {0} 'Playable',
+      {1} 'Male',
+      {2} 'Female',
+      {3} 'Is Extra Part',
+      {4} 'Use Solid Tint',
+      {5} 'Uses Body Texture'
+      ])
+    ).SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(PNAM, 'Type', itU32,
+      wbEnum([
+      {0} 'Misc',
+      {1} 'Face',
+      {2} 'Eyes',
+      {3} 'Hair',
+      {4} 'Facial Hair',
+      {5} 'Scar',
+      {6} 'Eyebrows',
+      {7} 'Meatcaps',
+      {8} 'Teeth',
+      {9} 'Head Rear'
+      ])
+    ).SetRequired,
     wbRArrayS('Extra Parts',
       wbFormIDCk(HNAM, 'Part', [HDPT])
     ),
-    wbRArray('Parts', wbRStruct('Part', [
-      wbInteger(NAM0, 'Part Type', itU32, wbEnum([
-        'Race Morph',
-        'Tri',
-        'Chargen Morph'
-      ])),
-      wbString(NAM1, 'FileName', 0, cpTranslate, True)
+    wbRArray('Parts',
+      wbRStruct('Part', [
+        wbInteger(NAM0, 'Part Type', itU32,
+          wbEnum([
+          {0} 'Race Morph',
+          {1} 'Tri',
+          {2} 'Chargen Morph'
+          ])),
+        wbString(NAM1, 'Filename').SetRequired
     ])),
     wbFormIDCk(TNAM, 'Texture Set', [TXST]),
     wbFormIDCk(CNAM, 'Color', [CLFM]),
