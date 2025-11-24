@@ -508,6 +508,10 @@ begin
   else if SameText(Identifier, 'wbSelectedFilesToFileNames') then begin
     if (Args.Count = 1) then
     begin
+      if not (V2O(Args.Values[0]) is TStrings) or not (V2O(Args.Values[0]) is TStringList) then begin
+        JvInterpreterErrorN(ieDirectInvalidArgument, 0, 'Expected a TStrings or TStringList'); // or  ieNotEnoughParams, ieIncompatibleTypes or others.
+      end;
+
       var Nodes: TNodeArray := vstNav.GetSortedSelection(True);
 
       for i := Low(Nodes) to High(Nodes) do begin
@@ -515,14 +519,19 @@ begin
         if not Assigned(NodeData) then
           Continue;
         Element := NodeData.Element;
-        if Supports(Element, IwbFile, _File) then
+        if Supports(Element, IwbFile, _File) then begin
           if TStrings(V2O(Args.Values[0])).IndexOf(_File.FileName) = -1 then
-            TStrings(V2O(Args.Values[0])).Add(_File.FileName)
-        else if Supports(Element, IwbMainRecord, MainRecord) then
+            TStrings(V2O(Args.Values[0])).AddObject(_File.FileName, TObject(Pointer(Element)));
+        end
+        else if Supports(Element, IwbMainRecord, MainRecord) then begin
           if TStrings(V2O(Args.Values[0])).IndexOf(MainRecord._File.FileName) = -1 then
-            TStrings(V2O(Args.Values[0])).Add(MainRecord._File.FileName);
+            TStrings(V2O(Args.Values[0])).AddObject(MainRecord._File.FileName, TObject(Pointer(MainRecord._File)));
+        end
+        else if Supports(Element, IwbGroupRecord, Container) then begin
+          if TStrings(V2O(Args.Values[0])).IndexOf(Container._File.FileName) = -1 then
+            TStrings(V2O(Args.Values[0])).AddObject(Container._File.FileName, TObject(Pointer(Container._File)));
+        end;
       end;
-
       Done := True;
     end else
       JvInterpreterError(ieDirectInvalidArgument, 0); // or  ieNotEnoughParams, ieIncompatibleTypes or others.
