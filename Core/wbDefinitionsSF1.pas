@@ -14243,215 +14243,154 @@ begin
     ], [], cpNormal, True)
   ], False, nil, cpNormal, False, nil {wbPACKAfterLoad});
 
-  var wbQUSTLocationAliasFlags :=
-    wbInteger(FNAM, 'Flags', itU32, wbFlags([
-      {0x00000001} {00} 'Reserves Location',
-      {0x00000002} {01} 'Optional',
-      {0x00000004} {02} 'Unknown 2',
-      {0x00000008} {03} 'Allow Reuse in Quest',
-      {0x00000010} {04} 'Unknown 4',
-      {0x00000020} {05} 'Unknown 5',
-      {0x00000040} {06} 'Unknown 6',
-      {0x00000080} {07} 'Unknown 7',
-      {0x00000100} {08} 'Stores Text',
-      {0x00000200} {09} 'Allow Reserved',
-      {0x00000400} {10} 'Unknown 10',
-      {0x00000800} {11} 'Unknown 11',
-      {0x00001000} {12} 'Unknown 12',
-      {0x00002000} {13} 'Unknown 13',
-      {0x00004000} {14} 'Unknown 14',
-      {0x00008000} {15} 'Unknown 15',
-      {0x00010000} {16} 'Allow Explored',
-      {0x00020000} {17} 'Unknown 17',
-      {0x00040000} {18} 'Unknown 18',
-      {0x00080000} {19} 'Unknown 19',
-      {0x00100000} {20} 'External Alias - Linked',
-      {0x00200000} {21} 'Unknown 21',
-      {0x00400000} {22} 'Unknown 22',
-      {0x00800000} {23} 'Discard on shutdown if unused',
-      {0x01000000} {24} 'Unknown 24',
-      {0x02000000} {25} 'Unknown 25',
-      {0x04000000} {26} 'Unknown 26',
-      {0x08000000} {27} 'Search Ship Locations',
-      {0x10000000} {28} 'Matching Loc - Planets And Systems Only',
-      {0x20000000} {29} 'Current Alias System',
-      {0x40000000} {30} 'Current Alias Planet',
-      {0x80000000} {31} 'Unknown 31'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags);
-
-  var wbQUSTReferenceAliasFlags :=
-    wbInteger(FNAM, 'Flags', itU32, wbFlags([
-      {0x00000001} {00} 'Reserves Reference',
-      {0x00000002} {01} 'Optional',
-      {0x00000004} {02} 'Quest Object',
-      {0x00000008} {03} 'Allow Reuse in Quest',
-      {0x00000010} {04} 'Allow Dead',
-      {0x00000020} {05} 'Matching Ref - In Loaded Area',
-      {0x00000040} {06} 'Essential',
-      {0x00000080} {07} 'Allow Disabled',
-      {0x00000100} {08} 'Stores Text',
-      {0x00000200} {09} 'Allow Reserved',
-      {0x00000400} {10} 'Protected',
-      {0x00000800} {11} 'Forced by Aliases',
-      {0x00001000} {12} 'Allow Destroyed',
-      {0x00002000} {13} 'Matching Ref - Closest',
-      {0x00004000} {14} 'Uses Stored Text',
-      {0x00008000} {15} 'Initially Disabled',
-      {0x00010000} {16} 'Unknown 16',
-      {0x00020000} {17} 'Clear Names When Removed',
-      {0x00040000} {18} 'Matching Ref - Actors Only',
-      {0x00080000} {19} 'Create Ref - Temp',
-      {0x00100000} {20} 'External Alias - Linked',
-      {0x00200000} {21} 'No Pickpocket',
-      {0x00400000} {22} 'Can Apply Data To Non-Aliased Refs',
-      {0x00800000} {23} 'Is Companion',
-      {0x01000000} {24} 'Optional All Scenes',
-      {0x02000000} {25} 'Matching Ref - From Crowd',
-      {0x04000000} {26} 'Quest Object Cargo',
-      {0x08000000} {27} 'Unknown 27',
-      {0x10000000} {28} 'Unknown 28',
-      {0x20000000} {29} 'Unknown 29',
-      {0x40000000} {30} 'Unknown 30',
-      {0x80000000} {31} 'Consumable'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags);
-
-(*  var wbQUSTAliasFlags :=
-    wbInteger(FNAM, 'Flags', itU32, wbFlags([
-      {0x00000001} 'Reserves Location/Reference',
-      {0x00000002} 'Optional',
-      {0x00000004} 'Quest Object',
-      {0x00000008} 'Allow Reuse in Quest',
-      {0x00000010} 'Allow Dead',
-      {0x00000020} 'Matching Ref - In Loaded Area',
-      {0x00000040} 'Essential',
-      {0x00000080} 'Allow Disabled',
-      {0x00000100} 'Stores Text',
-      {0x00000200} 'Allow Reserved',
-      {0x00000400} 'Protected',
-      {0x00000800} 'Forced by Aliases',
-      {0x00001000} 'Allow Destroyed',
-      {0x00002000} 'Matching Ref - Closest',
-      {0x00004000} 'Uses Stored Text',
-      {0x00008000} 'Initially Disabled',
-      {0x00010000} 'Allow Explored',
-      {0x00020000} 'Clear Names When Removed',
-      {0x00040000} 'Matching Ref - Actors Only',
-      {0x00080000} 'Create Ref - Temp',
-      {0x00100000} 'External Alias - Linked',
-      {0x00200000} 'No Pickpocket',
-      {0x00400000} 'Can Apply Data To Non-Aliased Refs',
-      {0x00800000} 'Is Companion/Discard on shutdown if unused',
-      {0x01000000} 'Optional All Scenes',
-      {0x02000000} 'Matching Ref - From Crowd',
-      {0x04000000} 'Quest Object Cargo',
-      {0x08000000} 'Search Ship Locations',
-      {0x10000000} 'Matching Loc - Planets And Systems Only',
-      {0x20000000} 'Current Alias System',
-      {0x40000000} 'Current Alias Planet',
-      {0x80000000} 'Consumable'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags); *)
-
   var lReferenceAlias :=
     wbRStructSK([0], 'Reference Alias', [
-      wbInteger(ALST, 'Reference Alias ID', itU32, nil, cpNormal, True),
-      wbString(ALID, 'Alias Name', 0, cpNormal, True),
-//      wbQUSTAliasFlags,
-      wbQUSTReferenceAliasFlags,
+      wbInteger(ALST, 'Alias ID', itU32).SetRequired,
+      wbString(ALID, 'Alias Name').SetRequired,
+      wbInteger(FNAM, 'Flags', itU32,
+        wbFlags([
+        {0}  'Reserves Reference',
+        {1}  'Optional',
+        {2}  'Quest Object',
+        {3}  'Allow Reuse in Quest',
+        {4}  'Allow Dead',
+        {5}  'Matching Ref - In Loaded Area',
+        {6}  'Essential',
+        {7}  'Allow Disabled',
+        {8}  'Stores Text',
+        {9}  'Allow Reserved',
+        {10} 'Protected',
+        {11} 'Forced by Aliases',
+        {12} 'Allow Destroyed',
+        {13} 'Matching Ref - Closest',
+        {14} 'Uses Stored Text',
+        {15} 'Initially Disabled',
+        {16} '',
+        {17} 'Clear Names When Removed',
+        {18} 'Matching Ref - Actors Only',
+        {19} 'Create Ref - Temp',
+        {20} 'External Alias - Linked',
+        {21} 'No Pickpocket',
+        {22} 'Can Apply Data To Non-Aliased Refs',
+        {23} 'Is Companion',
+        {24} 'Optional All Scenes',
+        {25} 'Matching Ref - From Crowd',
+        {26} 'Quest Object Cargo',
+        {27} '',
+        {28} '',
+        {29} '',
+        {30} '',
+        {31} 'Consumable'
+        ])
+      ).SetRequired
+       .IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbFloat(ALFG, 'Orbit Altitude Mult'),
-
-      wbInteger(ALLR, 'Legendary Rank', itU8, wbEnum([], [
-        $0001, '1',
-        $0002, '2',
-        $0003, '3'
-      ])).SetDefaultNativeValue(1),
+      wbInteger(ALLR, 'Legendary Rank', itU8,
+        wbEnum([], [
+        1, '1',
+        2, '2',
+        3, '3'
+        ])
+      ).SetDefaultNativeValue(1),
       wbInteger(ALFI, 'Force Into Alias When Filled', itS32, wbQuestAliasToStr, wbAliasToInt)
         .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-
-      wbRUnion('Alias Type', [
-      {0} wbRStruct('Closest To Alias', [
-            wbInteger(ALCC, 'Closest To Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo)
+      wbRUnion('Fill Type', [
+      {0} wbRStruct('Specific Reference', [
+            wbFormIDCk(ALFR, 'Reference', [ACHR,PARW,PBAR,PBAR,PCON,PFLA,PGRE,PHZD,PLYR,PMIS,REFR], True)
           ]),
-      {1} wbRStruct('Forced Reference', [
-            wbFormIDCk(ALFR, 'Forced Reference', [REFR, ACHR, PLYR])
-          ]),
+      {1} wbRStruct('Unique Reference', [
+            wbRUnion('Ref Type', [
+              wbFormIDCk(ALUA, 'Actor', [NPC_]),
+              wbFormIDck(ALUB, 'Base Form', [GBFM])
+            ]).IncludeFlag(dfUnionStaticResolve)
+          ]).IncludeFlag(dfStructFirstNotRequired),
       {2} wbRStruct('Location Alias Reference', [
             wbInteger(ALFA, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
               .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-            wbFormIDCk(KNAM, 'Keyword', [KYWD]),
             wbFormIDCk(ALRT, 'Ref Type', [LCRT]).SetRequired
           ]),
-      {3} wbRStruct('Find Matching Reference From Event', [
-            wbInteger(ALFE, 'From Event', itU32, wbQuestEventEnum),
-            wbInteger(ALFD, 'Event Data', itU32, wbEventMemberEnum).SetRequired
+      {3} wbRStruct('External Alias Reference', [
+            wbFormIDCk(ALEQ, 'Quest', [QUST]),
+            wbInteger(ALEA, 'Alias', itS32, wbQuestExternalAliasToStr, wbAliasToInt)
+              .SetLinksToCallbackOnValue(wbQuestAliasExternalAliasLinksTo)
+              .SetRequired
           ]),
       {4} wbRStruct('Create Reference to Object', [
             wbFormIDCk(ALCO, 'Object', [ACTI,ALCH,ARMO,BOOK,CELL,CONT,DOOR,FLOR,FURN,GBFM,IDLM,KEYM,LVLB,LVLI,LVLN,LVSC,MISC,NPC_,PKIN,PROJ,SOUN,STAT,WEAP]), // yee haw
             wbStruct(ALCA, 'Alias', [
               wbInteger('Alias', itS16, wbQuestAliasToStr, wbAliasToInt)
                 .SetLinksToCallback(wbSameQuestAliasLinksTo),
-              wbInteger('Create', itU16, wbEnum([] ,[
+              wbInteger('Create', itU16,
+                wbEnum([] ,[
                 $0000, 'At',
                 $8000, 'In'
-              ]))
+                ]))
             ]).SetRequired,
-            wbInteger(ALCL, 'Level', itU32, wbEnum([
-              'Easy',
-              'Medium',
-              'Hard',
-              'Very Hard',
-              'None'
-            ])).SetRequired
+            wbInteger(ALCL, 'Level', itU32,
+              wbEnum([
+              {0} 'Easy',
+              {1} 'Medium',
+              {2} 'Hard',
+              {3} 'Very Hard',
+              {4} 'None'
+              ])
+            ).SetRequired
           ]),
-      {5} wbRStruct('External Alias Reference', [
-            wbFormIDCk(ALEQ, 'Quest', [QUST]),
-            wbInteger(ALEA, 'Alias', itS32, wbQuestExternalAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbQuestAliasExternalAliasLinksTo)
-              .SetRequired
-          ]),
-      {6} wbRStruct('Unique Actor', [
-            wbFormIDCk(ALUA, 'Unique Actor', [NPC_])
-          ]),
-      {6} wbRStruct('Unique Base Form', [
-            wbFormIDCk(ALUB, 'Unique Base Form', [GBFM])
-          ]),
-      {7} wbRStruct('Find Matching Reference Near Alias', [
-            wbInteger(ALNA, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
+      {5} wbRStruct('Create Matching Ref', [
+            wbInteger(ALCM, 'Source Created Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
               .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-            wbInteger(ALNT, 'Type', itU32, wbEnum([
-              'Linked Form',
-              'Linked Ref',
-              'Linked Interior Cell',
-              'Linked Exterior Cell',
-              'Same Module'
-            ])).SetRequired,
-            wbFormIDCk(ALNR, 'Ref Type', [LCRT, NULL])
+            wbStruct(ALCA, 'Target Ref Alias', [
+              wbInteger('Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
+                .SetLinksToCallback(wbSameQuestAliasLinksTo),
+              wbInteger('Create', itU16,
+                wbEnum([] ,[
+                $0000, 'At',
+                $8000, 'In'
+                ]))
+            ])
           ]),
-      {8} wbRStruct('Ref Collection', [
-            wbInteger(ALCS, 'Ref Collection', itS32, wbQuestAliasToStr, wbAliasToInt)
-          ]),
-      {9} wbRStruct('Create Object Template', [
-            wbInteger(ALCM, 'Template Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-            wbInteger(ALCA, 'Target Override Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo)
-          ])
-      ]).IncludeFlag(dfMustBeUnion),
-
+      {6} wbRStruct('Find Matching Reference', [
+            wbRUnion('Match Type', [
+            {0} wbRStruct('In Collection', [
+                  wbInteger(ALCS, 'Ref Collection', itS32, wbQuestAliasToStr, wbAliasToInt)
+                ]),
+            {1} wbRStruct('Closest To', [
+                  wbInteger(ALCC, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
+                    .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo)
+                ]),
+            {2} wbRStruct('From Event', [
+                  wbInteger(ALFE, 'Event', itU32, wbQuestEventEnum),
+                  wbInteger(ALFD, 'Data', itU32, wbEventMemberEnum)
+                ]),
+            {3} wbRStruct('Near Alias', [
+                  wbInteger(ALNA, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
+                    .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
+                  wbInteger(ALNT, 'Type', itU32,
+                    wbEnum([
+                    {0} 'Linked Form',
+                    {1} 'Linked Ref',
+                    {2} 'Linked Interior Cell',
+                    {3} 'Linked Exterior Cell',
+                    {4} 'Same Module'
+                  ])).SetRequired,
+                  wbFormIDCk(ALNR, 'Ref Type', [LCRT,NULL])
+              ])
+            ]).IncludeFlag(dfUnionStaticResolve)
+          ]).IncludeFlag(dfStructFirstNotRequired)
+      ]).IncludeFlag(dfUnionStaticResolve),
       wbConditions,
       wbKeywords,
       wbContainerItems,
-
-      wbFormIDCk(SPOR, 'Spectator override package list', [FLST], False, cpNormal, False),
-      wbFormIDCk(OCOR, 'Observe dead body override package list', [FLST], False, cpNormal, False),
-      wbFormIDCk(GWOR, 'Guard warn override package list', [FLST], False, cpNormal, False),
-      wbFormIDCk(ECOR, 'Combat override package list', [FLST], False, cpNormal, False),
-
-      wbArray(ALLA, 'Linked Aliases', wbStruct('Linked Alias', [
-        wbFormIDCk('Keyword', [KYWD, NULL]),
-        wbInteger('Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
-          .SetLinksToCallback(wbSameQuestAliasLinksTo)
-      ])),
+      wbFormIDCk(SPOR, 'Spectator override package list', [FLST]),
+      wbFormIDCk(OCOR, 'Observe dead body override package list', [FLST]),
+      wbFormIDCk(GWOR, 'Guard warn override package list', [FLST]),
+      wbFormIDCk(ECOR, 'Combat override package list', [FLST]),
+      wbArray(ALLA, 'Linked Aliases',
+        wbStruct('Linked Alias', [
+          wbFormIDCk('Keyword', [KYWD, NULL]),
+          wbInteger('Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
+            .SetLinksToCallback(wbSameQuestAliasLinksTo)
+        ])),
       wbFormIDCk(ALDN, 'Display Name', [MESG]),
       wbFormIDCk(ALDI, 'Death Item', [LVLI]),
       wbFormIDCk(ALFV, 'Forced Voice', [VTYP]),
@@ -14459,9 +14398,9 @@ begin
       wbRArrayS('Alias Factions', wbFormIDCk(ALFC, 'Faction', [FACT])),
       wbRArray('Alias Package Data', wbFormIDCk(ALPC, 'Package', [PACK])),
       wbString(SCCM, 'Script Comment'),
-      wbFormIDCk(VTCK, 'Voice Types', [NPC_, FACT, FLST, VTYP, NULL]).SetRequired,
+      wbFormIDCk(VTCK, 'Voice Types', [FACT,FLST,NPC_,VTYP,NULL]).SetRequired,
       wbRArrayS('Alias Terminals', wbFormIDCk(ALTM, 'Terminal Menu', [TMLM])),
-      wbEmpty(ALED, 'Alias End Marker', cpNormal, True)
+      wbEmpty(ALED, 'Alias End Marker').SetRequired
     ]).SetSummaryKey([1, 2])
       .SetSummaryDelimiter(' ')
       .SetSummaryMemberPrefixSuffix(0, 'Ref [', ']')
@@ -14472,56 +14411,67 @@ begin
 
   var lLocationAlias :=
     wbRStructSK([0], 'Location Alias', [
-      wbInteger(ALLS, 'Location Alias ID', itU32),
+      wbInteger(ALLS, 'Alias ID', itU32),
       wbString(ALID, 'Alias Name'),
-//      wbQUSTAliasFlags,
-      wbQUSTLocationAliasFlags,
+      wbInteger(FNAM, 'Flags', itU32,
+        wbFlags(wbSparseFlags([
+        0,  'Reserves Location',
+        1,  'Optional',
+        3,  'Allow Reuse in Quest',
+        8,  'Stores Text',
+        9,  'Allow Reserved',
+        16, 'Allow Explored',
+        20, 'External Alias - Linked',
+        23, 'Discard on shutdown if unused',
+        27, 'Search Ship Locations',
+        28, 'Matching Loc - Planets And Systems Only',
+        29, 'Current Alias System',
+        30, 'Current Alias Planet'
+        ]))
+      ).SetRequired
+       .IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbFloat(ALFG, 'Orbit Altitude Mult'),
-
       wbInteger(ALFI, 'Force Into Alias When Filled', itS32, wbQuestAliasToStr, wbAliasToInt)
         .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-
-      wbRUnion('Alias Type', [
-      {1} wbRStruct('Specific Location', [
-            wbFormIDCk(ALFL, 'Specific Location', [LCTN])
+      wbRUnion('Fill  Type', [
+      {0} wbRStruct('Specific Location', [
+            wbFormIDCk(ALFL, 'Location', [LCTN])
           ]),
-      {2} wbRStruct('Reference Alias Location', [
+      {1} wbRStruct('Alias Location', [
             wbInteger(ALFA, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
               .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
             wbFormIDCk(KNAM, 'Keyword', [KYWD])
           ]),
-      {3} wbRStruct('Find Matching Location From Event', [
-            wbInteger(ALFE, 'From Event', itU32, wbQuestEventEnum),
-            wbInteger(ALFD, 'Event Data', itU32, wbEventMemberEnum)
-          ]),
-      {5} wbRStruct('External Alias Location', [
+      {2} wbRStruct('External Alias Location', [
             wbFormIDCk(ALEQ, 'Quest', [QUST]),
             wbInteger(ALEA, 'Alias', itS32, wbQuestExternalAliasToStr, wbAliasToInt)
               .SetLinksToCallbackOnValue(wbQuestAliasExternalAliasLinksTo)
+          ]),
+      {3} wbRStruct('Find Matching Location', [
+            wbInteger(ALFE, 'From Event', itU32, wbQuestEventEnum),
+            wbInteger(ALFD, 'Event Data', itU32, wbEventMemberEnum)
           ])
-      ]).IncludeFlag(dfMustBeUnion),
+      ]).IncludeFlag(dfUnionStaticResolve),
 
-      wbConditions,
-
-      wbRStruct('Unknown', [
-        wbMarkerReq(ALPS),
-        wbConditions,
-        wbFormIDCk(LNAM, 'PCM Type Keyword', [KYWD])
+      wbRStruct('Match Conditions', [
+        wbConditions
       ]),
-
+      wbRStruct('Planet Content Request', [
+        wbMarkerReq(ALPS),
+        wbRStruct('Planet Location Conditions', [
+          wbConditions
+        ]),
+        wbFormIDCk(LNAM, 'Request Keyword', [KYWD])
+      ]),
       wbInteger(ALCC, 'Closest To Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
         .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-
-      wbInteger(ALSY, 'Current Alias System ID', itS32, wbQuestAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-
-      wbInteger(ALPN, 'Current Alias Planet ID', itS32, wbQuestAliasToStr, wbAliasToInt)
-              .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
-
+      wbInteger(ALSY, 'Current Alias System', itS32, wbQuestAliasToStr, wbAliasToInt)
+        .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
+      wbInteger(ALPN, 'Current Alias Planet', itS32, wbQuestAliasToStr, wbAliasToInt)
+        .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
       wbFormIDCk(ALKF, 'Location Type Keyword', [KYWD]),
       wbFormIDCk(ALDN, 'Display Name', [MESG]),
-
-      wbEmpty(ALED, 'Alias End Marker', cpNormal, True)
+      wbEmpty(ALED, 'Alias End Marker').SetRequired
     ]).SetSummaryKey([1, 2])
       .SetSummaryDelimiter(' ')
       .SetSummaryMemberPrefixSuffix(0, 'Loc [', ']')
@@ -14531,16 +14481,16 @@ begin
       .IncludeFlag(dfCollapsed, wbCollapseAliases);
 
   var lRefCollectionAlias :=
-    wbRStructSK([0], 'Collection Alias', [
-      wbInteger(ALCS, 'Collection Alias ID', itU32),
+    wbRStructSK([0], 'Ref Collection Alias', [
+      wbInteger(ALCS, 'Alias ID', itU32),
       wbInteger(ALMI, 'Max Initial Fill Count', itU8).SetRequired,
       wbUnknown(ALAM, 4),
       wbRUnion('Reference Alias or Alias End Marker', [
         wbRStruct('Alias End Marker', [
-          wbEmpty(ALED, 'Alias End Marker', cpNormal, True)
+          wbEmpty(ALED, 'Alias End Marker').SetRequired
         ]),
         lReferenceAlias
-      ], [], cpNormal, True)
+      ]).SetRequired
     ]).SetSummaryKey([1, 3])
       .SetSummaryDelimiter(' ')
       .SetSummaryMemberPrefixSuffix(0, 'RefCol [', ']')
