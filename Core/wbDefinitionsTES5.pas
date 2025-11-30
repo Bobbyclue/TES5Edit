@@ -7962,7 +7962,7 @@ begin
         wbInteger('Max', itU8)
       ]),
       wbInteger('Flags', itU8, wbFlags([
-        {0x01} 'Parent',
+        {0x01} 'Loose',
         {0x02} 'Sequence',
         {0x04} 'No Attacking',
         {0x04} 'Blocking'
