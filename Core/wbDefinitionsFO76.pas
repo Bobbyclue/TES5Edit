@@ -15433,7 +15433,7 @@ begin
     wbEDID,
     wbOBND(True),
     wbOPDSs,
-    wbFormIDCk(SDSC, 'Sound Descriptor', [SNDR, NULL]),
+    wbFormIDCk(SDSC, 'Sound Descriptor', [SNDR]).SetRequired,
     wbStruct(REPT, 'Repeat', [
       wbFloat('Min Time'),
       wbFloat('Max Time'),

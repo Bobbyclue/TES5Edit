@@ -10275,7 +10275,7 @@ begin
     wbOBND(True),
     wbUnknown(FNAM, cpIgnore), // leftover, unused
     wbUnknown(SNDD, cpIgnore), // leftover, unused
-    wbFormIDCk(SDSC, 'Sound Descriptor', [SNDR,NULL])
+    wbFormIDCk(SDSC, 'Sound Descriptor', [SNDR]).SetRequired
   ]);
 
   wbRecord(SPEL, 'Spell', [
