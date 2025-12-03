@@ -12596,8 +12596,8 @@ begin
     wbEDID,
     wbOBND,
     wbStruct(DNAM, 'Data', [
-      wbFloat('Default Number of Tiles').SetDefaultEditValue('1.0'),
-      wbInteger('Default Number of Slices', itU16).SetDefaultEditValue('4.0'),
+      wbFloat('Default Number of Tiles').SetDefaultNativeValue(1),
+      wbInteger('Default Number of Slices', itU16).SetDefaultNativeValue(4),
       wbInteger('Default Number of Tiles - Relative to Length', itU16, wbBoolEnum),
       wbFloatColors('Default Color'),
       wbFloat('Wind Settings - Sensibility'),
