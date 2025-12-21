@@ -14406,6 +14406,7 @@ begin
       .SetSummaryMemberPrefixSuffix(0, 'Ref [', ']')
       .SetSummaryMemberPrefixSuffix(1, '', '')
       .SetSummaryMemberPrefixSuffix(2, '{', '}')
+      .SetToStr(wbQUSTAliasToStr)
       .IncludeFlag(dfSummaryMembersNoName)
       .IncludeFlag(dfCollapsed, wbCollapseAliases);
 
@@ -14477,6 +14478,7 @@ begin
       .SetSummaryMemberPrefixSuffix(0, 'Loc [', ']')
       .SetSummaryMemberPrefixSuffix(1, '', '')
       .SetSummaryMemberPrefixSuffix(2, '{', '}')
+      .SetToStr(wbQUSTAliasToStr)
       .IncludeFlag(dfSummaryMembersNoName)
       .IncludeFlag(dfCollapsed, wbCollapseAliases);
 
@@ -14552,7 +14554,7 @@ begin
     ]),
     wbFormIDCk(QTYP, 'Quest Type', [KYWD]),
     wbFormIDCk(FTYP, 'Quest Faction', [KYWD]), // was FACT but now separate from FACT
-    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum),
+    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum).SetToStr(wbQUSTEventToStr),
     wbFormIDCk(LNAM, 'Location', [LCTN]),
     wbFormIDCk(QTLM, 'Quest Time Limit', [GLOB]),
     wbFormIDCk(QSRC, 'Source Quest', [QUST]),

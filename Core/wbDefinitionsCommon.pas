@@ -332,6 +332,8 @@ procedure wbFactionRelationToStr(var aValue: string; aBasePtr: Pointer; aEndPtr:
 procedure wbItemToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbNPCPackageToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbObjectPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbQUSTAliasToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbQUSTEventToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbRGBAToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbScriptToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbScriptPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
@@ -3905,6 +3907,110 @@ begin
     Exit;
 
   aValue := aValue + ' {Curve Table: ' + MainRecord.ShortName + '}';
+end;
+
+procedure wbQUSTAliasToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  var lAlias : IwbContainerElementRef;
+  if not Supports(aElement, IwbContainerElementRef, lAlias) then
+    Exit;
+
+  var lFlags := lAlias.ElementBySignature[FNAM];
+  if not Assigned(lFlags) then
+    Exit;
+
+  var lFlagsValue := lFlags.NativeValue;
+  // Optional
+  if (lFlagsValue and $2) <> 0 then
+    Exit;
+
+  // Forced By Aliases
+  if (lFlagsValue and $800) <> 0 then
+    Exit;
+
+  if lAlias.Name = 'Reference Alias' then begin
+    if Assigned(lAlias.ElementByName['Specific Reference']) or
+       Assigned(lAlias.ElementByName['Unique Actor']) or
+       Assigned(lAlias.ElementByName['Unique Reference']) or
+       Assigned(lAlias.ElementByName['Location Alias Reference']) or
+       Assigned(lAlias.ElementByName['External Alias Reference']) or
+       Assigned(lAlias.ElementByName['Create Reference To Object']) or
+       Assigned(lAlias.ElementByName['Create Matching Ref']) or
+       Assigned(lAlias.ElementByName['Find Matching Reference']) or
+       Assigned(lAlias.ElementByName['Match Conditions'])
+    then
+      Exit;
+  end;
+
+  if lAlias.Name = 'Location Alias' then begin
+    if Assigned(lAlias.ElementBySignature[ALFL]) or
+       Assigned(lAlias.ElementByName['Reference Alias Location']) or
+       Assigned(lAlias.ElementByName['External Alias Location']) or
+       Assigned(lAlias.ElementByName['Find Matching Location']) or
+       Assigned(lAlias.ElementByName['Match Conditions'])
+    then
+      Exit;
+  end;
+
+  case aType of
+    ctCheck: aValue := '<Warning: ' + lAlias.Summary + ' is non-optional and Forced to NONE.  This quest cannot start.';
+    ctToStr: aValue := lAlias.Summary + '<Warning: Alias is non-optional and Forced to NONE.  This quest cannot start.';
+  end;
+end;
+
+procedure wbQUSTEventToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if wbBuildRefs = False then
+    Exit;
+
+  var lMainRecord := aElement.ContainingMainRecord;
+  if not Assigned(lMainRecord) then
+    Exit;
+
+  for var lRefByIdx := 0 to Pred(lMainRecord.ReferencedByCount) do
+  begin
+    var lRefBy := lMainRecord.ReferencedBy[lRefByIdx];
+    if not Assigned(lRefBy) then
+      Continue;
+
+    if lRefBy.Signature = SMQN then begin
+      var lQuests := lRefBy.ElementByName['Quests'] as IwbContainerElementRef;
+      if not Assigned(lQuests) then
+        Continue;
+
+      for var lQuestIdx := 0 to Pred(lQuests.ElementCount) do begin
+        var lQuest := lQuests.Elements[lQuestIdx] as IwbContainerElementRef;
+        if not Assigned(lQuest) then
+          Continue;
+
+        var lLinksTo := lQuest.Elements[0].LinksTo as IwbMainRecord;
+        if not Assigned(lLinksTo) then
+          Continue;
+
+        lLinksTo := lLinksTo.MasterOrSelf;
+        if not Assigned(lLinksTo) then
+          Continue;
+
+        var lMaster := lMainRecord.MasterOrSelf;
+        if not Assigned(lMaster) then
+          Continue;
+
+        if lLinksTo = lMaster then
+          Exit;
+      end;
+    end;
+  end;
+
+  case aType of
+    ctCheck: aValue := '<Warning: ' + lMainRecord.ShortName + ' has not been added to the story manager>';
+    ctToStr: aValue := aElement.EditValue + '<Warning: ' + lMainRecord.ShortName + ' has not been added to the story manager>';
+  end;
 end;
 
 procedure wbRGBAToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
