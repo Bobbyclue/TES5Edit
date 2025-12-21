@@ -11055,7 +11055,7 @@ begin
       ])),
       wbUnused(3)
     ]).SetRequired,
-    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum),
+    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum).SetToStr(wbQUSTEventToStr),
     wbFormIDCk(LNAM, 'Location', [LCTN]),
     wbFormIDCk(XNAM, 'Quest Completion XP', [GLOB]),
     wbRArray('Text Display Globals', wbFormIDCk(QTGL, 'Global', [GLOB])),
@@ -11218,6 +11218,7 @@ begin
             .SetSummaryMemberPrefixSuffix(0, 'Ref [', ']')
             .SetSummaryMemberPrefixSuffix(1, '', '')
             .SetSummaryMemberPrefixSuffix(2, '{', '}')
+            .SetToStr(wbQUSTAliasToStr)
             .IncludeFlag(dfSummaryMembersNoName)
             .IncludeFlag(dfCollapsed, wbCollapseAliases),
       {1} wbRStructSK([0], 'Location Alias', [
@@ -11252,6 +11253,7 @@ begin
             .SetSummaryMemberPrefixSuffix(0, 'Loc [', ']')
             .SetSummaryMemberPrefixSuffix(1, '', '')
             .SetSummaryMemberPrefixSuffix(2, '{', '}')
+            .SetToStr(wbQUSTAliasToStr)
             .IncludeFlag(dfSummaryMembersNoName)
             .IncludeFlag(dfCollapsed, wbCollapseAliases),
       {2} wbRStructSK([0], 'Ref Collection Alias', [

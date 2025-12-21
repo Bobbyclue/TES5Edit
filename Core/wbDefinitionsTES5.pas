@@ -9029,7 +9029,7 @@ begin
       wbByteArray('Unknown', 4),
       wbInteger('Type', itU32, wbQuestTypeEnum)
     ]).SetRequired,
-    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum),
+    wbInteger(ENAM, 'Event', itU32, wbQuestEventEnum).SetToStr(wbQUSTEventToStr),
     wbRArray('Text Display Globals', wbFormIDCk(QTGL, 'Global', [GLOB])),
     wbString(FLTR, 'Object Window Filter', 0, cpTranslate),
     wbRStruct('Quest Dialogue Conditions', [wbConditions]),
@@ -9209,6 +9209,7 @@ begin
             .SetSummaryMemberPrefixSuffix(0, 'Ref [', ']')
             .SetSummaryMemberPrefixSuffix(1, '', '')
             .SetSummaryMemberPrefixSuffix(2, '{', '}')
+            .SetToStr(wbQUSTAliasToStr)
             .IncludeFlag(dfSummaryMembersNoName)
             .IncludeFlag(dfCollapsed, wbCollapseAliases),
       {1} wbRStructSK([0], 'Location Alias', [
@@ -9252,6 +9253,7 @@ begin
             .SetSummaryMemberPrefixSuffix(0, 'Loc [', ']')
             .SetSummaryMemberPrefixSuffix(1, '', '')
             .SetSummaryMemberPrefixSuffix(2, '{', '}')
+            .SetToStr(wbQUSTAliasToStr)
             .IncludeFlag(dfSummaryMembersNoName)
             .IncludeFlag(dfCollapsed, wbCollapseAliases)
       ]).IncludeFlag(dfUnionStaticResolve)),
