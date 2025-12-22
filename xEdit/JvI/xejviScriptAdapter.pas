@@ -567,6 +567,14 @@ begin
     Value := Element.ContainingMainRecord;
 end;
 
+procedure IwbElement_ContainingSubRecord(var Value: Variant; Args: TJvInterpreterArgs);
+var
+  Element: IwbElement;
+begin
+  if Supports(IInterface(Args.Values[0]), IwbElement, Element) then
+    Value := Element.ContainingSubRecord;
+end;
+
 procedure IwbElement_LinksTo(var Value: Variant; Args: TJvInterpreterArgs);
 var
   Element: IwbElement;
@@ -2217,6 +2225,7 @@ begin
     AddFunction(cUnit, 'GetFile', IwbElement_GetFile, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'GetContainer', IwbElement_GetContainer, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ContainingMainRecord', IwbElement_ContainingMainRecord, 1, [varEmpty], varEmpty);
+    AddFunction(cUnit, 'ContainingSubRecord', IwbElement_ContainingSubRecord, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'LinksTo', IwbElement_LinksTo, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'Check', IwbElement_Check, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ElementAssign', IwbElement_Assign, 4, [varEmpty, varEmpty, varEmpty, varBoolean], varEmpty);
