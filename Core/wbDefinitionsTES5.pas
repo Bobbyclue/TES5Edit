@@ -3048,7 +3048,7 @@ begin
       .IncludeFlag(dfSummaryMembersNoName)
       .IncludeFlag(dfCollapsed, wbCollapseFragments)
     , [], wbScriptFragmentsSceneCounter),
-    wbArray('Phase Fragments',
+    wbArrayS('Phase Fragments',
       wbStructSK([0, 1], 'Phase Fragment', [
         wbInteger('Phase Flag', itU8, wbFlags([
           {1} 'OnStart',
