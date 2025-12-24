@@ -337,9 +337,9 @@ begin
               if el.Count < 3 then Continue;
               var chunkt := transforms[chunks.NativeValues['Transform Index']];
               var t: TTransform;
-              t.Translation.x := chunkt.NativeValues['Translation\X'] + chunks[i].NativeValues['Translation\X'];
-              t.Translation.y := chunkt.NativeValues['Translation\Y'] + chunks[i].NativeValues['Translation\Y'];
-              t.Translation.z := chunkt.NativeValues['Translation\Z'] + chunks[i].NativeValues['Translation\Z'];
+              t.Translation.x := chunkt.NativeValues['Translation\X'] + chunks[i].NativeValues['Offset\X'];
+              t.Translation.y := chunkt.NativeValues['Translation\Y'] + chunks[i].NativeValues['Offset\Y'];
+              t.Translation.z := chunkt.NativeValues['Translation\Z'] + chunks[i].NativeValues['Offset\Z'];
               t.Rotation.x := chunkt.NativeValues['Rotation\X'];
               t.Rotation.y := chunkt.NativeValues['Rotation\Y'];
               t.Rotation.z := chunkt.NativeValues['Rotation\Z'];

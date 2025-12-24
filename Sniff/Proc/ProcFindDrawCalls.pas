@@ -148,7 +148,7 @@ begin
     end;
 
     if totalcalls > fCallsNum then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
       Log.Add(#9 + IntToStr(totalcalls) + ' draw calls estimated in total');
       Log.Add('');
       fManager.AddMessages(Log);

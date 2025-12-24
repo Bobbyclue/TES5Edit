@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls;
+  Vcl.StdCtrls, Vcl.Mask, Vcl.ExtCtrls;
 
 type
   TFrameHavokMaterial = class(TFrame)
@@ -14,6 +14,12 @@ type
     cmbReplace: TComboBox;
     Label1: TLabel;
     Label2: TLabel;
+    edSearch: TLabeledEdit;
+    edReplace: TLabeledEdit;
+    rbTES4: TRadioButton;
+    rbFO3: TRadioButton;
+    rbTES5: TRadioButton;
+    procedure rbTES5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -28,6 +34,7 @@ type
     fMaterialReplace: string;
   public
     slMaterial: TStringList;
+    Ready: Boolean;
 
     constructor Create(aManager: TProcManager); override;
     destructor Destroy; override;
@@ -48,6 +55,49 @@ uses
   wbDataFormat,
   wbDataFormatNif,
   wbDataFormatNifTypes;
+
+procedure TFrameHavokMaterial.rbTES5Click(Sender: TObject);
+var
+  prefix: string;
+begin
+  if not TProcHavokSearchMaterial(Proc).Ready then
+    Exit;
+
+  if rbTES5.Checked then prefix := 'SKY_' else
+  if rbFO3.Checked then prefix := 'FO_' else
+  if rbTES4.Checked then prefix := 'OB_';
+
+  var mats := TProcHavokSearchMaterial(Proc).slMaterial;
+  var f1 := UpperCase(Trim(edSearch.Text));
+  var f2 := UpperCase(Trim(edReplace.Text));
+
+  cmbSearch.Items.BeginUpdate;
+  cmbReplace.Items.BeginUpdate;
+  try
+    if (Sender is TRadioButton) or (Sender = edSearch) then cmbSearch.Items.Clear;
+    if (Sender is TRadioButton) or (Sender = edReplace) then cmbReplace.Items.Clear;
+    for var i := 0 to Pred(mats.Count) do begin
+      var mat := mats[i];
+      if (Sender = nil) or (Sender is TRadioButton) or (Sender = edSearch) then
+        if (mat = '') or ( mat.StartsWith(prefix) and ((f1 = '') or mat.Contains(f1)) ) then
+          cmbSearch.Items.AddObject(mat, mats.Objects[i]);
+      if (Sender = nil) or (Sender is TRadioButton) or (Sender = edReplace) then
+        if (mat = '') or ( mat.StartsWith(prefix) and ((f2 = '') or mat.Contains(f2)) ) then
+          cmbReplace.Items.AddObject(mat, mats.Objects[i]);
+    end;
+  finally
+    cmbSearch.Items.EndUpdate;
+    cmbReplace.Items.EndUpdate;
+  end;
+
+  if Sender = nil then cmbSearch.ItemIndex := 0;
+  if Sender = nil then cmbReplace.ItemIndex := 0;
+
+  if (Sender = edSearch) and not cmbSearch.DroppedDown then
+    cmbSearch.DroppedDown := True;
+  if (Sender = edReplace) and not cmbReplace.DroppedDown then
+    cmbReplace.DroppedDown := True;
+end;
 
 constructor TProcHavokSearchMaterial.Create(aManager: TProcManager);
 var
@@ -98,21 +148,34 @@ procedure TProcHavokSearchMaterial.OnShow;
 var
   i: Integer;
 begin
-  Frame.cmbSearch.Items.Assign(slMaterial);
-  i := Frame.cmbSearch.Items.IndexOf(StorageGetString('sMaterialSearch', ''));
-  if i = -1 then i := 0;
-  Frame.cmbSearch.ItemIndex := i;
+  Ready := False;
+  i := StorageGetInteger('iGame', 2);
+  if i = 0 then Frame.rbTES4.Checked := True else
+  if i = 1 then Frame.rbFO3.Checked := True else
+    Frame.rbTES5.Checked := True;
+  Frame.edSearch.Text := StorageGetString('sFilterSearch', Frame.edSearch.Text);
+  Frame.edReplace.Text := StorageGetString('sFilterReplace', Frame.edReplace.Text);
+  Ready := True;
+  Frame.rbTES5Click(nil);
 
-  Frame.cmbReplace.Items.Assign(slMaterial);
+  i := Frame.cmbSearch.Items.IndexOf(StorageGetString('sMaterialSearch', ''));
+  if i <> -1 then Frame.cmbSearch.ItemIndex := i;
   i := Frame.cmbReplace.Items.IndexOf(StorageGetString('sMaterialReplace', ''));
-  if i = -1 then i := 0;
-  Frame.cmbReplace.ItemIndex := i;
+  if i <> -1 then Frame.cmbReplace.ItemIndex := i;
 end;
 
 procedure TProcHavokSearchMaterial.OnHide;
+var
+  i: Integer;
 begin
+  if Frame.rbTES4.Checked then i := 0 else
+  if Frame.rbFO3.Checked then i := 1 else
+    i := 2;
+  StorageSetInteger('iGame', i);
   StorageSetString('sMaterialSearch', Frame.cmbSearch.Text);
+  StorageSetString('sFilterSearch', Frame.edSearch.Text);
   StorageSetString('sMaterialReplace', Frame.cmbReplace.Text);
+  StorageSetString('sFilterReplace', Frame.edReplace.Text);
 end;
 
 procedure TProcHavokSearchMaterial.OnStart;
@@ -120,10 +183,10 @@ begin
   fMaterialSearch := Frame.cmbSearch.Text;
   fMaterialReplace := Frame.cmbReplace.Text;
 
-  if fMaterialSearch = '' then
-    raise Exception.Create('Searched material can not be empty');
+  //if (fMaterialSearch = '') and (fMaterialReplace = '') then
+  // raise Exception.Create('Replace material must be set if the searched one is empty');
 
-  if fMaterialSearch = fMaterialReplace then
+  if (fMaterialSearch = fMaterialReplace) and (fMaterialSearch <> '') then
     raise Exception.Create('Searched and replacing materials must be different');
 end;
 
@@ -165,21 +228,24 @@ begin
 
         for var j := 0 to Pred(subshapes.Count) do begin
           var subshape := subshapes[j];
-          if subshape.EditValues['Material'] <> fMaterialSearch then
+          if (fMaterialSearch <> '') and (subshape.EditValues['Material'] <> fMaterialSearch) then
             Continue;
           if fMaterialReplace = '' then
-            Log.Add(Format(#9 + block.Name + ': Shape #%d uses %s material', [j, fMaterialSearch]))
+            Log.Add(#9 + subshape.Path + ': ' + subshape.EditValues['Material'])
           else
             UpdateField(subshape.Elements['Material'], fMaterialReplace, bChanged);
         end;
       end
 
       else if block.IsNiObject('bhkShape', True) then begin
-        if block.EditValues['Material'] <> fMaterialSearch then
+        if block.EditValues['Material'] = '' then
+          Continue;
+
+        if (fMaterialSearch <> '') and (block.EditValues['Material'] <> fMaterialSearch) then
           Continue;
 
         if fMaterialReplace = '' then
-          Log.Add(Format(#9 + block.Name + ': Uses %s material', [fMaterialSearch]))
+          Log.Add(#9 + block.Name + ': ' + block.EditValues['Material'])
         else
           UpdateField(block.Elements['Material'], fMaterialReplace, bChanged);
       end;
@@ -187,9 +253,9 @@ begin
     end;
 
     if Log.Count > 0 then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
       Log.Add('');
-      fManager.AddMessages(Log);
+      AddMessages(Log);
     end;
 
     if bChanged then
@@ -201,5 +267,6 @@ begin
   end;
 
 end;
+
 
 end.

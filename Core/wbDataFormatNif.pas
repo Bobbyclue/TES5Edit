@@ -112,9 +112,9 @@ type
     function GetStrips(aElement: TdfElement = nil): TStripArray;
     function SetStrips(const aStrips: TStripArray; aElement: TdfElement = nil): Boolean;
     function GetTransform(var aTransform: TTransform): Boolean;
-    function SetTransform(aTransform: TTransform): Boolean;
+    function SetTransform(const aTransform: TTransform): Boolean;
     function GetBoundSphere(var aSphere: TBoundSphere): Boolean;
-    function SetBoundSphere(aSphere: TBoundSphere): Boolean;
+    function SetBoundSphere(const aSphere: TBoundSphere): Boolean;
     function GetSkin: TwbNifBlock;
     function GetCollision: TwbNifBlock;
     function GetController(const aBlockType: string = ''; aChained: Boolean = False): TwbNifBlock;
@@ -139,6 +139,7 @@ type
 
   TwbNifFile = class(TdfContainer)
   private
+    FFileName: string;
     FNifVersion: TwbNifVersion;
     FOptions: TwbNifOptions;
     FInternalUpdates: Boolean;
@@ -161,6 +162,7 @@ type
     function Serialize(const aDataStart, aDataEnd: Pointer): Integer; override;
     procedure SerializeToJSON(const aJSON: TJSONBaseObject); override;
     procedure UnSerializeFromJSON(const aJSON: TJSONBaseObject); override;
+    procedure LoadFromFile(const aFileName: string); override;
     procedure Delete(Index: Integer); override;
     procedure Move(CurIndex, NewIndex: Integer); override;
     procedure UpdateNifVersion;
@@ -184,6 +186,7 @@ type
     function SpellFaceNormals: Boolean;
     function SpellUpdateTangents: Boolean;
     function SpellAddUpdateTangents: Boolean;
+    property FileName: string read FFileName;
     property NifVersion: TwbNifVersion read FNifVersion write SetNifVersion;
     property Options: TwbNifOptions read FOptions write FOptions;
     property Header: TwbNifBlock read GetHeader;
@@ -725,15 +728,17 @@ begin
   var ms := EditValues['Motion System'];
   var mq := EditValues['Motion Quality'];
 
-  Result :=
-    // not undefined, static or animstatic layer
-    (layer > 2) and
-    (ms <> 'MO_SYS_INVALID') and
-    (ms <> 'MO_SYS_FIXED') and
-    (mq <> 'MO_QUAL_INVALID') and
-    (mq <> 'MO_QUAL_FIXED') and
-    // keyframed biped layer is dynamic
-    ( (ms <> 'MO_SYS_KEYFRAMED') or (layer = 8) );
+  Result := (ms <> 'MO_SYS_INVALID') and (ms <> 'MO_SYS_FIXED')
+      // keyframed biped layer is dynamic
+      and ( (ms <> 'MO_SYS_KEYFRAMED') or (layer = 8) );
+
+  // In Skyrim not only motion system defines static
+  if NifFile.NifVersion >= nfTES5 then
+    Result := Result and
+      // not undefined, static or animstatic layer
+      (layer > 2) and
+      (mq <> 'MO_QUAL_INVALID') and
+      (mq <> 'MO_QUAL_FIXED');
 end;
 
 function TwbNifBlock.GetIsEditorMarker: Boolean;
@@ -1320,29 +1325,38 @@ var
 begin
   Result := False;
 
-  if not IsNiObject('NiAVObject') then
-    Exit;
+  if IsNiObject('NiAVObject') then begin
+    t := Elements['Transform'];
+    if not Assigned(t) then
+      Exit;
 
-  t := Elements['Transform'];
-  if not Assigned(t) then
-    Exit;
+    aTransform.Scale := t.NativeValues['Scale'];
+    aTransform.Translation.X := t.NativeValues['Translation\X'];
+    aTransform.Translation.Y := t.NativeValues['Translation\Y'];
+    aTransform.Translation.Z := t.NativeValues['Translation\Z'];
 
-  aTransform.Scale := t.NativeValues['Scale'];
-  aTransform.Translation.X := t.NativeValues['Translation\X'];
-  aTransform.Translation.Y := t.NativeValues['Translation\Y'];
-  aTransform.Translation.Z := t.NativeValues['Translation\Z'];
+    r := t.Elements['Rotation'];
+    for i := 0 to 2 do
+      for j := 0 to 2 do
+        m[j, i] := r.NativeValues['m' + IntToStr(i+1) + IntToStr(j+1)];
 
-  r := t.Elements['Rotation'];
-  for i := 0 to 2 do
-    for j := 0 to 2 do
-      m[j, i] := r.NativeValues['m' + IntToStr(i+1) + IntToStr(j+1)];
-
-  M33ToQuaternion(m, aTransform.Rotation);
+    M33ToQuaternion(m, aTransform.Rotation);
+  end
+  else if BlockType = 'bhkRigidBodyT' then begin
+    aTransform.Translation.X := NativeValues['Translation\X'];
+    aTransform.Translation.Y := NativeValues['Translation\Y'];
+    aTransform.Translation.Z := NativeValues['Translation\Z'];
+    aTransform.Rotation.X := NativeValues['Rotation\X'];
+    aTransform.Rotation.Y := NativeValues['Rotation\Y'];
+    aTransform.Rotation.Z := NativeValues['Rotation\Z'];
+    aTransform.Rotation.W := NativeValues['Rotation\W'];
+    aTransform.Scale := 1.0;
+  end;
 
   Result := True;
 end;
 
-function TwbNifBlock.SetTransform(aTransform: TTransform): Boolean;
+function TwbNifBlock.SetTransform(const aTransform: TTransform): Boolean;
 var
   i, j: integer;
   t, r: TdfElement;
@@ -1390,7 +1404,7 @@ begin
   Result := True;
 end;
 
-function TwbNifBlock.SetBoundSphere(aSphere: TBoundSphere): Boolean;
+function TwbNifBlock.SetBoundSphere(const aSphere: TBoundSphere): Boolean;
 var
   e: TdfElement;
 begin
@@ -1511,7 +1525,7 @@ function TwbNifBlock.ApplyTransform(aRecursive: Boolean = False; aOptions: TwbAp
         (aBlock.NifFile.BlockByType('BSSkin::Instance', True) = nil);
   end;
 
-  procedure UpdateRotation(entries: TdfElement; var t: TTransform);
+  procedure UpdateRotation(entries: TdfElement; const t: TTransform);
   begin
     if not Assigned(entries) then
       Exit;
@@ -2207,6 +2221,12 @@ begin
   end;
 end;
 
+procedure TwbNifFile.LoadFromFile(const aFileName: string);
+begin
+  inherited;
+  FFileName := aFileName;
+end;
+
 procedure TwbNifFile.RemapBlocks(const aMap: array of Integer);
 var
   i, j, b: integer;
@@ -2700,7 +2720,7 @@ begin
   if (dynbodies > 0) then Result := Result or (1 shl 6);
 
   // Articulated. Applies velocity equally to all bones of a grabbed object. Makes objects like armor ground models move cleanly.
-  if (dynbodies > 0) then Result := Result or (1 shl 7);
+  if (dynbodies > IfThen(NifVersion = nfFO3, 1, 0)) then Result := Result or (1 shl 7);
 
   // Transform updates, runtime only
   // 1 shl 8

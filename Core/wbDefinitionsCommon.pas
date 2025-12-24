@@ -16,7 +16,7 @@ uses
   wbInterface,
   wbDefinitionsSignatures;
 
-  type
+type
   TwbVarRecs = TArray<TVarRec>;
 
 var

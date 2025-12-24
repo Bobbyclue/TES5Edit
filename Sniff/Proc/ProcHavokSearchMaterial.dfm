@@ -48,4 +48,57 @@ object FrameHavokMaterial: TFrameHavokMaterial
     DropDownCount = 24
     TabOrder = 2
   end
+  object edSearch: TLabeledEdit
+    Left = 399
+    Top = 83
+    Width = 73
+    Height = 23
+    EditLabel.Width = 26
+    EditLabel.Height = 15
+    EditLabel.Caption = 'Filter'
+    TabOrder = 3
+    Text = ''
+    OnChange = rbTES5Click
+  end
+  object edReplace: TLabeledEdit
+    Left = 399
+    Top = 136
+    Width = 73
+    Height = 23
+    EditLabel.Width = 26
+    EditLabel.Height = 15
+    EditLabel.Caption = 'Filter'
+    TabOrder = 4
+    Text = ''
+    OnChange = rbTES5Click
+  end
+  object rbTES4: TRadioButton
+    Left = 16
+    Top = 39
+    Width = 89
+    Height = 17
+    Caption = 'Oblivion'
+    TabOrder = 5
+    OnClick = rbTES5Click
+  end
+  object rbFO3: TRadioButton
+    Left = 120
+    Top = 39
+    Width = 105
+    Height = 17
+    Caption = 'Fallout 3/NV'
+    TabOrder = 6
+    OnClick = rbTES5Click
+  end
+  object rbTES5: TRadioButton
+    Left = 240
+    Top = 39
+    Width = 105
+    Height = 17
+    Caption = 'Skyrim'
+    Checked = True
+    TabOrder = 7
+    TabStop = True
+    OnClick = rbTES5Click
+  end
 end

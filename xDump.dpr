@@ -28,8 +28,6 @@ uses
   Windows,
   Registry,
   IniFiles,
-  ZlibEx,
-  lz4,
   wbBSA in 'Core\wbBSA.pas',
   wbCommandLine in 'Core\wbCommandLine.pas',
   wbSort in 'Core\wbSort.pas',

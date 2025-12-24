@@ -28,14 +28,12 @@ uses
   ProcAnimSkeletonDeath in 'Sniff\Proc\ProcAnimSkeletonDeath.pas' {FrameAnimSkeletonDeath: TFrame},
   ProcApplyTransform in 'Sniff\Proc\ProcApplyTransform.pas' {FrameApplyTransform: TFrame},
   ProcAttachParent in 'Sniff\Proc\ProcAttachParent.pas' {FrameAttachParent: TFrame},
-  ProcChangePartitionSlot in 'Sniff\Proc\ProcChangePartitionSlot.pas' {FrameChangePartitionSlot: TFrame},
   ProcCheckForErrors in 'Sniff\Proc\ProcCheckForErrors.pas' {FrameCheckForErrors: TFrame},
   ProcConvertRootNode in 'Sniff\Proc\ProcConvertRootNode.pas' {FrameConvertRootNode: TFrame},
   ProcCopyControlledBlocks in 'Sniff\Proc\ProcCopyControlledBlocks.pas' {FrameCopyControlledBlocks: TFrame},
   ProcCopyGeometryBlocks in 'Sniff\Proc\ProcCopyGeometryBlocks.pas' {FrameCopyGeometryBlocks: TFrame},
   ProcCopyPriorities in 'Sniff\Proc\ProcCopyPriorities.pas' {FrameCopyPriorities: TFrame},
   ProcFindDrawCalls in 'Sniff\Proc\ProcFindDrawCalls.pas' {FrameFindDrawCalls: TFrame},
-  ProcFindSeveralStrips in 'Sniff\Proc\ProcFindSeveralStrips.pas' {FrameFindSeveralStrips: TFrame},
   ProcFindUVs in 'Sniff\Proc\ProcFindUVs.pas' {FrameFindUVs: TFrame},
   ProcFixExportedKFAnim in 'Sniff\Proc\ProcFixExportedKFAnim.pas' {FrameFixExportedKFAnim: TFrame},
   ProcGroupShapes in 'Sniff\Proc\ProcGroupShapes.pas' {FrameGroupShapes: TFrame},
@@ -49,18 +47,16 @@ uses
   ProcMoppUpdate in 'Sniff\Proc\ProcMoppUpdate.pas' {FrameMoppUpdate: TFrame},
   ProcOptimize in 'Sniff\Proc\ProcOptimize.pas' {FrameOptimize: TFrame},
   ProcOptimizeKF in 'Sniff\Proc\ProcOptimizeKF.pas' {FrameOptimizeKF: TFrame},
-  ProcPriorityControlledBlocks in 'Sniff\Proc\ProcPriorityControlledBlocks.pas' {FramePriorityControlledBlocks: TFrame},
   ProcRagdollConstraintUpdate in 'Sniff\Proc\ProcRagdollConstraintUpdate.pas' {FrameRagdollConstraintUpdate: TFrame},
   ProcRemoveControlledBlocks in 'Sniff\Proc\ProcRemoveControlledBlocks.pas' {FrameRemoveControlledBlocks: TFrame},
   ProcRemoveNodes in 'Sniff\Proc\ProcRemoveNodes.pas' {FrameRemoveNodes: TFrame},
   ProcRemoveUnusedNodes in 'Sniff\Proc\ProcRemoveUnusedNodes.pas' {FrameRemoveUnusedNodes: TFrame},
-  ProcRenameControlledBlocks in 'Sniff\Proc\ProcRenameControlledBlocks.pas' {FrameRenameControlledBlocks: TFrame},
-  ProcRenameStrings in 'Sniff\Proc\ProcRenameStrings.pas' {FrameRenameStrings: TFrame},
   ProcReplaceAssets in 'Sniff\Proc\ProcReplaceAssets.pas' {FrameReplaceAssets: TFrame},
   ProcSetMissingNames in 'Sniff\Proc\ProcSetMissingNames.pas' {FrameSetMissingNames: TFrame},
   ProcShaderFlagsUpdate in 'Sniff\Proc\ProcShaderFlagsUpdate.pas' {FrameShaderFlagsUpdate: TFrame},
   ProcSoftParticles in 'Sniff\Proc\ProcSoftParticles.pas' {FrameSoftParticles: TFrame},
   ProcTangents in 'Sniff\Proc\ProcTangents.pas' {FrameTangents: TFrame},
+  ProcTransformInfo in 'Sniff\Proc\ProcTransformInfo.pas' {FrameTransformInfo: TFrame},
   ProcUniversalFixer in 'Sniff\Proc\ProcUniversalFixer.pas' {FrameUniversalFixer: TFrame},
   ProcUniversalTweaker in 'Sniff\Proc\ProcUniversalTweaker.pas' {FrameUniversalTweaker: TFrame},
   ProcUnskinMesh in 'Sniff\Proc\ProcUnskinMesh.pas' {FrameUnskinMesh: TFrame},
@@ -78,6 +74,7 @@ begin
   try
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Carbon');
   Application.CreateForm(TFormMain, FormMain);
   Application.Run;
   except end;

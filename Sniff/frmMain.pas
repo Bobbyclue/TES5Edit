@@ -19,7 +19,7 @@ uses
   Vcl.Menus, Vcl.Themes;
 
 const
-  sSniffVersion = '1.8';
+  sSniffVersion = '1.9';
   sSniffCaption = 'S''Lanter''s NIF Helper';
   sSniffTitle = sSniffCaption + ' ' + sSniffVersion;
   WM_PROCESSING_START = WM_USER + 10;
@@ -104,7 +104,6 @@ uses
   ProcTangents,
   ProcUpdateBounds,
   ProcReplaceAssets,
-  ProcRenameStrings,
   ProcCheckForErrors,
   ProcAnalyzeMesh,
   ProcJsonConverter,
@@ -116,9 +115,7 @@ uses
   ProcAttachParent,
   ProcCopyControlledBlocks,
   ProcCopyPriorities,
-  ProcRenameControlledBlocks,
   ProcRemoveControlledBlocks,
-  ProcPriorityControlledBlocks,
   ProcAnimQuadraticToLinear,
   ProcAnimSkeletonDeath,
   ProcShaderFlagsUpdate,
@@ -126,16 +123,15 @@ uses
   ProcRagdollConstraintUpdate,
   ProcMoppUpdate,
   ProcUnweldedVertices,
-  ProcFindSeveralStrips,
   ProcFindDrawCalls,
   ProcFindUVs,
+  ProcTransformInfo,
   ProcHavokInfo,
   ProcHavokSettingsUpdate,
   ProcHavokSearchMaterial,
   ProcCopyGeometryBlocks,
   ProcVertexPaint,
   ProcGroupShapes,
-  ProcChangePartitionSlot,
   ProcFixExportedKFAnim,
   ProcOptimizeKF,
   ProcRemoveNodes,
@@ -280,6 +276,17 @@ begin
 
   Settings := TMemIniFile.Create(s);
 
+  if Settings.ValueExists('Main', 'FormLeft') then begin
+    Position := poDesigned;
+    Left := Settings.ReadInteger('Main', 'FormLeft', Left);
+    Top := Settings.ReadInteger('Main', 'FormTop', Top);
+    Width := Settings.ReadInteger('Main', 'FormWidth', Width);
+    Height := Settings.ReadInteger('Main', 'FormHeight', Height);
+    WindowState := TWindowState(Settings.ReadInteger('Main', 'FormState', Integer(WindowState)));
+    if not Assigned(Screen.MonitorFromWindow(Handle, mdNull)) then
+      MakeFullyVisible;
+  end;
+
   var theme := TStyleManager.ActiveStyle.Name;
   theme := Settings.ReadString('Main', 'Theme', theme);
   TStyleManager.TrySetStyle(theme);
@@ -312,7 +319,6 @@ begin
   AddProc('NIF', TProcUniversalFixer.Create(Manager));
   AddProc('NIF', TProcApplyTransform.Create(Manager));
   AddProc('NIF', TProcAdjustTransform.Create(Manager));
-  AddProc('NIF', TProcRenameStrings.Create(Manager));
   AddProc('NIF', TProcAttachParent.Create(Manager));
   AddProc('NIF', TProcCopyGeometryBlocks.Create(Manager));
   AddProc('NIF', TProcVertexPaint.Create(Manager));
@@ -322,7 +328,6 @@ begin
   AddProc('NIF', TProcRemoveUnusedNodes.Create(Manager));
   AddProc('NIF', TProcConvertRootNode.Create(Manager));
   AddProc('NIF', TProcUnskinMesh.Create(Manager));
-  AddProc('NIF', TProcChangePartitionSlot.Create(Manager));
   AddProc('NIF', TProcAddLODNode.Create(Manager));
   AddProc('NIF', TProcAddRootCollisionNode.Create(Manager));
   AddProc('NIF', TProcAddBoundingBox.Create(Manager));
@@ -330,17 +335,15 @@ begin
 
   AddProc('Report', TProcCheckForErrors.Create(Manager));
   AddProc('Report', TProcAnalyzeMesh.Create(Manager));
+  AddProc('Report', TProcTransformInfo.Create(Manager));
   AddProc('Report', TProcHavokInfo.Create(Manager));
   AddProc('Report', TProcUnweldedVertices.Create(Manager));
-  AddProc('Report', TProcFindSeveralStrips.Create(Manager));
   AddProc('Report', TProcFindDrawCalls.Create(Manager));
   AddProc('Report', TProcFindUVs.Create(Manager));
 
   AddProc('Animation', TProcCopyControlledBlocks.Create(Manager));
   AddProc('Animation', TProcCopyPriorities.Create(Manager));
-  AddProc('Animation', TProcRenameControlledBlocks.Create(Manager));
   AddProc('Animation', TProcRemoveControlledBlocks.Create(Manager));
-  AddProc('Animation', TProcPriorityControlledBlocks.Create(Manager));
   AddProc('Animation', TProcAnimQuadraticToLinear.Create(Manager));
   AddProc('Animation', TProcFixExportedKFAnim.Create(Manager));
   AddProc('Animation', TProcOptimizeKF.Create(Manager));
@@ -364,7 +367,7 @@ begin
 
   // operation is provided in the command line
   if wbFindCmdLineParam('OP', s) and (s <> '') then
-    for var i: Integer := Low(Procs) to High(Procs) do
+    for var i := Low(Procs) to High(Procs) do
       if SameText(s, Procs[i].Title) then begin
         lvProcs.Selected := lvProcs.Items[i];
         bAutoMode := True;
@@ -374,7 +377,7 @@ begin
   // select the last used operation if not in automation mode
   if not bAutoMode then begin
     LastUsedProc := Settings.ReadString('Main', 'Operation', Procs[0].ClassName);
-    for var i: Integer := Low(Procs) to High(Procs) do
+    for var i := Low(Procs) to High(Procs) do
       if Procs[i].Title = LastUsedProc then begin
         lvProcs.Selected := lvProcs.Items[i];
         Break;
@@ -435,13 +438,16 @@ end;
 
 procedure TFormMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if Assigned(Proc) then
-    Proc.OnHide;
-
-  if Assigned(ProcFrame) then
-    FreeAndNil(ProcFrame);
-
   Settings.WriteString('Main', 'Theme', TStyleManager.ActiveStyle.Name);
+  if WindowState in [wsNormal, wsMaximized] then begin
+    Settings.WriteInteger('Main', 'FormState', Integer(WindowState));
+    if WindowState = wsNormal then begin
+      Settings.WriteInteger('Main', 'FormLeft', Left);
+      Settings.WriteInteger('Main', 'FormTop', Top);
+      Settings.WriteInteger('Main', 'FormWidth', Width);
+      Settings.WriteInteger('Main', 'FormHeight', Height);
+    end;
+  end;
 
   Settings.WriteString('Main', 'InputDirectory', edInput.Text);
   Settings.EraseSection('Input History');
@@ -460,7 +466,13 @@ begin
   Settings.WriteBool('Main', 'OutputAll', chkOutputAll.Checked);
   Settings.WriteString('Main', 'Operation', Procs[lvProcs.ItemIndex].Title);
 
-  for var p: TProcBase in Procs do
+  if Assigned(Proc) then
+    Proc.OnHide;
+
+  if Assigned(ProcFrame) then
+    FreeAndNil(ProcFrame);
+
+  for var p in Procs do
     p.Free;
 
   Manager.Free;
@@ -596,7 +608,7 @@ procedure TFormMain.btnProcessClick(Sender: TObject);
 var
   objs: TArray<TProcessObject>;
   obj: TProcessObject;
-  i, Threads: integer;
+  i, UseThreads: integer;
   s: string;
 begin
   if tcMain.TabIndex = 1 then begin
@@ -710,37 +722,40 @@ begin
       objs[Pred(Length(objs))] := obj;
     end;
 
-    var ProcProcess: TProcessProc :=
+    // custom number of threads if operation supports multithreading
+    UseThreads := Proc.Threads;
+    if UseThreads = 0 then begin
+      UseThreads := StrToIntDef(edThreads.Text, 0);
+      if UseThreads > System.CPUCount then
+        UseThreads := CPUCount;
+    end;
+
+    var SniffProcess: TProcessProc :=
       procedure(i: Integer) begin
         Manager.Process(objs[i]);
       end;
-
-    // custom number of threads if operation supports multithreading
-    Threads := Proc.Threads;
-    if Threads = 0 then begin
-      Threads := StrToIntDef(edThreads.Text, 0);
-      if Threads > System.CPUCount then
-        Threads := CPUCount;
-    end;
 
     var sw := TStopwatch.StartNew;
 
     // single main thread when debugging
     if DebugHook <> 0 then begin
       for i := Low(objs) to High(objs) do
-        ProcProcess(i);
+        SniffProcess(i);
     end else
 
     // multi threaded
-    case wbTaskProgressExecute(
-      Self, 'Processing...',
-      Low(objs), High(objs), ProcProcess, i, s, Threads
-    ) of
-      mrAbort: begin
-        s := 'Error: "' + objs[i].FileName + ': ' + s;
-        Manager.AddMessage(#13#10 + s);
+    with TwbTaskProgress.Create(Self) do try
+      Caption := 'Processing...';
+      LowIndex := Low(objs);
+      HighIndex := High(objs);
+      Threads := UseThreads;
+      ProcessProc := SniffProcess;
+      if Execute = mrAbort then begin
+        Manager.AddMessage(#13#10'Error: "' + objs[ErrorIndex].FileName + ': ' + ErrorMessage);
         Exit;
       end;
+    finally
+      Free;
     end;
 
     try

@@ -35,6 +35,7 @@ uses
   JsonDataObjects,
   wbHelpers,
   wbDefinitionsCommon,
+  wbDefinitionsReflection,
   wbDefinitionsSignatures;
 
 const
@@ -985,134 +986,6 @@ begin
           end;
     end;
   end;
-end;
-
-function wbREFLStringToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-begin
-  if not Assigned(aElement) then
-    Exit('');
-
-  if not (aType in [ctToEditValue, ctToSortKey, ctToStr, ctToSummary]) then
-    Exit('');
-
-  if aInt < 0 then
-    case aInt of
-      Integer($FFFFFF01): Exit('Null');
-      Integer($FFFFFF02): Exit('String');
-      Integer($FFFFFF03): Exit('List');
-      Integer($FFFFFF04): Exit('Map');
-      Integer($FFFFFF05): Exit('Ref');
-      Integer($FFFFFF08): Exit('Int8');
-      Integer($FFFFFF09): Exit('UInt8');
-      Integer($FFFFFF0A): Exit('Int16');
-      Integer($FFFFFF0B): Exit('UInt16');
-      Integer($FFFFFF0C): Exit('Int32');
-      Integer($FFFFFF0D): Exit('UInt32');
-      Integer($FFFFFF0E): Exit('Int64');
-      Integer($FFFFFF0F): Exit('UInt64');
-      Integer($FFFFFF10): Exit('Bool');
-      Integer($FFFFFF11): Exit('Float');
-      Integer($FFFFFF12): Exit('Double');
-      Integer($FFFFFF13): Exit('Diff');
-    else
-      Exit('<Warning: Unknown Type>');
-    end else begin
-      var lSubRecord := aElement.ContainingSubRecord;
-      if not Assigned(lSubRecord) then
-        Exit('');
-
-      var lStringTable := lSubRecord.ElementByPath['String Table\Strings'] as IwbDataContainer;
-      if not Assigned(lStringTable) then
-        Exit('');
-
-      var lBasePtr : PAnsiChar := lStringTable.DataBasePtr;
-        Result := PAnsiChar(@lBasePtr[aInt]);
-    end;
-end;
-
-function wbREFLStringToInt(const aString: string; const aElement: IwbElement): Int64;
-begin
-  Result := 0;
-  if aString = '' then
-    Exit;
-
-  if not Assigned(aElement) then
-    Exit;
-
-  if aString = 'Null'   then Exit($FFFFFF01) else
-  if aString = 'String' then Exit($FFFFFF02) else
-  if aString = 'List'   then Exit($FFFFFF03) else
-  if aString = 'Map'    then Exit($FFFFFF04) else
-  if aString = 'Ref'    then Exit($FFFFFF05) else
-  if aString = 'Int8'   then Exit($FFFFFF08) else
-  if aString = 'UInt8'  then Exit($FFFFFF09) else
-  if aString = 'Int16'  then Exit($FFFFFF0A) else
-  if aString = 'UInt16' then Exit($FFFFFF0B) else
-  if aString = 'Int32'  then Exit($FFFFFF0C) else
-  if aString = 'UInt32' then Exit($FFFFFF0D) else
-  if aString = 'Int64'  then Exit($FFFFFF0E) else
-  if aString = 'UInt64' then Exit($FFFFFF0F) else
-  if aString = 'Bool'   then Exit($FFFFFF10) else
-  if aString = 'Float'  then Exit($FFFFFF11) else
-  if aString = 'Double' then Exit($FFFFFF12) else
-  if aString = 'Diff'   then Exit($FFFFFF13) else
-
-  begin
-    var lSubRecord := aElement.ContainingSubRecord;
-    if not Assigned(lSubRecord) then
-      Exit;
-
-    var lStringTable := lSubRecord.ElementByPath['String Table\Strings'] as IwbContainerElementRef;
-    if not Assigned(lStringTable) then
-      Exit;
-
-    var lTablePtr := (lStringTable as IwbDataContainer).DataBasePtr;
-    for var i := 0 to Pred(lStringTable.ElementCount) do begin
-      var lString := lStringTable.Elements[i];
-      if aString = lString.EditValue then begin
-        var lStringPtr := (lString as IwbDataContainer).DataBasePtr;
-        Result := Int64(lStringPtr) - Int64(lTablePtr);
-        Exit;
-      end;
-    end;
-  end;
-end;
-
-function wbREFLDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-begin
-  Result := 0;
-  if not Assigned(aElement) then
-    Exit;
-
-  var lContainer : IwbContainer;
-  if not wbTryGetContainerFromUnion(aElement, lContainer) then
-    Exit;
-
-  Result := lContainer.Elements[0].NativeValue;
-end;
-
-function wbREFLShouldInclude(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
-begin
-  Result := PWord(aBasePtr)^ <> $FFFF;
-end;
-
-function wbREFLFormID(const aName: string; aSigs: TwbSignatures = []): IwbValueDef;
-begin
-  Result :=
-    wbStructSK([1], aName, [
-      wbInteger('Data Type', itS32, wbREFLStringToStr, wbREFLStringToInt).SetDefaultEditValue('UInt32'),
-      wbFormIDCK(aName, aSigs)
-    ]).SetSummaryKey([1])
-      .IncludeFlag(dfCollapsed);
-end;
-
-function wbREFLWwiseGUID(const aName: string = 'GUID'): IwbValueDef;
-begin
-  Result :=
-    wbStruct(aName, [
-      wbInteger('Data Type', itS32, wbREFLStringToStr, wbREFLStringToInt).SetDefaultEditValue('UInt32'),
-      wbUnknown(8)
-    ]);
 end;
 
 function wbOBND(aRequired: Boolean = False): IwbRecordMemberDef;
@@ -2804,6 +2677,7 @@ const
 procedure DefineSF1;
 begin
   DefineCommon;
+  DefineReflection;
 
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
@@ -5759,132 +5633,6 @@ begin
     wbEmpty(ACEP, 'Unknown'),                                           //ACEP  none // sets +0x5E to 1 (uint8/bool) //does not occur in Starfield.esm
     wbMarkerReq(XNAM)                                                   //XNAM  end marker for BNAM fields
   ]);
-
-  var wbREFLColorEnum :=
-    wbEnum([
-    {0} 'Red',
-    {1} 'Green',
-    {2} 'Blue',
-    {3} 'Alpha'
-    ]);
-
-  var wbREFLFloatEnum :=
-    wbEnum([
-    {0} 'Operation',
-    {1} 'Value',
-    {2} 'Blend Amount'
-    ]);
-
-  var wbREFLOperationEnum :=
-    wbStringEnum([
-    {0} 'Add',
-    {1} 'Greater',
-    {2} 'Multiply',
-    {4} 'Replace'
-    ]);
-
-  var wbREFLBETH :=
-    wbStruct('Reflection Header', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Version', itU32),
-      wbInteger('Chunk Count', itU32)
-    ]);
-
-  var wbREFLSTRT :=
-    wbStruct('String Table', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbArray('Strings',
-        wbString('String')
-      ).SetShouldInclude(function(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean
-       begin
-         Result := (PLongWord(aBasePtr)^ <> $45505954);
-       end)
-    ]).SetSummaryKey([2])
-      .IncludeFlag(dfCollapsed);
-
-  var wbREFLTYPE :=
-    wbStruct('Type', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Class Count', itU32)
-    ]).SetSummaryKey([2])
-      .SetSummaryMemberPrefixSuffix(2, 'Class Cout: ', '')
-      .IncludeFlag(dfCollapsed);
-
-  var wbREFLCLAS :=
-    wbArray('Classes',
-      wbStruct('Class', [
-        wbString('Signature', 4),
-        wbInteger('Data Size', itU32),
-        wbInteger('Class Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-        wbInteger('Form', itS32, wbREFLStringToStr, wbREFLStringToInt),
-        wbInteger('Flags', itU16,
-          wbFlags(wbSparseFlags([
-          2, 'User',
-          3, 'Struct'
-          ], False, 4))
-        ).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbArray('Fields',
-          wbStruct('Field', [
-            wbInteger('Field Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-            wbInteger('Field Type', itS32, wbREFLStringToStr, wbREFLStringToInt),
-            wbInteger('Offset', itU16),
-            wbInteger('Size', itU16)
-          ]).SetSummaryKey([0])
-            .IncludeFlag(dfCollapsed),
-        -2).IncludeFlag(dfCollapsed)
-      ]).SetSummaryKey([2])
-        .IncludeFlag(dfCollapsed)
-    ).SetCountPath('Type\Class Count', True)
-     .IncludeFlag(dfCollapsed);
-
-  var wbREFLOBJT :=
-    wbStruct('Object Data', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-      wbUnknown
-    ]);
-
-  var wbREFLDIFF :=
-    wbStruct('Diff', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-      wbUnknown
-    ]);
-
-  var wbREFL :=
-    wbStruct(REFL, 'Reflection', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbREFLOBJT,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport);
-
-  var wbRDIF :=
-    wbStruct(RDIF, 'Reflection Diff', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbREFLDIFF,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport);
 
   var wbBaseFormComponents: IwbRecordMemberDef;
 

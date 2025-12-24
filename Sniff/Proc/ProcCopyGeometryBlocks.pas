@@ -12,7 +12,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor, wbDataFormatNif,
   Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask;
 
 type
@@ -22,6 +22,8 @@ type
     btnBrowse: TButton;
     chkCopyGeom: TCheckBox;
     chkCopyTransform: TCheckBox;
+    rbMatchingFiles: TRadioButton;
+    rbSingleFile: TRadioButton;
     procedure btnBrowseClick(Sender: TObject);
   private
     { Private declarations }
@@ -35,6 +37,7 @@ type
     fSourceDirectory: string;
     fCopyTransform: Boolean;
     fCopyGeom: Boolean;
+    fSourceFile: TwbNifFile;
   public
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
@@ -50,8 +53,7 @@ implementation
 {$R *.dfm}
 
 uses
-  wbDataFormat,
-  wbDataFormatNif;
+  wbDataFormat;
 
 procedure TFrameCopyGeometryBlocks.btnBrowseClick(Sender: TObject);
 var
@@ -62,8 +64,20 @@ begin
   if path = '' then
     path := ExtractFilePath(Application.ExeName);
 
-  if SelectFolder(path) then
-    edSourceDirectory.Text := Path;
+  if rbMatchingFiles.Checked then begin
+    if SelectFolder(path) then
+      edSourceDirectory.Text := Path;
+  end
+  else begin
+    with TFileOpenDialog.Create(Application.MainForm) do begin
+      Options := [fdoFileMustExist];
+      with FileTypes.Add do begin DisplayName := 'NIF Files'; FileMask := '*.nif'; end;
+      with FileTypes.Add do begin DisplayName := 'All Files'; FileMask := '*.*'; end;
+      FileName := path;
+      if Execute then
+        edSourceDirectory.Text := FileName;
+    end;
+  end;
 end;
 
 constructor TProcCopyGeometryBlocks.Create(aManager: TProcManager);
@@ -83,6 +97,8 @@ end;
 
 procedure TProcCopyGeometryBlocks.OnShow;
 begin
+  Frame.rbMatchingFiles.Checked := StorageGetBool('bMatchingFiles', Frame.rbMatchingFiles.Checked);
+  Frame.rbSingleFile.Checked := not Frame.rbMatchingFiles.Checked;
   Frame.edSourceDirectory.Text := StorageGetString('sSourceDirectory', Frame.edSourceDirectory.Text);
   Frame.chkCopyGeom.Checked := StorageGetBool('bCopyGeom', Frame.chkCopyGeom.Checked);
   Frame.chkCopyTransform.Checked := StorageGetBool('bCopyTransform', Frame.chkCopyTransform.Checked);
@@ -90,9 +106,11 @@ end;
 
 procedure TProcCopyGeometryBlocks.OnHide;
 begin
+  StorageSetBool('bMatchingFiles', Frame.rbMatchingFiles.Checked);
   StorageSetString('sSourceDirectory', Frame.edSourceDirectory.Text);
   StorageSetBool('bCopyGeom', Frame.chkCopyGeom.Checked);
   StorageSetBool('bCopyTransform', Frame.chkCopyTransform.Checked);
+  FreeAndNil(fSourceFile);
 end;
 
 procedure TProcCopyGeometryBlocks.OnStart;
@@ -105,10 +123,19 @@ begin
 
   fSourceDirectory := Frame.edSourceDirectory.Text;
 
-  if (fSourceDirectory = '') or not DirectoryExists(fSourceDirectory) then
+  if Frame.rbMatchingFiles.Checked and ( (fSourceDirectory = '') or not DirectoryExists(fSourceDirectory) ) then
     raise Exception.Create('Source directory not found');
 
-  fSourceDirectory := IncludeTrailingPathDelimiter(fSourceDirectory);
+  if Frame.rbSingleFile.Checked and ( (fSourceDirectory = '') or not FileExists(fSourceDirectory) ) then
+    raise Exception.Create('Source file not found');
+
+  if Frame.rbMatchingFiles.Checked then
+    fSourceDirectory := IncludeTrailingPathDelimiter(fSourceDirectory)
+  else begin
+    FreeAndNil(fSourceFile);
+    fSourceFile := TwbNifFile.Create;
+    fSourceFile.LoadFromFile(fSourceDirectory);
+  end;
 end;
 
 function TProcCopyGeometryBlocks.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
@@ -123,12 +150,17 @@ begin
     Exit;
 
   Nif := TwbNifFile.Create;
-  SrcNif := TwbNifFile.Create;
+  SrcNif := nil; // suppress compiler warning
+  if not Assigned(fSourceFile) then
+    SrcNif := TwbNifFile.Create;
   bChanged := False;
 
   try
     Nif.LoadFromFile(aInputDirectory + aFileName);
-    SrcNif.LoadFromFile(fSourceDirectory + aFileName);
+    if not Assigned(fSourceFile) then
+      SrcNif.LoadFromFile(fSourceDirectory + aFileName)
+    else
+      SrcNif := fSourceFile;
 
     for Block in Nif.BlocksByType('NiAVObject', True) do begin
       var name := Block.EditValues['Name'];
@@ -218,7 +250,8 @@ begin
 
   finally
     Nif.Free;
-    SrcNif.Free;
+    if not Assigned(fSourceFile) then
+      SrcNif.Free;
   end;
 
 end;

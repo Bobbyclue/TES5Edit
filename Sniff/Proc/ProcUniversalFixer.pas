@@ -99,7 +99,7 @@ begin
     Clear;
     Add('- Update invalid string indices');
     Add('- Remove empty and invalid links from link arrays (children, extradatas, properties, etc.)');
-    Add('- Remove absolute path from asset names');
+    Add('- Remove absolute path and double slashes from assets');
     Add('- Remove useless redundant blocks including empty geometry shapes');
     //Add('- Add Hidden flag to EditorMarker blocks in Skyrim meshes');
     Add('- Update BSXFlags, add if missing when needed');
@@ -234,6 +234,9 @@ begin
       newname := StringReplace(newname, '/', delim, [rfReplaceAll]);
     end else
       if Pos('/', newname) <> 0 then delim := '/' else delim := '\';
+
+    // fix double slashes
+    newname := StringReplace(newname, delim + delim, delim, [rfReplaceAll]);
 
     // fix absolute paths
     if TPath.IsPathRooted(newname) then begin

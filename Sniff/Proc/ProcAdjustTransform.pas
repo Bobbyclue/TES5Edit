@@ -227,7 +227,6 @@ function TProcAdjustTransform.ProcessFile(const aInputDirectory, aOutputDirector
 var
   nif: TwbNifFile;
   block: TdfElement;
-  name: string;
   bChanged: Boolean;
 begin
   bChanged := False;
@@ -235,7 +234,7 @@ begin
   try
     nif.LoadFromFile(aInputDirectory + aFileName);
 
-    for var i: Integer := 0 to Pred(nif.BlocksCount) do begin
+    for var i := 0 to Pred(nif.BlocksCount) do begin
       block := nif.Blocks[i];
 
       // root block if no names
@@ -244,8 +243,8 @@ begin
         Break;
       end;
 
-      name := block.EditValues['Name'];
-      for var s: String in fNames do
+      var name := block.EditValues['Name'];
+      for var s in fNames do
         if ( fExactMatch and SameText(name, s) ) or ( not fExactMatch and ContainsText(name, s) ) then begin
           bChanged := Transform(block.Elements['Transform']) or bChanged;
           Break;

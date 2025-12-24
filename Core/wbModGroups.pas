@@ -16,6 +16,7 @@ uses
   System.Types,
   System.Classes,
   System.SysUtils,
+  wbHash,
   wbInterface,
   wbLoadOrder;
 

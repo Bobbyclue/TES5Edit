@@ -163,7 +163,7 @@ procedure CheckUnusedBlocks(aObj: Pointer; Log: TStrings);
 
     // scan our refs only once
     if aUsage[aBlock.Index] = 1 then
-      for var i: Integer := 0 to Pred(aBlock.RefsCount) do
+      for var i := 0 to Pred(aBlock.RefsCount) do
         CountBlocksUsage(TwbNifBlock(aBlock.Refs[i].LinksTo), aUsage);
   end;
 
@@ -321,7 +321,7 @@ begin
   if not (nif.NifVersion in [nfTES3, nfTES4, nfFO3, nfTES5, nfSSE, nfFO4]) then
     Exit;
 
-  for var i: Integer := 0 to Pred(nif.BlocksCount) do begin
+  for var i := 0 to Pred(nif.BlocksCount) do begin
     var block := nif.Blocks[i];
     if not Assigned(block.Elements['Name']) then
       Continue;
@@ -355,7 +355,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckHavokMassInertia(aObj: Pointer; Log: TStrings);
+procedure CheckCollision(aObj: Pointer; Log: TStrings);
 
   function BadTensor(t: Single): Boolean;
   begin
@@ -368,11 +368,13 @@ begin
   if not (nif.NifVersion in [nfTES4, nfFO3, nfTES5, nfSSE]) then
     Exit;
 
-  // skip animated meshes, they are treated as having "infinite" mass in the engine
-  if Assigned(nif.BlockByType('NiControllerManager')) then
-    Exit;
+  var bAnimated := Assigned(nif.BlockByType('NiControllerManager'));
 
   for var block in nif.BlocksByType('bhkRigidBody', True) do begin
+    var shape := TwbNifBlock(block.Elements['Shape'].LinksTo);
+    if not Assigned(shape) then
+      Continue;
+
     //var layer: Integer := block.NativeValues['Havok Filter\Layer'];
     var ms := block.EditValues['Motion System'];
     var mq := block.EditValues['Motion Quality'];
@@ -390,6 +392,13 @@ begin
         Log.Add(#9 + block.Name + ': ' + ms + ' Motion System is not supported pre Skyrim');
     end;
 
+    // MOPP should not be used in statics and animations
+    if (bDynamic or (ms = 'MO_SYS_KEYFRAMED')) and (shape.BlockType = 'bhkMoppBvTreeShape') then
+      Log.Add(#9 + block.Name + ': MOPP shape is used with dynamic or keyframed motion system instead of simple shape(s)');
+
+    if not bDynamic and (block.NativeValues['Body Flags'] > 0) then
+       Log.Add(#9 + block.Name + ': Body Flags (used for wind simulation) set on static collision, causes performance issues');
+
     //if (ms = 'MO_SYS_INVALID') and (mq <> 'MO_QUAL_INVALID') then
     //  Log.Add(#9 + block.Name + ': Motion System is MO_SYS_INVALID but Motion Quality is not MO_QUAL_INVALID');
 
@@ -405,7 +414,8 @@ begin
     if (pen > 0.0) and (pen < minpen) then
       Log.Add(#9 + block.Name + ': Penetration Depth < ' + dfFloatToStr(minpen) + ' causes Havok issues due to precision loss');
 
-    if bDynamic then begin
+    // skip animated meshes, they are treated as having "infinite" mass in the engine
+    if bDynamic and not bAnimated then begin
       if SameValue(mass, 0.0) then
         Log.Add(#9 + block.Name + ': Zero moveable collision mass');
 
@@ -433,10 +443,59 @@ begin
     end;
 
   end;
+
+  // MOPP collision complexity check
+  if Assigned(nif.BlockByType('bhkMoppBvTreeShape')) then begin
+    var tris := 0; var coltris := 0;
+    for var i := 0 to Pred(nif.BlocksCount) do begin
+      var block := nif.Blocks[i];
+
+      if block.BlockType = 'bhkNiTriStripsShape' then begin
+        for var data in block.Elements['Strips Data'] do begin
+          var shape := TwbNifBlock(data.LinksTo);
+          if not Assigned(shape) then Continue;
+          if shape.BlockType = 'NiTriStripsData' then
+            Inc(coltris, Integer(shape.NativeValues['Num Triangles']));
+        end;
+      end
+
+      else if block.BlockType = 'hkPackedNiTriStripsData' then
+         Inc(coltris, block.Elements['Triangles'].Count)
+
+      else if block.BlockType = 'bhkCompressedMeshShapeData' then begin
+        Inc(coltris, block.Elements['Big Tris'].Count);
+        for var chunk in block.Elements['Chunks'] do begin
+          var stripslen := 0;
+          for var strip in chunk.Elements['Strip Lengths'] do begin
+            var s: Integer := strip.NativeValue;
+            Inc(coltris, s - 2);
+            Inc(stripslen, s);
+          end;
+          Inc(coltris, (chunk.Elements['Indices'].Count - stripslen) div 3);
+        end;
+      end
+
+      else if block.IsNiObject('NiTriBasedGeom') then begin
+        var data := TwbNifBlock(block.Elements['Data'].LinksTo);
+        if not Assigned(data) then Continue;
+        if data.IsNiObject('NiTriBasedGeomData') then
+          Inc(tris, Integer(data.NativeValues['Num Triangles']));
+      end
+
+      else if block.IsNiObject('BSTriShape') then
+        Inc(tris, Integer(block.NativeValues['Num Triangles']));
+    end;
+
+    if (tris > 10) and (coltris > 10) then begin
+      var ratio := Round(coltris / tris * 100);
+      if ratio > 50 then
+        Log.Add(#9 + Format('MOPP collision tris to geometry tris ratio is %d%% (%d/%d), poorly optimized collision', [ratio, coltris, tris]));
+    end;
+  end;
 end;
 
 //==============================================================================
-procedure CheckSubShapesCollisionOrder(aObj: Pointer; Log: TStrings);
+{procedure CheckSubShapesCollisionOrder(aObj: Pointer; Log: TStrings);
 var
   j, prevmat, mat: Integer;
 begin
@@ -462,9 +521,17 @@ begin
   end;
 
 end;
-
+}
 //==============================================================================
 procedure CheckSkinningIssues(aObj: Pointer; Log: TStrings);
+
+  function GetSkinPartition(shape: TwbNifBlock): TwbNifBlock;
+  begin
+    Result := shape.GetSkin;
+    if not Assigned(Result) then Exit;
+    Result := TwbNifBlock(Result.Elements['Skin Partition'].LinksTo);
+  end;
+
 begin
   var nif: TwbNifFile := aObj;
 
@@ -506,6 +573,75 @@ begin
     for var shape in nif.BlocksByType('BSDynamicTriShape', True) do
       if shape.GetSkin = nil then
         Log.Add(#9 + shape.Name + ': Missing skin instance (acceptable only in headparts and facegen)');
+
+  if (nif.NifVersion in [nfTES5, nfSSE]) and nif.FileName.EndsWith('_0.nif', True) and Assigned(nif.BlockByType('NiSkinInstance', True)) then repeat
+    var f := nif.FileName.Replace('_0.nif', '_1.nif', [rfIgnoreCase]);
+    if not FileExists(f) then Break;
+    var nif1 := TwbNifFile.Create;
+    try
+      // silently ignore loading issues if any
+      try nif1.LoadFromFile(f); except Break; end;
+      var r0 := nif.RootNode;
+      var r1 := nif1.RootNode;
+      if not Assigned(r0) or not Assigned(r1) then
+        Break;
+
+      var m0 := r0.ChildrenByType('NiNode');
+      var m1 := r1.ChildrenByType('NiNode');
+      if Length(m0) <> Length(m1) then begin
+        Log.Add(#9 + nif.RootNode.Name + ': Bone counts between morph models don''t match in _0.nif and _1.nif');
+        Break;
+      end;
+
+      var sl0 := TStringList.Create; var sl1 := TStringList.Create;
+      try
+        for var n in m0 do sl0.Add(n.EditValues['Name']);
+        for var n in m1 do sl1.Add(n.EditValues['Name']);
+        sl0.Sort; sl1.Sort;
+        if sl0.Text <> sl1.Text then
+          Log.Add(#9 + nif.RootNode.Name + ': Bones between morph models don''t match in _0.nif and _1.nif');
+      finally
+        sl0.Free; sl1.Free;
+      end;
+
+      m0 := r0.ChildrenByType('BSTriShape');
+      m1 := r1.ChildrenByType('BSTriShape');
+      if Length(m0) = 0 then m0 := r0.ChildrenByType('NiTriBasedGeom');
+      if Length(m1) = 0 then m1 := r1.ChildrenByType('NiTriBasedGeom');
+      if Length(m0) <> Length(m1) then begin
+        Log.Add(#9 + nif.RootNode.Name + ': Shape counts between morph models don''t match in _0.nif and _1.nif');
+        Break;
+      end;
+
+      for var i := Low(m0) to High(m0) do begin
+        var b0 := m0[i];
+        var b1 := m1[i];
+        if b0.EditValues['Name'] <> b1.EditValues['Name'] then begin
+          Log.Add(#9 + b0.Name + ': Shapes names between morph models don''t match in _0.nif and _1.nif');
+          Continue;
+        end;
+        var p0 := GetSkinPartition(b0);
+        var p1 := GetSkinPartition(b1);
+        if not Assigned(p0) or not Assigned(p1) then
+          Continue;
+        if p0.NativeValues['Num Partitions'] <> p1.NativeValues['Num Partitions'] then begin
+          Log.Add(#9 + p0.Name + ': Skin partition counts between morph models don''t match in _0.nif and _1.nif');
+          Continue;
+        end;
+        for var j := 0 to Pred(p0.Elements['Partitions'].Count) do begin
+          var part0 := p0.Elements['Partitions'][j];
+          var part1 := p1.Elements['Partitions'][j];
+          if part0.NativeValues['Num Vertices'] <> part1.NativeValues['Num Vertices'] then begin
+            Log.Add(#9 + part0.Path + ': Model vertex counts between morph models don''t match in _0.nif and _1.nif');
+            Continue;
+          end;
+        end;
+      end;
+    finally
+      nif1.Free;
+    end;
+  until True;
+
 end;
 
 //==============================================================================
@@ -517,9 +653,14 @@ var
 begin
   var nif: TwbNifFile := aObj;
 
-  // invalid modifier
+  // unnamed modifier
+  for var block in nif.BlocksByType('NiPSysModifier', True) do
+    if block.EditValues['Name'] = '' then
+      Log.Add(#9 + block.Name + ': Name is not set');
+
+  // invalid modifier in controller
   for var block in nif.BlocksByType('NiPSysModifierCtlr', True) do begin
-    var modname: string := block.EditValues['Modifier Name'];
+    var modname := block.EditValues['Modifier Name'];
     if modname <> '' then
       modifier := nif.BlockByName(modname)
     else
@@ -1046,7 +1187,7 @@ begin
 
     var bHasVertexColors := False;
     if shape.IsNiObject('NiGeometry') then begin
-      var shapedata: TwbNifBlock := TwbNifBlock(shape.Elements['Data'].LinksTo);
+      var shapedata := TwbNifBlock(shape.Elements['Data'].LinksTo);
       if Assigned(shapedata) then
         bHasVertexColors := shapedata.NativeValues['Has Vertex Colors'];
     end else
@@ -1138,6 +1279,16 @@ begin
         if texset.EditValues['Textures\[1]'] = '' then
           Log.Add(#9 + texset.Name + ': Normal Texture [Slot 1] must be set for all Shaders');
 
+        // Vertex colors and alpha
+        if bHasVertexColors and not shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
+          Log.Add(#9 + shape.Name + ': Has vertex colors but missing Vertex_Colors shader flag in ' + shader.Name);
+
+        if not bHasVertexColors and shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
+          Log.Add(#9 + shape.Name + ': Has no vertex colors but Vertex_Colors shader flag is set in ' + shader.Name);
+
+        if not bHasVertexColors and Shader.NativeValues['Shader Flags 1\Vertex_Alpha'] then
+          Log.Add(#9 + shape.Name + ': Has no vertex colors but Vertex_Alpha shader flag is set in ' + shader.Name);
+
         // envmap shader + flags + textures
         if ShaderType = 'Environment Map' then begin
           if not shader.NativeValues['Shader Flags 1\Environment_Mapping'] then
@@ -1159,7 +1310,7 @@ begin
           if not Shader.NativeValues['Shader Flags 1\Own_Emit'] then
             Log.Add(#9 + Shader.Name + ': Glow Shader type is used but missing Own_Emit shader flag');
 
-          if (Shader.EditValues['Emissive Color'] = '#000000') then
+          if Shader.EditValues['Emissive Color'] = '#000000' then
             Log.Add(#9 + Shader.Name + ': Glow Shader type is used but Emissive Color is blank');
 
           if texset.EditValues['Textures\[2]'] = '' then
@@ -1276,8 +1427,9 @@ begin
           if not Shader.NativeValues['Shader Flags 2\EnvMap_Light_Fade'] then
             Log.Add(#9 + Shader.Name + ': Shader Type is Environment/MultiLayer Parallax, but missing EnvMap_Light_Fade flag');
         end else begin
-          if Shader.NativeValues['Shader Flags 2\EnvMap_Light_Fade'] then
-            Log.Add(#9 + Shader.Name + ': EnvMap_Light_Fade flag is set, but Shader Type is not Environment/MultiLayer_Parallax');
+          // benign error
+          //if Shader.NativeValues['Shader Flags 2\EnvMap_Light_Fade'] then
+          //  Log.Add(#9 + Shader.Name + ': EnvMap_Light_Fade flag is set, but Shader Type is not Environment/MultiLayer_Parallax');
         end;
 
         // Rim Lighting flag
@@ -1332,24 +1484,6 @@ begin
           Log.Add(#9 + shader.Name + ': Zero Glossiness causes lighting issues');
       end;
 
-      //Vertex Colors
-      if shape.IsNiObject('NiGeometry') then begin
-        var shapedata: TwbNifBlock := TwbNifBlock(shape.Elements['Data'].LinksTo);
-        if Assigned(shapedata) then begin
-          if bHasVertexColors and not shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
-            Log.Add(#9 + shapedata.Name + ': Has Vertex Colors is true but missing Vertex Colors shader flag in ' + shader.Name);
-
-          if not bHasVertexColors and shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
-            Log.Add(#9 + shapedata.Name + ': Has Vertex Colors is false but Vertex Colors shader flag is set in ' + shader.Name);
-        end;
-      end
-      else begin
-        if bHasVertexColors and not shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
-          Log.Add(#9 + shape.Name + ': Has vertex colors but missing Vertex Colors shader flag in ' + shader.Name);
-
-        if not bHasVertexColors and shader.NativeValues['Shader Flags 2\Vertex_Colors'] then
-          Log.Add(#9 + shape.Name + ': Has no vertex colors but Vertex Colors shader flag is set in ' + shader.Name);
-      end;
     end;
 
     // Fallout 4
@@ -1361,7 +1495,7 @@ begin
   end;
 
   // handled in BSXFlags check
-  var bsx: TwbNifBlock := nif.BlockByName('BSX');
+  var bsx := nif.BlockByName('BSX');
   //if not Assigned(bsx) and bExternalEmitShader then
   //  Log.Add(#9 + EmitShader + ': External_Emit shader flag is set but BSXFlags block is missing with the same flag');
 
@@ -1471,43 +1605,53 @@ begin
     else if block.BlockType = 'NiTriShapeData' then
       CheckTris(block.Elements['Triangles'], block.NativeValues['Num Vertices'])
 
-    else if block.BlockType = 'NiTriStripsData' then
-      CheckStrips(block.Elements['Strips'], block.NativeValues['Num Vertices'])
+    else if block.BlockType = 'NiTriStripsData' then begin
+      CheckStrips(block.Elements['Strips'], block.NativeValues['Num Vertices']);
+      var snum: Integer := block.NativeValues['Num Strips'];
+      if snum > 1 then
+        Log.Add(#9 + block.Name + ': ' + Format('Num Strips = %d, should always be 1 to reduce the number of draw calls', [snum]));
+    end
 
     else if block.BlockType = 'hkPackedNiTriStripsData' then
-      CheckTris(block.Elements['Triangles'], block.NativeValues['Num Vertices'], 'Triangle');
+      CheckTris(block.Elements['Triangles'], block.NativeValues['Num Vertices'], 'Triangle')
+
+    else if block.BlockType = 'NiSkinPartition' then begin
+      var parts := block.Elements['Partitions'];
+      for var j := 0 to Pred(parts.Count) do begin
+        var snum: Integer := parts[j].NativeValues['Num Strips'];
+        if snum > 1 then
+          Log.Add(#9 + parts[j].Path + ': ' + Format('Num Strips = %d, should always be 1 to reduce the number of draw calls', [snum]));
+      end;
+    end;
 
   end;
 end;
 
 //==============================================================================
-procedure CheckAllWhiteVertexColors(aObj: Pointer; Log: TStrings);
+procedure CheckVertexColors(aObj: Pointer; Log: TStrings);
+type
+  TFloat4 = array [0..3] of Single;
+  PFloat4 = ^TFloat4;
+  TByte4 = array [0..3] of Byte;
+  PByte4 = ^TByte4;
 const
   fSingle1 = $3F800000;
-  fColor4White: array [0..3] of Cardinal = (fSingle1, fSingle1, fSingle1, fSingle1);
+  fColor4White: TFloat4 = (fSingle1, fSingle1, fSingle1, fSingle1);
   bColor4White: Cardinal = $FFFFFFFF;
 var
-  i, j: Integer;
+  bAllWhite, bAlpha, bHDR: Boolean;
+  shapename: string;
 begin
   var nif: TwbNifFile := aObj;
 
-  for i := 0 to Pred(nif.BlocksCount) do begin
+  for var i := 0 to Pred(nif.BlocksCount) do begin
     var shape := nif.Blocks[i];
     if not (shape.IsNiObject('BSTriShape') or shape.IsNiObject('NiTriBasedGeom')) then
       Continue;
 
-    // skip cases where Vertex Colors are required
-    if Assigned(shape.Elements['Shader Property']) then begin
-      var shader := TwbNifBlock(shape.Elements['Shader Property'].LinksTo);
-      // booleval shortcircuit bug here not working using "and", two "if"s instead
-      if Assigned(shader) then begin
-        if shader.NativeValues['Shader Flags 2\Tree_Anim'] then
-          Continue;
-
-        if Shader.EditValues['Shader Type'] = 'Parallax' then
-          Continue;
-      end;
-    end;
+    bAllWhite := True;
+    bHDR := False;
+    bAlpha := False;
 
     if shape.IsNiObject('NiTriBasedGeom') then begin
       var shapedata := TwbNifBlock(shape.Elements['Data'].LinksTo);
@@ -1521,14 +1665,25 @@ begin
       if not Assigned(colors) or (colors.Count = 0) then
         Continue;
 
-      var bAllWhite := True;
-      for j := 0 to Pred(colors.Count) do
-        if not CompareMem(TdfValue(colors[j]).DataStart, @fColor4White[0], SizeOf(fColor4White)) then begin
-          bAllWhite := False;
-          Break;
-        end;
-      if bAllWhite then
-        Log.Add(#9 + shapedata.Name + ': All white #FFFFFFFF vertex colors');
+      for var j := 0 to Pred(colors.Count) do begin
+        var c: PFloat4 := Pointer(TdfValue(colors[j]).DataStart);
+        if CompareMem(c, @fColor4White[0], SizeOf(fColor4White)) then
+          Continue;
+
+        bAllWhite := False;
+        if not bAlpha and (c[3] < 1.0) then
+          bAlpha := True;
+
+        if not bHDR then
+          if (c[0] < 0.0) or (c[0] > 1.0) or (c[1] < 0.0) or (c[1] > 1.0) or (c[2] < 0.0) or (c[2] > 1.0) or (c[3] < 0.0) or (c[3] > 1.0) then begin
+            Log.Add(#9 + shapedata.Name + ': HDR vertex color at index ' + IntToStr(j));
+            bHDR := True;
+          end;
+
+        // found everything we wanted
+        if not bAllWhite and bAlpha and bHDR then Break;
+      end;
+      shapename := shapedata.Name;
     end
 
     else begin
@@ -1539,16 +1694,31 @@ begin
       if not Assigned(vertices) or (vertices.Count = 0) then
         Continue;
 
-      var bAllWhite := True;
-      for j := 0 to Pred(vertices.Count) do
-        if PCardinal(TdfValue(vertices[j].Elements['Vertex Colors']).DataStart)^ <> bColor4White then begin
-          bAllWhite := False;
-          Break;
-        end;
-      if bAllWhite then
-        Log.Add(#9 + shape.Name + ': All white #FFFFFFFF vertex colors');
+      for var j := 0 to Pred(vertices.Count) do begin
+        var c: PByte4 := Pointer(TdfValue(vertices[j].Elements['Vertex Colors']).DataStart);
+        if PCardinal(c)^ = bColor4White then
+          Continue;
+
+        bAllWhite := False;
+        if not bAlpha and (c[3] < 255) then
+          bAlpha := True;
+
+        // found everything we wanted
+        if not bAllWhite and bAlpha then Break;
+      end;
+      shapename := shape.Name;
     end;
 
+    var shader := shape.PropertyByType('BSShaderProperty', True);
+
+    if bAllWhite then
+      // skip cases where Vertex Colors are required
+      if not ( Assigned(shader) and ( Boolean(shader.NativeValues['Shader Flags 2\Tree_Anim']) or (shader.EditValues['Shader Type'] = 'Parallax') ) ) then
+        Log.Add(#9 + shapename + ': All white #FFFFFFFF vertex colors');
+
+    if bAlpha and Assigned(shader) and (nif.NifVersion in [nfFO3, nfTES5, nfSSE]) then
+      if Assigned(shape.PropertyByType('NiAlphaProperty')) and not shader.NativeValues['Shader Flags 1\Vertex_Alpha'] then
+        Log.Add(#9 + shapename + ': Has alpha < 1.0 in vertex colors and attached NiAlphaProperty but missing Vertex_Alpha flag in ' + shader.Name);
   end;
 
 end;
@@ -1655,45 +1825,6 @@ begin
     end;
 
   end;
-end;
-
-
-//==============================================================================
-procedure CheckHDRVertexColors(aObj: Pointer; Log: TStrings);
-const
-  sRGB: string = 'RGB';
-var
-  j, k: Integer;
-  c: Single;
-  bHDR: Boolean;
-begin
-  var nif: TwbNifFile := aObj;
-
-  for var shapedata in nif.BlocksByType('NiTriBasedGeomData', True) do begin
-    if shapedata.NativeValues['Has Vertex Colors'] = 0 then
-      Continue;
-
-    bHDR := False;
-    var colors := shapedata.Elements['Vertex Colors'];
-    for j := 0 to Pred(colors.Count) do begin
-
-      for k := 1 to Length(sRGB) do begin
-        c := colors[j].NativeValues[sRGB[k]];
-        if (c < 0.0) or (c > 1.0) then begin
-          bHDR := True;
-          Break;
-        end;
-      end;
-
-      if bHDR then begin
-        Log.Add(#9 + shapedata.Name + ': HDR vertex color at index ' + IntToStr(j));
-        Break;
-      end;
-
-    end;
-
-  end;
-
 end;
 
 //==============================================================================
@@ -1873,7 +2004,7 @@ end;
 //==============================================================================
 function TCheck.DoesExtension(const aExtension: string): Boolean;
 begin
-  for var s: string in Extensions do
+  for var s in Extensions do
     if SameText(s, aExtension) then
       Exit(True);
   Result := False;
@@ -1914,16 +2045,16 @@ begin
     CheckInvalidArrayLinks);
 
   AddCheck('Invalid geometry', 'Meshes', ['.nif'],
-    'Triangles or strips reference invalid vertices. Unused vertices in geometry. Duplicate vertices in BSTriShape',
+    'Triangles or strips reference invalid vertices. Unused vertices in geometry. Duplicate vertices in BSTriShape. Multiple strips in NiTriStripsData.',
     CheckGeometry);
 
   AddCheck('Hardcoded block names', 'Meshes', ['.nif'],
     'Some blocks must have specific name to work properly (BSX for BSXFlags, INV for BsInvMarker, etc.), "Weapon" nodes in non-skeletons, [TES4] unnamed NiMaterialProperty',
     CheckHardcodedBlockNames);
 
-  AddCheck('Zero mass or inertia in collision', 'Meshes', ['.nif'],
-    'Moveable collision has zero mass or uses inertia system without inertia tensor matrix set (will break the physics not only for that object, but other objects using totally different meshes as well), Havok layer and motion settings',
-    CheckHavokMassInertia);
+  AddCheck('Collision issues', 'Meshes', ['.nif'],
+    'Moveable collision has zero mass or uses inertia system without inertia tensor matrix set (will break the physics not only for that object, but other objects using totally different meshes as well), Havok layer and motion settings, MOPP issues',
+    CheckCollision);
 
   AddCheck('Check BSXFlags', 'Meshes', ['.nif'],
     'Check for invalid BSXFlags: Animated, Havok, Ragdoll, Complex, Addon, Editor Marker and Dynamic. Emittance flag is checked by "Invalid shader types and flags". Complex and Articulated affect grabbing behaviour only',
@@ -1958,32 +2089,29 @@ begin
     CheckAnimStopTime);
 
   AddCheck('Skinning issues', 'Meshes', ['.nif'],
-    'BSDismemberSkinInstance and Body Parts checks, missing Skin in BSDynamicTriShape',
+    'BSDismemberSkinInstance and Body Parts checks, missing Skin in BSDynamicTriShape, [TES5/SSE] disrepancies between _0 and _1 morph models',
     CheckSkinningIssues);
 
-  AddCheck('Invalid subshapes material order', 'Meshes', ['.nif'],
+  // false check, just keeping the code
+  {AddCheck('Invalid subshapes material order', 'Meshes', ['.nif'],
     'Sub Shapes material in hkPackedNiTriStripsData must be in ascending order, otherwise the first one will be used for all shapes in game',
-    CheckSubShapesCollisionOrder);
+    CheckSubShapesCollisionOrder);}
 
   AddCheck('Miscellaneous checks', 'Meshes', ['.nif', '.kf'],
     'Root node is a NiNode/NiSequence descendant and the first block, Invalid subshapes in bhkListShape, [TES4] Tangents size not matching the vertices count, Unsupported NiSpecularPropertry in post Oblivion meshes',
     CheckMiscellaneous);
 
-  AddCheck('Optional checks', 'Meshes', ['.nif'],
-    'Potential false positives, could be done on purpose: Empty shader flags, Envmap + Light_fade flags and 5th + 6th slots in textureset for BSShaderPPLightingProperty',
-    CheckOptional);
-
-  AddCheck('Redundant white vertex colors', 'Meshes', ['.nif'],
-    'Check for possibly redundant all white vertex colors except for grass/leaf animations where they are required',
-    CheckAllWhiteVertexColors);
-
-  AddCheck('HDR vertex colors', 'Meshes', ['.nif'],
-    'Check for HDR vertex colors (outside of 0..1 range) which sometimes are not intended and lead to rendering issues in Oblivion, Fallout 3, New Vegas and Skyrim LE',
-    CheckHDRVertexColors, False);
+  AddCheck('Check vertex colors', 'Meshes', ['.nif'],
+    'Check for alpha < 1.0 but missing Vertex_Alpha shader flag, possibly redundant all white vertex colors except for leaf animations and parallax, HDR vertex colors (outside of 0..1 range) which sometimes are not intended and lead to rendering issues',
+    CheckVertexColors);
 
   AddCheck('Clamped tiling UVs', 'Meshes', ['.nif'],
     'Check for tiling UVs outside of 0..1 range in CLAMP mode. Causes texture stretching',
     CheckUVs, False);
+
+  AddCheck('Optional checks', 'Meshes', ['.nif'],
+    'Potential false positives, could be done on purpose: Empty shader flags, Envmap + Light_fade flags and 5th + 6th slots in textureset for BSShaderPPLightingProperty',
+    CheckOptional, False);
 
   AddCheck('Repeated denegerate tris in strips', 'Meshes', ['.nif'],
     'Check for strips with repeated degenerate triangles',

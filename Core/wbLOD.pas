@@ -20,6 +20,7 @@ uses
   Masks,
   wbInterface,
   wbImplementation,
+  wbHash,
   wbHelpers,
   wbSort,
   wbStreams,
@@ -2380,7 +2381,7 @@ var
     if (Length(Res) > 0) and Result^.LoadFromData(Res[High(Res)].GetData) then begin
       //slLog.Add(TreeRec.Name + ' using LOD ' + Result^.Billboard);
       // store checksum of billboard to avoid duplicates in atlas
-      Result^.CRC32 := wbCRC32Data(Res[High(Res)].GetData);
+      Result^.CRC32 := TwbHash.CRC32(Res[High(Res)].GetData);
       // load tree data
       Res := wbContainerHandler.OpenResource(ChangeFileExt(Result^.Billboard, '.txt'));
       if Length(Res) > 0 then begin

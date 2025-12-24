@@ -140,7 +140,7 @@ begin
     end;
 
     if Log.Count > 0 then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

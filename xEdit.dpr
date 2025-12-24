@@ -57,6 +57,9 @@ uses
   wbDefinitionsFO4 in 'Core\wbDefinitionsFO4.pas',
   wbDefinitionsFO4Saves in 'Core\wbDefinitionsFO4Saves.pas',
   wbDefinitionsFO76 in 'Core\wbDefinitionsFO76.pas',
+  wbDefinitionsReflection in 'Core\wbDefinitionsReflection.pas',
+  wbDefinitionsSF1 in 'Core\wbDefinitionsSF1.pas',
+  wbDefinitionsSignatures in 'Core\wbDefinitionsSignatures.pas',
   wbDefinitionsTES3 in 'Core\wbDefinitionsTES3.pas',
   wbDefinitionsTES4 in 'Core\wbDefinitionsTES4.pas',
   wbDefinitionsTES4Saves in 'Core\wbDefinitionsTES4Saves.pas',
@@ -67,6 +70,7 @@ uses
   wbHelpers in 'Core\wbHelpers.pas',
   wbImplementation in 'Core\wbImplementation.pas',
   wbInterface in 'Core\wbInterface.pas',
+  wbLoadOrder in 'Core\wbLoadOrder.pas',
   wbLocalization in 'Core\wbLocalization.pas',
   wbLOD in 'Core\wbLOD.pas',
   wbModGroups in 'Core\wbModGroups.pas',
@@ -79,30 +83,26 @@ uses
   xeEditWarningForm in 'xEdit\xeEditWarningForm.pas' {frmEditWarning},
   xeFileSelectForm in 'xEdit\xeFileSelectForm.pas' {frmFileSelect},
   xeFilterOptionsForm in 'xEdit\xeFilterOptionsForm.pas' {frmFilterOptions},
-  xeLegendForm in 'xEdit\xeLegendForm.pas' {frmLegend},
-  xeLocalizationForm in 'xEdit\xeLocalizationForm.pas' {frmLocalization},
-  xeLocalizePluginForm in 'xEdit\xeLocalizePluginForm.pas' {frmLocalizePlugin},
-  xeLODGenForm in 'xEdit\xeLODGenForm.pas', {frmLODGen}
-  xeLogAnalyzerForm in 'xEdit\xeLogAnalyzerForm.pas' {frmLogAnalyzer},
-  xeMainForm in 'xEdit\xeMainForm.pas' {frmMain},
-  xeModGroupEditForm in 'xEdit\xeModGroupEditForm.pas', {frmModGroupEdit}
-  xeModGroupSelectForm in 'xEdit\xeModGroupSelectForm.pas', {frmModGroupSelect}
-  xeModuleSelectForm in 'xEdit\xeModuleSelectForm.pas', {frmModuleSelect}
-  xeOptionsForm in 'xEdit\xeOptionsForm.pas' {frmOptions},
-  xeRichEditForm in 'xEdit\xeRichEditForm.pas' {frmRichEdit},
   xejviScriptAdapter in 'xEdit\JvI\xejviScriptAdapter.pas',
   xejviScriptAdapterDF in 'xEdit\JvI\xejviScriptAdapterDF.pas',
   xejviScriptAdapterMisc in 'xEdit\JvI\xejviScriptAdapterMisc.pas',
+  xejviScriptHost in 'xEdit\JvI\xejviScriptHost.pas',
+  xeLegendForm in 'xEdit\xeLegendForm.pas' {frmLegend},
+  xeLocalizationForm in 'xEdit\xeLocalizationForm.pas' {frmLocalization},
+  xeLocalizePluginForm in 'xEdit\xeLocalizePluginForm.pas' {frmLocalizePlugin},
+  xeLODGenForm in 'xEdit\xeLODGenForm.pas',
+  xeLogAnalyzerForm in 'xEdit\xeLogAnalyzerForm.pas' {frmLogAnalyzer},
+  xeMainForm in 'xEdit\xeMainForm.pas' {frmMain},
+  xeModGroupEditForm in 'xEdit\xeModGroupEditForm.pas',
+  xeModGroupSelectForm in 'xEdit\xeModGroupSelectForm.pas',
+  xeModuleSelectForm in 'xEdit\xeModuleSelectForm.pas',
+  xeOptionsForm in 'xEdit\xeOptionsForm.pas' {frmOptions},
+  xeRichEditForm in 'xEdit\xeRichEditForm.pas' {frmRichEdit},
   xeScriptForm in 'xEdit\xeScriptForm.pas' {frmScript},
-  xeTipForm in 'xEdit\xeTipForm.pas', {frmTip}
+  xeTipForm in 'xEdit\xeTipForm.pas',
   xeViewElementsForm in 'xEdit\xeViewElementsForm.pas' {frmViewElements},
   xeWaitForm in 'xEdit\xeWaitForm.pas' {frmWait},
-  xeWorldspaceCellDetailsForm in 'xEdit\xeWorldspaceCellDetailsForm.pas' {frmWorldspaceCellDetails},
-  xeScriptHost in 'xEdit\xeScriptHost.pas',
-  xejviScriptHost in 'xEdit\JvI\xejviScriptHost.pas',
-  wbDefinitionsSF1 in 'Core\wbDefinitionsSF1.pas',
-  wbDefinitionsSignatures in 'Core\wbDefinitionsSignatures.pas',
-  wbLoadOrder in 'Core\wbLoadOrder.pas';
+  xeWorldspaceCellDetailsForm in 'xEdit\xeWorldspaceCellDetailsForm.pas' {frmWorldspaceCellDetails};
 
 {$R *.res}
 {$MAXSTACKSIZE 2097152}
@@ -138,7 +138,7 @@ begin
   Application.Title := wbApplicationTitle;
   try
     Application.CreateForm(TfrmMain, frmMain);
-    Application.Run;
+  Application.Run;
   finally
     DoRename;
   end;

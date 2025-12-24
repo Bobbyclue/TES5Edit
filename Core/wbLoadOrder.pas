@@ -16,6 +16,7 @@ uses
   System.Types,
   System.Classes,
   System.SysUtils,
+  wbHash,
   wbInterface;
 
 type
@@ -764,7 +765,7 @@ begin
     aCRC32 := _File.CRC32
   else begin
     if miCRC32 = 0 then
-      miCRC32 := wbCRC32File(wbDataPath + miOriginalName);
+      miCRC32 := TwbHash.CRC32(wbDataPath + miOriginalName);
     aCRC32 := miCRC32;
   end;
   Result := aCRC32.IsValid;
@@ -785,7 +786,7 @@ begin
   if Assigned(miFile) then
     Exit(_File.CRC32 = aCRC32);
   if miCRC32 = 0 then
-    miCRC32 := wbCRC32File(wbDataPath + miOriginalName);
+    miCRC32 := TwbHash.CRC32(wbDataPath + miOriginalName);
   Result := aCRC32 = miCRC32;
 end;
 
