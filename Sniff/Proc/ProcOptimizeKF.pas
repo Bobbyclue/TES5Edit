@@ -108,7 +108,6 @@ function TProcOptimizeKF.ProcessFile(const aInputDirectory, aOutputDirectory: st
 
 var
   nif: TwbNifFile;
-  block: TwbNifBlock;
   datalink, entries: TdfElement;
   bChanged: Boolean;
 begin
@@ -117,37 +116,30 @@ begin
   try
     nif.LoadFromFile(aInputDirectory + aFileName);
 
-    for var i: Integer := 0 to Pred(nif.BlocksCount) do begin
-      block := nif.Blocks[i];
-      //fManager.AddMessage('Processing block ' + block.Name);
-
-      if not block.IsNiObject('NiKeyBasedInterpolator', True) then
-        Continue;
-
+    for var block in nif.BlocksByType('NiKeyBasedInterpolator', True) do begin
       datalink := block.Elements['Data'];
       if not Assigned(datalink) then
         Continue;
 
-      block := TwbNifBlock(datalink.LinksTo);
-
-      if not Assigned(block) then
+      var data := TwbNifBlock(datalink.LinksTo);
+      if not Assigned(data) then
         Continue;
 
-      entries := block.Elements['Quaternion Keys'];
+      entries := data.Elements['Quaternion Keys'];
       if Assigned(entries) and Optimize(entries, '..\Num Rotation Keys') then
         bChanged := True;
 
-      entries := block.Elements['Translations\Keys'];
+      entries := data.Elements['Translations\Keys'];
       if Assigned(entries) and Optimize(entries, '..\Num Keys') then
         bChanged := True;
 
-      entries := block.Elements['Scales\Keys'];
+      entries := data.Elements['Scales\Keys'];
       if Assigned(entries) and Optimize(entries, '..\Num Keys') then
         bChanged := True;
 
-      entries := block.Elements['XYZ Rotations'];
+      entries := data.Elements['XYZ Rotations'];
       if Assigned(entries) then
-        for var j: Integer := 0 to Pred(entries.Count) do
+        for var j := 0 to Pred(entries.Count) do
           if Optimize(entries[j].Elements['Keys'], '..\Num Keys') then
             bChanged := True;
     end;

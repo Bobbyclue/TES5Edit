@@ -71,6 +71,8 @@ type
     fNoOutput: Boolean;
     fThreads: Integer;
 
+    procedure AddMessage(const aText: string);
+    procedure AddMessages(const aStrings: TStrings);
     function GetSupportedGameNames: string;
     function GetExtensionNames: string;
     procedure SetExtensionNames(aExtensions: string);
@@ -325,10 +327,20 @@ begin
   fManager := aManager;
 end;
 
+procedure TProcbase.AddMessage(const aText: string);
+begin
+  fManager.AddMessage(aText);
+end;
+
+procedure TProcBase.AddMessages(const aStrings: TStrings);
+begin
+  fManager.AddMessages(aStrings);
+end;
+
 function TProcBase.GetSupportedGameNames: string;
 begin
   Result := '';
-  for var g: TGameType in fSupportedGames do begin
+  for var g in fSupportedGames do begin
     if Result <> '' then
       Result := Result + ', ';
 
@@ -339,7 +351,7 @@ end;
 function TProcBase.GetExtensionNames: string;
 begin
   Result := '';
-  for var s: string in fExtensions do begin
+  for var s in fExtensions do begin
     if Result <> '' then
       Result := Result + ', ';
 

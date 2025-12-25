@@ -17,9 +17,10 @@ program BSArchPro;
 {$ENDIF}
 
 uses
+  MSHeap,
   {$IFDEF EXCEPTION_LOGGING_ENABLED}
   nxExceptionHook,
-  {$ENDIF}
+  {$ENDIF }
   System.Classes,
   System.SysUtils,
   Vcl.Themes,
@@ -38,7 +39,6 @@ uses
   System.IOUtils,
   frmMain in 'BSArch\frmMain.pas' {FormMain},
   wbBSArchive in 'Core\wbBSArchive.pas',
-  wbAssets in 'BSArch\wbAssets.pas',
   frmSearchReplace in 'BSArch\frmSearchReplace.pas' {FormSearchReplace},
   wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress},
   frmArchiveInfo in 'BSArch\frmArchiveInfo.pas' {FormArchiveInfo},
@@ -69,6 +69,9 @@ begin
   {$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
+  Application.ShowHint := True;
+  Application.HintPause := 200;
+  Application.HintHidePause := 10000;
   Application.Title := 'BSArchPro';
   bapInitStyles;
   Application.CreateForm(TFormMain, FormMain);

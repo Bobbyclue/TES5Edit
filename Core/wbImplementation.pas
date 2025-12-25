@@ -30,8 +30,8 @@ uses
 {$IFDEF USE_PARALLEL_BUILD_REFS}
   System.SyncObjs,
 {$ENDIF}
-  Zlibex,
-  lz4;
+  wbCompression,
+  wbHash;
 
 const
   DefaultVCS1 = 0;
@@ -94,7 +94,6 @@ implementation
 
 uses
   TypInfo,
-  lz4io,
   wbLocalization,
   wbHelpers,
   wbSort;
@@ -2687,7 +2686,7 @@ begin
       try
         FileStream := TBufferedFileStream.Create(CacheFileName, fmOpenRead or fmShareDenyWrite);
         try
-          lz4DeCompressStream(FileStream, MemoryStream);
+          TwbCompression.Decompress(ctLZ4F, FileStream, MemoryStream);
         finally
           FileStream.Free;
       end;
@@ -2730,7 +2729,7 @@ begin
               MemoryStream.Position := 0;
               FileStream := TBufferedFileStream.Create(CacheFileName, fmCreate);
               try
-                lz4CompressStream(MemoryStream, FileStream);
+                TwbCompression.Compress(ctLZ4F, MemoryStream, FileStream);
               finally
                 FileStream.Free;
               end;
@@ -4051,7 +4050,7 @@ function TwbFile.GetCRC32: TwbCRC32;
 begin
   Result := flCRC32;
   if Result = 0 then begin
-    Result := wbCRC32Ptr(flView, flSize);
+    Result := TwbHash.CRC32(flView, flSize);
     flCRC32 := Result;
   end;
 end;
@@ -6390,7 +6389,7 @@ begin
   MemoryStream := TMemoryStream.Create;
   try
     inherited WriteToStream(MemoryStream, aResetModified);
-    flCRC32 := wbCRC32Ptr(MemoryStream.Memory, MemoryStream.Size);
+    flCRC32 := TwbHash.CRC32(MemoryStream.Memory, MemoryStream.Size);
     MemoryStream.Position := 0;
     aStream.Write(MemoryStream.Memory^, MemoryStream.Size);
   finally
@@ -10087,7 +10086,8 @@ begin
     if UncompressedLength > 0 then begin
       SetLength(mrDataStorage, UncompressedLength );
 
-      DecompressToUserBuf(
+      TwbCompression.Decompress(
+        ctZLib,
         PByte(dcDataBasePtr) + SizeOf(Cardinal),
         mrStruct.mrsDataSize - SizeOf(Cardinal),
         @mrDataStorage[0],
@@ -14632,10 +14632,7 @@ var
           DataSize := MemoryStream.Size;
           Stream.WriteBuffer(DataSize, SizeOf(DataSize));
           MemoryStream.Position := 0;
-          if (wbGameMode = gmFO76) then
-            ZCompressStream(MemoryStream, Stream, zcLevel9)
-          else
-            ZCompressStream(MemoryStream, Stream);
+          TwbCompression.Compress(ctZLib, MemoryStream, Stream);
         finally
           FreeAndNil(MemoryStream);
         end;
@@ -22453,14 +22450,21 @@ begin
     case sc of
       scNone: Assert(False);  // Getting there would be very funny :)
       scZComp:
-        DecompressToUserBuf(
+        TwbCompression.Decompress(
+          ctZLib,
           PByte(dcDataBasePtr),
           GetDataSize,
           @dcDataStorage[0],
           PCardinal(dcDataBasePtr)^
         );
       scLZComp:
-        LZ4_decompress_safe(PAnsiChar(dcDataBasePtr), @dcDataStorage[0], GetDataSize, szUncompressedSize);
+        TwbCompression.Decompress(
+          ctLZ4,
+          PByte(dcDataBasePtr),
+          GetDataSize,
+          @dcDataStorage[0],
+          PCardinal(dcDataBasePtr)^
+        );
       else
         Assert(False);  // Something hasn't been updated yet.
     end;

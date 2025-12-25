@@ -20,8 +20,8 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Caption = 
       'Comma separated block types to process. Or a path to the block u' +
       'sing types or names, for example "\BSFadeNode\arms2:2\NiAlphaPro' +
-      'perty". When empty processes all blocks. Not used for material f' +
-      'iles.'
+      'perty". When empty process all blocks. Not used for material fil' +
+      'es.'
     WordWrap = True
   end
   object StaticText1: TStaticText
@@ -118,11 +118,12 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
       'Add'
       'Mul'
       'Replace with'
-      'Prepend'
-      'Append'
+      'Prepend str'
+      'Append str'
       'AND &'
       'AND NOT &!'
-      'OR |')
+      'OR |'
+      'Remove str')
   end
   object edBlocks: TEdit
     Left = 16
@@ -175,41 +176,6 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     TabOrder = 11
     TabStop = False
     OnClick = btnPresetClick
-  end
-  object DefaultPresets: TStaticText
-    Left = 296
-    Top = 200
-    Width = 50
-    Height = 19
-    AutoSize = False
-    Caption = 
-      '{"Change body part in BSDismemberSkinInstance partitions":{"sBlo' +
-      'cks":"BSDismemberSkinInstance","sDescendants":false,"sPath":"Par' +
-      'titions\\[*]\\Body Part","iValueMode":0,"sValue":"SBP_32_BODY","' +
-      'bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue"' +
-      ':"SBP_34_FOREARMS"},"Set normal texture to diffuse with _n suffi' +
-      'x in BSShaderTextureSet":{"sBlocks":"BSShaderTextureSet","sDesce' +
-      'ndants":false,"sPath":"Textures\\[1]","iValueMode":3,"sValue":"$' +
-      '1_n.dds","bOldValueCheck":true,"sOldPath":"Textures\\[0]","iOldV' +
-      'alueMode":10,"sOldValue":"(.+)\\.dds"},"Change Author field in N' +
-      'iHeader":{"sBlocks":"NiHeader","sDescendants":false,"sPath":"Exp' +
-      'ort Info\\Author","iValueMode":0,"sValue":"Sniff","bOldValueChec' +
-      'k":false,"sOldPath":"","iOldValueMode":0,"sOldValue":""},"Add Hi' +
-      'dden flag to EditorMarker nodes":{"sBlocks":"NiAVObject","sDesce' +
-      'ndants":true,"sPath":"Flags","iValueMode":8,"sValue":"1","bOldVa' +
-      'lueCheck":true,"sOldPath":"Name","iOldValueMode":4,"sOldValue":"' +
-      'EditorMarker"},"Switch to Parallax shader in BSLightingShaderPro' +
-      'perty if there is parallax texture":{"sBlocks":"BSLightingShader' +
-      'Property","sDescendants":false,"sPath":"Shader Type","iValueMode' +
-      '":0,"sValue":"Parallax","bOldValueCheck":true,"sOldPath":"Textur' +
-      'e Set\\Textures\\[3]","iOldValueMode":4,"sOldValue":".dds"},"Add' +
-      ' Glow_Map flag if shader is Glow Shader in BSLightingShaderPrope' +
-      'rty":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,' +
-      '"sPath":"Shader Flags 2","iValueMode":5,"sValue":"| Glow_Map","b' +
-      'OldValueCheck":true,"sOldPath":"Shader Type","iOldValueMode":0,"' +
-      'sOldValue":"Glow Shader"}}'
-    TabOrder = 12
-    Visible = False
   end
   object menuPreset: TPopupMenu
     AutoHotkeys = maManual

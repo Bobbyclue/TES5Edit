@@ -17,7 +17,7 @@ uses
   Dialogs, StdCtrls, Buttons, CheckLst, Menus,
   Vcl.Styles.Utils.SystemMenu, VirtualTrees, VirtualEditTree,
   wbInterface, wbLoadOrder, wbModGroups, Vcl.ExtCtrls,
-  System.UITypes, Vcl.Mask;
+  System.UITypes, Vcl.Mask, wbHash;
 
 type
   TfrmModGroupEdit = class(TForm)

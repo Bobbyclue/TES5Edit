@@ -1,6 +1,6 @@
 {******************************************************************************
 
-  This Source Code Form is subject to the terms of the Mozilla Public License, 
+  This Source Code Form is subject to the terms of the Mozilla Public License,
   v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain 
   one at https://mozilla.org/MPL/2.0/.
 
@@ -147,6 +147,7 @@ type
     procedure SetElementEditValue(const aElement: TdfElement; aDataStart, aDataEnd: PByte; var aValue: string); virtual;
     procedure AddDef(const aDef: TdfDef);
     procedure InsertDefsFrom(const aDef: TdfDef; Index: Integer);
+    function SetDefaultValue(const aValue: string): TdfDef;
     function SetOnCreate(aProc: TdfOnCreateEvent): TdfDef;
     function SetOnDestroy(aProc: TdfOnDestroyEvent): TdfDef;
     function SetOnEnabled(aProc: TdfOnEnabledEvent): TdfDef;
@@ -182,6 +183,19 @@ type
     property OnLinksTo: TdfOnLinksToEvent read FOnLinksTo write FOnLinksTo;
   end;
 
+  TdfContainer = class;
+
+  TdfElementEnumerator = class
+  private
+    fIndex: Integer;
+    fContainer: TdfContainer;
+  public
+    constructor Create(aElement: TdfElement);
+    function GetCurrent: TdfElement; inline;
+    function MoveNext: Boolean; inline;
+    property Current: TdfElement read GetCurrent;
+  end;
+
   TdfElement = class
   private
     FDef: TdfDef;
@@ -214,6 +228,7 @@ type
   public
     constructor Create(const aDef: TdfDef; const aParent: TdfElement); virtual;
     destructor Destroy; override;
+    function GetEnumerator: TdfElementEnumerator; inline;
     procedure DoException(const aMessage: string);
     function ValidateData(const aDataStart, aDataEnd: Pointer; aSize: Integer): Boolean;
     function UnSerialize(const aDataStart, aDataEnd: Pointer; const aDataSize: Integer): Integer; virtual;
@@ -221,7 +236,7 @@ type
     procedure UnSerializeFromJSON(const aJSON: TJSONBaseObject); virtual;
     procedure SerializeToJSON(const aJSON: TJSONBaseObject); virtual;
     procedure LoadFromData(const aData: TBytes); virtual;
-    procedure LoadFromFile(const aFileName: string);
+    procedure LoadFromFile(const aFileName: string); virtual;
     procedure LoadFromJSONFile(const aFileName: string);
     procedure LoadFromResource(const aContainerName, aFileName: string); overload;
     procedure LoadFromResource(const aFileName: string); overload;
@@ -973,6 +988,12 @@ begin
     FDefs[Index + i] := aDef.Defs[i].Clone;
 end;
 
+function TdfDef.SetDefaultValue(const aValue: string): TdfDef;
+begin
+  Result := Self;
+  Result.FDefaultValue := aValue;
+end;
+
 function TdfDef.SetOnCreate(aProc: TdfOnCreateEvent): TdfDef;
 begin
   Result := Self;
@@ -1052,6 +1073,27 @@ begin
 end;
 
 
+{ TdfElementEnumerator }
+
+constructor TdfElementEnumerator.Create(aElement: TdfElement);
+begin
+  inherited Create;
+  fIndex := -1;
+  fContainer := TdfContainer(aElement);
+end;
+
+function TdfElementEnumerator.GetCurrent: TdfElement;
+begin
+  Result := fContainer[fIndex];
+end;
+
+function TdfElementEnumerator.MoveNext: Boolean;
+begin
+  Result := fIndex < fContainer.Count - 1;
+  if Result then
+    Inc(fIndex);
+end;
+
 
 { TdfElement }
 
@@ -1070,6 +1112,11 @@ begin
   // check FDef in case if exception occured in constructor and FDef is not set yet
   if Assigned(FDef) and Assigned(FDef.OnDestroy) then
     FDef.OnDestroy(Self);
+end;
+
+function TdfElement.GetEnumerator: TdfElementEnumerator;
+begin
+  Result := TdfElementEnumerator.Create(Self);
 end;
 
 procedure TdfElement.DoException(const aMessage: string);

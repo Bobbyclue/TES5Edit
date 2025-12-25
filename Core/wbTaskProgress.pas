@@ -25,10 +25,12 @@ type
   TProgressBarWithText = class(TProgressBar)
   private
     FProgressText: string;
+    FProgressTextMult: Double;
   protected
     procedure WMPaint(var Message: TWMPaint); message WM_PAINT;
-  published
+  public
     property ProgressText: string read FProgressText write FProgressText;
+    property ProgressTextMult: Double read FProgressTextMult write FProgressTextMult;
   end;
 
   TFormTaskProgress = class(TForm)
@@ -46,13 +48,13 @@ type
     fLowIndex: Integer;
     fHighIndex: Integer;
     fCurrentIndex: Integer;
+    fProgressTextMult: Double;
     {$IF CompilerVersion >= 34.0} { Delphi 10.4 }
     fObjectLock: TLightweightMREW;
     {$ELSE}
     fObjectLock: IReadWriteSync;
     {$IFEND}
     fProcessProc: TProcessProc;
-    //fProgressProc: TProcessProc;
     fThreadPool: array of TwbTaskWorkerThread;
     fThreads: Integer;
     fCancel: Boolean;
@@ -82,17 +84,19 @@ type
     constructor Create(aObjectProc: TwbWorkerObjectProc);
   end;
 
-
-function wbTaskProgressExecute(
-  aOwner: TComponent;
-  const aCaption: string;
-  aLowIndex: Integer;
-  aHighIndex: Integer;
-  const aProcessProc: TProcessProc;
-  out aExceptionIndex: Integer;
-  out aExceptionMessage: string;
-  aThreads: Integer = 0
-): TModalResult;
+  TwbTaskProgress = class
+    Owner: TComponent;
+    Threads: Integer;
+    ProcessProc: TProcessProc;
+    Caption: string;
+    ProgressTextMult: Double;
+    LowIndex: Integer;
+    HighIndex: Integer;
+    ErrorIndex: Integer;
+    ErrorMessage: string;
+    constructor Create(aOwner: TComponent);
+    function Execute: TModalResult;
+  end;
 
 
 implementation
@@ -122,7 +126,7 @@ begin
 
   s := ProgressText;
   if s = '' then
-    s := Format('%d/%d', [Position, Max]);
+    s := Format('%d/%d', [Round(Position * FProgressTextMult), Round(Max * FProgressTextMult)]);
 
   R := ClientRect;
   DC := GetWindowDC(Handle);
@@ -141,30 +145,28 @@ begin
 end;
 
 //============================================================================
-function wbTaskProgressExecute(
-  aOwner: TComponent;
-  const aCaption: string;
-  aLowIndex: Integer;
-  aHighIndex: Integer;
-  const aProcessProc: TProcessProc;
-  out aExceptionIndex: Integer;
-  out aExceptionMessage: string;
-  aThreads: Integer = 0
-): TModalResult;
+constructor TwbTaskProgress.Create(aOwner: TComponent);
+begin
+  Owner := aOwner;
+  ProgressTextMult := 1;
+end;
+
+//============================================================================
+function TwbTaskProgress.Execute: TModalResult;
 begin
   Result := mrCancel;
 
-  var Count := aHighIndex - aLowIndex + 1;
+  var Count := HighIndex - LowIndex + 1;
   if Count <= 0 then
     Exit;
 
-  with TFormTaskProgress.Create(aOwner) do try
-    Caption := aCaption;
-    fLowIndex := aLowIndex;
-    fHighIndex := aHighIndex;
-    fProcessProc := aProcessProc;
-    //fProgressProc := aProgressProc;
-    fThreads := aThreads;
+  with TFormTaskProgress.Create(Owner) do try
+    Caption := Self.Caption;
+    fLowIndex := Self.LowIndex;
+    fHighIndex := Self.HighIndex;
+    fProcessProc := Self.ProcessProc;
+    fThreads := Self.Threads;
+    fProgressTextMult := Self.ProgressTextMult;
     if fThreads = 0 then begin
       fThreads := CalcThreads(System.CPUCount);
       if fThreads <= 0 then
@@ -175,11 +177,12 @@ begin
 
     Result := ShowModal;
 
-    aExceptionIndex := fExceptionIndex;
-    aExceptionMessage := fExceptionMessage;
+    Self.ErrorIndex := fExceptionIndex;
+    Self.ErrorMessage := fExceptionMessage;
   finally
     Free;
   end;
+
 end;
 
 //============================================================================
@@ -265,9 +268,7 @@ begin
   if CurIndex = -1 then
     Exit;
 
-  // Succ() proactive progress update to 100% fill progress bar
-  // for the last objects in queue
-  PostMessage(Handle, WM_PROGRESS_UPDATE, Succ(CurIndex) - fLowIndex, 0);
+  PostMessage(Handle, WM_PROGRESS_UPDATE, CurIndex, 0);
 
   try
     fProcessProc(CurIndex);
@@ -422,8 +423,11 @@ end;
 procedure TFormTaskProgress.FormActivate(Sender: TObject);
 begin
   InitializeTaskbars;
-  ProgressBar.Min := 1;
-  ProgressBar.Max := fHighIndex - fLowIndex + 1;
+  ProgressBar.Min := fLowIndex;
+  ProgressBar.Max := fHighIndex;
+  if ProgressBar is TProgressBarWithText then
+    TProgressBarWithText(ProgressBar).ProgressTextMult := fProgressTextMult;
+
   TThread.CreateAnonymousThread(StartProcessing).Start;
 end;
 

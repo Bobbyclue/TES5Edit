@@ -22,6 +22,7 @@ uses
   System.Generics.Defaults,
   System.Generics.Collections,
   System.RegularExpressions,
+  wbHash,
   wbStreams;
 
 type
@@ -1023,10 +1024,6 @@ type
 
   TwbFormIDs = TArray<TwbFormID>;
   TwbFormIDDictionary = TDictionary<TwbFormID, TwbNothing>;
-
-  PwbCRC32 = ^TwbCRC32;
-  TwbCRC32 = type Cardinal;
-  TwbCRC32s = array of TwbCRC32;
 
   TwbCRC32Helper = record helper for TwbCRC32
     function AssignFromString(const s: string): Boolean;

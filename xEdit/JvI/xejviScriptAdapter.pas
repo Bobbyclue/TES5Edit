@@ -27,7 +27,8 @@ uses
   wbSort,
   wbNifScanner,
   wbBSArchive,
-  wbLOD;
+  wbLOD,
+  wbHash;
 
 implementation
 
@@ -1925,30 +1926,30 @@ end;
 
 procedure Misc_wbCRC32Data(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := wbCRC32Data(Args.Values[0]);
+  Value := TwbHash.CRC32(TBytes(Args.Values[0]));
 end;
 
 procedure Misc_wbCRC32Resource(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := wbCRC32Data(wbContainerHandler.OpenResourceData(Args.Values[0], Args.Values[1]));
+  Value := TwbHash.CRC32(wbContainerHandler.OpenResourceData(Args.Values[0], Args.Values[1]));
 end;
 
 procedure Misc_wbCRC32File(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := wbCRC32File(string(Args.Values[0]));
+  Value := TwbHash.CRC32(string(Args.Values[0]));
 end;
 
 procedure Misc_CreateHashTES3(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := CreateHashTES3(Args.Values[0]);
+  Value := TwbHash.TES3(Args.Values[0]);
 end;
 
 procedure Misc_CreateHashTES4(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   case Args.Count of
    0: JvInterpreterError(ieNotEnoughParams, -1);
-   1: Value := CreateHashTES4(Args.Values[0]);
-   2: Value := CreateHashTES4(Args.Values[0], Args.Values[1]);
+   1: Value := TwbHash.TES4(Args.Values[0], False);
+   2: Value := TwbHash.TES4(Args.Values[0], Args.Values[1]);
    else
      JvInterpreterError(ieTooManyParams, -1);
   end;
@@ -1956,15 +1957,15 @@ end;
 
 procedure Misc_CreateHashFO4(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := CreateHashFO4(Args.Values[0]);
+  Value := TwbHash.FO4(Args.Values[0]);
 end;
 
 procedure Misc_bscrc32(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := bscrc32(string(Args.Values[0]));
+  Value := TwbHash.BSCRC32(string(Args.Values[0]));
 end;
 
-procedure Misc_wbSHA1Data(var Value: Variant; Args: TJvInterpreterArgs);
+{procedure Misc_wbSHA1Data(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := wbSHA1Data(Args.Values[0]);
 end;
@@ -1982,7 +1983,7 @@ end;
 procedure Misc_wbMD5File(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := wbMD5File(string(Args.Values[0]));
-end;
+end;}
 
 // find REFR records in child groups by base record signatures
 // that are not deleted or disabled
@@ -2407,10 +2408,10 @@ begin
     AddFunction(cUnit, 'CreateHashTES3', Misc_CreateHashTES3, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'CreateHashTES4', Misc_CreateHashTES4, -1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'CreateHashFO4', Misc_CreateHashFO4, 1, [varEmpty], varEmpty);
-    AddFunction(cUnit, 'wbSHA1Data', Misc_wbSHA1Data, 1, [varEmpty], varEmpty);
-    AddFunction(cUnit, 'wbSHA1File', Misc_wbSHA1File, 1, [varEmpty], varEmpty);
-    AddFunction(cUnit, 'wbMD5Data', Misc_wbMD5Data, 1, [varEmpty], varEmpty);
-    AddFunction(cUnit, 'wbMD5File', Misc_wbMD5File, 1, [varEmpty], varEmpty);
+    //AddFunction(cUnit, 'wbSHA1Data', Misc_wbSHA1Data, 1, [varEmpty], varEmpty);
+    //AddFunction(cUnit, 'wbSHA1File', Misc_wbSHA1File, 1, [varEmpty], varEmpty);
+    //AddFunction(cUnit, 'wbMD5Data', Misc_wbMD5Data, 1, [varEmpty], varEmpty);
+    //AddFunction(cUnit, 'wbMD5File', Misc_wbMD5File, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'wbFindREFRsByBase', Misc_wbFindRefrsByBase, 4, [varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbGetSiblingRecords', Misc_wbGetSiblingRecords, 4, [varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbNormalizeResourceName', Misc_wbNormalizeResourceName, 2, [varEmpty, varEmpty], varEmpty);

@@ -34,7 +34,6 @@ type
     miPresetAdd: TMenuItem;
     miPresetRemove: TMenuItem;
     N1: TMenuItem;
-    DefaultPresets: TStaticText;
     procedure chkOldValueCheckClick(Sender: TObject);
     procedure edPathChange(Sender: TObject);
     procedure miPresetAddClick(Sender: TObject);
@@ -47,16 +46,24 @@ type
     { Public declarations }
     fPresets: TJSONObject;
     fPreset: string;
+    fPresetsChanged: Boolean;
     function AddPreset(const aPreset: string): TMenuItem;
   end;
 
   TTweakOldValueMode = (ovmEqual = 0, ovmNotEqual, ovmGreater, ovmLesser,
     ovmContains, ovmDoesntContain, ovmStartsWith, ovmEndsWith,
     ovmAnd, ovmAndNot, ovmRegExp);
+  TTweakOldValueModes = set of TTweakOldValueMode;
 
   TTweakNewValueMode = (nvmSet = 0, nvmAdd, nvmMul, nvmReplace, nvmPrepend, nvmAppend,
-    nvmAnd, nvmAndNot, nvmOr);
+    nvmAnd, nvmAndNot, nvmOr, nvmRemove);
+  TTweakNewValueModes = set of TTweakNewValueMode;
 
+const
+  MathOld: TTweakOldValueModes = [ovmGreater, ovmLesser, ovmAnd, ovmAndNot];
+  MathNew: TTweakNewValueModes = [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr];
+
+type
   TProcUniversalTweaker = class(TProcBase)
   private
     Frame: TFrameUniversalTweaker;
@@ -85,6 +92,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.Types,
   System.StrUtils,
   System.Math,
   System.RegularExpressionsCore,
@@ -108,11 +116,9 @@ begin
 end;
 
 procedure TFrameUniversalTweaker.btnPresetClick(Sender: TObject);
-var
-  pnt: TPoint;
 begin
-  if GetCursorPos(pnt) then
-    menuPreset.Popup(pnt.X, pnt.Y);
+  with ClientToScreen(Point(btnPreset.Left, btnPreset.Top + btnPreset.Height)) do
+    menuPreset.Popup(X, Y);
 end;
 
 procedure TFrameUniversalTweaker.chkOldValueCheckClick(Sender: TObject);
@@ -129,6 +135,12 @@ end;
 
 function TFrameUniversalTweaker.AddPreset(const aPreset: string): TMenuItem;
 begin
+  for var Item in menuPreset.Items do
+    if Item.Caption = aPreset then begin
+      Result := Item;
+      Exit;
+    end;
+
   Result := TMenuItem.Create(menuPreset);
   Result.Caption := aPreset;
   Result.AutoCheck := True;
@@ -138,6 +150,27 @@ begin
   menuPreset.Items.Add(Result);
 end;
 
+procedure TFrameUniversalTweaker.miPresetClick(Sender: TObject);
+begin
+  var s := TMenuItem(Sender).Caption;
+  if not fPresets.Contains(s) then
+    Exit;
+
+  with fPresets.O[s] do begin
+    edBlocks.Text := S['sBlocks'];
+    chkInherited.Checked := B['sDescendants'];
+    edPath.Text := S['sPath'];
+    edPathChange(nil);
+    cmbNewValueMode.ItemIndex := I['iValueMode'];
+    edValue.Text := S['sValue'];
+    chkOldValueCheck.Checked := B['bOldValueCheck'];
+    edOldPath.Text := S['sOldPath'];
+    cmbOldValueMode.ItemIndex := I['iOldValueMode'];
+    edOldValue.Text := S['sOldValue'];
+  end;
+  fPreset := s;
+end;
+
 procedure TFrameUniversalTweaker.miPresetAddClick(Sender: TObject);
 var
   s: string;
@@ -145,21 +178,24 @@ begin
   if not InputQuery('Universal tweaker', 'Add preset', s) then
     Exit;
 
-  if (s = '') or (s = 'Add') or (s = 'Remove') or (s = '-') then
+  if (Trim(s) = '') or (s = 'Add') or (s = 'Remove') or (s = '-') or (s = '&') then
     Exit;
 
-  fPresets.O[s].S['sBlocks'] := edBlocks.Text;
-  fPresets.O[s].B['sDescendants'] := chkInherited.Checked;
-  fPresets.O[s].S['sPath'] := edPath.Text;
-  fPresets.O[s].I['iValueMode'] := cmbNewValueMode.ItemIndex;
-  fPresets.O[s].S['sValue'] := edValue.Text;
-  fPresets.O[s].B['bOldValueCheck'] := chkOldValueCheck.Checked;
-  fPresets.O[s].S['sOldPath'] := edOldPath.Text;
-  fPresets.O[s].I['iOldValueMode'] := cmbOldValueMode.ItemIndex;
-  fPresets.O[s].S['sOldValue'] := edOldValue.Text;
+  with fPresets.O[s] do begin
+    S['sBlocks'] := edBlocks.Text;
+    B['sDescendants'] := chkInherited.Checked;
+    S['sPath'] := edPath.Text;
+    I['iValueMode'] := cmbNewValueMode.ItemIndex;
+    S['sValue'] := edValue.Text;
+    B['bOldValueCheck'] := chkOldValueCheck.Checked;
+    S['sOldPath'] := edOldPath.Text;
+    I['iOldValueMode'] := cmbOldValueMode.ItemIndex;
+    S['sOldValue'] := edOldValue.Text;
+  end;
 
   AddPreset(s).Checked := True;
   fPreset := s;
+  fPresetsChanged := True;
 end;
 
 procedure TFrameUniversalTweaker.miPresetRemoveClick(Sender: TObject);
@@ -197,44 +233,39 @@ begin
     end;
 
   fPreset := '';
-end;
-
-procedure TFrameUniversalTweaker.miPresetClick(Sender: TObject);
-begin
-  var s := TMenuItem(Sender).Caption;
-  if not fPresets.Contains(s) then
-    Exit;
-
-  edBlocks.Text := fPresets.O[s].S['sBlocks'];
-  chkInherited.Checked := fPresets.O[s].B['sDescendants'];
-  edPath.Text := fPresets.O[s].S['sPath'];
-  edPathChange(nil);
-  cmbNewValueMode.ItemIndex := fPresets.O[s].I['iValueMode'];
-  edValue.Text := fPresets.O[s].S['sValue'];
-  chkOldValueCheck.Checked := fPresets.O[s].B['bOldValueCheck'];
-  edOldPath.Text := fPresets.O[s].S['sOldPath'];
-  cmbOldValueMode.ItemIndex := fPresets.O[s].I['iOldValueMode'];
-  edOldValue.Text := fPresets.O[s].S['sOldValue'];
-
-  fPreset := s;
+  fPresetsChanged := True;
 end;
 
 procedure TProcUniversalTweaker.OnShow;
+const
+  cDefaultPresets: TArray<string> = [
+    '{"Change body part in BSDismemberSkinInstance partitions":{"sBlocks":"BSDismemberSkinInstance","sDescendants":false,"sPath":"Partitions\\[*]\\Body Part","iValueMode":0,"sValue":"SBP_32_BODY","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"SBP_34_FOREARMS"},',
+    '"Set normal texture to diffuse with _n suffix in BSShaderTextureSet":{"sBlocks":"BSShaderTextureSet","sDescendants":false,"sPath":"Textures\\[1]","iValueMode":3,"sValue":"$1_n.dds","bOldValueCheck":true,"sOldPath":"Textures\\[0]","iOldValueMode":10,"sOldValue":"(.+)\\.dds"},',
+    '"Change Author field in NiHeader":{"sBlocks":"NiHeader","sDescendants":false,"sPath":"Export Info\\Author","iValueMode":0,"sValue":"Sniff","bOldValueCheck":false,"sOldPath":"","iOldValueMode":0,"sOldValue":""},',
+    '"Add Hidden flag to EditorMarker nodes":{"sBlocks":"NiAVObject","sDescendants":true,"sPath":"Flags","iValueMode":8,"sValue":"1","bOldValueCheck":true,"sOldPath":"Name","iOldValueMode":4,"sOldValue":"EditorMarker"},',
+    '"Switch to Parallax shader in BSLightingShaderProperty if there is parallax texture":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Type","iValueMode":0,"sValue":"Parallax","bOldValueCheck":true,"sOldPath":"Texture Set\\Textures\\[3]","iOldValueMode":4,"sOldValue":".dds"},',
+    '"Add Glow_Map flag if shader is Glow Shader in BSLightingShaderProperty":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Flags 2","iValueMode":5,"sValue":"| Glow_Map","bOldValueCheck":true,"sOldPath":"Shader Type","iOldValueMode":0,"sOldValue":"Glow Shader"},',
+    '"Change priority of controlled blocks matched by name in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Priority","iValueMode":0,"sValue":"10","bOldValueCheck":true,"sOldPath":"Node Name","iOldValueMode":10,"sOldValue":"Neck|Head"},',
+    '"Change name of controlled blocks in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Node Name","iValueMode":0,"sValue":"Bip01 Head","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"Bip01 Neck"},',
+    '"Trim whitespaces from the Name field":{"sBlocks":"NiObjectNET","sDescendants":true,"sPath":"Name","iValueMode":3,"sValue":"","bOldValueCheck":true,"sOldPath":"","iOldValueMode":10,"sOldValue":"^\\s*|\\s*$"}}'
+  ];
 begin
-  Frame.chkReport.Checked := StorageGetBool('bReportOnly', Frame.chkReport.Checked);
-  Frame.edBlocks.Text := StorageGetString('sBlocks', Frame.edBlocks.Text);
-  Frame.chkInherited.Checked := StorageGetBool('bDescendants', Frame.chkInherited.Checked);
-  Frame.edPath.Text := StorageGetString('sPath', Frame.edPath.Text);
-  Frame.cmbNewValueMode.ItemIndex := StorageGetInteger('iValueMode', Frame.cmbNewValueMode.ItemIndex);
-  Frame.edValue.Text := StorageGetString('sValue', Frame.edValue.Text);
-  Frame.edOldPath.Text := StorageGetString('sOldPath', Frame.edOldPath.Text);
-  Frame.chkOldValueCheck.Checked := StorageGetBool('bOldValueCheck', Frame.chkOldValueCheck.Checked);
-  Frame.cmbOldValueMode.ItemIndex := StorageGetInteger('iOldValueMode', Frame.cmbOldValueMode.ItemIndex);
-  Frame.edOldValue.Text := StorageGetString('sOldValue', Frame.edOldValue.Text);
-  Frame.chkOldValueCheckClick(nil);
+  try
+    Frame.chkReport.Checked := StorageGetBool('bReportOnly', Frame.chkReport.Checked);
+    Frame.edBlocks.Text := StorageGetString('sBlocks', Frame.edBlocks.Text);
+    Frame.chkInherited.Checked := StorageGetBool('bDescendants', Frame.chkInherited.Checked);
+    Frame.edPath.Text := StorageGetString('sPath', Frame.edPath.Text);
+    Frame.cmbNewValueMode.ItemIndex := StorageGetInteger('iValueMode', Frame.cmbNewValueMode.ItemIndex);
+    Frame.edValue.Text := StorageGetString('sValue', Frame.edValue.Text);
+    Frame.edOldPath.Text := StorageGetString('sOldPath', Frame.edOldPath.Text);
+    Frame.chkOldValueCheck.Checked := StorageGetBool('bOldValueCheck', Frame.chkOldValueCheck.Checked);
+    Frame.cmbOldValueMode.ItemIndex := StorageGetInteger('iOldValueMode', Frame.cmbOldValueMode.ItemIndex);
+    Frame.edOldValue.Text := StorageGetString('sOldValue', Frame.edOldValue.Text);
+    Frame.chkOldValueCheckClick(nil);
+  except end;
+
   Frame.fPresets := TJSONObject.Create;
-  var s := StorageGetString('sPresets', Frame.DefaultPresets.Caption);
-  try Frame.fPresets.FromJSON(s); except end;
+  try Frame.fPresets.FromJSON(StorageGetString('sPresets', String.Join('', cDefaultPresets))); except end;
   with TStringList.Create do try
     for var i := 0 to Pred(Frame.fPresets.Count) do
       Add(Frame.fPresets.Names[i]);
@@ -258,8 +289,10 @@ begin
   StorageSetInteger('iOldValueMode', Frame.cmbOldValueMode.ItemIndex);
   StorageSetString('sOldValue', Frame.edOldValue.Text);
   StorageSetBool('bReportOnly', Frame.chkReport.Checked);
-  StorageSetString('sPresets', Frame.fPresets.ToJSON(True));
-  Frame.fPresets.Free;
+  if Frame.fPresetsChanged then
+    StorageSetString('sPresets', Frame.fPresets.ToJSON(True));
+  if Assigned(Frame.fPresets) then
+    Frame.fPresets.Free;
 end;
 
 procedure TProcUniversalTweaker.OnStart;
@@ -269,7 +302,7 @@ begin
     StrictDelimiter := True;
     DelimitedText := Frame.edBlocks.Text;
     SetLength(fBlocks, Count);
-    for var i: Integer := 0 to Pred(Count) do
+    for var i := 0 to Pred(Count) do
       fBlocks[i] := Trim(Strings[i]);
   finally
     Free;
@@ -317,16 +350,26 @@ function ModifyElement(aBlock: TdfElement;
   regexp: TPerlRegEx
 ): Boolean;
 var
-  CurrentValue, NewValue: string;
+  CurrentValue, NewValue, OriginalValue: string;
   FloatCurrentValue, FloatOldValue, FloatNewValue: Extended;
   Matched: Boolean;
 
-  function GetEditValue: string;
+  function GetEditValue(const path: string; asnum: Boolean): string;
   begin
-    if aPath <> '' then
-      Result := aBlock.EditValues[aPath]
+    try
+    if asnum then
+      if aPath <> '' then
+        Result := FloatToStr(aBlock.NativeValues[path])
+      else
+        Result := FloatToStr(aBlock.NativeValue)
     else
-      Result := aBlock.EditValue;
+      if aPath <> '' then
+        Result := aBlock.EditValues[path]
+      else
+        Result := aBlock.EditValue;
+    except
+      Result := '';
+    end;
   end;
 
   function ToFloat: Boolean;
@@ -335,7 +378,7 @@ var
     try
       FloatCurrentValue := dfStrToFloat(CurrentValue);
       FloatNewValue := dfStrToFloat(aValue);
-      if aOldValueCheck and (aOldValueMode in [ovmEqual, ovmNotEqual, ovmGreater, ovmLesser, ovmAnd, ovmAndNot]) then
+      if aOldValueCheck and (aOldValueMode in MathOld) then
         FloatOldValue := dfStrToFloat(aOldValue);
     except
       Result := False;
@@ -359,11 +402,13 @@ begin
 
   // perform all checks against another element if provided
   if aOldPath <> '' then
-    CurrentValue := aBlock.EditValues[aOldPath]
+    //CurrentValue := aBlock.EditValues[aOldPath]
+    CurrentValue := GetEditValue(aOldPath, aOldValueMode in MathOld)
   else
-    CurrentValue := GetEditValue;
+    //CurrentValue := GetEditValue;
+    CurrentValue := GetEditValue(aPath, aOldValueMode in MathOld);
 
-  Matched := False;
+  Matched := not aOldValueCheck;
 
   if aOldValueCheck then
   case aOldValueMode of
@@ -379,7 +424,6 @@ begin
     ovmAndNot:   Matched := ToFloat and (Trunc(FloatCurrentValue) and Trunc(FloatOldValue) = 0);
     ovmRegExp:   begin
       regexp.Subject := CurrentValue;
-      regexp.RegEx := aOldValue;
       regexp.Replacement := aValue;
       Matched := regexp.ReplaceAll;
     end;
@@ -390,7 +434,8 @@ begin
 
   // if we were checking another element, then get the actual value for tweaking
   if aOldPath <> '' then
-    CurrentValue := GetEditValue;
+    //CurrentValue := GetEditValue;
+    CurrentValue := GetEditValue(aPath, aValueMode in MathNew);
 
   case aValueMode of
     nvmSet:     NewValue := aValue;
@@ -407,26 +452,29 @@ begin
     end;
     nvmPrepend: NewValue := aValue + CurrentValue;
     nvmAppend : NewValue := CurrentValue + aValue;
+    nvmRemove : NewValue := StringReplace(CurrentValue, aValue, '', [rfIgnoreCase, rfReplaceAll]);
   end;
 
   // if fractional part is zero (ends with .00000)
   // then remove it in case we are working with int field
-  if aValueMode in [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr] then begin
+  if aValueMode in MathNew then begin
     var z := Copy(dfFloatToStr(1), 2, 100);
     if NewValue.EndsWith(z) then
       NewValue := Copy(NewValue, 1, Length(NewValue) - Length(z));
   end;
+
+  OriginalValue := GetEditValue(aPath, False);
 
   if aPath <> '' then
     aBlock.EditValues[aPath] := NewValue
   else
     aBlock.EditValue := NewValue;
 
-  Result := CurrentValue <> GetEditValue;
+  Result := CurrentValue <> GetEditValue(aPath, aValueMode in MathNew);
   if Assigned(Log) and Result then begin
     var p := aBlock.Path;
     if aPath <> '' then p := p + '\' + aPath;
-    Log.Add(#9 + p + ': Changed from "' + CurrentValue + '" to "' + GetEditValue + '"');
+    Log.Add(#9 + p + ': Changed from "' + OriginalValue + '" to "' + GetEditValue(aPath, False) + '"');
   end;
 end;
 
@@ -448,6 +496,8 @@ begin
   if fOldValueMode = ovmRegExp then begin
     regexp := TPerlRegEx.Create;
     regexp.Options := [preCaseLess];
+    regexp.RegEx := fOldValue;
+    regexp.Study;
   end;
 
   if fReportOnly then
@@ -515,9 +565,9 @@ begin
     end;
 
     if bChanged and fReportOnly then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
+      Log.Add('');
       fManager.AddMessages(Log);
-      fManager.AddMessage('');
     end;
 
   finally

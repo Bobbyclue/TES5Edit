@@ -213,7 +213,7 @@ begin
       Log.Add(Format(#9'Vertices: %d    Triangles: %d    ACMR: %.1f    ATVR: %.1f    Overfetch: %.1f', [verts, tris, _acmr, _atvr, _overfetch]));
 
     if Log.Count > 0 then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

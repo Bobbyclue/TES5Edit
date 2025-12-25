@@ -20,9 +20,9 @@ uses
   System.Generics.Defaults,
   System.Generics.Collections,
   ImagingDds,
-  lz4io,
-  zlibEx,
   wbBSArchive,
+  wbCompression,
+  wbHash,
   wbInterface,
   wbSort,
   wbStreams;
@@ -81,7 +81,7 @@ type
 
   IwbBSAFileInternal = interface(IwbBSAFile)
     ['{A360B348-8F6B-4FC1-A869-9D5B833DCA5F}']
-    function GetData(aFileRecord: Pointer): TBytes;
+    function GetData(aFileEntry: TwbBSFileEntry): TBytes;
   end;
 
   TwbBSAFile = class(TInterfacedObject, IwbResourceContainer, IwbBSAFile, IwbBSAFileInternal)
@@ -100,7 +100,7 @@ type
     function GetFileName: string;
 
     {---IwbBSAFileInternal---}
-    function GetData(aFileRecord: Pointer): TBytes;
+    function GetData(aFileEntry: TwbBSFileEntry): TBytes;
   public
     constructor Create(const aFileName: string);
     destructor Destroy; override;
@@ -261,9 +261,9 @@ begin
       if ccFolders.TryAdd(lFolder, wbNothing) then begin
         var lFolderHash: Int64;
         if wbGameMode >= gmTES5 then
-          lFolderHash := CreateHashFO4(lFolder)
+          lFolderHash := TwbHash.FO4(lFolder)
         else
-          lFolderHash := CreateHashTES4(lFolder);
+          lFolderHash := TwbHash.TES4(lFolder);
         ccFolderHashes.TryAdd(lFolderHash, lFolder);
       end;
 
@@ -274,9 +274,9 @@ begin
       if ccFiles.TryAdd(lFile, wbNothing) then begin
         var lFileHash: Int64;
         if wbGameMode >= gmTES5 then
-          lFileHash := CreateHashFO4(lFile)
+          lFileHash := TwbHash.FO4(lFile)
         else
-          lFileHash := CreateHashTES4(lFile);
+          lFileHash := TwbHash.TES4(lFile);
         ccFileHashes.TryAdd(lFileHash, lFile);
 
         if wbGameMode < gmTES5 then
@@ -284,9 +284,9 @@ begin
             lFile := ChangeFileExt(lFile, '.ddx');
             if ccFiles.TryAdd(lFile, wbNothing) then begin
               if wbGameMode >= gmTES5 then
-                lFileHash := CreateHashFO4(lFile)
+                lFileHash := TwbHash.FO4(lFile)
               else
-                lFileHash := CreateHashTES4(lFile);
+                lFileHash := TwbHash.TES4(lFile);
               ccFileHashes.TryAdd(lFileHash, lFile);
             end;
       end;
@@ -477,11 +477,11 @@ begin
   inherited;
 end;
 
-function TwbBSAFile.GetData(aFileRecord: Pointer): TBytes;
+function TwbBSAFile.GetData(aFileEntry: TwbBSFileEntry): TBytes;
 begin
   Result := nil;
-  if Assigned(aFileRecord) then
-    Result := bfArchive.ExtractFileData(aFileRecord);
+  if Assigned(aFileEntry) then
+    Result := bfArchive.Unpack(aFileEntry);
 end;
 
 function TwbBSAFile.GetFileName: string;
@@ -499,24 +499,26 @@ var
   FileRecord: Pointer;
 begin
   Result := nil;
-  FileRecord := bfArchive.FindFileRecord(aFileName);
+  FileRecord := bfArchive.FileByName(aFileName);
   if Assigned(FileRecord) then
     Result := TwbBSAResource.Create(Self, FileRecord);
 end;
 
 procedure TwbBSAFile.ResourceDict(const aDict: TwbResourceDict; aFolder: string);
 begin
-  bfArchive.ResourceDict(aDict, aFolder);
+for var f in bfArchive.FilesByFolder(aFolder) do
+  aDict.TryAdd(f.Name, wbNothing);
 end;
 
 function TwbBSAFile.ResourceExists(const aFileName: string): Boolean;
 begin
-  Result := Assigned(bfArchive.FindFileRecord(aFileName));
+  Result := Assigned(bfArchive.FileByName(aFileName));
 end;
 
 procedure TwbBSAFile.ResourceList(const aList: TStrings; aFolder: string = '');
 begin
-  bfArchive.ResourceList(aList, aFolder);
+  for var f in bfArchive.FilesByFolder(aFolder) do
+    aList.Add(f.Name);
 end;
 
 { TwbBSAResource }

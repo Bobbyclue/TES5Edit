@@ -51,7 +51,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.NetEncoding,
+  //System.NetEncoding,
   System.RegularExpressionsCore,
   wbDataFormat,
   wbDataFormatNif,
@@ -77,9 +77,10 @@ begin
   Frame.chkFixAbsolute.Checked := StorageGetBool('bFixAbsolute', Frame.chkFixAbsolute.Checked);
   Frame.chkRegExp.Checked := StorageGetBool('bRegExp', Frame.chkRegExp.Checked);
   Frame.chkReport.Checked := StorageGetBool('bReportOnly', Frame.chkReport.Checked);
-  var s := StorageGetString('sReplacements', '');
-  if s <> '' then
-    Frame.memoPairs.Lines.Text := TBase64Encoding.Base64String.Decode(s);
+  Frame.memoPairs.Lines.Text := StringToText(StorageGetString('sReplacements', TextToString(Frame.memoPairs.Lines.Text)));
+  //var s := StorageGetString('sReplacements', '');
+  //if s <> '' then
+  //  Frame.memoPairs.Lines.Text := TBase64Encoding.Base64String.Decode(s);
 end;
 
 procedure TProcReplaceAssets.OnHide;
@@ -87,7 +88,8 @@ begin
   StorageSetBool('bFixAbsolute', Frame.chkFixAbsolute.Checked);
   StorageSetBool('bRegExp', Frame.chkRegExp.Checked);
   StorageSetBool('bReportOnly', Frame.chkReport.Checked);
-  StorageSetString('sReplacements', TBase64Encoding.Base64String.Encode(Frame.memoPairs.Lines.Text));
+  StorageSetString('sReplacements', TextToString(Frame.memoPairs.Lines.Text));
+  //StorageSetString('sReplacements', TBase64Encoding.Base64String.Encode(Frame.memoPairs.Lines.Text));
 end;
 
 procedure TProcReplaceAssets.OnStart;

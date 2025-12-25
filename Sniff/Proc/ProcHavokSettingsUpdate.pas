@@ -278,6 +278,10 @@ begin
         UpdateField(block.Elements['Material'], fMaterial, bChanged);
         UpdateField(block.Elements['Radius'], fRadius, bChanged);
         UpdateField(block.Elements['Radius Copy'], fRadius, bChanged);
+        var filters := block.Elements['Filters'];
+        if Assigned(filters) then
+          for var f in filters do
+            UpdateField(f.Elements['Layer'], fLayer, bChanged);
       end
 
       else if (block.BlockType = 'hkPackedNiTriStripsData') or (block.BlockType = 'bhkCompressedMeshShapeData') then begin
@@ -293,6 +297,7 @@ begin
 
       else if block.IsNiObject('bhkRigidBody', True) then begin
         UpdateField(block.Elements['Havok Filter\Layer'], fLayer, bChanged);
+        UpdateField(block.Elements['Havok Filter Copy\Layer'], fLayer, bChanged);
         UpdateField(block.Elements['Mass'], fMass, bChanged);
 
         if bChanged and (block.NativeValues['Mass'] = 0) then

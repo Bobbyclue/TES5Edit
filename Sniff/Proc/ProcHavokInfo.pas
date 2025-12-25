@@ -124,7 +124,7 @@ begin
       Log.Add(Format(#9'Static: %d    Dynamic: %d    Total Mass: %s', [statics, dynamics, dfFloatToStr(mass)]));
 
     if Log.Count > 0 then begin
-      fManager.AddMessage(aFileName);
+      Log.Insert(0, aFileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

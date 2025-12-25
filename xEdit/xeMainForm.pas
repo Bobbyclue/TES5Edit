@@ -65,6 +65,7 @@ uses
   xeInit,
   wbLocalization,
   wbModGroups,
+  wbHash,
   wbHardcoded,
   xeScriptHost,
   Vcl.Themes,
@@ -17379,7 +17380,7 @@ begin
       aFileCRC := Cardinal(FileCRCs.Objects[i])
     else begin
       try
-        aFileCRC := wbCRC32File(wbDataPath + aFileName);
+        aFileCRC := TwbHash.CRC32(wbDataPath + aFileName);
       except
         aFileCRC := 0;
       end;

@@ -19,7 +19,8 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
       'ta blocks from source meshes, optionally copy transformation in ' +
       'NiAVObject. Nodes are matched by name. For each file in the Inpu' +
       't directory data will be copied from the file with the same path' +
-      ' and name in the provided Source directory if exists.'
+      ' and name in the provided Source directory if exists, or from th' +
+      'e single nif file.'
     TabOrder = 0
   end
   object edSourceDirectory: TLabeledEdit
@@ -30,7 +31,9 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
     Anchors = [akLeft, akTop, akRight]
     EditLabel.Width = 245
     EditLabel.Height = 15
-    EditLabel.Caption = 'Source directory with files to copy blocks from'
+    EditLabel.Caption = 
+      'Source directory with files or the single file to copy blocks fr' +
+      'om'
     TabOrder = 1
     Text = ''
   end
@@ -61,5 +64,23 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
     Height = 17
     Caption = 'Copy transformation (pos, rot, scale)'
     TabOrder = 4
+  end
+  object rbMatchingFiles: TRadioButton
+    Left = 16
+    Top = 71
+    Width = 153
+    Height = 17
+    Caption = 'From matching files'
+    Checked = True
+    TabOrder = 5
+    TabStop = True
+  end
+  object rbSingleFile: TRadioButton
+    Left = 16
+    Top = 94
+    Width = 153
+    Height = 17
+    Caption = 'From the single file'
+    TabOrder = 6
   end
 end

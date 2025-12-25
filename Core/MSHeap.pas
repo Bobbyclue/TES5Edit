@@ -1,10 +1,24 @@
 unit MSHeap;
 
-// default MM override using Windows Heap API
-// Roberto Della Pasqua www.dellapasqua.com
-// 10 sept 2022 added inline directive, zeromemory and freemem return value
+{
+  Default MM override using Windows Heap API
+  Roberto Della Pasqua www.dellapasqua.com
+  10 sept 2022 added inline directive, zeromemory and freemem return value
 
-{$O+}
+  Manifest clause to use the new ("better") segment heap since Windows 10, version 2004 (build 19041):
+  https://docs.microsoft.com/en-us/windows/win32/sbscs/application-manifests#heaptype
+
+  <asmv3:application>
+    <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2020/WindowsSettings">
+      <heapType>SegmentHeap</heapType>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+}
+
+{$LongStrings off}
+{$Optimization on}
+{$Overflowchecks off}
+{$Rangechecks off}
 
 interface
 
@@ -13,7 +27,7 @@ uses Windows;
 implementation
 
 var
-  ProcessHeap: THandle;
+  ProcessHeap: THandle = 0;
 
 function SysGetMem(Size: NativeInt): Pointer; inline;
 begin
@@ -23,7 +37,7 @@ end;
 function SysFreeMem(P: Pointer): Integer; inline;
 begin
   HeapFree(ProcessHeap, 0, P); //returns 0 if fail, but this can stop the execution
-  Result:=0; //for Delphi management should be reversed to zero, else throws a runtime exception
+  Result := 0; //for Delphi management should be reversed to zero, else throws a runtime exception
 end;
 
 function SysReallocMem(P: Pointer; Size: NativeInt): Pointer; inline;
@@ -46,22 +60,49 @@ begin
   Result := False;
 end;
 
+function NoMemoryAllocated: Boolean;
+var
+  State: TMemoryManagerState;
+begin
+  GetMemoryManagerState(State);
+  Result := (State.AllocatedMediumBlockCount = 0) and (State.AllocatedLargeBlockCount = 0);
+end;
+
+{$if not declared(SetDllDirectory)}
+//WinBase.h:
+function SetDllDirectory(lpPathName: PChar): BOOL; stdcall;
+  external Windows.kernel32 name {$ifdef UNICODE}'SetDllDirectoryW'{$else}'SetDllDirectoryA'{$endif};
+{$ifend}
+
 const
-  MemoryManager: TMemoryManagerEx =
-  (
-  GetMem: SysGetmem;
-  FreeMem: SysFreeMem;
-  ReallocMem: SysReAllocMem;
-  AllocMem: SysAllocMem;
-  RegisterExpectedMemoryLeak: SysRegisterExpectedMemoryLeak;
-  UnregisterExpectedMemoryLeak: SysUnregisterExpectedMemoryLeak
+  MemoryManager: TMemoryManagerEx = (
+    GetMem: SysGetmem;
+    FreeMem: SysFreeMem;
+    ReallocMem: SysReAllocMem;
+    AllocMem: SysAllocMem;
+    RegisterExpectedMemoryLeak: SysRegisterExpectedMemoryLeak;
+    UnregisterExpectedMemoryLeak: SysUnregisterExpectedMemoryLeak
   );
+
 
 initialization
 
-if DebugHook = 0 then begin
-  ProcessHeap := GetProcessHeap;
-  SetMemoryManager(MemoryManager);
-end;
+  // For a little additional security and performance, remove the current working directory of the process from the
+  // search path for DLLs (effective for DLLs that are loaded after this point only).
+  // Argument values:
+  // - Pathname: Replaces the CWD in the Search Path with <Pathname>
+  // - Empty string: Removes the CWD from the Search Path
+  // - NULL: Restores the default search order
+
+  //SetDllDirectory('');
+
+  //{$IFNDEF DEBUG}
+  if DebugHook = 0 then begin
+    Assert(NoMemoryAllocated, 'Can not initialize MSHeap, memory is already allocated');
+    ProcessHeap := GetProcessHeap;
+    Assert(ProcessHeap <> 0);
+    SetMemoryManager(MemoryManager);
+  end;
+  //{$ENDIF}
 
 end.
