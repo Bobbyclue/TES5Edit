@@ -12173,19 +12173,17 @@ begin
       ]))
     ]),
 
-    wbStruct(XCVR, 'Water Current Zone Data', [
-      wbFloat('Unknown'),
-      wbFloat('Unknown'),
-      wbFloat('Unknown')
-    ]),
-    wbStruct(XCVL, 'Water Current Zone Data', [
-      wbFloat('Unknown'),
-      wbFloat('Unknown'),
-      wbFloat('Unknown')
-    ]),
-    wbFormIDCk(XCZR, 'Current Zone Reference', sigReferences),
-    wbUnknown(XCZA),
-    wbFormIDCk(XCZC, 'Current Zone Cell', [CELL, NULL]),
+    wbVec3(XCVL,'Water Current Linear Velocity'),
+    wbVec3(XCVR,'Water Current Rotational Velocity'),
+    wbRArray('Water Current Data',
+      wbRStruct('Current', [
+        wbRUnion('', [
+          wbFormIDCk(XCZR, 'Reference', sigReferences),
+          wbFormIDCk(XCZC, 'Cell', [CELL])
+        ]),
+        wbUnknown(XCZA)
+      ])
+    ),
 
     wbXSCL,
     wbXLOD, // not seen in FO4 vanilla files

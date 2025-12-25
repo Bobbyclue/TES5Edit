@@ -10040,26 +10040,39 @@ begin
 
     {--- MultiBound ---}
     wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
-    wbRStruct('Water Current Velocities', [
-      wbRUnion('', [
+    wbRUnion('', [
+      wbRStruct('Water Current Velocities', [
         wbInteger(XWCN, 'Velocity Count', itU32, nil, cpBenign),
-        wbInteger(XWCS, 'Velocity Count', itU32, nil, cpBenign)
-      ]).IncludeFlag(dfUnionStaticResolve),
-      wbArray(XWCU, 'Velocities',
-        wbStruct('Current', [
-          wbVec3('Velocity'),
-          wbFloat
-        ])
-      ).SetCountPathOnValue('[0]', False)
-       .SetRequired
-       .IncludeFlag(dfCollapsed, wbCollapseOther)
-       .IncludeFlag(dfNotAlignable)
+        wbArray(XWCU, 'Velocities',
+          wbStruct('Current', [
+            wbVec3('Velocity'),
+            wbFloat
+          ])
+        ).SetCountPathOnValue(XWCN, False)
+         .SetRequired
+      ]),
+      wbRStruct('Water Current Velocities (Old)', [
+        wbInteger(XWCS, 'Velocity Count', itU32, nil, cpBenign),
+        wbArray(XWCU, 'Velocities',
+          wbStruct('Current', [
+            wbVec3('Velocity'),
+            wbFloat
+          ])
+        ).SetCountPathOnValue(XWCS, False)
+         .SetRequired
+      ])
     ]),
     wbVec3(XCVL,'Water Current Linear Velocity'),
     wbVec3(XCVR,'Water Current Rotational Velocity'),
-    wbFormIDCk(XCZC, 'Water Current Zone Cell', [CELL, NULL]),
-    wbFormIDCk(XCZR, 'Water Current Zone Reference', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, NULL]),
-    wbByteArray(XCZA, 'Water Current Zone Action', 4),
+    wbRArray('Water Current Data',
+      wbRStruct('Current', [
+        wbRUnion('', [
+          wbFormIDCk(XCZR, 'Reference', [ACHR,PARW,PBAR,PCON,PBEA,PFLA,PGRE,PHZD,PLYR,PMIS,REFR,NULL]),
+          wbFormIDCk(XCZC, 'Cell', [CELL])
+        ]),
+        wbUnknown(XCZA)
+      ])
+    ),
     wbXSCL,
     wbFormIDCk(XSPC, 'Spawn Container', [REFR]),
 
