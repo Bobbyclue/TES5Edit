@@ -109,8 +109,6 @@ type
     property Size: Integer read GetSize;
   end;
 
-  TGameResourceType = (resMesh, resTexture, resSound, resMusic, resMaterial);
-
   // source texture for atlas builder
   TSourceAtlasTexture = record
     Name: string;
@@ -223,7 +221,6 @@ type
 function wbLODExtraOptionsFileName(const PluginName, WorldspaceID: string): string;
 function wbLODSettingsFileName(const WorldspaceID: string): string;
 function wbLODTreeBlockFileExt: string;
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
 function wbDefaultNormalTexture(aGameMode: TwbGameMode): string;
 function wbDefaultSpecularTexture(aGameMode: TwbGameMode): string;
 procedure wbPrepareImageAlpha(img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
@@ -308,7 +305,8 @@ const
 implementation
 
 uses
-  Math;
+  Math,
+  wbBSArchive;
 
 function wbLODExtraOptionsFileName(const PluginName, WorldspaceID: string): string;
 begin
@@ -994,36 +992,6 @@ begin
   Result := True;
 end;
 
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
-var
-  i: integer;
-begin
-  Result := Trim(StringReplace(LowerCase(aName), '/', '\', [rfReplaceAll]));
-  if Length(Result) < 2 then
-    Exit;
-
-  // absolute path, cut everything before Data or leave only file name
-  i := Pos('data\', Result);
-  if i <> 0 then
-    Delete(Result, 1, Pred(i));
-
-  // starts with slash, remove it
-  if Result[1] = '\' then Delete(Result, 1, 1);
-  // starts with Data, remove it
-  if Copy(Result, 1, 5) = 'data\' then Delete(Result, 1, 5);
-  // root folder in Data for different resource types
-  if (aResType = resMesh) and (Copy(Result, 1, 7) <> 'meshes\') then
-    Result := 'meshes\' + Result
-  else if (aResType = resTexture) and (Copy(Result, 1, 9) <> 'textures\') then
-    Result := 'textures\' + Result
-  else if (aResType = resSound) and (Copy(Result, 1, 6) <> 'sound\') then
-    Result := 'sound\' + Result
-  else if (aResType = resMusic) and (Copy(Result, 1, 6) <> 'music\') then
-    Result := 'music\' + Result
-  else if (aResType = resMaterial) and (Copy(Result, 1, 10) <> 'materials\') then
-    Result := 'materials\' + Result;
-end;
-
 procedure wbPrepareImageAlpha(img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
 var
   x, y: integer;
@@ -1060,7 +1028,7 @@ const
     t: string;
   begin
     if s <> '' then begin
-      t := wbNormalizeResourceName(s, resTexture);
+      t := TwbAsset.GetAssetName(s, '', atTexture);
       if slTextures.IndexOf(t) = -1 then
         slTextures.Add(t);
     end;
@@ -1100,7 +1068,7 @@ begin
         Continue;
       end;
 
-      nifname := wbNormalizeResourceName(slMeshes[i], resMesh);
+      nifname := TwbAsset.GetAssetName(slMeshes[i], '', atMesh);
       if ExtractFileExt(nifname) <> '.nif' then
         Continue;
 
@@ -1151,7 +1119,7 @@ begin
             end;
 
           if not bTiled then begin
-            s := wbNormalizeResourceName(Shader.EditValues['Name'], resMaterial);
+            s := TwbAsset.GetAssetName(Shader.EditValues['Name'], '', atMaterial);
             // getting textures from material first, it has priority over textureset
             if (ExtractFileExt(s) = '.bgsm') and wbContainerHandler.ResourceExists(s) then begin
               try
@@ -1999,7 +1967,7 @@ begin
     // fallouts always use _lod mesh only
     Result := ChangeFileExt(aStat.ElementEditValues['Model\MODL'], '') + '_lod.nif';
 
-  Result := wbNormalizeResourceName(Result, resMesh);
+  Result := TwbAsset.GetAssetName(Result, '', atMesh);
   if (aLODLevel <> -1) and not wbContainerHandler.ResourceExists(Result) then
     Result := '';
 end;
@@ -3159,7 +3127,7 @@ begin
           if slLODTextures.Count > 1 then begin
             // remove HD LOD texture if there
             if wbIsSkyrim then begin
-              i := slLODTextures.IndexOf(wbNormalizeResourceName(aWorldspace.WinningOverride.ElementEditValues['TNAM'], resTexture));
+              i := slLODTextures.IndexOf(TwbAsset.GetAssetName(aWorldspace.WinningOverride.ElementEditValues['TNAM'], '', atTexture));
               if i <> -1 then slLODTextures.Delete(i);
             end;
 
@@ -3466,8 +3434,8 @@ var
           for n := 0 to Pred(Entries.ElementCount) do begin
             Entry := Entries.Elements[n] as IwbContainer;
             // export everything in case full model is used for LOD - there may be a wild card * for base
-            basemat := Lowercase(wbNormalizeResourceName(Entry.ElementEditValues['BNAM'], resMaterial));
-            swapmat := Lowercase(wbNormalizeResourceName(Entry.ElementEditValues['SNAM'], resMaterial));
+            basemat := LowerCase(TwbAsset.GetAssetName(Entry.ElementEditValues['BNAM'], '', atMaterial));
+            swapmat := LowerCase(TwbAsset.GetAssetName(Entry.ElementEditValues['SNAM'], '', atMaterial));
             slSwapMat.Add(swapmat);
             slBaseMat.Add(basemat);
             // list of swap materials for atlas
@@ -3706,7 +3674,7 @@ begin
               except on E: Exception do
                 wbProgressCallback('<Warning: Error reading "' + s + '": ' + E.Message + '>');
               end;
-              slLODTextures.Add(wbNormalizeResourceName(bgsm.EditValues['Textures\Diffuse'], resTexture));
+              slLODTextures.Add(TwbAsset.GetAssetName(bgsm.EditValues['Textures\Diffuse'], '', atTexture));
             end;
           finally
             bgsm.Free;

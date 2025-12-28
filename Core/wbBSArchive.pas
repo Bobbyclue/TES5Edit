@@ -413,7 +413,7 @@ type
     atScript, atSource,
     atStrings, atSpeedTree, atVideo, atLODSettings, atDistantLOD,
     atInterface, atProgram, atMenu, atFont, atFacegen, atLSData,
-    atGrass, atPreVis, atSeq, atDialogViews,
+    atGrass, atPreVis, atSeq, atDialogueViews,
     atBookArt, atIcon, atSplash
   );
 
@@ -457,7 +457,7 @@ type
       (Typ: atGrass;          Root: 'grass';         Ext: ['.gid']),
       (Typ: atPreVis;         Root: 'vis';           Ext: ['.uvd']),
       (Typ: atSeq;            Root: 'seq';           Ext: ['.seq']), // TES5
-      (Typ: atDialogViews;    Root: 'dialogueviews'; Ext: ['.xml']),
+      (Typ: atDialogueViews;  Root: 'dialogueviews'; Ext: ['.xml']),
       (Typ: atBookArt;        Root: 'bookart';       Ext: ['.dds', '.tga']), // TES3
       (Typ: atIcon;           Root: 'icons';         Ext: ['.dds', '.tga']), // TES3
       (Typ: atSplash;         Root: 'splash';        Ext: ['.dds', '.tga']) // TES3
