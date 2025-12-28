@@ -2205,7 +2205,7 @@ begin
     AddConst(cUnit, 'atMaterial',      ord(atMaterial));
     AddConst(cUnit, 'atMenu',          ord(atMenu));
     AddConst(cUnit, 'atMesh',          ord(atMesh));
-    AddConst(cUnit, 'atMusc',          ord(atMusic));
+    AddConst(cUnit, 'atMusic',         ord(atMusic));
     AddConst(cUnit, 'atPrevis',        ord(atPrevis));
     AddConst(cUnit, 'atProgram',       ord(atProgram));
     AddConst(cUnit, 'atScript',        ord(atScript));
