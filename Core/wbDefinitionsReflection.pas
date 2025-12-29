@@ -1,5 +1,7 @@
 unit wbDefinitionsReflection;
 
+{$I wbDefines.inc}
+
 interface
 
 uses

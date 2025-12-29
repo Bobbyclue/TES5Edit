@@ -2037,7 +2037,7 @@ end;
 
 procedure Misc_wbNormalizeResourceName(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := wbNormalizeResourceName(string(Args.Values[0]), Args.Values[1]);
+  Value := TwbAsset.GetAssetName(string(Args.Values[0]), '', Args.Values[1]);
 end;
 
 procedure Misc_wbStringListInString(var Value: Variant; Args: TJvInterpreterArgs);
@@ -2183,12 +2183,41 @@ begin
     AddConst(cUnit, 'csRefsBuild', ord(csRefsBuild));
     AddConst(cUnit, 'csAsCreatedEmpty', ord(csAsCreatedEmpty));
 
-    {TGameResourceType}
-    AddConst(cUnit, 'resMesh', ord(resMesh));
-    AddConst(cUnit, 'resTexture', ord(resTexture));
-    AddConst(cUnit, 'resSound', ord(resSound));
-    AddConst(cUnit, 'resMusic', ord(resMusic));
-    AddConst(cUnit, 'resMaterial', ord(resMaterial));
+    { TGameResourceType - Deprecated, use TwbAssetType }
+    AddConst(cUnit, 'resMesh',     ord(atMesh));
+    AddConst(cUnit, 'resTexture',  ord(atTexture));
+    AddConst(cUnit, 'resSound',    ord(atSound));
+    AddConst(cUnit, 'resMusic',    ord(atMusic));
+    AddConst(cUnit, 'resMaterial', ord(atMaterial));
+
+    { TwbAssetType }
+    AddConst(cUnit, 'atNone',          ord(atNone));
+    AddConst(cUnit, 'atBookArt',       ord(atBookArt));
+    AddConst(cUnit, 'atDialogueViews', ord(atDialogueViews));
+    AddConst(cUnit, 'atDistantLOD',    ord(atDistantLOD));
+    AddConst(cUnit, 'atFacegen',       ord(atFacegen));
+    AddConst(cUnit, 'atFont',          ord(atFont));
+    AddConst(cUnit, 'atGrass',         ord(atGrass));
+    AddConst(cUnit, 'atIcon',          ord(atIcon));
+    AddConst(cUnit, 'atInterface',     ord(atInterface));
+    AddConst(cUnit, 'atLODSettings',   ord(atLODSettings));
+    AddConst(cUnit, 'atLSData',        ord(atLSData));
+    AddConst(cUnit, 'atMaterial',      ord(atMaterial));
+    AddConst(cUnit, 'atMenu',          ord(atMenu));
+    AddConst(cUnit, 'atMesh',          ord(atMesh));
+    AddConst(cUnit, 'atMusic',         ord(atMusic));
+    AddConst(cUnit, 'atPrevis',        ord(atPrevis));
+    AddConst(cUnit, 'atProgram',       ord(atProgram));
+    AddConst(cUnit, 'atScript',        ord(atScript));
+    AddConst(cUnit, 'atSeq',           ord(atSeq));
+    AddConst(cUnit, 'atSound',         ord(atSound));
+    AddConst(cUnit, 'atSource',        ord(atSource));
+    AddConst(cUnit, 'atSpeedTree',     ord(atSpeedTree));
+    AddConst(cUnit, 'atSplash',        ord(atSplash));
+    AddConst(cUnit, 'atStrings',       ord(atStrings));
+    AddConst(cUnit, 'atTexture',       ord(atTexture));
+    AddConst(cUnit, 'atVideo',         ord(atVideo));
+    AddConst(cUnit, 'atVoice',         ord(atVoice));
 
     AddFunction(cUnit, 'Assigned', _Assigned, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ObjectToElement', ObjectToElement, 1, [varEmpty], varEmpty);
