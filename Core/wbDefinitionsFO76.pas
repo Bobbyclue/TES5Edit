@@ -15301,8 +15301,8 @@ begin
         ),
         wbInteger('Override', itU8, wbBoolEnum),
         wbInteger('Priority', itU8),
-        wbByteArray('Unknown')
-      ], cpNormal, True),
+        wbUnused(2)
+      ]).SetRequired,
 
       {--- Icon ---}
       wbICON,
