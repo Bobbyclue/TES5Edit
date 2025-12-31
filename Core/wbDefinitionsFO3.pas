@@ -7134,7 +7134,7 @@ begin
           ])),
         wbInteger('Override', itU8, wbBoolEnum),
         wbInteger('Priority', itU8),
-        wbByteArray('Unused')
+        wbUnused(2)
       ]).SetRequired,
 
       {followed by one of these: }

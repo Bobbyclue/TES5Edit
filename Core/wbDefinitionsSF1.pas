@@ -15441,8 +15441,8 @@ begin
         ),
         wbInteger('Override', itU8, wbBoolEnum),
         wbInteger('Priority', itU8),
-        wbByteArray('Unknown')
-      ], cpNormal, True),
+        wbUnused(2)
+      ]).SetRequired,
 
       {--- Weather ---}
       wbArrayS(RDWT, 'Weather Types', wbStructSK([0], 'Weather Type', [
