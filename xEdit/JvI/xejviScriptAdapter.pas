@@ -2203,7 +2203,7 @@ begin
     AddConst(cUnit, 'atLODSettings',   ord(atLODSettings));
     AddConst(cUnit, 'atLSData',        ord(atLSData));
     AddConst(cUnit, 'atMaterial',      ord(atMaterial));
-    AddConst(cUnit, 'atMenu',          ord(atMenu));
+    AddConst(cUnit, 'atMenus',         ord(atMenus));
     AddConst(cUnit, 'atMesh',          ord(atMesh));
     AddConst(cUnit, 'atMusic',         ord(atMusic));
     AddConst(cUnit, 'atPrevis',        ord(atPrevis));
