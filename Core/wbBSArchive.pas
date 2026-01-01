@@ -436,7 +436,7 @@ type
   const
     cDataFolders: array [0..1] of string = ('data', 'data files');
     cBSAssets: array [0..26] of TAssetDesc = (
-      (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
+      (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.psa', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
       (Typ: atTexture;        Root: 'textures';      Ext: ['.dds', '.tga', '.png']),
       (Typ: atMaterial;       Root: 'materials';     Ext: ['.bgsm', '.bgem']),
       (Typ: atVoice;          Root: 'sound\voice';   Ext: ['.lip', '.wav', '.xwm', '.mp3', '.ogg', '.fuz']),
@@ -661,6 +661,12 @@ begin
   if Length(Trim(aFileName)) < 2 then begin
     Result := '';
     Exit;
+  end;
+
+  // beth slop
+  if aFileName = #8'NOR' then begin
+    Result := '';
+    Exit
   end;
 
   var path := '\' + LowerCase(aFileName);
