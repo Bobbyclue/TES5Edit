@@ -1825,6 +1825,23 @@ begin
   wbContainerHandler.ResourceCopy(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
+{ TwbAsset }
+
+procedure TwbAsset_AssetTypeByExtension(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TwbAsset.AssetTypeByExtension(Args.Values[0]);
+end;
+
+procedure TwbAsset_AssetTypeByFolder(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TwbAsset.AssetTypeByFolder(Args.Values[0]);
+end;
+
+procedure TwbAsset_wbNormalizeResourceName(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TwbAsset.GetAssetName(string(Args.Values[0]), '', Args.Values[1]);
+end;
+
 
 { TwbFastStringList }
 
@@ -2035,11 +2052,6 @@ begin
     lst.Add(Pointer(Records[i]));
 end;
 
-procedure Misc_wbNormalizeResourceName(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TwbAsset.GetAssetName(string(Args.Values[0]), '', Args.Values[1]);
-end;
-
 procedure Misc_wbStringListInString(var Value: Variant; Args: TJvInterpreterArgs);
 var
   sl: TStringList;
@@ -2210,6 +2222,7 @@ begin
     AddConst(cUnit, 'atProgram',       ord(atProgram));
     AddConst(cUnit, 'atScript',        ord(atScript));
     AddConst(cUnit, 'atSeq',           ord(atSeq));
+    AddConst(cUnit, 'atShaders',       ord(atShaders));
     AddConst(cUnit, 'atSound',         ord(atSound));
     AddConst(cUnit, 'atSource',        ord(atSource));
     AddConst(cUnit, 'atSpeedTree',     ord(atSpeedTree));
@@ -2218,6 +2231,10 @@ begin
     AddConst(cUnit, 'atTexture',       ord(atTexture));
     AddConst(cUnit, 'atVideo',         ord(atVideo));
     AddConst(cUnit, 'atVoice',         ord(atVoice));
+
+    { TwbAsset }
+
+
 
     AddFunction(cUnit, 'Assigned', _Assigned, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ObjectToElement', ObjectToElement, 1, [varEmpty], varEmpty);
@@ -2407,7 +2424,12 @@ begin
     AddFunction(cUnit, 'ResourceOpenData', IwbContainerHandler_ResourceOpenData, 2, [varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'ResourceCopy', IwbContainerHandler_ResourceCopy, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
 
-    { IwbFastStringList }
+    { TwbAsset}
+    AddFunction(cUnit, 'AssetTypeByExtension', TwbAsset_AssetTypeByExtension, 1, [varEmpty], varEmpty);
+    AddFunction(cUnit, 'AssetTypeByFolder', TwbAsset_AssetTypeByFolder, 1, [varEmpty], varEmpty);
+    AddFunction(cUnit, 'wbNormalizeResourceName', TwbAsset_wbNormalizeResourceName, 2, [varEmpty, varEmpty], varEmpty);
+
+    { TwbFastStringList }
     AddClass('TwbFastStringList', TwbFastStringList, 'TwbFastStringList');
     AddGet(TwbFastStringList, 'Create', TwbFastStringList_Create, 0, [varEmpty], varEmpty);
 
@@ -2443,7 +2465,6 @@ begin
     //AddFunction(cUnit, 'wbMD5File', Misc_wbMD5File, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'wbFindREFRsByBase', Misc_wbFindRefrsByBase, 4, [varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbGetSiblingRecords', Misc_wbGetSiblingRecords, 4, [varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
-    AddFunction(cUnit, 'wbNormalizeResourceName', Misc_wbNormalizeResourceName, 2, [varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbStringListInString', Misc_wbStringListInString, 2, [varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'LocalizationGetStringsFromFile', Misc_LocalizationGetStringsFromFile, 2, [varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbFormIDErrorCheckLock', Misc_wbFormIDErrorCheckLock, 0, [], varEmpty);
