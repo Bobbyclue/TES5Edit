@@ -1056,7 +1056,9 @@ begin
       Continue;
 
     for var i := 0 to Pred(textures.Count) do
-      if TPath.IsPathRooted(textures[i].EditValue) then
+      if textures[i].EditValue = #8'NOR' then
+        Log.Add(#9 + textures[i].Path + ': Invalid texture ' + textures[i].EditValue)
+      else if TPath.IsPathRooted(textures[i].EditValue) then
         Log.Add(#9 + textures[i].Path + ': Absolute path ' + textures[i].EditValue);
 
     if nif.NifVersion = nfFO3 then begin

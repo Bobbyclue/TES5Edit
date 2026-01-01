@@ -227,6 +227,10 @@ begin
 
     var delim := '';
 
+    // beth slop
+    if newname = #8'NOR' then
+      newname := '';
+
     // detecting used delimiter
     // edge case when path contains both slashes \ and /, don't even ask why...
     if (Pos('\', newname) <> 0) and (Pos('/', newname) <> 0) then begin

@@ -108,7 +108,7 @@ var
 
       // group by material file in the Name field for FO4 meshes
       if (nif.NifVersion = nfFO4) and (shader.BlockType = 'BSLightingShaderProperty') and (shader.EditValues['Name'] <> '') then begin
-        Result := wbNormalizeResourceName(shader.EditValues['Name'], resMaterial);
+        Result := ExtractFileName(shader.EditValues['Name']);
         Exit;
       end;
 
@@ -126,7 +126,7 @@ var
 
       for j := 0 to Pred(el.Count) do begin
         if Result <> '' then Result := Result + ',';
-        Result := Result + wbNormalizeResourceName(el[j].EditValue, resTexture);
+        Result := Result + ExtractFileName(el[j].EditValue);
         if not fAllFeatures then
           Break;
       end;
@@ -149,7 +149,7 @@ var
           if not Assigned(prop) then
             Continue;
 
-          Result := wbNormalizeResourceName(prop.EditValues['File Name'], resTexture);
+          Result := ExtractFileName(prop.EditValues['File Name']);
           Exit;
         end
 
@@ -168,7 +168,7 @@ var
 
           for j := 0 to Pred(el.Count) do begin
             if Result <> '' then Result := Result + ',';
-            Result := Result + wbNormalizeResourceName(el[j].EditValue, resTexture);
+            Result := Result + ExtractFileName(el[j].EditValue);
             if not fAllFeatures then
               Break;
           end;
@@ -237,7 +237,7 @@ begin
       if not (child.IsNiObject('NiTriBasedGeom') or child.IsNiObject('BSTriShape')) then
         Continue;
 
-      token := GetUsedTexture(child);
+      token := LowerCase(GetUsedTexture(child));
       if token = '' then
         Continue;
 

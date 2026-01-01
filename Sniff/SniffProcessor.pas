@@ -17,7 +17,6 @@ uses
 type
   TGameType = (gtTES3, gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4);
   TGameTypes = set of TGameType;
-  TGameResourceType = (resMesh, resTexture, resSound, resMusic, resMaterial);
 
   TProcBase = class;
 
@@ -105,7 +104,6 @@ type
   end;
 
 function SelectFolder(var aPath: string): Boolean;
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
 function TextToString(const aText: string): string;
 function StringToText(const aText: string): string;
 
@@ -130,36 +128,6 @@ begin
   finally
     Free;
   end;
-end;
-
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
-var
-  i: integer;
-begin
-  Result := Trim(StringReplace(LowerCase(aName), '/', '\', [rfReplaceAll]));
-  if Length(Result) < 2 then
-    Exit;
-
-  // absolute path, cut everything before Data or leave only file name
-  i := Pos('data\', Result);
-  if i <> 0 then
-    Delete(Result, 1, Pred(i));
-
-  // starts with slash, remove it
-  if Result[1] = '\' then Delete(Result, 1, 1);
-  // starts with Data, remove it
-  if Copy(Result, 1, 5) = 'data\' then Delete(Result, 1, 5);
-  // root folder in Data for different resource types
-  if (aResType = resMesh) and (Copy(Result, 1, 7) <> 'meshes\') then
-    Result := 'meshes\' + Result
-  else if (aResType = resTexture) and (Copy(Result, 1, 9) <> 'textures\') then
-    Result := 'textures\' + Result
-  else if (aResType = resSound) and (Copy(Result, 1, 6) <> 'sound\') then
-    Result := 'sound\' + Result
-  else if (aResType = resMusic) and (Copy(Result, 1, 6) <> 'music\') then
-    Result := 'music\' + Result
-  else if (aResType = resMaterial) and (Copy(Result, 1, 10) <> 'materials\') then
-    Result := 'materials\' + Result;
 end;
 
 function TextToString(const aText: string): string;
@@ -318,8 +286,6 @@ procedure TProcManager.SetIniFile(aFile: TMemIniFile);
 begin
   fSettings := aFile;
 end;
-
-
 
 
 constructor TProcBase.Create(aManager: TProcManager);
