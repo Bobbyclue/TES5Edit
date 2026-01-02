@@ -443,54 +443,64 @@ begin
     end;
 
   end;
+end;
+
+//==============================================================================
+procedure CheckCollisionMOPP(aObj: Pointer; Log: TStrings);
+begin
+  var nif: TwbNifFile := aObj;
+
+  if not (nif.NifVersion in [nfTES4, nfFO3, nfTES5, nfSSE]) then
+    Exit;
+
+  if not Assigned(nif.BlockByType('bhkMoppBvTreeShape')) then
+    Exit;
 
   // MOPP collision complexity check
-  if Assigned(nif.BlockByType('bhkMoppBvTreeShape')) then begin
-    var tris := 0; var coltris := 0;
-    for var i := 0 to Pred(nif.BlocksCount) do begin
-      var block := nif.Blocks[i];
+  var tris := 0; var coltris := 0;
+  for var i := 0 to Pred(nif.BlocksCount) do begin
+    var block := nif.Blocks[i];
 
-      if block.BlockType = 'bhkNiTriStripsShape' then begin
-        for var data in block.Elements['Strips Data'] do begin
-          var shape := TwbNifBlock(data.LinksTo);
-          if not Assigned(shape) then Continue;
-          if shape.BlockType = 'NiTriStripsData' then
-            Inc(coltris, Integer(shape.NativeValues['Num Triangles']));
+    if block.BlockType = 'bhkNiTriStripsShape' then begin
+      for var data in block.Elements['Strips Data'] do begin
+        var shape := TwbNifBlock(data.LinksTo);
+        if not Assigned(shape) then Continue;
+        if shape.BlockType = 'NiTriStripsData' then
+          Inc(coltris, Integer(shape.NativeValues['Num Triangles']));
+      end;
+    end
+
+    else if block.BlockType = 'hkPackedNiTriStripsData' then
+       Inc(coltris, block.Elements['Triangles'].Count)
+
+    else if block.BlockType = 'bhkCompressedMeshShapeData' then begin
+      Inc(coltris, block.Elements['Big Tris'].Count);
+      for var chunk in block.Elements['Chunks'] do begin
+        var stripslen := 0;
+        for var strip in chunk.Elements['Strip Lengths'] do begin
+          var s: Integer := strip.NativeValue;
+          Inc(coltris, s - 2);
+          Inc(stripslen, s);
         end;
-      end
+        Inc(coltris, (chunk.Elements['Indices'].Count - stripslen) div 3);
+      end;
+    end
 
-      else if block.BlockType = 'hkPackedNiTriStripsData' then
-         Inc(coltris, block.Elements['Triangles'].Count)
+    else if block.IsNiObject('NiTriBasedGeom') then begin
+      var data := TwbNifBlock(block.Elements['Data'].LinksTo);
+      if not Assigned(data) then Continue;
+      if data.IsNiObject('NiTriBasedGeomData') then
+        Inc(tris, Integer(data.NativeValues['Num Triangles']));
+    end
 
-      else if block.BlockType = 'bhkCompressedMeshShapeData' then begin
-        Inc(coltris, block.Elements['Big Tris'].Count);
-        for var chunk in block.Elements['Chunks'] do begin
-          var stripslen := 0;
-          for var strip in chunk.Elements['Strip Lengths'] do begin
-            var s: Integer := strip.NativeValue;
-            Inc(coltris, s - 2);
-            Inc(stripslen, s);
-          end;
-          Inc(coltris, (chunk.Elements['Indices'].Count - stripslen) div 3);
-        end;
-      end
+    else if block.IsNiObject('BSTriShape') then
+      Inc(tris, Integer(block.NativeValues['Num Triangles']));
+  end;
 
-      else if block.IsNiObject('NiTriBasedGeom') then begin
-        var data := TwbNifBlock(block.Elements['Data'].LinksTo);
-        if not Assigned(data) then Continue;
-        if data.IsNiObject('NiTriBasedGeomData') then
-          Inc(tris, Integer(data.NativeValues['Num Triangles']));
-      end
-
-      else if block.IsNiObject('BSTriShape') then
-        Inc(tris, Integer(block.NativeValues['Num Triangles']));
-    end;
-
-    if (tris > 10) and (coltris > 10) then begin
-      var ratio := Round(coltris / tris * 100);
-      if ratio > 50 then
-        Log.Add(#9 + Format('MOPP collision tris to geometry tris ratio is %d%% (%d/%d), poorly optimized collision', [ratio, coltris, tris]));
-    end;
+  if (tris > 10) and (coltris > 10) then begin
+    var ratio := Round(coltris / tris * 100);
+    if ratio > 50 then
+      Log.Add(#9 + Format('MOPP collision tris to geometry tris ratio is %d%% (%d/%d), poorly optimized collision', [ratio, coltris, tris]));
   end;
 end;
 
@@ -1056,7 +1066,7 @@ begin
       Continue;
 
     for var i := 0 to Pred(textures.Count) do
-      if textures[i].EditValue = #8'NOR' then
+      if not TPath.HasValidPathChars(textures[i].EditValue, False) then
         Log.Add(#9 + textures[i].Path + ': Invalid texture ' + textures[i].EditValue)
       else if TPath.IsPathRooted(textures[i].EditValue) then
         Log.Add(#9 + textures[i].Path + ': Absolute path ' + textures[i].EditValue);
@@ -2054,9 +2064,13 @@ begin
     'Some blocks must have specific name to work properly (BSX for BSXFlags, INV for BsInvMarker, etc.), "Weapon" nodes in non-skeletons, [TES4] unnamed NiMaterialProperty',
     CheckHardcodedBlockNames);
 
-  AddCheck('Collision issues', 'Meshes', ['.nif'],
-    'Moveable collision has zero mass or uses inertia system without inertia tensor matrix set (will break the physics not only for that object, but other objects using totally different meshes as well), Havok layer and motion settings, MOPP issues',
+  AddCheck('Collision Havok issues', 'Meshes', ['.nif'],
+    'Moveable collision has zero mass or uses inertia system without inertia tensor matrix set (will break the physics not only for that object, but other objects using totally different meshes as well), Havok layer and motion settings',
     CheckCollision);
+
+  AddCheck('Collision MOPP issues', 'Meshes', ['.nif'],
+    'Badly optimized MOPP collision using high poly shapes',
+    CheckCollisionMOPP);
 
   AddCheck('Check BSXFlags', 'Meshes', ['.nif'],
     'Check for invalid BSXFlags: Animated, Havok, Ragdoll, Complex, Addon, Editor Marker and Dynamic. Emittance flag is checked by "Invalid shader types and flags". Complex and Articulated affect grabbing behaviour only',

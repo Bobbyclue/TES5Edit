@@ -664,7 +664,7 @@ begin
   end;
 
   // beth slop
-  if aFileName = #8'NOR' then begin
+  if Pos(#8'NOR', aFileName) <> 0 then begin
     Result := '';
     Exit
   end;

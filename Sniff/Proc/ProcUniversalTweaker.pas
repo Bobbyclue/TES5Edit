@@ -338,8 +338,8 @@ begin
   end;
 
   fReportOnly := Frame.chkReport.Checked;
+  fNoOutput := fReportOnly;
 end;
-
 
 function ModifyElement(aBlock: TdfElement;
   const aPath, aValue, aOldPath, aOldValue: string;

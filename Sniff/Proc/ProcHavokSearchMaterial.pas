@@ -182,6 +182,7 @@ procedure TProcHavokSearchMaterial.OnStart;
 begin
   fMaterialSearch := Frame.cmbSearch.Text;
   fMaterialReplace := Frame.cmbReplace.Text;
+  fNoOutput := fMaterialReplace = '';
 
   //if (fMaterialSearch = '') and (fMaterialReplace = '') then
   // raise Exception.Create('Replace material must be set if the searched one is empty');

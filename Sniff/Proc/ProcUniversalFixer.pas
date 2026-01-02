@@ -228,7 +228,7 @@ begin
     var delim := '';
 
     // beth slop
-    if newname = #8'NOR' then
+    if Pos(#8'NOR', newname) <> 0 then
       newname := '';
 
     // detecting used delimiter
