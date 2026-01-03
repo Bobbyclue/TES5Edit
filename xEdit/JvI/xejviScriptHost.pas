@@ -635,6 +635,10 @@ begin
     FilterElementValue := Value;
     Done := True;
   end else
+  if SameText(Identifier, 'FilterByRegexComparison') then begin
+    FilterByRegexComparison := Value;
+    Done := True;
+  end else
   if SameText(Identifier, 'FilterByBaseEditorID') then begin
     FilterByBaseEditorID := Value;
     Done := True;

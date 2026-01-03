@@ -966,6 +966,8 @@ type
     FilterByElementValue: Boolean;
     FilterElementValue: string;
 
+    FilterByRegexComparison: Boolean;
+
     FilterByName: Boolean;
     FilterName: string;
 
@@ -13096,6 +13098,8 @@ begin
       FilterByElementValue := cbByElementValue.Checked;
       FilterElementValue := edElementValue.Text;
 
+      FilterByRegexComparison := cbRegexComparison.Checked;
+
       FilterByName := cbByName.Checked;
       FilterName := edName.Text;
 
@@ -13346,7 +13350,19 @@ begin
         Boolean(Script.CallFunction('Filter', [MainRecord]));
     end;
 
-    function CheckContainerForElementValue(const aElement: IwbElement; const aValue: string): Boolean;
+    function CheckValueRegex(const aRegex: string; const aComparisonText: string): Boolean;
+    begin
+      with TPerlRegEx.Create do try
+        Subject := aComparisonText;
+        RegEx := aRegex;
+        Options := [preCaseLess, preMultiLine];
+        Result := MatchAgain;
+      finally
+        Free;
+      end;
+    end;
+
+    function CheckContainerForElementValue(const aElement: IwbElement; const aValue: string; const abRegExCheck: boolean): Boolean;
     var
       Container: IwbContainerElementRef;
       i: integer;
@@ -13358,13 +13374,15 @@ begin
 
       if Container.ElementCount = 0 then
       begin
-        if Pos(aValue, UpperCase(aElement.Value)) > 0 then
+        if abRegExCheck then
+          Result := CheckValueRegex(aValue, aElement.Value)
+        else if Pos(aValue, UpperCase(aElement.Value)) > 0 then
           Result := True;
       end
       else
         for i := 0 to Pred(Container.ElementCount) do
         begin
-          Result := CheckContainerForElementValue(Container.Elements[i], aValue);
+          Result := CheckContainerForElementValue(Container.Elements[i], aValue, abRegExCheck);
           if Result then Break;
         end;
     end;
@@ -13400,9 +13418,19 @@ begin
 
                 (FilterDeleted and not MainRecord.IsDeleted) or
                 (Assigned(Signatures) and not Signatures.Find(MainRecord.Signature, Dummy)) or
-                (FilterByEditorID and (Pos(AnsiUpperCase(FilterEditorID), AnsiUpperCase(MainRecord.EditorID)) < 1)) or
-                (FilterByName and (Pos(AnsiUpperCase(FilterName), AnsiUpperCase(MainRecord.DisplayName[True])) < 1)) or
-                (FilterByElementValue and not CheckContainerForElementValue(MainRecord, UpperCase(FilterElementValue))) or
+                (FilterByEditorID and
+                  (
+                  (FilterByRegexComparison and not CheckValueRegex(FilterEditorID, MainRecord.EditorID)) or
+                  (not FilterByRegexComparison and (Pos(AnsiUpperCase(FilterEditorID), AnsiUpperCase(MainRecord.EditorID)) < 1))
+                  )
+                ) or
+                (FilterByName and
+                  (
+                  (FilterByRegexComparison and not CheckValueRegex(FilterName, MainRecord.DisplayName[True])) or
+                  (not FilterByRegexComparison and (Pos(AnsiUpperCase(FilterName), AnsiUpperCase(MainRecord.DisplayName[True])) < 1))
+                  )
+                ) or
+                (FilterByElementValue and not CheckContainerForElementValue(MainRecord, FilterElementValue, FilterByRegexComparison)) or
 
                 (FilterRequiresReference and
                   (
@@ -13418,8 +13446,18 @@ begin
 
                     (FilterRequiresBaseRecord and
                       (
-                        (FilterByBaseEditorID and (Pos(AnsiUpperCase(FilterBaseEditorID), AnsiUpperCase(BaseRecord.EditorID)) < 1)) or
-                        (FilterByBaseName and (Pos(AnsiUpperCase(FilterBaseName), AnsiUpperCase(BaseRecord.DisplayName[True])) < 1)) or
+                        (FilterByBaseEditorID and
+                          (
+                          (FilterByRegexComparison and CheckValueRegex(FilterBaseEditorID, BaseRecord.EditorID)) or
+                          (not FilterByRegexComparison and (Pos(AnsiUpperCase(FilterBaseEditorID), AnsiUpperCase(BaseRecord.EditorID)) < 1))
+                          )
+                        ) or
+                        (FilterByBaseName and
+                          (
+                          (FilterByRegexComparison and CheckValueRegex(FilterBaseName, BaseRecord.DisplayName[True])) or
+                          (not FilterByRegexComparison and (Pos(AnsiUpperCase(FilterBaseName), AnsiUpperCase(BaseRecord.DisplayName[True])) < 1))
+                          )
+                        ) or
                         (FilterByHasVWDMesh and (BaseRecord.HasVisibleWhenDistantMesh <> FilterHasVWDMesh))
                       )
                     ) or

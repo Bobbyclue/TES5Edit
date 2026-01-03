@@ -77,6 +77,7 @@ type
     cbHasPrecombinedMesh: TCheckBox;
     cbByElementValue: TCheckBox;
     edElementValue: TEdit;
+    cbRegexComparison: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure mniSelectionClick(Sender: TObject);
     procedure cmbPresetSelect(Sender: TObject);
@@ -307,6 +308,8 @@ begin
   if cbByElementValue.Checked <> Settings.ReadBool(Section, 'ByElementValue', False) then Exit;
   if edElementValue.Text <> Settings.ReadString(Section, 'ElementValue', '') then Exit;
 
+  if cbRegexComparison.Checked <> Settings.ReadBool(Section, 'RegexComparison', False) then Exit;
+
   if cbByBaseName.Checked <> Settings.ReadBool(Section, 'ByBaseName', False) then Exit;
   if edBaseName.Text <> Settings.ReadString(Section, 'BaseName', '') then Exit;
 
@@ -472,6 +475,8 @@ begin
   cbByElementValue.Checked := Settings.ReadBool(Section, 'ByElementValue', False);
   edElementvalue.Text := Settings.ReadString(Section, 'ElementValue', '');
 
+  cbRegexComparison.Checked := Settings.ReadBool(Section, 'RegexComparison', False);
+
   cbScaledActors.Checked := Settings.ReadBool(Section, 'ScaledActors', False);
 
   cbRecordSignature.Checked := Settings.ReadBool(Section, 'BySignature', False);
@@ -557,6 +562,8 @@ begin
 
   Settings.WriteBool(Section, 'ByElementValue', cbByElementValue.Checked);
   Settings.WriteString(Section, 'ElementValue', edElementValue.Text);
+
+  Settings.WriteBool(Section, 'RegexComparison', cbRegexComparison.Checked);
 
   Settings.WriteBool(Section, 'ScaledActors', cbScaledActors.Checked);
 
