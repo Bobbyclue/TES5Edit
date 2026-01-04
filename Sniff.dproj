@@ -65,7 +65,7 @@
         <DCC_DcuOutput>.\Temp\Sniff\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\Build</DCC_ExeOutput>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_UnitSearchPath>.\Core;.\Sniff;.\External\libdeflate;.\External\lz4-delphi;.\External\TForge\Source\Include;.\External\TForge\Source\Shared;.\External\TForge\Source\Engine\Forge;.\External\TForge\Source\Engine\Hashes;.\External\JsonDataObjects\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\External\JsonDataObjects\Source;.\External\lz4-delphi;.\Core;.\Sniff;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -81,7 +81,7 @@
         <DCC_UsePackage>DBXSqliteDriver;IndyIPCommon;RESTComponents;bindcompdbx;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;svnui;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;FireDAC;vcltouch;vcldb;bindcompfmx;svn;FireDACSqliteDriver;FireDACPgDriver;inetdb;soaprtl;DbxCommonDriver;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <PF_KeyStorePass>853C47DE5F92078FCF65E527A45EE36281C30502A02B979B97EE0FB48E3E3C9EDB56A384E34A1C6BC1AE577CFA9CC360BAE1367E044B22801678459DE5E522CEC91BF36FD558FAD0BFAFAF1107028597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>853C0DA36405559EA3757169D17BE32C819C055DA057979397B50FF08E723CD8DB05A38FE3431C4DC1CC572EFA9CC37ABAF83612047422E0166545C2E5F1228CC90AB922EE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
@@ -102,7 +102,7 @@
         <DCC_Optimize>true</DCC_Optimize>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
-        <PF_KeyStorePass>853C47DE645855D8A342711DD129E36881D0051BA043979397B40FAB8E363C94DB04A3D7E3401C39C1CC5752FACFC338BAF83613042722C3164B45C2E5BA22DBC90AF35DEE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>853C47DE5F92078FA359716CD16AE34E81C60513A04997C197A00FAA8E6C3C8BDB0CA39AE3191C62C1BB5726FAB3C317BAE9365104262291163B45CFE5942290C916F30AD544FACCD3C63B05722F8597F7D7</PF_KeyStorePass>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>

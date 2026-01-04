@@ -205,6 +205,7 @@ function wbNiObjectExists(const aNiObject: string): Boolean;
 procedure wbNiObjectCheckDups;
 }
 function wbNiObjectList: TArray<string>;
+function wbIsNiObject(const aNiObject, aTemplate: string): Boolean;
 function nifblk(const e: TdfElement): TwbNifBlock;
 
 implementation
