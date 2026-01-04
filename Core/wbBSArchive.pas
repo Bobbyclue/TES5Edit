@@ -657,19 +657,15 @@ class function TwbAsset.GetAssetName(const aFileName: string; const aRoot: strin
 var
   i: Integer;
 begin
-  // skip empty and one char "NOR" textures
-  if Length(Trim(aFileName)) < 2 then begin
-    Result := '';
+  Result := '';
+
+  // skip too short, empty and beth slop
+  if (Length(aFileName) < 2) or (Trim(aFileName) = '') or (Pos(#8'NOR', aFileName) <> 0) then
     Exit;
-  end;
 
-  // beth slop
-  if Pos(#8'NOR', aFileName) <> 0 then begin
-    Result := '';
-    Exit
-  end;
+  var path := '\' + StringReplace(LowerCase(aFileName), '/', '\', [rfReplaceAll]);
 
-  var path := '\' + LowerCase(aFileName);
+  try
 
   // searching for Data folder first
   for var f in cDataFolders do begin
@@ -697,13 +693,16 @@ begin
     Exit;
   end;
 
-  // last resort - detect asset type by extension and use its root
-  if AssetType = atNone then
+  // last resort - detect asset type by extension if not provided
+  if AssetType = atNone then begin
     AssetType := AssetTypeByExtension(path);
-  // priority goes to sound over voice and music (audio uses the same extensions mostly)
-  if AssetType in [atVoice, atMusic] then AssetType := atSound;
-  // unknonws go into meshes by default
-  if AssetType = atNone then AssetType := atMesh;
+    // priority goes to sound over voice and music (audio uses the same extensions mostly)
+    if AssetType in [atVoice, atMusic] then AssetType := atSound;
+    // unknonws go into meshes by default
+    if AssetType = atNone then AssetType := atMesh;
+  end;
+
+  // prepend with Asset type root
   for var a in cBSAssets do
     if a.Typ = AssetType then begin
       // use file name only from absolute paths
@@ -713,6 +712,11 @@ begin
         Result := a.Root + '\' + aFileName;
       Exit;
     end;
+
+  finally
+    Result := StringReplace(Result, '/', '\', [rfReplaceAll]);
+    Result := StringReplace(Result, '\\', '\', [rfReplaceAll]);
+  end;
 end;
 
 class function TwbAsset.GetNonASCII(const aFileName: string): string;
