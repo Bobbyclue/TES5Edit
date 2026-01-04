@@ -463,6 +463,7 @@ type
     pnlCancel: TPanel;
     btnCancel: TButton;
     bnPinned: TSpeedButton;
+    cbRegExFilter: TCheckBox;
 
     {--- Form ---}
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -745,6 +746,7 @@ type
 
     procedure btnCancelClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure cbRegExFilterClick(Sender: TObject);
   protected
     OverrideViewFocusedNode: PVirtualNode;
     function GetViewFocusedNode: PVirtualNode;
@@ -2170,6 +2172,12 @@ end;
 function TfrmMain.ByRefSelectionIncludesOnlyDeepCopyRecords(aSelection: TDynMainRecords): Boolean;
 begin
   Result := False;
+end;
+
+procedure TfrmMain.cbRegExFilterClick(Sender: TObject);
+begin
+  if edFileNameFilter.Text <> '' then
+    edFileNameFilterChange(Sender);
 end;
 
 procedure TfrmMain.ConflictLevelForMainRecord(const aMainRecord: IwbMainRecord; out aConflictAll: TConflictAll; out aConflictThis: TConflictThis);
@@ -5699,20 +5707,41 @@ procedure TfrmMain.edFileNameFilterChange(Sender: TObject);
 var
   SearchText : string;
   Node       : PVirtualNode;
+  FilterRegex: TPerlRegEx;
 begin
+  edFileNameFilter.Color := clWindow;
   SearchText := edFileNameFilter.Text;
-  SearchText := SearchText.ToLowerInvariant;
+  if not cbRegExFilter.Checked then
+    SearchText := SearchText.ToLowerInvariant;
   with vstNav do begin
     BeginUpdate;
+    FilterRegex := TPerlRegEx.Create;
     try
-      Node := GetFirst;
-      while Assigned(Node) do begin
-        IsVisible[Node] := not ((SearchText <> '') and
-          not Text[Node, 0, False].ToLowerInvariant.Contains(SearchText));
-        Node := GetNextSibling(Node);
+      try
+        FilterRegex.RegEx := SearchText;
+        FilterRegex.Options := [preCaseLess];
+        Node := GetFirst;
+        while Assigned(Node) do begin
+          if (SearchText <> '') and cbRegExFilter.Checked then
+          begin
+            FilterRegex.Subject := Text[Node, 0, False];
+            IsVisible[Node] := FilterRegex.Match;
+          end
+          else
+            IsVisible[Node] := not ((SearchText <> '') and
+              not Text[Node, 0, False].ToLowerInvariant.Contains(SearchText));
+          Node := GetNextSibling(Node);
+        end;
+      except
+        on E: ERegularExpressionError do
+        begin
+          edFileNameFilter.Color := wbLighter(clRed, 0.85);
+          // Ignore regex errors that can occur while typing
+        end;
       end;
     finally
       EndUpdate;
+      FilterRegex.Free;
     end;
   end;
 end;
