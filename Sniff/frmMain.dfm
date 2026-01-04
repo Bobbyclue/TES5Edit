@@ -475,6 +475,19 @@ object FormMain: TFormMain
       ShowCaption = False
       TabOrder = 1
     end
+    object edProcFilter: TLabeledEdit
+      Left = 56
+      Top = 2
+      Width = 192
+      Height = 24
+      EditLabel.Width = 34
+      EditLabel.Height = 24
+      EditLabel.Caption = 'Filter:'
+      LabelPosition = lpLeft
+      TabOrder = 2
+      Text = ''
+      OnChange = edProcFilterChange
+    end
   end
   object menuPopup: TPopupMenu
     AutoHotkeys = maManual

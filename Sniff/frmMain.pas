@@ -54,6 +54,7 @@ type
     Label2: TLabel;
     edOutput: TComboBox;
     Label3: TLabel;
+    edProcFilter: TLabeledEdit;
     procedure FormCreate(Sender: TObject);
     procedure lvProcsSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
@@ -66,6 +67,7 @@ type
     procedure lblProcessedFilesTitleClick(Sender: TObject);
     procedure mniStyleClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure edProcFilterChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -74,12 +76,13 @@ type
     Settings: TMemIniFile;
     Manager: TProcManager;
     ProcessedFiles: TArray<String>;
-    Procs: array of TProcBase;
+    Procs: TProcBases;
     Proc: TProcBase;
     ProcFrame: TFrame;
     bAutoMode: Boolean;
     procedure SniffMessage(const aText: string);
     procedure AddProc(const aGroup: string; aProc: TProcBase);
+    procedure ShowProcs(const aProcs: TProcBases);
 
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -139,6 +142,7 @@ uses
   ProcConvertRootNode,
   ProcUnskinMesh,
   ProcMergeShapes,
+  ProcMergeProperties,
   ProcWallsReflectionFlag,
   ProcSoftParticles,
   ProcUniversalTweaker,
@@ -229,13 +233,25 @@ end;
 
 procedure TFormMain.AddProc(const aGroup: string; aProc: TProcBase);
 begin
-  SetLength(Procs, Succ(Length(Procs)));
-  Procs[Pred(Length(Procs))] := aProc;
-  with lvProcs.Items.Add do begin
-    Caption := aProc.Title;
-    for var i := 0 to Pred(lvProcs.Groups.Count) do
-      if lvProcs.Groups[i].Header = aGroup then
-        GroupID := lvProcs.Groups[i].GroupID;
+  Procs := Procs + [aProc];
+  for var i := 0 to Pred(lvProcs.Groups.Count) do
+    if lvProcs.Groups[i].Header = aGroup then
+      aProc.GroupID := lvProcs.Groups[i].GroupID;
+end;
+
+procedure TFormMain.ShowProcs(const aProcs: TProcBases);
+begin
+  lvProcs.Items.BeginUpdate;
+  try
+    lvProcs.Clear;
+    for var p in aProcs do
+      with lvProcs.Items.Add do begin
+        Caption := p.Title;
+        GroupID := p.GroupID;
+        Data := p;
+      end;
+  finally
+    lvProcs.Items.EndUpdate;
   end;
 end;
 
@@ -324,6 +340,7 @@ begin
   AddProc('NIF', TProcVertexPaint.Create(Manager));
   AddProc('NIF', TProcGroupShapes.Create(Manager));
   AddProc('NIF', TProcMergeShapes.Create(Manager));
+  AddProc('NIF', TProcMergeProperties.Create(Manager));
   AddProc('NIF', TProcRemoveNodes.Create(Manager));
   AddProc('NIF', TProcRemoveUnusedNodes.Create(Manager));
   AddProc('NIF', TProcConvertRootNode.Create(Manager));
@@ -362,6 +379,8 @@ begin
   AddProc('Shader', TProcShaderFlagsUpdate.Create(Manager));
   AddProc('Shader', TProcWallsReflectionFlag.Create(Manager));
   AddProc('Shader', TProcSoftParticles.Create(Manager));
+
+  ShowProcs(Procs);
 
   //ShowScrollBar(lvProcs.Handle, SB_HORZ, False);
 
@@ -464,10 +483,10 @@ begin
   Settings.WriteBool('Main', 'InputSubDir', chkInputSubdir.Checked);
   Settings.WriteBool('Main', 'SkipOnErrors', chkSkipOnErrors.Checked);
   Settings.WriteBool('Main', 'OutputAll', chkOutputAll.Checked);
-  Settings.WriteString('Main', 'Operation', Procs[lvProcs.ItemIndex].Title);
-
-  if Assigned(Proc) then
+  if Assigned(Proc) then begin
+    Settings.WriteString('Main', 'Operation', Proc.Title);
     Proc.OnHide;
+  end;
 
   if Assigned(ProcFrame) then
     FreeAndNil(ProcFrame);
@@ -503,13 +522,41 @@ begin
   end;
 end;
 
+procedure TFormMain.edProcFilterChange(Sender: TObject);
+begin
+  var f := LowerCase(Trim(edProcFilter.Text));
+  var filtered: TProcBases;
+  var selected := '';
+  if Assigned(Proc) then
+    selected := Proc.Title;
+  for var p in Procs do
+    if (f = '') or (Pos(f, LowerCase(p.Title)) <> 0) then
+      filtered := filtered + [p];
+
+  ShowProcs(filtered);
+
+  for var item in lvProcs.Items do
+    if item.Caption = selected then begin
+      lvProcs.Selected := item;
+      Break;
+    end;
+
+  if not Assigned(lvProcs.Selected) and (Length(filtered) <> 0) then
+    lvProcs.ItemIndex := 0;
+
+  if Assigned(lvProcs.Selected) then
+    lvProcs.Selected.MakeVisible(False);
+
+  lvProcsSelectItem(lvProcs, lvProcs.Selected, True);
+end;
+
 procedure TFormMain.lvProcsSelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
-  if not Selected then
+  if not Selected or not Assigned(Item) then
     Exit;
 
-  if Proc = Procs[Item.Index] then
+  if Proc = Item.Data then
     Exit;
 
   if Assigned(Proc) then
@@ -518,7 +565,7 @@ begin
   if Assigned(ProcFrame) then
     FreeAndNil(ProcFrame);
 
-  Proc := Procs[Item.Index];
+  Proc := Item.Data;
 
   Caption := Proc.Title + ' - ' + sSniffTitle;
   Application.Title := Caption;
@@ -530,7 +577,7 @@ begin
   lblProcessedFiles.Caption := Proc.ExtensionNames;
 
   pnlOutput.ShowCaption := Proc.NoOutput;
-  for var i: Integer := 0 to Pred(pnlOutput.ControlCount) do
+  for var i := 0 to Pred(pnlOutput.ControlCount) do
     pnlOutput.Controls[i].Visible := not Proc.NoOutput;
 
   edThreads.Enabled := Proc.Threads = 0;
@@ -564,7 +611,8 @@ begin
     pnlOperation.Visible := True;
     pnlInput.Visible := True;
     pnlOutput.Visible := True;
-    lvProcs.Selected.MakeVisible(False);
+    if Assigned(lvProcs.Selected) then
+      lvProcs.Selected.MakeVisible(False);
     lvProcs.SetFocus;
     btnProcess.Caption := 'Process';
   end

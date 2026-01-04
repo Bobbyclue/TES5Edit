@@ -19,6 +19,7 @@ type
   TGameTypes = set of TGameType;
 
   TProcBase = class;
+  TProcBases = array of TProcBase;
 
   TProcessObject = class
     FileName: string;
@@ -64,6 +65,7 @@ type
   TProcBase = class
   protected
     fManager: TProcManager;
+    fGroupID: Integer;
     fTitle: string;
     fSupportedGames: TGameTypes;
     fExtensions: array of string;
@@ -95,6 +97,7 @@ type
     procedure OnStart; virtual;
     procedure OnStop; virtual;
 
+    property GroupID: Integer read fGroupID write fGroupID;
     property Title: string read fTitle;
     property NoOutput: Boolean read fNoOutput;
     property Threads: Integer read fThreads write fThreads;
@@ -223,7 +226,7 @@ begin
     AddMessage('Updated: ' + infile);
     AtomicIncrement(fModifiedCount);
   end else
-    AddMessage('Unchanged: ' + infile)
+    AddMessage('Unchanged: ' + infile);
 end;
 
 procedure TProcManager.AddMessage(const aText: string);

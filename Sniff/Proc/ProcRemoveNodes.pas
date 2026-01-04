@@ -148,7 +148,7 @@ var
     end;
   end;
 
-  begin
+begin
   bChanged := False;
   nif := TwbNifFile.Create;
   nif.Options := [nfoCollapseLinkArrays, nfoRemoveUnusedStrings];

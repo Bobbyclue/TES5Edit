@@ -43,6 +43,7 @@ uses
   ProcInertiaUpdate in 'Sniff\Proc\ProcInertiaUpdate.pas' {Frame1: TFrame},
   ProcJamAnim in 'Sniff\Proc\ProcJamAnim.pas' {FrameJamAnim: TFrame},
   ProcJsonConverter in 'Sniff\Proc\ProcJsonConverter.pas' {FrameJsonConverter: TFrame},
+  ProcMergeProperties in 'Sniff\Proc\ProcMergeProperties.pas' {FrameMergeProperties: TFrame},
   ProcMergeShapes in 'Sniff\Proc\ProcMergeShapes.pas' {FrameMergeShapes: TFrame},
   ProcMoppUpdate in 'Sniff\Proc\ProcMoppUpdate.pas' {FrameMoppUpdate: TFrame},
   ProcOptimize in 'Sniff\Proc\ProcOptimize.pas' {FrameOptimize: TFrame},
