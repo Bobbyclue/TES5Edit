@@ -56,12 +56,12 @@ type
   TTweakOldValueModes = set of TTweakOldValueMode;
 
   TTweakNewValueMode = (nvmSet = 0, nvmAdd, nvmMul, nvmReplace, nvmPrepend, nvmAppend,
-    nvmAnd, nvmAndNot, nvmOr, nvmRemove);
+    nvmAnd, nvmAndNot, nvmOr, nvmRemove, nvmRound);
   TTweakNewValueModes = set of TTweakNewValueMode;
 
 const
   MathOld: TTweakOldValueModes = [ovmGreater, ovmLesser, ovmAnd, ovmAndNot];
-  MathNew: TTweakNewValueModes = [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr];
+  MathNew: TTweakNewValueModes = [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound];
 
 type
   TProcUniversalTweaker = class(TProcBase)
@@ -161,11 +161,11 @@ begin
     chkInherited.Checked := B['sDescendants'];
     edPath.Text := S['sPath'];
     edPathChange(nil);
-    cmbNewValueMode.ItemIndex := I['iValueMode'];
+    cmbNewValueMode.ItemIndex := cmbNewValueMode.Items.IndexOfObject(TObject(I['iValueMode']));
     edValue.Text := S['sValue'];
     chkOldValueCheck.Checked := B['bOldValueCheck'];
     edOldPath.Text := S['sOldPath'];
-    cmbOldValueMode.ItemIndex := I['iOldValueMode'];
+    cmbOldValueMode.ItemIndex := cmbOldValueMode.Items.IndexOfObject(TObject(I['iOldValueMode']));
     edOldValue.Text := S['sOldValue'];
   end;
   fPreset := s;
@@ -185,11 +185,11 @@ begin
     S['sBlocks'] := edBlocks.Text;
     B['sDescendants'] := chkInherited.Checked;
     S['sPath'] := edPath.Text;
-    I['iValueMode'] := cmbNewValueMode.ItemIndex;
+    I['iValueMode'] := Integer(cmbNewValueMode.Items.Objects[cmbNewValueMode.ItemIndex]);
     S['sValue'] := edValue.Text;
     B['bOldValueCheck'] := chkOldValueCheck.Checked;
     S['sOldPath'] := edOldPath.Text;
-    I['iOldValueMode'] := cmbOldValueMode.ItemIndex;
+    I['iOldValueMode'] := Integer(cmbOldValueMode.Items.Objects[cmbOldValueMode.ItemIndex]);
     S['sOldValue'] := edOldValue.Text;
   end;
 
@@ -250,16 +250,44 @@ const
     '"Trim whitespaces from the Name field":{"sBlocks":"NiObjectNET","sDescendants":true,"sPath":"Name","iValueMode":3,"sValue":"","bOldValueCheck":true,"sOldPath":"","iOldValueMode":10,"sOldValue":"^\\s*|\\s*$"}}'
   ];
 begin
+  Frame.cmbNewValueMode.Items.AddObject('Set', TObject(nvmSet));
+  Frame.cmbNewValueMode.Items.AddObject('Add', TObject(nvmAdd));
+  Frame.cmbNewValueMode.Items.AddObject('Mul', TObject(nvmMul));
+  Frame.cmbNewValueMode.Items.AddObject('Round', TObject(nvmRound));
+  Frame.cmbNewValueMode.Items.AddObject('Replace with', TObject(nvmReplace));
+  Frame.cmbNewValueMode.Items.AddObject('Prepend str', TObject(nvmPrepend));
+  Frame.cmbNewValueMode.Items.AddObject('Append str', TObject(nvmAppend));
+  Frame.cmbNewValueMode.Items.AddObject('Remove str', TObject(nvmRemove));
+  Frame.cmbNewValueMode.Items.AddObject('AND &', TObject(nvmAnd));
+  Frame.cmbNewValueMode.Items.AddObject('AND NOT &!', TObject(nvmAndNot));
+  Frame.cmbNewValueMode.Items.AddObject('OR |', TObject(nvmOr));
+
+  Frame.cmbOldValueMode.Items.AddObject('=', TObject(ovmEqual));
+  Frame.cmbOldValueMode.Items.AddObject('<>', TObject(ovmNotEqual));
+  Frame.cmbOldValueMode.Items.AddObject('>', TObject(ovmGreater));
+  Frame.cmbOldValueMode.Items.AddObject('<', TObject(ovmLesser));
+  Frame.cmbOldValueMode.Items.AddObject('Contains', TObject(ovmContains));
+  Frame.cmbOldValueMode.Items.AddObject('Doesn''t contain', TObject(ovmDoesntContain));
+  Frame.cmbOldValueMode.Items.AddObject('Starts with', TObject(ovmStartsWith));
+  Frame.cmbOldValueMode.Items.AddObject('Ends with', TObject(ovmEndsWith));
+  Frame.cmbOldValueMode.Items.AddObject('Regular Expr', TObject(ovmRegExp));
+  Frame.cmbOldValueMode.Items.AddObject('AND &', TObject(ovmAnd));
+  Frame.cmbOldValueMode.Items.AddObject('AND NOT &!', TObject(ovmAndNot));
+
   try
     Frame.chkReport.Checked := StorageGetBool('bReportOnly', Frame.chkReport.Checked);
     Frame.edBlocks.Text := StorageGetString('sBlocks', Frame.edBlocks.Text);
     Frame.chkInherited.Checked := StorageGetBool('bDescendants', Frame.chkInherited.Checked);
     Frame.edPath.Text := StorageGetString('sPath', Frame.edPath.Text);
-    Frame.cmbNewValueMode.ItemIndex := StorageGetInteger('iValueMode', Frame.cmbNewValueMode.ItemIndex);
+    var i := Frame.cmbNewValueMode.Items.IndexOfObject(TObject(StorageGetInteger('iValueMode', 0)));
+    if i = -1 then i := 0;
+    Frame.cmbNewValueMode.ItemIndex := i;
     Frame.edValue.Text := StorageGetString('sValue', Frame.edValue.Text);
     Frame.edOldPath.Text := StorageGetString('sOldPath', Frame.edOldPath.Text);
     Frame.chkOldValueCheck.Checked := StorageGetBool('bOldValueCheck', Frame.chkOldValueCheck.Checked);
-    Frame.cmbOldValueMode.ItemIndex := StorageGetInteger('iOldValueMode', Frame.cmbOldValueMode.ItemIndex);
+    i := Frame.cmbOldValueMode.Items.IndexOfObject(TObject(StorageGetInteger('iOldValueMode', 0)));
+    if i = -1 then i := 0;
+    Frame.cmbOldValueMode.ItemIndex := i;
     Frame.edOldValue.Text := StorageGetString('sOldValue', Frame.edOldValue.Text);
     Frame.chkOldValueCheckClick(nil);
   except end;
@@ -282,11 +310,11 @@ begin
   StorageSetString('sBlocks', Frame.edBlocks.Text);
   StorageSetBool('bDescendants', Frame.chkInherited.Checked);
   StorageSetString('sPath', Frame.edPath.Text);
-  StorageSetInteger('iValueMode', Frame.cmbNewValueMode.ItemIndex);
+  StorageSetInteger('iValueMode', Integer(Frame.cmbNewValueMode.Items.Objects[Frame.cmbNewValueMode.ItemIndex]));
   StorageSetString('sValue', Frame.edValue.Text);
   StorageSetString('sOldPath', Frame.edOldPath.Text);
   StorageSetBool('bOldValueCheck', Frame.chkOldValueCheck.Checked);
-  StorageSetInteger('iOldValueMode', Frame.cmbOldValueMode.ItemIndex);
+  StorageSetInteger('iOldValueMode', Integer(Frame.cmbOldValueMode.Items.Objects[Frame.cmbOldValueMode.ItemIndex]));
   StorageSetString('sOldValue', Frame.edOldValue.Text);
   StorageSetBool('bReportOnly', Frame.chkReport.Checked);
   if Frame.fPresetsChanged then
@@ -316,16 +344,24 @@ begin
 
   fValueMode := TTweakNewValueMode(Frame.cmbNewValueMode.ItemIndex);
   fValue := Frame.edValue.Text;
+  if (fValueMode = nvmRound) and (fValue = '') then
+    fValue := '1';
 
-  fOldPath := Frame.edOldPath.Text;
   fOldValueCheck := Frame.chkOldValueCheck.Checked;
+  if fOldValueCheck then begin
+    fOldPath := Frame.edOldPath.Text;
+    fOldValue := Frame.edOldValue.Text;
+  end
+  else begin
+    fOldPath := '';
+    fOldValue := '';
+  end;
   fOldValueMode := TTweakOldValueMode(Frame.cmbOldValueMode.ItemIndex);
-  fOldValue := Frame.edOldValue.Text;
 
   if (fValueMode = nvmReplace) and (not fOldValueCheck or not (fOldValueMode in [ovmContains, ovmStartsWith, ovmEndsWith, ovmRegExp]) or (fOldValue = '')) then
     raise Exception.Create('When replacing, if field must be checked using "Contains", "Start with", "Ends with" or "Regular Expr" with non-empty value');
 
-  if fValueMode in [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr] then try
+  if fValueMode in [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound] then try
     dfStrToFloat(fValue);
   except
     raise Exception.Create('Value must be a number');
@@ -402,10 +438,8 @@ begin
 
   // perform all checks against another element if provided
   if aOldPath <> '' then
-    //CurrentValue := aBlock.EditValues[aOldPath]
     CurrentValue := GetEditValue(aOldPath, aOldValueMode in MathOld)
   else
-    //CurrentValue := GetEditValue;
     CurrentValue := GetEditValue(aPath, aOldValueMode in MathOld);
 
   Matched := not aOldValueCheck;
@@ -434,13 +468,13 @@ begin
 
   // if we were checking another element, then get the actual value for tweaking
   if aOldPath <> '' then
-    //CurrentValue := GetEditValue;
     CurrentValue := GetEditValue(aPath, aValueMode in MathNew);
 
   case aValueMode of
     nvmSet:     NewValue := aValue;
     nvmAdd:     if ToFloat then NewValue := dfFloatToStr(FloatCurrentValue + FloatNewValue);
     nvmMul:     if ToFloat then NewValue := dfFloatToStr(FloatCurrentValue * FloatNewValue);
+    nvmRound:   if ToFloat then NewValue := dfFloatToStr(Round(FloatCurrentValue / FloatNewValue) * FloatNewValue);
     nvmAnd:     if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) and Trunc(FloatNewValue));
     nvmAndNot:  if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) and not Trunc(FloatNewValue));
     nvmOr:      if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) or Trunc(FloatNewValue));
@@ -470,7 +504,7 @@ begin
   else
     aBlock.EditValue := NewValue;
 
-  Result := CurrentValue <> GetEditValue(aPath, aValueMode in MathNew);
+  Result := OriginalValue <> GetEditValue(aPath, False);
   if Assigned(Log) and Result then begin
     var p := aBlock.Path;
     if aPath <> '' then p := p + '\' + aPath;

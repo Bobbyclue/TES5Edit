@@ -184,9 +184,6 @@ begin
   fMaterialReplace := Frame.cmbReplace.Text;
   fNoOutput := fMaterialReplace = '';
 
-  //if (fMaterialSearch = '') and (fMaterialReplace = '') then
-  // raise Exception.Create('Replace material must be set if the searched one is empty');
-
   if (fMaterialSearch = fMaterialReplace) and (fMaterialSearch <> '') then
     raise Exception.Create('Searched and replacing materials must be different');
 end;

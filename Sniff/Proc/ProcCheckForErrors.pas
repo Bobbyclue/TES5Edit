@@ -443,6 +443,16 @@ begin
     end;
 
   end;
+
+  for var block in nif.BlocksByType('bhkConstraint', True) do begin
+    var s := 'Ragdoll';
+    if block.BlockType = 'bhkMalleableConstraint' then s := 'Hinge\' + s else
+    if block.BlockType = 'bhkBreakableConstraint' then s := 'Constraint Data\' + s;
+    var el := block.Elements[s + '\Cone Max Angle'];
+    if Assigned(el) then
+      if SameValue(el.NativeValue, 0.0) then
+        Log.Add(#9 + el.Path+ ': 0.0 value causes jittering');
+  end;
 end;
 
 //==============================================================================
