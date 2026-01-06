@@ -9895,7 +9895,7 @@ begin
     26, 'Navmesh - Filter (Collision Geometry)',
     27, 'Navmesh - Bounding Box (Collision Geometry)',
     28, 'Reflected By Auto Water',
-    29, 'Don''t Have Settle',
+    29, 'Don''t Havok Settle',
     30, 'Navmesh - Ground',
     31, 'Multibound'
     ])).SetFlagHasDontShow(16, wbFlagREFRInteriorDontShow)
