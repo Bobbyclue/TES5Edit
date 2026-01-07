@@ -1102,7 +1102,7 @@ procedure ProcessTES5(e: IInterface);
 var
   ent, ents: IInterface;
   sig, s: string;
-  i, DisabledClouds: Integer;
+  i, DisabledClouds: Cardinal;
   sl: TStringList;
 begin
   ScanForPapyrusScripts(ElementBySignature(e, 'VMAD'));
@@ -1333,7 +1333,7 @@ procedure ProcessFO4(e: IInterface);
 var
   ent, ents, ents2, ents3: IInterface;
   sig, s: string;
-  i, j, k, DisabledClouds: Integer;
+  i, j, k, DisabledClouds: Cardinal;
   sl: TStringList;
 begin
   ScanForPapyrusScripts(ElementBySignature(e, 'VMAD'));
