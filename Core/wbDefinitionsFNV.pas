@@ -8504,17 +8504,7 @@ begin
   wbRecord(RCCT, 'Recipe Category', [
     wbEDIDReq,
     wbFULL,
-    wbInteger(DATA, 'Flags', itU8,
-      wbFlags(wbSparseFlags([
-        0, 'Subcategory?',
-        1, 'Unknown 1',
-        2, 'Unknown 2',
-        3, 'Unknown 3',
-        4, 'Unknown 4',
-        5, 'Unknown 5',
-        6, 'Unknown 6',
-        7, 'Unknown 7'
-      ]))).IncludeFlag(dfCollapsed, wbCollapseFlags)
+    wbInteger(DATA, 'Subcategory', itU8, wbBoolEnum).SetAfterLoad(wbRecipeCategoryDataAfterLoad)
   ]);
 
   wbIngredient :=
