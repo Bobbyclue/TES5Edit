@@ -1294,7 +1294,7 @@ begin
       ProcessAsset(ElementByIndex(ents, i), atTexture);
     ents := ElementByPath(e, 'Noise Textures');
     for i := 0 to Pred(ElementCount(ents)) do
-      ProcessAsset(ElementByIndex(ents, i));
+      ProcessAsset(ElementByIndex(ents, i), atTexture);
     ProcessAsset(ElementBySignature(e, 'NAM5'), atTexture);
   end
 
