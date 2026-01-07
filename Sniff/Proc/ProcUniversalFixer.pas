@@ -241,6 +241,8 @@ begin
 
     // fix double slashes
     newname := StringReplace(newname, delim + delim, delim, [rfReplaceAll]);
+    // fix new lines
+    newname := newname.Trim([#9, #10, #13]);
 
     // fix absolute paths
     if TPath.IsPathRooted(newname) then begin
