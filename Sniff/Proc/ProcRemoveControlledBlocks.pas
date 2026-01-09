@@ -40,7 +40,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -102,7 +102,7 @@ begin
   fNotMatching := Frame.chkNotMatching.Checked;
 end;
 
-function TProcRemoveControlledBlocks.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcRemoveControlledBlocks.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   entries, entry: TdfElement;
@@ -114,7 +114,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var block in nif.BlocksByType('NiSequence', True) do begin
       entries := block.Elements['Controlled Blocks'];

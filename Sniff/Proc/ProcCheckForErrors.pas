@@ -32,7 +32,7 @@ type
     { Public declarations }
   end;
 
-  TCheckProcedure = procedure(aObj: Pointer; Log: TStrings);
+  TCheckProcedure = procedure(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
   TExtensions = array of string;
 
   TCheck = record
@@ -66,7 +66,7 @@ type
       aActive: Boolean = True
     );
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -85,7 +85,7 @@ uses
 
 
 //==============================================================================
-procedure CheckStringIndex(aObj: Pointer; Log: TStrings);
+procedure CheckStringIndex(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -104,7 +104,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckBlocksOrder(aObj: Pointer; Log: TStrings);
+procedure CheckBlocksOrder(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   procedure RecursiveIndexCheck(const aParent: TwbNifBlock);
   begin
@@ -152,7 +152,7 @@ end;
 
 
 //==============================================================================
-procedure CheckUnusedBlocks(aObj: Pointer; Log: TStrings);
+procedure CheckUnusedBlocks(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   procedure CountBlocksUsage(aBlock: TwbNifBlock; var aUsage: array of Integer);
   begin
@@ -190,7 +190,7 @@ end;
 
 
 //==============================================================================
-procedure CheckInvalidRepeatedChildrenNames(aObj: Pointer; Log: TStrings);
+procedure CheckInvalidRepeatedChildrenNames(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -251,7 +251,7 @@ end;
 
 
 //==============================================================================
-procedure CheckInvalidArrayLinks(aObj: Pointer; Log: TStrings);
+procedure CheckInvalidArrayLinks(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   idx: array of Integer;
 begin
@@ -280,7 +280,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckWrongLinkTypes(aObj: Pointer; Log: TStrings);
+procedure CheckWrongLinkTypes(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -294,7 +294,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckHardcodedBlockNames(aObj: Pointer; Log: TStrings);
+procedure CheckHardcodedBlockNames(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 type
   TBlockName = record BlockType, Name: string end;
 const
@@ -355,7 +355,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckCollision(aObj: Pointer; Log: TStrings);
+procedure CheckCollision(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   function BadTensor(t: Single): Boolean;
   begin
@@ -453,10 +453,40 @@ begin
       if SameValue(el.NativeValue, 0.0) then
         Log.Add(#9 + el.Path+ ': 0.0 value causes jittering');
   end;
+
+  if nif.NifVersion in [nfTES4, nfFO3] then
+    with TStringList.Create do try
+      Sorted := True;
+      Duplicates := dupIgnore;
+      for var block in nif.BlocksByType('NiControllerSequence', True) do
+        for var b in block.Elements['Controlled Blocks'] do
+          if b.EditValues['Controller Type'] = 'NiTransformController' then begin
+            var n := nif.BlockByName(GetControlledBlockName(b, 'Node Name'));
+            if Assigned(n) then begin
+              var col := n.GetCollision;
+              if Assigned(col) then AddObject(col.Name, col);
+              for var nn in n.ChildrenByType('NiNode', True) do begin
+                col := nn.GetCollision;
+                if Assigned(col) then AddObject(col.Name, col);
+              end;
+            end;
+          end;
+
+      for var i := 0 to Pred(Count) do begin
+        var col := TwbNifBlock(Objects[i]);
+        if not col.NativeValues['Flags\USE_VEL'] then begin
+          var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
+          if Assigned(rigid) and (rigid.EditValues['Motion System'] = 'MO_SYS_KEYFRAMED') then
+            Log.Add(#9 + col.Name + ': Transformed keyframed animated collision is missing USE_VEL flag');
+        end;
+      end;
+    finally
+      Free;
+    end;
 end;
 
 //==============================================================================
-procedure CheckCollisionMOPP(aObj: Pointer; Log: TStrings);
+procedure CheckCollisionMOPP(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -515,7 +545,7 @@ begin
 end;
 
 //==============================================================================
-{procedure CheckSubShapesCollisionOrder(aObj: Pointer; Log: TStrings);
+{procedure CheckSubShapesCollisionOrder(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   j, prevmat, mat: Integer;
 begin
@@ -543,7 +573,7 @@ begin
 end;
 }
 //==============================================================================
-procedure CheckSkinningIssues(aObj: Pointer; Log: TStrings);
+procedure CheckSkinningIssues(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   function GetSkinPartition(shape: TwbNifBlock): TwbNifBlock;
   begin
@@ -595,12 +625,21 @@ begin
         Log.Add(#9 + shape.Name + ': Missing skin instance (acceptable only in headparts and facegen)');
 
   if (nif.NifVersion in [nfTES5, nfSSE]) and nif.FileName.EndsWith('_0.nif', True) and Assigned(nif.BlockByType('NiSkinInstance', True)) then repeat
-    var f := nif.FileName.Replace('_0.nif', '_1.nif', [rfIgnoreCase]);
-    if not FileExists(f) then Break;
+    var f := aFile.FileName.Replace('_0.nif', '_1.nif', [rfIgnoreCase]);
     var nif1 := TwbNifFile.Create;
     try
       // silently ignore loading issues if any
-      try nif1.LoadFromFile(f); except Break; end;
+      try
+        if Assigned(aFile.FileEntry) then begin
+          if not aFile.FileEntry.Archive.FileExists(f) then Break;
+          nif1.LoadFromData(aFile.FileEntry.Archive.Unpack(f));
+        end
+        else begin
+          if not FileExists(f) then Break;
+          nif1.LoadFromFile(f);
+        end;
+      except Break; end;
+
       var r0 := nif.RootNode;
       var r1 := nif1.RootNode;
       if not Assigned(r0) or not Assigned(r1) then
@@ -665,7 +704,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckParticleSystem(aObj: Pointer; Log: TStrings);
+procedure CheckParticleSystem(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 const
   cEmitterLifeSpanMargin = 12;
 var
@@ -755,7 +794,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckTargetField(aObj: Pointer; Log: TStrings);
+procedure CheckTargetField(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   nif: TwbNifFile;
   Target, Parent: TwbNifBlock;
@@ -768,20 +807,6 @@ var
         Exit;
     end;
     Result := nil;
-  end;
-
-  function GetControlledBlockName(b: TdfElement; const aField: string): string;
-  begin
-    Result := '';
-
-    if nif.NifVersion >= nfFO3 then
-      Result := b.EditValues[aField]
-    // Oblivion meshes store names in string palette
-    else if Assigned(b.Elements['String Palette']) then begin
-      var p := TwbNifBlock(b.Elements['String Palette'].LinksTo);
-      if Assigned(p) then
-        Result := p.GetStringPaletteString(b.NativeValues[aField + ' Offset']);
-    end;
   end;
 
 begin
@@ -883,7 +908,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckAnimStopTime(aObj: Pointer; Log: TStrings);
+procedure CheckAnimStopTime(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   procedure CheckKeys(data: TwbNifBlock; keys: TdfElement; aStopTime: string);
   begin
@@ -951,7 +976,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckBSXFlags(aObj: Pointer; Log: TStrings);
+procedure CheckBSXFlags(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 const
   cFlags: array [0..9] of string = (
     'Animated', 'Havok', 'Ragdoll', 'Complex',
@@ -1014,7 +1039,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckConsistencyFlags(aObj: Pointer; Log: TStrings);
+procedure CheckConsistencyFlags(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   f, f2: string;
 begin
@@ -1058,7 +1083,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckTextureSetSlots(aObj: Pointer; Log: TStrings);
+procedure CheckTextureSetSlots(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -1137,7 +1162,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckNiAlphaProperty(aObj: Pointer; Log: TStrings);
+procedure CheckNiAlphaProperty(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 const
   SRC_ALPHA = 6;
   INV_SRC_ALPHA = 7;
@@ -1175,7 +1200,7 @@ begin
     var alpha_blend := flags and 1 = 1;
 
     var shader := shape.PropertyByType('BSShaderProperty', True);
-    if Assigned(shader) then
+    if Assigned(shader) and (nif.NifVersion < nfFO4) then
       if alpha_blend and not shader.NativeValues['Shader Flags 2\Assume_Shadowmask'] then
         Log.Add(#9 + prop.Name + ': Blend alpha forces the object to be in single-pass mode, and can cause lighting issues if multiple lights are illuminating the object');
 
@@ -1188,7 +1213,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckShaderTypeFlags(aObj: Pointer; Log: TStrings);
+procedure CheckShaderTypeFlags(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   i: Integer;
   bExternalEmitShader: Boolean;
@@ -1438,10 +1463,10 @@ begin
         // Character_Lighting flag
         if bFacegen then begin
           if not Shader.NativeValues['Shader Flags 2\Character_Lighting'] then
-            Log.Add(#9 + Shader.Name + ': .nif is a Facegen .nif but Character_Lighting flag is not set');
+            Log.Add(#9 + Shader.Name + ': file is a Facegen nif but Character_Lighting flag is not set');
         end else begin
           if Shader.NativeValues['Shader Flags 2\Character_Lighting'] then
-            Log.Add(#9 + Shader.Name + ': .nif is not a Facegen .nif but Character_Lighting flag is set');
+            Log.Add(#9 + Shader.Name + ': file is not a Facegen nif but Character_Lighting flag is set');
         end;
 
         // EnvMap_Light_Fade flag
@@ -1533,7 +1558,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckGeometry(aObj: Pointer; Log: TStrings);
+procedure CheckGeometry(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   procedure CheckTris(tris: TdfElement; numverts: Integer; const aTriElement: string = '');
   begin
@@ -1602,6 +1627,9 @@ begin
       CheckTris(block.Elements['Triangles'], block.NativeValues['Num Vertices']);
 
     // detecting duplicate vertices
+    if not Assigned(block.Elements['Vertex Data']) then
+      Continue;
+
     var numverts: Integer := block.NativeValues['Num Vertices'];
     if numverts > 0 then begin
       var verts: TBytes;
@@ -1650,7 +1678,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckVertexColors(aObj: Pointer; Log: TStrings);
+procedure CheckVertexColors(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 type
   TFloat4 = array [0..3] of Single;
   PFloat4 = ^TFloat4;
@@ -1746,7 +1774,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckMiscellaneous(aObj: Pointer; Log: TStrings);
+procedure CheckMiscellaneous(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -1818,7 +1846,7 @@ end;
 
 
 //==============================================================================
-procedure CheckOptional(aObj: Pointer; Log: TStrings);
+procedure CheckOptional(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -1850,7 +1878,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckUVs(aObj: Pointer; Log: TStrings);
+procedure CheckUVs(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 var
   shader: TwbNifBlock;
   mode: TdfElement;
@@ -1911,7 +1939,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckStripsDegenerate(aObj: Pointer; Log: TStrings);
+procedure CheckStripsDegenerate(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   function CheckStrips(const Strips: TdfElement): Boolean;
   begin
@@ -1968,7 +1996,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckDdsSize(aObj: Pointer; Log: TStrings);
+procedure CheckDdsSize(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
   function IsPowerOf2(x: Cardinal): Boolean;
   begin
@@ -1984,7 +2012,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckSSENifFormat(aObj: Pointer; Log: TStrings);
+procedure CheckSSENifFormat(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var nif: TwbNifFile := aObj;
 
@@ -2011,7 +2039,7 @@ begin
 end;
 
 //==============================================================================
-procedure CheckSSEDdsFormat(aObj: Pointer; Log: TStrings);
+procedure CheckSSEDdsFormat(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var dds: PDDSHeader := aObj;
 
@@ -2247,7 +2275,7 @@ begin
     end;
 end;
 
-function TProcCheckForErrors.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcCheckForErrors.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   dds: TDDSHeader;
@@ -2260,11 +2288,12 @@ begin
   Log := TStringList.Create;
   if fLoadNif then nif := TwbNifFile.Create;
   try
-    ext := ExtractFileExt(aFileName);
+    ext := ExtractFileExt(aFile.FileName);
     obj := nil;
 
     if fLoadDDS and SameText(ext, '.dds') then begin
-      with TFileStream.Create(aInputDirectory + aFileName, fmOpenRead + fmShareDenyNone) do try
+      var d := aFile.GetData;
+      with TPointerStream.Create(d, Length(d), True) do try
         if ( Read(dds, SizeOf(dds)) <> SizeOf(dds) ) or (dds.Magic <> 'DDS ') then
           Log.Add(#9'Not a valid DDS file')
         else
@@ -2274,18 +2303,18 @@ begin
       end;
     end
 
-    else if fLoadNif then begin
-      nif.LoadFromFile(aInputDirectory + aFileName);
+    else if fLoadNif and not SameText(ext, '.dds') then begin
+      nif.LoadFromData(aFile.GetData);
       obj := nif;
     end;
 
     if obj <> nil then
       for var i: Integer := Low(Checks) to High(Checks) do
         if Checks[i].Active and Checks[i].DoesExtension(ext) then
-          Checks[i].Proc(obj, Log);
+          Checks[i].Proc(aFile, obj, Log);
 
     if Log.Count > 0 then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

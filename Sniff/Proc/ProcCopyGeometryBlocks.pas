@@ -45,7 +45,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -138,7 +138,7 @@ begin
   end;
 end;
 
-function TProcCopyGeometryBlocks.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcCopyGeometryBlocks.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   Nif, SrcNif: TwbNifFile;
   j: Integer;
@@ -146,7 +146,7 @@ var
   bChanged: Boolean;
   links, extras: array of Integer;
 begin
-  if not FileExists(fSourceDirectory + aFileName) then
+  if not FileExists(fSourceDirectory + aFile.FileName) then
     Exit;
 
   Nif := TwbNifFile.Create;
@@ -156,9 +156,9 @@ begin
   bChanged := False;
 
   try
-    Nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
     if not Assigned(fSourceFile) then
-      SrcNif.LoadFromFile(fSourceDirectory + aFileName)
+      SrcNif.LoadFromFile(fSourceDirectory + aFile.FileName)
     else
       SrcNif := fSourceFile;
 

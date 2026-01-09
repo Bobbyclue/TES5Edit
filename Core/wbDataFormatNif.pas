@@ -207,6 +207,8 @@ procedure wbNiObjectCheckDups;
 function wbNiObjectList: TArray<string>;
 function wbIsNiObject(const aNiObject, aTemplate: string): Boolean;
 function nifblk(const e: TdfElement): TwbNifBlock;
+function GetControlledBlockName(aControlledBlock: TdfElement; const aField: string): string;
+
 
 implementation
 
@@ -319,6 +321,19 @@ begin
   while Assigned(Element) and not (Element is TwbNifBlock) do
     Element := Element.Parent;
   Result := TwbNifBlock(Element);
+end;
+
+function GetControlledBlockName(aControlledBlock: TdfElement; const aField: string): string;
+begin
+  Result := '';
+
+  // Oblivion meshes store names in string palette
+  if Assigned(aControlledBlock.Elements['String Palette']) then begin
+    var p := TwbNifBlock(aControlledBlock.Elements['String Palette'].LinksTo);
+    if Assigned(p) then
+      Result := p.GetStringPaletteString(aControlledBlock.NativeValues[aField + ' Offset']);
+  end else
+    Result := aControlledBlock.EditValues[aField];
 end;
 
 procedure wbGetVector2(var Vector: TVector2; const aElement: TdfElement; asText: Boolean = False); inline;
@@ -3262,6 +3277,8 @@ begin
     FNifVersion := nfTES4
   else if (Version = v10200) and (UserVersion = 10) and (UserVersion2 in [6, 7, 8, 9, 11]) then
     FNifVersion := nfTES4
+  //else if (Version = v10012) and (UserVersion = 0) and (UserVersion2 = 1) then
+  //  FNifVersion := nfTES4
   //else if (Version = v10010) then
   //  FNifVersion := nfTES4
   else if (Version = v20207) and (UserVersion = 11) then
@@ -4199,27 +4216,20 @@ end;
 //===========================================================================
 { Basic NIF data structures: NIF, Header, Footer }
 
+function NiHeader_EnBSHeader(const e: TdfElement): Boolean; begin
+  var v := Cardinal(e.NativeValues['..\Version']);
+  var uv := Cardinal(e.NativeValues['..\User Version']);
+  Result := (v = v10012) or ((v = v20207) or (v = v20005) or ((v >= v10100) and (v <= v20004) and (uv <= 11))) and (uv >= 3);
+end;
+function NiHeader_EnExportUnknownInt(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\User Version 2'] > 130; end;
+function NiHeader_EnExportProccessScript(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\User Version 2'] < 131; end;
+function NiHeader_EnExportMaxFilepath(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\User Version 2'] >= 103; end;
 function NiHeader_EnSince20004(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Version'] >= v20004; end;
 function NiHeader_EnSince10018(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Version'] >= v10018; end;
 function NiHeader_EnSince5001(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Version'] >= v5001; end;
-
-function NiHeader_EnUserVersion2(const e: TdfElement): Boolean;
-var
-  Version, UserVersion: Cardinal;
-begin
-  Version := e.NativeValues['..\Version'];
-  UserVersion := e.NativeValues['..\User Version'];
-  Result := (Version >= v10010) and ((UserVersion >= 10) or ((UserVersion = 1) and (Version <> v10200)));
-  //Result := (Version = v10012) or ((Version = v20207) or (Version = v20005) or ((Version >= v10100) and (Version <= v20004) and (UserVersion <= 11))) and (UserVersion >= 3);
-end;
-
-function NiHeader_EnExportInfo(const e: TdfElement): Boolean; begin Result := (e.NativeValues['..\Version'] >= v10010) and(e.NativeValues['..\User Version'] >= 3); end;
-function NiHeader_EnBefore10012(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\Version'] <= v10012; end;
-function NiHeader_EnMaxFilepath(const e: TdfElement): Boolean; begin Result := (e.NativeValues['..\Version'] = v20207) and (Integer(e.NativeValues['..\User Version 2']) in [130,132]); end;
 function NiHeader_EnSince20207(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Version'] >= v20207; end;
 function NiHeader_EnSince20103(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Version'] >= v20103; end;
-function NiHeader_EnProccessScript(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\User Version 2'] <= 130; end;
-function NiHeader_EnUnknownExportInt(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\User Version 2'] >= 131; end;
+function NiHeader_EnBefore10012(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\..\Version'] <= v10012; end;
 procedure NiHeader_GetTextVersion(const e: TdfElement; var aText: string); begin aText := wbIntToNifVersion(e.NativeValue); end;
 procedure NiHeader_SetTextVersion(const e: TdfElement; var aText: string); begin aText := IntToStr(wbNifVersionToInt(aText)); end;
 
@@ -4261,47 +4271,41 @@ begin
   { NiHeader }
   wbNiObject(wbNifBlock('NiHeader', [
     dfChars('Magic', 0, sNifMagicGamebryo + '20.2.0.7', #$0A, True, []),
-    dfInteger('Version', dtU32, '20.2.0.7', [
-        DF_OnGetText, @NiHeader_GetTextVersion,
-        DF_OnSetText, @NiHeader_SetTextVersion
-    ]),
+    dfInteger('Version', dtU32, '20.2.0.7')
+      .SetOnGetText(NiHeader_GetTextVersion)
+      .SetOnSetText(NiHeader_SetTextVersion),
     dfEnum('Endian Type', dtU8, [
       0, 'ENDIAN_BIG',
       1, 'ENDIAN_LITTLE'
-    ], 'ENDIAN_LITTLE', [DF_OnGetEnabled, @NiHeader_EnSince20004]),
+    ], 'ENDIAN_LITTLE').SetOnEnabled(NiHeader_EnSince20004),
     dfInteger('User Version', dtU32, '12').SetOnEnabled(NiHeader_EnSince10018),
     dfInteger('Num Blocks', dtU32),
     // BSStreamHeader
-    dfInteger('User Version 2', dtU32, '83', [DF_OnGetEnabled, @NiHeader_EnUserVersion2]),
+    dfInteger('User Version 2', dtU32, '83').SetOnEnabled(NiHeader_EnBSHeader),
     dfStruct('Export Info', [
-      dfInteger('Unknown Int', dtU32, '3', [DF_OnGetEnabled, @NiHeader_EnBefore10012]),
       wbShortString('Author'),
-      wbShortString('Process Script').SetOnEnabled(NiHeader_EnProccessScript),
-      dfInteger('Unknown Int 2', dtU32, '0').SetOnEnabled(NiHeader_EnUnknownExportInt),
-      wbShortString('Export Script')
-    ], [DF_OnGetEnabled, @NiHeader_EnExportInfo]),
-    wbShortString('Max Filepath', [DF_OnGetEnabled, @NiHeader_EnMaxFilepath]),
+      dfInteger('Unknown Int', dtU32, '0').SetOnEnabled(NiHeader_EnExportUnknownInt),
+      wbShortString('Process Script').SetOnEnabled(NiHeader_EnExportProccessScript),
+      wbShortString('Export Script'),
+      wbShortString('Max Filepath').SetOnEnabled(NiHeader_EnExportMaxFilepath)
+    ]).SetOnEnabled(NiHeader_EnBSHeader),
     // BSStreamHeader
-    dfArray('Block Types', wbSizedString('Type'), -2, '', [DF_OnGetEnabled, @NiHeader_EnSince5001]),
-    dfArray(
-      'Block Type Index',
-      dfInteger('Block', dtU16, [
-        DF_OnGetText, @NiHeader_GetTextBlockType,
-        DF_OnSetText, @NiHeader_SetTextBlockType
-      ]),
-      0, 'Num Blocks',
-      [DF_OnGetEnabled, @NiHeader_EnSince5001]
-    ),
-    dfArray('Block Size', dfInteger('Size', dtU32), 0, 'Num Blocks', [DF_OnGetEnabled, @NiHeader_EnSince20207]),
-    dfInteger('Num Strings', dtU32, [DF_OnGetEnabled, @NiHeader_EnSince20103]),
-    dfInteger('Max String Length', dtU32, [DF_OnGetEnabled, @NiHeader_EnSince20103]),
-    dfArray('Strings', wbSizedString('String'), 0, 'Num Strings', [DF_OnGetEnabled, @NiHeader_EnSince20103]),
-    dfInteger('Num Groups', dtU32, [DF_OnGetEnabled, @NiHeader_EnSince5001])
-  ], [DF_OnAfterLoad, @NiHeader_AfterLoad]));
+    dfArray('Block Types', wbSizedString('Type'), -2, '').SetOnEnabled(NiHeader_EnSince5001),
+    dfArray('Block Type Index',
+      dfInteger('Block', dtU16)
+        .SetOnGetText(NiHeader_GetTextBlockType)
+        .SetOnSetText(NiHeader_SetTextBlockType),
+      0, 'Num Blocks').SetOnEnabled(NiHeader_EnSince5001),
+    dfArray('Block Size', dfInteger('Size', dtU32), 0, 'Num Blocks').SetOnEnabled(NiHeader_EnSince20207),
+    dfInteger('Num Strings', dtU32).SetOnEnabled(NiHeader_EnSince20103),
+    dfInteger('Max String Length', dtU32).SetOnEnabled(NiHeader_EnSince20103),
+    dfArray('Strings', wbSizedString('String'), 0, 'Num Strings').SetOnEnabled(NiHeader_EnSince20103),
+    dfInteger('Num Groups', dtU32).SetOnEnabled(NiHeader_EnSince5001)
+  ]).SetOnAfterLoad(NiHeader_AfterLoad));
 
   { NiFooter }
   wbNiObject(wbNifBlock('NiFooter', [
-    dfArray('Roots', wbNiRef('Roots', 'NiObject'), -4, '', [DF_OnBeforeSave, @RemoveNoneLinks])
+    dfArray('Roots', wbNiRef('Roots', 'NiObject'), -4).SetOnBeforeSave(RemoveNoneLinks)
   ]));
 end;
 
@@ -4319,11 +4323,10 @@ procedure wbDefineNiObjectNET;
 begin
   wbNiObject(wbNifBlock('NiObjectNET', [
     wbString('Name'),
-    wbNiRef('Extra Data', 'NiExtraData', [DF_OnGetEnabled, @EnBefore4220]),
-    dfArray('Extra Data List', wbNiRef('Extra Data List', 'NiExtraData'), -4, '', [
-      DF_OnGetEnabled, @EnSince10010,
-      DF_OnBeforeSave, @RemoveNoneLinks
-    ]),
+    wbNiRef('Extra Data', 'NiExtraData').SetOnEnabled(EnBefore4220),
+    dfArray('Extra Data List', wbNiRef('Extra Data List', 'NiExtraData'), -4)
+      .SetOnEnabled(EnSince10010)
+      .SetOnBeforeSave(RemoveNoneLinks),
     wbNiRef('Controller', 'NiTimeController')
   ]), 'NiObject', True);
 end;
@@ -4340,16 +4343,15 @@ begin
     dfUnion([
       dfInteger('Flags', dtU16),
       dfInteger('Flags', dtU32, '14')
-    ], [DF_OnDecide, @NiAVObject_DecideFlags]),
+    ]).SetOnDecide(NiAVObject_DecideFlags),
     wbMTransform('Transform'),
-    wbVector3('Velocity', [DF_OnGetEnabled, @EnBefore4220]),
-    dfArray('Properties', wbNiRef('Properties', 'NiProperty'), -4, '', [
-      DF_OnGetEnabled, @NiAVObject_EnProperties,
-      DF_OnBeforeSave, @RemoveNoneLinks
-    ]),
-    wbBool('Has Bounding Volume', [DF_OnGetEnabled, @EnBefore4220]),
-    wbBoundingVolume('Bounding Volume', [DF_OnGetEnabled, @NiAVObject_EnBoundingVolume]),
-    wbNiRef('Collision Object', 'NiCollisionObject', [DF_OnGetEnabled, @EnSince10010])
+    wbVector3('Velocity').SetOnEnabled(EnBefore4220),
+    dfArray('Properties', wbNiRef('Properties', 'NiProperty'), -4)
+      .SetOnEnabled(NiAVObject_EnProperties)
+      .SetOnBeforeSave(RemoveNoneLinks),
+    wbBool('Has Bounding Volume').SetOnEnabled(EnBefore4220),
+    wbBoundingVolume('Bounding Volume').SetOnEnabled(NiAVObject_EnBoundingVolume),
+    wbNiRef('Collision Object', 'NiCollisionObject').SetOnEnabled(EnSince10010)
   ]), 'NiObjectNET', True);
 end;
 
@@ -6214,7 +6216,7 @@ begin
     wbPropagationMode('Propagation Mode', '', []),
     wbCollisionMode('Collision Mode', '', [DF_OnGetEnabled, @EnSince10100]),
     dfInteger('Use ABV', dtU8),
-    wbBoundingVolume('Bounding Volume', [DF_OnGetEnabled, @NiCollisionData_EnBoundingVolume])
+    wbBoundingVolume('Bounding Volume').SetOnEnabled(NiCollisionData_EnBoundingVolume)
   ]), 'NiCollisionObject', False);
 end;
 

@@ -30,7 +30,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -107,7 +107,7 @@ begin
     raise Exception.Create('Select properties to merge');
 end;
 
-function TProcMergeProperties.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcMergeProperties.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   block: TwbNifBlock;
@@ -133,7 +133,7 @@ begin
   js := TJsonObject.Create;
   props := TStringList.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     // in reverse order because we are goint to remove some
     for var i := Pred(nif.BlocksCount) downto 0 do begin

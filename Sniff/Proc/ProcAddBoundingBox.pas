@@ -47,7 +47,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -117,7 +117,7 @@ begin
   fExtentZ := GetVerifyFloat(Frame.edExtentZ.Text);
 end;
 
-function TProcAddBoundingBox.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAddBoundingBox.ProcessFile(aFile: TProcFileObject): TBytes;
 const
   sBoundingBox = 'Bounding Box';
 var
@@ -126,7 +126,7 @@ var
 begin
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;

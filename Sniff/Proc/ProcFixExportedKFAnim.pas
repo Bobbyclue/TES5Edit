@@ -31,7 +31,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -59,7 +59,7 @@ begin
   Result := Frame;
 end;
 
-function TProcFixExportedKFAnim.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcFixExportedKFAnim.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   entries, entry: TdfElement;
@@ -71,7 +71,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;

@@ -40,7 +40,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -84,7 +84,7 @@ begin
   fFaceNormals := Frame.chkNormals.Checked;
 end;
 
-function TProcTangents.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcTangents.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   bChanged: Boolean;
@@ -92,7 +92,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if fFaceNormals then
       bChanged := nif.SpellFaceNormals;

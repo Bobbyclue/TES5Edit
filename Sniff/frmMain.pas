@@ -13,7 +13,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  System.IniFiles, Vcl.Graphics,
+  System.Types, System.IniFiles, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.Imaging.pngimage, Vcl.ComCtrls, Diagnostics, SniffProcessor, Vcl.Mask,
   Vcl.Menus, Vcl.Themes;
@@ -55,6 +55,10 @@ type
     edOutput: TComboBox;
     Label3: TLabel;
     edProcFilter: TLabeledEdit;
+    menuInput: TPopupMenu;
+    mniInputFolder: TMenuItem;
+    mniInputArchive: TMenuItem;
+    Label4: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure lvProcsSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
@@ -68,6 +72,8 @@ type
     procedure mniStyleClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure edProcFilterChange(Sender: TObject);
+    procedure mniInputFolderClick(Sender: TObject);
+    procedure mniInputArchiveClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -101,6 +107,7 @@ uses
   System.IOUtils,
   System.StrUtils,
   ShellApi,
+  wbBSArchive,
   wbTaskProgress,
   frMessages,
   wbCommandLine,
@@ -173,23 +180,13 @@ var
   fileName: array[0..MAX_PATH] of char;
   f, ff: string;
   sl: TStringList;
-  bFirstFile: Boolean;
 begin
   sl := TStringList.Create;
-  sl.Duplicates := dupIgnore;
-  bFirstFile := True;
   try
     cnt := DragQueryFile(msg.Drop, $FFFFFFFF, fileName, MAX_PATH);
     for i := 0 to Pred(cnt) do begin
       DragQueryFile(msg.Drop, i, fileName, MAX_PATH);
       f := fileName;
-
-      if bFirstFile then begin
-        Manager.InputDirectory := ExtractFilePath(f);
-        Manager.OutputDirectory := ExtractFilePath(f);
-        bFirstFile := False;
-      end;
-
       if TFileAttribute.faDirectory in TPath.GetAttributes(f) then begin
         for ff in TDirectory.GetFiles(f, '*.*', TSearchOption.soAllDirectories) do
           sl.Add(ff);
@@ -256,6 +253,23 @@ begin
 end;
 
 procedure TFormMain.btnInputBrowseClick(Sender: TObject);
+begin
+  with ClientToScreen(Point(btnInputBrowse.Left, btnInputBrowse.Top + btnInputBrowse.Height)) do
+    menuInput.Popup(X, Y);
+end;
+
+procedure TFormMain.mniInputArchiveClick(Sender: TObject);
+begin
+  var path: string := edInput.Text;
+
+  if path = '' then
+    path := ExtractFilePath(Application.ExeName);
+
+  if SelectArchive(path) then
+    edInput.Text := Path;
+end;
+
+procedure TFormMain.mniInputFolderClick(Sender: TObject);
 begin
   var path: string := edInput.Text;
 
@@ -654,8 +668,8 @@ procedure TFormMain.btnProcessClick(Sender: TObject);
   end;
 
 var
-  objs: TArray<TProcessObject>;
-  obj: TProcessObject;
+  objs: TArray<TProcFileObject>;
+  obj: TProcFileObject;
   i, UseThreads: integer;
   s: string;
 begin
@@ -673,11 +687,23 @@ begin
     Exit;
   end;
 
-  // ProcessedFiles is filled when drag&dropping
+  // drag&dropped a single archive
+  if (Length(ProcessedFiles) = 1) and TwbBSArchive.IsArchive(ProcessedFiles[0]) then begin
+    Manager.InputDirectory := ProcessedFiles[0];
+    Manager.OutputDirectory := IncludeTrailingPathDelimiter(edOutput.Text);
+  end
+
+  // drag&dropped multiple files
+  else if Length(ProcessedFiles) <> 0 then begin
+    Manager.InputDirectory := ExtractFilePath(ProcessedFiles[0]);
+    Manager.OutputDirectory := ExtractFilePath(ProcessedFiles[0]);
+  end;
+
+  // no drag&drop
   if Length(ProcessedFiles) = 0 then begin
 
-    if (Trim(edInput.Text) = '') or not TDirectory.Exists(edInput.Text) then begin
-      SniffMessage('Input directory not found');
+    if (Trim(edInput.Text) = '') or ( not TDirectory.Exists(edInput.Text) and not (TwbBSArchive.IsArchive(edInput.Text) and FileExists(edInput.Text)) ) then begin
+      SniffMessage('Input directory/archive not found or invalid');
       Exit;
     end;
 
@@ -687,7 +713,11 @@ begin
         Exit;
       end;
 
-    Manager.InputDirectory := IncludeTrailingPathDelimiter(edInput.Text);
+    if not TwbBSArchive.IsArchive(edInput.Text) then
+      Manager.InputDirectory := IncludeTrailingPathDelimiter(edInput.Text)
+    else
+      Manager.InputDirectory := edInput.Text;
+
     Manager.OutputDirectory := IncludeTrailingPathDelimiter(edOutput.Text);
 
     if not bAutoMode then begin
@@ -738,36 +768,42 @@ begin
   Application.ProcessMessages;
 
   try
+    // path contains filter
+    var path := Trim(edPathContains.Text);
 
-    // collecting files for processing if not drag&dropped
-    if Length(ProcessedFiles) = 0 then begin
-      var so: TSearchOption;
+    // collecting files if input is archive
+    if TwbBSArchive.IsArchive(Manager.InputDirectory) then begin
+      Manager.InputArchive := TwbBSArchive.Create;
+      Manager.InputArchive.MultiThreaded := True;
+      Manager.InputArchive.LoadFromFile(Manager.InputDirectory);
+      for var f in Manager.InputArchive do begin
+        if not Proc.IsAcceptedFile(f.Name) then Continue;
+        if (path <> '') and not ContainsText(f.Name, path) then Continue;
+        obj := TProcFileObject.Create;
+        obj.Manager := Manager;
+        obj.FileName := f.Name;
+        obj.FileEntry := f;
+        objs := objs + [obj];
+      end;
+    end
 
-      if chkInputSubdir.Checked then
-        so := TSearchOption.soAllDirectories
-      else
-        so := TSearchOption.soTopDirectoryOnly;
+    else begin
+      // collecting files if not drag&dropped
+      if Length(ProcessedFiles) = 0 then begin
+        var so: TSearchOption;
+        if chkInputSubdir.Checked then so := TSearchOption.soAllDirectories else so := TSearchOption.soTopDirectoryOnly;
+        ProcessedFiles := TDirectory.GetFiles(Manager.InputDirectory, '*.*', so);
+      end;
 
-      ProcessedFiles := TDirectory.GetFiles(Manager.InputDirectory, '*.*', so);
-
-      // path contains filter
-      var path := Trim(edPathContains.Text);
-      if path <> '' then
-        for i := High(ProcessedFiles) downto Low(ProcessedFiles) do
-          if not ContainsText(Copy(ProcessedFiles[i], Length(Manager.InputDirectory) + 1, Length(ProcessedFiles[i])), path) then
-            Delete(ProcessedFiles, i, 1);
-    end;
-
-    // creating array of processed objects
-    for s in ProcessedFiles do begin
-      if not Proc.IsAcceptedFile(s) then
-        Continue;
-
-      obj := TProcessObject.Create;
-      obj.FileName := Copy(s, Length(Manager.InputDirectory) + 1, Length(s));
-
-      SetLength(objs, Succ(Length(objs)));
-      objs[Pred(Length(objs))] := obj;
+      for s in ProcessedFiles do begin
+        var f := Copy(s, Length(Manager.InputDirectory) + 1, Length(s));
+        if not Proc.IsAcceptedFile(f) then Continue;
+        if (path <> '') and not ContainsText(f, path) then Continue;
+        obj := TProcFileObject.Create;
+        obj.Manager := Manager;
+        obj.FileName := f;
+        objs := objs + [obj];
+      end;
     end;
 
     // custom number of threads if operation supports multithreading
@@ -834,6 +870,9 @@ begin
     SetLength(ProcessedFiles, 0);
     for i := Low(objs) to High(objs) do
       objs[i].Free;
+
+    if Assigned(Manager.InputArchive) then
+      FreeAndNil(Manager.InputArchive);
 
     btnProcess.Enabled := True;
     btnExit.Enabled := True;

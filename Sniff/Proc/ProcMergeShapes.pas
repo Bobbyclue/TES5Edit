@@ -38,7 +38,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -97,7 +97,7 @@ begin
   fExactMatch := Frame.chkExactMatch.Checked;
 end;
 
-function TProcMergeShapes.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcMergeShapes.ProcessFile(aFile: TProcFileObject): TBytes;
 
   function merge_arrays(dst, src: TdfElement): Boolean;
   var
@@ -172,7 +172,7 @@ begin
   nif.Options := [nfoCollapseLinkArrays, nfoRemoveUnusedStrings];
 
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     var nodes := nif.BlocksByType('NiNode', True);
 

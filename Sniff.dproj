@@ -65,7 +65,7 @@
         <DCC_DcuOutput>.\Temp\Sniff\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\Build</DCC_ExeOutput>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_UnitSearchPath>.\External\JsonDataObjects\Source;.\External\lz4-delphi;.\Core;.\Sniff;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\External\JsonDataObjects\Source;.\External\libdeflate-pas;.\External\lz4-delphi;.\Core;.\Sniff;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -117,7 +117,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
-        <PF_KeyStorePass>853C0DA36405559EA3757169D17BE32C819C055DA057979397B50FF08E723CD8DB05A38FE3431C4DC1CC572EFA9CC37ABAF83612047422E0166545C2E5F1228CC90AB922EE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>853C47DE5F925585A304712AD15DE33A81940557A005978797B40FAA8E6D3CD0DB48A3D6E3181C3AC1B85752FAB3C36BBABA361304262290166845ECE5BA2290C95DF35DD544A8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
         <PF_UWPPackageDisplayName>Sniff</PF_UWPPackageDisplayName>
         <PF_UWPPackageName>zilav.Sniff</PF_UWPPackageName>
         <PF_UWPPublisher>CN=zilav</PF_UWPPublisher>

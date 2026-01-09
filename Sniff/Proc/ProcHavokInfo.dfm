@@ -7,12 +7,11 @@ object FrameHavokInfo: TFrameHavokInfo
   object StaticText1: TStaticText
     Left = 0
     Top = 0
-    Width = 491
+    Width = 199
     Height = 19
     Align = alTop
     Caption = 'Show info on Havok collision objects'
     TabOrder = 0
-    ExplicitWidth = 199
   end
   object chkPerObject: TCheckBox
     Left = 16

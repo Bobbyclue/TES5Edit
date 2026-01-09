@@ -7,7 +7,7 @@ object FrameTransformInfo: TFrameTransformInfo
   object StaticText1: TStaticText
     Left = 0
     Top = 0
-    Width = 499
+    Width = 449
     Height = 19
     Align = alTop
     Caption = 

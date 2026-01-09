@@ -31,7 +31,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -57,7 +57,7 @@ begin
   Result := Frame;
 end;
 
-function TProcWeiExplosion.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcWeiExplosion.ProcessFile(aFile: TProcFileObject): TBytes;
 const
   sNonAccum = 'NonAccum';
 var
@@ -69,7 +69,7 @@ var
 begin
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     // empty nif
     if nif.BlocksCount = 0 then
@@ -84,25 +84,25 @@ begin
       end;
 
     if not Assigned(NonAccum) then begin
-      fManager.AddMessage(#9+ aFileName +': NonAccum node is missng');
+      fManager.AddMessage(#9+ aFile.FileName +': NonAccum node is missng');
       Exit;
     end;
 
     Controller := nif.BlockByType('NiMultiTargetTransformController');
     if not Assigned(Controller) then begin
-      fManager.AddMessage(#9+ aFileName +': NiMultiTargetTransformController is missng');
+      fManager.AddMessage(#9+ aFile.FileName +': NiMultiTargetTransformController is missng');
       Exit;
     end;
 
     Palette := nif.BlockByType('NiDefaultAVObjectPalette');
     if not Assigned(Palette) then begin
-      fManager.AddMessage(#9+ aFileName +': NiDefaultAVObjectPalette is missing');
+      fManager.AddMessage(#9+ aFile.FileName +': NiDefaultAVObjectPalette is missing');
       Exit;
     end;
 
     Sequence := nif.BlockByType('NiControllerSequence');
     if not Assigned(Sequence) then begin
-      fManager.AddMessage(#9+ aFileName +': NiControllerSequence is missing');
+      fManager.AddMessage(#9+ aFile.FileName +': NiControllerSequence is missing');
       Exit;
     end;
 
@@ -120,7 +120,7 @@ begin
     end;
 
     if not bFound then begin
-      fManager.AddMessage(#9+ aFileName +': No acceptable NiNodes to process');
+      fManager.AddMessage(#9+ aFile.FileName +': No acceptable NiNodes to process');
       Exit;
     end;
 

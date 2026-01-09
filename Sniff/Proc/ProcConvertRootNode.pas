@@ -43,7 +43,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -117,7 +117,7 @@ begin
   fRoot := Frame.chkRoot.Checked;
 end;
 
-function TProcConvertRootNode.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcConvertRootNode.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   bChanged: Boolean;
@@ -125,7 +125,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     var blocks: TwbNifBlocks;
     if not fRoot then

@@ -84,7 +84,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -512,7 +512,7 @@ begin
   end;
 end;
 
-function TProcUniversalTweaker.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUniversalTweaker.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   BGSM: TwbBGSMFile;
@@ -537,12 +537,12 @@ begin
   if fReportOnly then
     Log := TStringList.Create;
 
-  ext := ExtractFileExt(aFileName);
+  ext := ExtractFileExt(aFile.FileName);
   try
     // *.NIF file
     if SameText(ext, '.nif') or SameText(ext, '.kf') then begin
       nif := TwbNifFile.Create;
-      nif.LoadFromFile(aInputDirectory + aFileName);
+      nif.LoadFromData(aFile.GetData);
 
       // processing specific block by path
       if (Length(fBlocks) = 1) and (Pos('\', fBlocks[0]) <> 0) then begin
@@ -555,7 +555,7 @@ begin
 
       else begin
         // if processing BSXFlags and it is missing, then add it
-        if (nif.NifVersion >= nfTES4) and (fBlocks[0] = 'BSXFlags') then
+        if (nif.NifVersion >= nfTES4) and (Length(fBlocks) <> 0) and (fBlocks[0] = 'BSXFlags') then
           if not Assigned(nif.BlockByType('BSXFlags')) and (nif.BlocksCount <> 0) and nif.RootNode.IsNiObject('NiNode') then
             nif.RootNode.AddExtraData('BSXFlags').EditValues['Name'] := 'BSX';
 
@@ -579,7 +579,7 @@ begin
     // *.BGSM file
     else if SameText(ext, '.bgsm') then begin
       BGSM := TwbBGSMFile.Create;
-      BGSM.LoadFromFile(aInputDirectory + aFileName);
+      BGSM.LoadFromData(aFile.GetData);
 
       bChanged := ModifyElement(BGSM, fPath, fValue, fOldPath, fOldValue, fValueMode, fOldValueCheck, fOldValueMode, Log, regexp) or bChanged;
     end
@@ -587,7 +587,7 @@ begin
     // *.BGEM file
     else if SameText(ext, '.bgem') then begin
       BGEM := TwbBGEMFile.Create;
-      BGEM.LoadFromFile(aInputDirectory + aFileName);
+      BGEM.LoadFromData(aFile.GetData);
 
       bChanged := ModifyElement(BGEM, fPath, fValue, fOldPath, fOldValue, fValueMode, fOldValueCheck, fOldValueMode, Log, regexp) or bChanged;
     end;
@@ -599,7 +599,7 @@ begin
     end;
 
     if bChanged and fReportOnly then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

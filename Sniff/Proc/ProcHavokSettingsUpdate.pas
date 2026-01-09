@@ -61,7 +61,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -247,7 +247,7 @@ begin
   fMotionQuality := Frame.edSettings.Values['Motion Quality'];
 end;
 
-function TProcHavokSettingsUpdate.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcHavokSettingsUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
 
   procedure UpdateField(const el: TdfElement; const aValue: string; var aChanged: Boolean);
   begin
@@ -269,7 +269,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
       block := nif.Blocks[i];

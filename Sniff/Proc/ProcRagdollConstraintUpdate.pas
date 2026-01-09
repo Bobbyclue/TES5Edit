@@ -31,7 +31,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -59,7 +59,7 @@ begin
   Result := Frame;
 end;
 
-function TProcRagdollConstraintUpdate.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcRagdollConstraintUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
 
   function CalcUpdate(Twist, Plane, Motor: TdfElement): Boolean;
   var
@@ -95,7 +95,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
       Constraint := nif.Blocks[i];

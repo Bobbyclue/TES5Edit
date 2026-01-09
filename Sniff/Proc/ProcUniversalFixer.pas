@@ -43,7 +43,7 @@ type
     procedure OnStart; override;
     procedure OnStop; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -1430,7 +1430,7 @@ begin
 end;
 
 
-function TProcUniversalFixer.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUniversalFixer.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -1440,7 +1440,7 @@ begin
   nif := TwbNifFile.Create;
   nif.Options := [nfoCollapseLinkArrays, nfoRemoveUnusedStrings];
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     bChanged := False;
     bChanged := FixStringIndices(nif, Log) or bChanged;
@@ -1466,7 +1466,7 @@ begin
 
       Sync.BeginWrite;
       try
-        LogFile.Add(aFileName);
+        LogFile.Add(aFile.FileName);
         LogFile.AddStrings(Log);
         LogFile.Add('');
       finally

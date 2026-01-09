@@ -31,7 +31,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -59,7 +59,7 @@ begin
   Result := Frame;
 end;
 
-function TProcOptimizeKF.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcOptimizeKF.ProcessFile(aFile: TProcFileObject): TBytes;
 
   function KeyValue(aKey: TdfElement): string;
   begin
@@ -114,7 +114,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var block in nif.BlocksByType('NiKeyBasedInterpolator', True) do begin
       datalink := block.Elements['Data'];

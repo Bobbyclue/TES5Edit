@@ -65,7 +65,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -230,7 +230,7 @@ begin
   end;
 end;
 
-function TProcVertexPaint.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcVertexPaint.ProcessFile(aFile: TProcFileObject): TBytes;
 
   procedure rgb2hsl(red, green, blue: Byte; var h, s, l: Double);
   var
@@ -356,7 +356,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
       block := nif.Blocks[i];

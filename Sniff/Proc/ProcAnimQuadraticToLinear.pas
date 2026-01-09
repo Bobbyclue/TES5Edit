@@ -40,7 +40,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -101,7 +101,7 @@ begin
   fNotMatching := Frame.chkNotMatching.Checked;
 end;
 
-function TProcAnimQuadraticToLinear.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAnimQuadraticToLinear.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Interpolator: TwbNifBlock;
@@ -112,7 +112,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;

@@ -54,7 +54,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -159,7 +159,7 @@ begin
     raise Exception.Create('No adjustment values set');
 end;
 
-function TProcAdjustTransform.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAdjustTransform.ProcessFile(aFile: TProcFileObject): TBytes;
 
 
   function AdjustFloat(val: Extended; m: Integer; const v: string): Extended;
@@ -232,7 +232,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var i := 0 to Pred(nif.BlocksCount) do begin
       block := nif.Blocks[i];

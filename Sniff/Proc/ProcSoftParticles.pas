@@ -28,7 +28,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -76,7 +76,7 @@ begin
   end;
 end;
 
-function TProcSoftParticles.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcSoftParticles.ProcessFile(aFile: TProcFileObject): TBytes;
 const
   cVPSoftScale = 'VPSoftScale';
 var
@@ -87,7 +87,7 @@ begin
   bChanged := False;
 
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var block in nif.BlocksByType('NiTriBasedGeom', True) do begin
 

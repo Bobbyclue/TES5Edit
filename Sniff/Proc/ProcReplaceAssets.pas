@@ -43,7 +43,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -117,7 +117,7 @@ begin
 
 end;
 
-function TProcReplaceAssets.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcReplaceAssets.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   i, k, p: integer;
   Elements: TList;
@@ -139,14 +139,14 @@ begin
   end;
   bChanged := False;
 
-  ext := ExtractFileExt(aFileName);
+  ext := ExtractFileExt(aFile.FileName);
 
   // collecting elements with assets
   try
     // *.NIF file
     if SameText(ext, '.nif') then begin
       Nif := TwbNifFile.Create;
-      Nif.LoadFromFile(aInputDirectory + aFileName);
+      Nif.LoadFromData(aFile.GetData);
       for el in Nif.GetAssets do
         Elements.Add(el);
     end
@@ -154,7 +154,7 @@ begin
     // *.BGSM file
     else if SameText(ext, '.bgsm') then begin
       BGSM := TwbBGSMFile.Create;
-      BGSM.LoadFromFile(aInputDirectory + aFileName);
+      BGSM.LoadFromData(aFile.GetData);
       el := BGSM.Elements['Textures'];
       for i := 0 to Pred(el.Count) do
         Elements.Add(el[i]);
@@ -163,7 +163,7 @@ begin
     // *.BGEM file
     else if SameText(ext, '.bgem') then begin
       BGEM := TwbBGEMFile.Create;
-      BGEM.LoadFromFile(aInputDirectory + aFileName);
+      BGEM.LoadFromData(aFile.GetData);
       el := BGEM.Elements['Textures'];
       for i := 0 to Pred(el.Count) do
         Elements.Add(el[i]);
@@ -227,7 +227,7 @@ begin
 
         // report
         if not bChanged then
-          Log.Add(#13#10 + aFileName);
+          Log.Add(#13#10 + aFile.FileName);
 
         Log.Add(#9 + el.Path + #13#10#9#9'"' + s + '"'#13#10#9#9'"' + el.EditValue + '"');
 

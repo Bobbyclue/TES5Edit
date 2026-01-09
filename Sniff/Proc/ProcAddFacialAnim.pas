@@ -45,7 +45,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -152,7 +152,7 @@ begin
 
 end;
 
-function TProcAddFacialAnim.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAddFacialAnim.ProcessFile(aFile: TProcFileObject): TBytes;
 const
   sHeadAnims = 'HeadAnims';
   sHeadAnims0 = 'HeadAnims:0';
@@ -163,7 +163,7 @@ var
 begin
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;
