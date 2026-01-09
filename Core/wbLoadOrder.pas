@@ -559,15 +559,16 @@ begin
   for i := Low(_ModulesLoadOrder) to High(_ModulesLoadOrder) do
     _ModulesLoadOrder[i].miCombinedIndex := i;
 
-  if   (not wbIsStarfield)
+  if (not wbIsStarfield)
     or wbRedPill
   then begin
     TwbModuleInfo.AddNewModule('<new file>.esp', True);
-    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
-      Include(miFlags, mfHasESMFlag);
-      Include(miFlags, mfIsESM);
-    end;
-    if wbIsLightSupported then begin
+    if not wbIsStarfield  then
+      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
+        Include(miFlags, mfHasESMFlag);
+        Include(miFlags, mfIsESM);
+      end;
+    if wbIsLightSupported and not wbIsStarfield then begin
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
         Include(miFlags, mfHasLightFlag);
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
@@ -576,7 +577,7 @@ begin
         Include(miFlags, mfIsESM);
       end;
     end;
-    if wbIsMediumSupported then begin
+    if wbIsMediumSupported and not wbIsStarfield then begin
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
         Include(miFlags, mfHasMediumFlag);
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
@@ -585,7 +586,7 @@ begin
         Include(miFlags, mfIsESM);
       end;
     end;
-    if wbIsUpdateSupported then begin
+    if wbIsUpdateSupported and not wbIsStarfield then begin
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
         Include(miFlags, mfHasUpdateFlag);
       with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin

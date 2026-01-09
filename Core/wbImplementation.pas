@@ -5176,12 +5176,25 @@ begin
       if GetIsUpdateDirect and (GetIsLightDirect or GetIsMediumDirect) then
           SetIsUpdate(False);
 
-      {if flModule.miExtension = meESP then begin
+      if flModule.miExtension = meESP then begin
         if not wbRedPill then
           raise Exception.Create('".esp" modules can not be saved in ' + wbAppName + wbToolName)
-        else
-          FileHeader.ElementEditValues['CNAM'] := 'RedPill';
-      end;}
+        else begin
+          if GetIsLight or GetIsMedium then
+            raise Exception.Create('".esp" modules must not be small or medium.');
+          if GetIsBlueprint then
+
+        end;
+      end;
+
+      if GetIsLight and GetIsMedium then
+        raise Exception.Create('Small or medium flags are mutually exclusive. Modules cannot be both.');
+
+      if GetIsUpdate then
+        raise Exception.Create('Update is not correctly supported by the game exe and will cause unexpected behavior. Saving update modules is not currently supported.');
+
+      if GetIsBlueprint then
+        raise Exception.Create('Saving blueprint modules is not currently supported.');
     end;
 
     inherited;
