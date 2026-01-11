@@ -7434,14 +7434,16 @@ begin
   wbINOM :=
     wbArray(INOM, 'INFO Order (Masters only)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
-    ).IncludeFlag(dfInternalEditOnly)
+    ).IncludeFlag(dfCollapsed)
+     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
      .IncludeFlag(dfDontAssign);
 
   wbINOA :=
     wbArray(INOA, 'INFO Order (All previous modules)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
-    ).IncludeFlag(dfInternalEditOnly)
+    ).IncludeFlag(dfCollapsed)
+     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
      .IncludeFlag(dfDontAssign);
 
