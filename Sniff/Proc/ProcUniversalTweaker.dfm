@@ -84,18 +84,6 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Style = csDropDownList
     DropDownCount = 20
     TabOrder = 4
-    Items.Strings = (
-      '='
-      '<>'
-      '>'
-      '<'
-      'Contains'
-      'Doesn'#39't contain'
-      'Starts with'
-      'Ends with'
-      'AND &'
-      'AND NOT &!'
-      'Regular Expr')
   end
   object edOldValue: TEdit
     Left = 382
@@ -113,17 +101,6 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Style = csDropDownList
     DropDownCount = 20
     TabOrder = 6
-    Items.Strings = (
-      'Set'
-      'Add'
-      'Mul'
-      'Replace with'
-      'Prepend str'
-      'Append str'
-      'AND &'
-      'AND NOT &!'
-      'OR |'
-      'Remove str')
   end
   object edBlocks: TEdit
     Left = 16

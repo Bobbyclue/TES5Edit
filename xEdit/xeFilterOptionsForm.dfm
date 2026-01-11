@@ -409,6 +409,14 @@ object frmFilterOptions: TfrmFilterOptions
       Height = 23
       TabOrder = 45
     end
+    object cbRegexComparison: TCheckBox
+      Left = 208
+      Top = 686
+      Width = 216
+      Height = 17
+      Caption = 'Use Regex for Contains Comparison'
+      TabOrder = 46
+    end
   end
   object pnlBottom: TPanel
     Left = 0

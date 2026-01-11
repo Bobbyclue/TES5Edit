@@ -32,7 +32,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -92,7 +92,7 @@ begin
   wbRotationEuler := True;
 end;
 
-function TProcTransformInfo.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcTransformInfo.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -100,7 +100,7 @@ begin
   nif := TwbNifFile.Create;
   Log := TStringList.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var i := 0 to Pred(nif.BlocksCount) do begin
       var b := nif.Blocks[i];
@@ -140,7 +140,7 @@ begin
     end;
 
     if Log.Count > 0 then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       AddMessages(Log);
     end;

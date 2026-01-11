@@ -22,7 +22,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -49,7 +49,7 @@ begin
   Result := Frame;
 end;
 
-function TProcUnskinMesh.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUnskinMesh.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   bChanged: Boolean;
@@ -78,7 +78,7 @@ begin
   bChanged := False;
 
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var b in nif.BlocksByType('NiNode') do
       if b.IsBone then begin

@@ -6168,8 +6168,8 @@ begin
       wbUnion(DATA, 'Effect Data', wbPerkDATADecider, [
         wbStructSK([0, 1], 'Quest + Stage', [
           wbFormIDCk('Quest', [QUST]),
-          wbInteger('Quest Stage', itU8, wbPerkDATAQuestStageToStr, wbQuestStageToInt),
-          wbUnused(3)
+          wbInteger('Quest Stage', itU16, wbPerkDATAQuestStageToStr, wbQuestStageToInt),
+          wbUnused(2)
         ]),
         wbFormIDCk('Ability', [SPEL]),
         wbStructSK([0, 1], 'Entry Point', [
@@ -9895,7 +9895,7 @@ begin
     26, 'Navmesh - Filter (Collision Geometry)',
     27, 'Navmesh - Bounding Box (Collision Geometry)',
     28, 'Reflected By Auto Water',
-    29, 'Don''t Have Settle',
+    29, 'Don''t Havok Settle',
     30, 'Navmesh - Ground',
     31, 'Multibound'
     ])).SetFlagHasDontShow(16, wbFlagREFRInteriorDontShow)

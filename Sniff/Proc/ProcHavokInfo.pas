@@ -28,7 +28,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -71,7 +71,7 @@ begin
   fPerObject := Frame.chkPerObject.Checked;
 end;
 
-function TProcHavokInfo.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcHavokInfo.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -81,7 +81,7 @@ begin
   nif := TwbNifFile.Create;
   Log := TStringList.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     statics := 0; dynamics := 0; mass := 0;
     for var col in nif.BlocksByType('bhkCollisionObject', True) do begin
@@ -124,7 +124,7 @@ begin
       Log.Add(Format(#9'Static: %d    Dynamic: %d    Total Mass: %s', [statics, dynamics, dfFloatToStr(mass)]));
 
     if Log.Count > 0 then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

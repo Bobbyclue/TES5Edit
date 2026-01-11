@@ -57,7 +57,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -202,7 +202,7 @@ begin
   Int32ToCheckListBox(clbFlags2, f2);
 end;
 
-function TProcShaderFlagsUpdate.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcShaderFlagsUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   i: Integer;
@@ -227,7 +227,7 @@ var
       el.NativeValue := f;
 
       if fReportOnly then begin
-        if Log.Count = 0 then Log.Add(#13#10 + aFileName);
+        if Log.Count = 0 then Log.Add(#13#10 + aFile.FileName);
         Log.Add(#9 + el.Path + #13#10#9#9'"' + old + '"'#13#10#9#9'"' + el.EditValue + '"');
       end;
 
@@ -240,7 +240,7 @@ begin
   nif := TwbNifFile.Create;
   Log := TStringList.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
       shader := nif.Blocks[i];

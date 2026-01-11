@@ -46,7 +46,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -151,7 +151,7 @@ begin
     end;
 end;
 
-function TProcUnweldedVertices.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUnweldedVertices.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -164,7 +164,7 @@ begin
   Log := TStringList.Create;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
       block := nif.Blocks[i];
@@ -214,7 +214,7 @@ begin
     end;
 
     if Log.Count > 0 then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

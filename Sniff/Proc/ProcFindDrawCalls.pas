@@ -28,7 +28,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -74,7 +74,7 @@ begin
   end;
 end;
 
-function TProcFindDrawCalls.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcFindDrawCalls.ProcessFile(aFile: TProcFileObject): TBytes;
 
   function GetShaderPasses(shader: TwbNifBlock): Integer;
   begin
@@ -107,7 +107,7 @@ begin
   Markers := TList.Create;
   totalcalls := 0;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     // list of geom shapes used for EditorMarker
     for i := 0 to Pred(nif.BlocksCount) do begin
@@ -148,7 +148,7 @@ begin
     end;
 
     if totalcalls > fCallsNum then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add(#9 + IntToStr(totalcalls) + ' draw calls estimated in total');
       Log.Add('');
       fManager.AddMessages(Log);

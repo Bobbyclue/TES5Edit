@@ -2156,7 +2156,7 @@ object frmMain: TfrmMain
           object edFileNameFilter: TLabeledEdit
             Left = 98
             Top = 6
-            Width = 356
+            Width = 306
             Height = 21
             Anchors = [akLeft, akTop, akRight]
             EditLabel.AlignWithMargins = True
@@ -2166,9 +2166,20 @@ object frmMain: TfrmMain
             LabelPosition = lpLeft
             TabOrder = 0
             Text = ''
+            StyleElements = [seFont, seBorder]
             OnChange = edFileNameFilterChange
             OnKeyDown = edFileNameFilterKeyDown
             OnKeyPress = edFilterNoBeepOnEnterKeyPress
+          end
+          object cbRegExFilter: TCheckBox
+            Left = 408
+            Top = 7
+            Width = 50
+            Height = 17
+            Anchors = [akTop, akRight]
+            Caption = '&RegEx'
+            TabOrder = 1
+            OnClick = cbRegExFilterClick
           end
         end
       end

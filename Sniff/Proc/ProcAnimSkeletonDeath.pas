@@ -38,7 +38,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -94,7 +94,7 @@ begin
   fExactMatch := Frame.chkExactMatch.Checked;
 end;
 
-function TProcAnimSkeletonDeath.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAnimSkeletonDeath.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif, skeleton: TwbNifFile;
   entries, entry: TdfElement;
@@ -104,17 +104,17 @@ var
 begin
   bChanged := False;
 
-  if not SameText(ExtractFileName(aFileName), 'death.kf') then
+  if not SameText(ExtractFileName(aFile.FileName), 'death.kf') then
     Exit;
 
-  skeletonfile := ExtractFilePath(aFileName) + 'skeleton.nif';
-  if not FileExists(aInputDirectory + skeletonfile) then
+  skeletonfile := ExtractFilePath(aFile.FileName) + 'skeleton.nif';
+  if not FileExists(fManager.InputDirectory + skeletonfile) then
     Exit;
 
   nif := TwbNifFile.Create;
   skeleton := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;
@@ -124,7 +124,7 @@ begin
     if not Assigned(entries)then
       Exit;
 
-    skeleton.LoadFromFile(aInputDirectory + skeletonfile);
+    skeleton.LoadFromFile(fManager.InputDirectory + skeletonfile);
 
     // going over NiNode bones in skeleton
     for bone in skeleton.BlocksByType('NiNode') do begin

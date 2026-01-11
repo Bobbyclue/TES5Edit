@@ -67,7 +67,7 @@ type
     function GetFrame(aOwner: TComponent): TFrame; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -209,7 +209,7 @@ begin
   end;
 end;
 
-function TProcMoppUpdate.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcMoppUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   i, j: Integer;
@@ -226,7 +226,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for i := 0 to Pred(nif.BlocksCount) do begin
 

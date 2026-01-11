@@ -53,7 +53,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -126,7 +126,7 @@ begin
   ShellExecute(self.WindowHandle, 'open', sLinkInfo, nil, nil, SW_SHOWNORMAL);
 end;
 
-function TProcOptimize.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcOptimize.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Options: TwbMeshOptimizeOptions;
@@ -139,7 +139,7 @@ begin
 
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.SpellOptimize(Options) then
       nif.SaveToData(Result);

@@ -38,7 +38,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -86,7 +86,7 @@ begin
     raise Exception.Create('Need to select at least one option');
 end;
 
-function TProcJamAnim.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcJamAnim.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   interpolator, transfdata: TwbNifBlock;
@@ -97,7 +97,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for interpolator in nif.BlocksByType('NiTransformInterpolator') do begin
       if interpolator.Elements['Data'].LinksTo <> nil then

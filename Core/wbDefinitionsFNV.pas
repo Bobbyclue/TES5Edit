@@ -5858,8 +5858,8 @@ begin
       wbUnion(DATA, 'Effect Data', wbPerkDATADecider, [
         wbStructSK([0, 1], 'Quest + Stage', [
           wbFormIDCk('Quest', [QUST]),
-          wbInteger('Quest Stage', itU8, wbPerkDATAQuestStageToStr, wbQuestStageToInt),
-          wbUnused(3)
+          wbInteger('Quest Stage', itU16, wbPerkDATAQuestStageToStr, wbQuestStageToInt),
+          wbUnused(2)
         ]),
         wbFormIDCk('Ability', [SPEL]),
         wbStructSK([0, 1], 'Entry Point', [
@@ -8504,17 +8504,7 @@ begin
   wbRecord(RCCT, 'Recipe Category', [
     wbEDIDReq,
     wbFULL,
-    wbInteger(DATA, 'Flags', itU8,
-      wbFlags(wbSparseFlags([
-        0, 'Subcategory?',
-        1, 'Unknown 1',
-        2, 'Unknown 2',
-        3, 'Unknown 3',
-        4, 'Unknown 4',
-        5, 'Unknown 5',
-        6, 'Unknown 6',
-        7, 'Unknown 7'
-      ]))).IncludeFlag(dfCollapsed, wbCollapseFlags)
+    wbInteger(DATA, 'Subcategory', itU8, wbBoolEnum).SetAfterLoad(wbRecipeCategoryDataAfterLoad)
   ]);
 
   wbIngredient :=

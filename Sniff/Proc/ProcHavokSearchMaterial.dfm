@@ -6,16 +6,16 @@ object FrameHavokMaterial: TFrameHavokMaterial
   TabOrder = 0
   object Label1: TLabel
     Left = 16
-    Top = 48
-    Width = 91
-    Height = 13
+    Top = 64
+    Width = 99
+    Height = 15
     Caption = 'Search for material'
   end
   object Label2: TLabel
     Left = 16
-    Top = 101
-    Width = 102
-    Height = 13
+    Top = 117
+    Width = 113
+    Height = 15
     Caption = 'Replace with material'
   end
   object StaticText1: TStaticText
@@ -32,18 +32,18 @@ object FrameHavokMaterial: TFrameHavokMaterial
   end
   object cmbSearch: TComboBox
     Left = 16
-    Top = 67
+    Top = 83
     Width = 377
-    Height = 21
+    Height = 23
     Style = csDropDownList
     DropDownCount = 24
     TabOrder = 1
   end
   object cmbReplace: TComboBox
     Left = 16
-    Top = 120
+    Top = 136
     Width = 377
-    Height = 21
+    Height = 23
     Style = csDropDownList
     DropDownCount = 24
     TabOrder = 2
@@ -100,5 +100,13 @@ object FrameHavokMaterial: TFrameHavokMaterial
     TabOrder = 7
     TabStop = True
     OnClick = rbTES5Click
+  end
+  object chkSkipRoot: TCheckBox
+    Left = 16
+    Top = 176
+    Width = 169
+    Height = 17
+    Caption = 'Skip root node collision'
+    TabOrder = 8
   end
 end

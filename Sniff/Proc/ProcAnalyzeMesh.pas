@@ -45,7 +45,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -119,7 +119,7 @@ begin
   if Frame.edVertices.Text = '' then fVertices := 0 else fVertices := StrToIntDef(Frame.edVertices.Text, 0);
 end;
 
-function TProcAnalyzeMesh.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAnalyzeMesh.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -161,7 +161,7 @@ begin
   nif := TwbNifFile.Create;
   Log := TStringList.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var i := 0 to Pred(nif.BlocksCount) do begin
       var b := nif.Blocks[i];
@@ -213,7 +213,7 @@ begin
       Log.Add(Format(#9'Vertices: %d    Triangles: %d    ACMR: %.1f    ATVR: %.1f    Overfetch: %.1f', [verts, tris, _acmr, _atvr, _overfetch]));
 
     if Log.Count > 0 then begin
-      Log.Insert(0, aFileName);
+      Log.Insert(0, aFile.FileName);
       Log.Add('');
       fManager.AddMessages(Log);
     end;

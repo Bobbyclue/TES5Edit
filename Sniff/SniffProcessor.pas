@@ -12,17 +12,21 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.IniFiles, System.SyncObjs,
-  Vcl.Forms, Vcl.Dialogs;
+  Vcl.Forms, Vcl.Dialogs, wbBSArchive;
 
 type
   TGameType = (gtTES3, gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4);
   TGameTypes = set of TGameType;
-  TGameResourceType = (resMesh, resTexture, resSound, resMusic, resMaterial);
 
   TProcBase = class;
+  TProcBases = array of TProcBase;
+  TProcManager = class;
 
-  TProcessObject = class
+  TProcFileObject = class
+    Manager: TProcManager;
     FileName: string;
+    FileEntry: TwbBSFileEntry;
+    function GetData: TBytes;
   end;
 
   TProcManager = class
@@ -32,6 +36,7 @@ type
     fDirectories: TStringList;
     {$IF CompilerVersion >= 34.0} { Delphi 10.4 } SyncLog: TLightweightMREW; {$ELSE} SyncLog: IReadWriteSync; {$IFEND}
     {$IF CompilerVersion >= 34.0} { Delphi 10.4 } SyncIO: TLightweightMREW; {$ELSE} SyncIO: IReadWriteSync; {$IFEND}
+    fInputArchive: TwbBSArchive;
     fInputDirectory: string;
     fOutputDirectory: string;
     fCopyAll: Boolean;
@@ -49,10 +54,11 @@ type
     procedure ClearMessages;
     procedure CreateDirectory(const aPath: string);
     procedure InitializeProcessing(aProc: TProcBase);
-    procedure Process(aObject: TProcessObject);
+    procedure Process(aFile: TProcFileObject);
 
     property Settings: TMemIniFile read fSettings;
     property Messages: TStringList read fMessages;
+    property InputArchive: TwbBSArchive read fInputArchive write fInputArchive;
     property InputDirectory: string read fInputDirectory write fInputDirectory;
     property OutputDirectory: string read fOutputDirectory write fOutputDirectory;
     property CopyAll: Boolean read fCopyAll write fCopyAll;
@@ -65,6 +71,7 @@ type
   TProcBase = class
   protected
     fManager: TProcManager;
+    fGroupID: Integer;
     fTitle: string;
     fSupportedGames: TGameTypes;
     fExtensions: array of string;
@@ -89,13 +96,14 @@ type
     constructor Create(aManager: TProcManager); virtual;
     function GetFrame(aOwner: TComponent): TFrame; virtual; abstract;
     function IsAcceptedFile(const aFileName: string): Boolean;
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; virtual;
+    function ProcessFile(aFile: TProcFileObject): TBytes; virtual;
 
     procedure OnShow; virtual;
     procedure OnHide; virtual;
     procedure OnStart; virtual;
     procedure OnStop; virtual;
 
+    property GroupID: Integer read fGroupID write fGroupID;
     property Title: string read fTitle;
     property NoOutput: Boolean read fNoOutput;
     property Threads: Integer read fThreads write fThreads;
@@ -105,7 +113,7 @@ type
   end;
 
 function SelectFolder(var aPath: string): Boolean;
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
+function SelectArchive(var aPath: string): Boolean;
 function TextToString(const aText: string): string;
 function StringToText(const aText: string): string;
 
@@ -126,40 +134,36 @@ begin
     Result := Execute;
     if Result then
       aPath := FileName;
-
   finally
     Free;
   end;
 end;
 
-function wbNormalizeResourceName(const aName: string; aResType: TGameResourceType): string;
-var
-  i: integer;
+function SelectArchive(var aPath: string): Boolean;
 begin
-  Result := Trim(StringReplace(LowerCase(aName), '/', '\', [rfReplaceAll]));
-  if Length(Result) < 2 then
-    Exit;
+  with TFileOpenDialog.Create(Application.MainForm) do try
+    with FileTypes.Add do begin
+      DisplayName := 'BSA archive';
+      FileMask := '*.bsa';
+    end;
+    with FileTypes.Add do begin
+      DisplayName := 'BA2 archive';
+      FileMask := '*.ba2';
+    end;
+    Options := [fdoFileMustExist];
+    if TwbBSArchive.IsArchive(aPath) then begin
+      FileName := aPath;
+      if SameText(ExtractFileExt(aPath), '.ba2') then
+        FileTypeIndex := 2;
+    end else
+      DefaultFolder := ExtractFilePath(aPath);
 
-  // absolute path, cut everything before Data or leave only file name
-  i := Pos('data\', Result);
-  if i <> 0 then
-    Delete(Result, 1, Pred(i));
-
-  // starts with slash, remove it
-  if Result[1] = '\' then Delete(Result, 1, 1);
-  // starts with Data, remove it
-  if Copy(Result, 1, 5) = 'data\' then Delete(Result, 1, 5);
-  // root folder in Data for different resource types
-  if (aResType = resMesh) and (Copy(Result, 1, 7) <> 'meshes\') then
-    Result := 'meshes\' + Result
-  else if (aResType = resTexture) and (Copy(Result, 1, 9) <> 'textures\') then
-    Result := 'textures\' + Result
-  else if (aResType = resSound) and (Copy(Result, 1, 6) <> 'sound\') then
-    Result := 'sound\' + Result
-  else if (aResType = resMusic) and (Copy(Result, 1, 6) <> 'music\') then
-    Result := 'music\' + Result
-  else if (aResType = resMaterial) and (Copy(Result, 1, 10) <> 'materials\') then
-    Result := 'materials\' + Result;
+    Result := Execute;
+    if Result then
+      aPath := FileName;
+  finally
+    Free;
+  end;
 end;
 
 function TextToString(const aText: string): string;
@@ -172,6 +176,14 @@ function StringToText(const aText: string): string;
 begin
   Result := StringReplace(aText, '#13', #13, [rfReplaceAll]);
   Result := StringReplace(Result, '#10', #10, [rfReplaceAll]);
+end;
+
+function TProcFileObject.GetData: TBytes;
+begin
+  if Assigned(FileEntry) then
+    Result := FileEntry.Unpack
+  else
+    Result := TFile.ReadAllBytes(Manager.InputDirectory + FileName);
 end;
 
 constructor TProcManager.Create;
@@ -189,6 +201,8 @@ destructor TProcManager.Destroy;
 begin
   fMessages.Free;
   fDirectories.Free;
+  if Assigned(fInputArchive) then
+    fInputArchive.Free;
 end;
 
 procedure TProcManager.InitializeProcessing(aProc: TProcBase);
@@ -200,9 +214,9 @@ begin
   fProcessedCount := 0;
 end;
 
-procedure TProcManager.Process(aObject: TProcessObject);
+procedure TProcManager.Process(aFile: TProcFileObject);
 var
-  infile, outfile, d, err: string;
+  outfile, d, err: string;
   data: TBytes;
   bUpdated: Boolean;
   bSkipped: Boolean;
@@ -210,9 +224,8 @@ begin
   bUpdated := False;
   bSkipped := False;
 
-  infile := aObject.FileName;
   try
-    data := Proc.ProcessFile(fInputDirectory, fOutputDirectory, infile);
+    data := Proc.ProcessFile(aFile);
   except
     on E: Exception do begin
       if fSkipOnErrors { Pos('Unknown NIF version', E.Message) <> 0 } then begin
@@ -234,14 +247,14 @@ begin
 
     // if not changed but option to copy all is checked then load original
     if not bUpdated and fCopyAll then
-      data := TFile.ReadAllBytes(fInputDirectory + infile);
+      data := aFile.GetData;
 
     // if nothing to save at this point
     if Length(data) = 0 then
       Exit;
 
     // saving output file
-    outfile := fOutputDirectory + infile;
+    outfile := fOutputDirectory + aFile.FileName;
     d := ExtractFilePath(outfile);
     if d <> fOutputDirectory then
       CreateDirectory(d);
@@ -250,12 +263,12 @@ begin
   end;
 
   if bSkipped then
-    AddMessage('Skipped: ' + infile + ': ' + err)
+    AddMessage('Skipped: ' + aFile.FileName + ': ' + err)
   else if bUpdated then begin
-    AddMessage('Updated: ' + infile);
+    AddMessage('Updated: ' + aFile.FileName);
     AtomicIncrement(fModifiedCount);
   end else
-    AddMessage('Unchanged: ' + infile)
+    AddMessage('Unchanged: ' + aFile.FileName);
 end;
 
 procedure TProcManager.AddMessage(const aText: string);
@@ -318,8 +331,6 @@ procedure TProcManager.SetIniFile(aFile: TMemIniFile);
 begin
   fSettings := aFile;
 end;
-
-
 
 
 constructor TProcBase.Create(aManager: TProcManager);
@@ -388,7 +399,7 @@ begin
     if s = ext then Exit(True)
 end;
 
-function TProcBase.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcBase.ProcessFile(aFile: TProcFileObject): TBytes;
 begin
 
 end;

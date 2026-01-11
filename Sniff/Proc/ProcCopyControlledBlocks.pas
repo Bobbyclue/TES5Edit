@@ -38,7 +38,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -97,7 +97,7 @@ begin
   fSourceDirectory := IncludeTrailingPathDelimiter(fSourceDirectory);
 end;
 
-function TProcCopyControlledBlocks.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcCopyControlledBlocks.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   Nif, SrcNif: TwbNifFile;
   SrcBlocks, DstBlocks: TdfElement;
@@ -149,7 +149,7 @@ var
   end;
 
 begin
-  if not FileExists(fSourceDirectory + aFileName) then
+  if not FileExists(fSourceDirectory + aFile.FileName) then
     Exit;
 
   bChanged := False;
@@ -159,8 +159,8 @@ begin
   Nif := TwbNifFile.Create;
   SrcNif := TwbNifFile.Create;
   try
-    Nif.LoadFromFile(aInputDirectory + aFileName);
-    SrcNif.LoadFromFile(fSourceDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
+    SrcNif.LoadFromFile(fSourceDirectory + aFile.FileName);
 
     if (SrcNif.BlocksCount = 0) or (Nif.BlocksCount = 0) then
       Exit;

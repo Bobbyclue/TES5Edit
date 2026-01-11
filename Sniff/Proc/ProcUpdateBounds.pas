@@ -31,7 +31,7 @@ type
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -58,7 +58,7 @@ begin
   Result := Frame;
 end;
 
-function TProcUpdateBounds.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUpdateBounds.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   bChanged: Boolean;
@@ -66,7 +66,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var i: Integer := 0 to Pred(nif.BlocksCount) do
       bChanged := nif.Blocks[i].UpdateBounds or bChanged;

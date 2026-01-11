@@ -25,11 +25,11 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
   end
   object edSourceDirectory: TLabeledEdit
     Left = 16
-    Top = 96
+    Top = 136
     Width = 401
     Height = 23
     Anchors = [akLeft, akTop, akRight]
-    EditLabel.Width = 245
+    EditLabel.Width = 332
     EditLabel.Height = 15
     EditLabel.Caption = 
       'Source directory with files or the single file to copy blocks fr' +
@@ -39,7 +39,7 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
   end
   object btnBrowse: TButton
     Left = 423
-    Top = 94
+    Top = 134
     Width = 45
     Height = 25
     Anchors = [akTop, akRight]
@@ -49,7 +49,7 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
   end
   object chkCopyGeom: TCheckBox
     Left = 16
-    Top = 136
+    Top = 176
     Width = 329
     Height = 17
     Caption = 'Copy geometry'
@@ -59,7 +59,7 @@ object FrameCopyGeometryBlocks: TFrameCopyGeometryBlocks
   end
   object chkCopyTransform: TCheckBox
     Left = 16
-    Top = 159
+    Top = 199
     Width = 329
     Height = 17
     Caption = 'Copy transformation (pos, rot, scale)'

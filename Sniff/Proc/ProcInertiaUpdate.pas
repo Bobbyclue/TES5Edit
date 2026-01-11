@@ -47,7 +47,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -134,7 +134,7 @@ begin
 
 end;
 
-function TProcInertiaUpdate.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcInertiaUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   bodypart: Integer;
@@ -201,7 +201,7 @@ begin
   bChanged := False;
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     for var rigid in nif.BlocksByType('bhkRigidBody', True) do begin
       var shape := TwbNifBlock(rigid.Elements['Shape'].LinksTo);

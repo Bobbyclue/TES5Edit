@@ -43,7 +43,7 @@ type
     procedure OnStart; override;
     procedure OnStop; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -227,6 +227,10 @@ begin
 
     var delim := '';
 
+    // beth slop
+    if Pos(#8'NOR', newname) <> 0 then
+      newname := '';
+
     // detecting used delimiter
     // edge case when path contains both slashes \ and /, don't even ask why...
     if (Pos('\', newname) <> 0) and (Pos('/', newname) <> 0) then begin
@@ -237,6 +241,8 @@ begin
 
     // fix double slashes
     newname := StringReplace(newname, delim + delim, delim, [rfReplaceAll]);
+    // fix new lines
+    newname := newname.Trim([#9, #10, #13]);
 
     // fix absolute paths
     if TPath.IsPathRooted(newname) then begin
@@ -1424,7 +1430,7 @@ begin
 end;
 
 
-function TProcUniversalFixer.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcUniversalFixer.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   Log: TStringList;
@@ -1434,7 +1440,7 @@ begin
   nif := TwbNifFile.Create;
   nif.Options := [nfoCollapseLinkArrays, nfoRemoveUnusedStrings];
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     bChanged := False;
     bChanged := FixStringIndices(nif, Log) or bChanged;
@@ -1460,7 +1466,7 @@ begin
 
       Sync.BeginWrite;
       try
-        LogFile.Add(aFileName);
+        LogFile.Add(aFile.FileName);
         LogFile.AddStrings(Log);
         LogFile.Add('');
       finally

@@ -36,7 +36,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -92,7 +92,7 @@ begin
   end;
 end;
 
-function TProcAddLODNode.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAddLODNode.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
   root, child, LODNode, RangeNode: TwbNifBlock;
@@ -103,7 +103,7 @@ begin
   nif := TwbNifFile.Create;
   nif.Options := [nfoCollapseLinkArrays];
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;

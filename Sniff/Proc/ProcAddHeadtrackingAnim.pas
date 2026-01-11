@@ -44,7 +44,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 
@@ -98,7 +98,7 @@ begin
   fKeyTime3 := StrToInt(Frame.edKeyTime3.Text);
 end;
 
-function TProcAddHeadtrackingAnim.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcAddHeadtrackingAnim.ProcessFile(aFile: TProcFileObject): TBytes;
 
   function RoundTime(aLen: double; aPercent: integer; aRoundTo: double = 1/30): double;
   begin
@@ -117,7 +117,7 @@ var
 begin
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;

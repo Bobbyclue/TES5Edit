@@ -155,7 +155,7 @@ function wbPlacedAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbROADAddInfo(const aMainRecord: IwbMainRecord): string;
 function wbSCENAddInfo(const aMainRecord: IwbMainRecord): string;
 
-{>>> After Load Callbacks <<<} //12
+{>>> After Load Callbacks <<<} //13
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 procedure wbAVIFSkillAfterLoad(const aElement: IwbElement);
 procedure wbDialogueTextAfterLoad(const aElement: IwbElement);
@@ -163,6 +163,7 @@ procedure wbDOBJObjectsAfterLoad(const aElement: IwbElement);
 procedure wbMESGAfterLoad(const aElement: IwbElement);
 procedure wbPACKDateAfterLoad(const aElement: IwbElement);
 procedure wbPNDTAfterLoad(const aElement: IwbElement);
+procedure wbRecipeCategoryDataAfterLoad(const aElement: IwbElement);
 procedure wbRPLDAfterLoad(const aElement: IwbElement);
 procedure wbScrollCastAfterLoad(const aElement: IwbElement);
 procedure wbScrollTypeAfterLoad(const aElement: IwbElement);
@@ -817,7 +818,7 @@ begin
   end;
 end;
 
-{>>> After Load Callbacks <<<} //12
+{>>> After Load Callbacks <<<} //13
 
 procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
 begin
@@ -968,6 +969,21 @@ begin
       if Assigned(lCNAM) then
         lCNAM.Remove;
     end;
+  finally
+    wbEndInternalEdit;
+  end;
+end;
+
+procedure wbRecipeCategoryDataAfterLoad(const aElement: IwbElement);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if wbBeginInternalEdit then try
+    if (aElement.NativeValue and $1) = 0 then
+      aElement.NativeValue := 0;
+    if (aElement.NativeValue and $1) = 1 then
+      aElement.NativeValue := 1;
   finally
     wbEndInternalEdit;
   end;
@@ -7418,14 +7434,16 @@ begin
   wbINOM :=
     wbArray(INOM, 'INFO Order (Masters only)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
-    ).IncludeFlag(dfInternalEditOnly)
+    ).IncludeFlag(dfCollapsed)
+     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
      .IncludeFlag(dfDontAssign);
 
   wbINOA :=
     wbArray(INOA, 'INFO Order (All previous modules)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
-    ).IncludeFlag(dfInternalEditOnly)
+    ).IncludeFlag(dfCollapsed)
+     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
      .IncludeFlag(dfDontAssign);
 

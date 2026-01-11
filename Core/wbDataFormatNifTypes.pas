@@ -165,7 +165,7 @@ function wbLookAtFlags(const aName, aDefaultValue: string; const aEvents: array 
 function wbAdditionalDataInfo(const aName: string; const aEvents: array of const): TdfDef;
 function wbAdditionalDataBlock(const aName: string; const aEvents: array of const): TdfDef;
 function wbBSPackedAdditionalDataBlock(const aName: string; const aEvents: array of const): TdfDef;
-function wbBoundingVolume(const aName: string; const aEvents: array of const): TdfDef;
+function wbBoundingVolume(const aName: string): TdfDef;
 
 
 implementation
@@ -2503,7 +2503,7 @@ begin
 end;
 function BoundingVolume_EnType5(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Collision Type'] = 5; end;
 
-function wbBoundingVolume(const aName: string; const aEvents: array of const): TdfDef;
+function wbBoundingVolume(const aName: string): TdfDef;
 begin
   Result := dfStruct(aName, [
     dfEnum('Collision Type', dtS32, [
@@ -2534,7 +2534,7 @@ begin
       wbNiPlane('Plane'),
       wbVector3('Center')
     ], [DF_OnGetEnabled, @BoundingVolume_EnType5])
-  ], aEvents);
+  ]);
 end;
 
 

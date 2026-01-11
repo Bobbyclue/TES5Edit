@@ -412,7 +412,8 @@ type
     atSound, atVoice, atMusic,
     atScript, atSource,
     atStrings, atSpeedTree, atVideo, atLODSettings, atDistantLOD,
-    atInterface, atProgram, atMenu, atFont, atFacegen, atLSData,
+    atInterface, atProgram,
+    atMenus, atFont, atFacegen, atLSData, atShaders,
     atGrass, atPreVis, atSeq, atDialogueViews,
     atBookArt, atIcon, atSplash
   );
@@ -434,14 +435,14 @@ type
     end;
   const
     cDataFolders: array [0..1] of string = ('data', 'data files');
-    cBSAssets: array [0..25] of TAssetDesc = (
-      (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
+    cBSAssets: array [0..26] of TAssetDesc = (
+      (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.psa', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
       (Typ: atTexture;        Root: 'textures';      Ext: ['.dds', '.tga', '.png']),
       (Typ: atMaterial;       Root: 'materials';     Ext: ['.bgsm', '.bgem']),
       (Typ: atVoice;          Root: 'sound\voice';   Ext: ['.lip', '.wav', '.xwm', '.mp3', '.ogg', '.fuz']),
       (Typ: atSound;          Root: 'sound';         Ext: ['.wav', '.xwm', '.ogg']),
       (Typ: atMusic;          Root: 'music';         Ext: ['.xwm', '.mp3']),
-      (Typ: atSource;         Root: 'source';        Ext: ['.psc']),
+      (Typ: atSource;         Root: 'scripts\source';Ext: ['.psc']), // SSE: source\scripts
       (Typ: atScript;         Root: 'scripts';       Ext: ['.pex', '.psc']),
       (Typ: atStrings;        Root: 'strings';       Ext: ['.strings', '.ilstrings', '.dlstrings']),
       (Typ: atSpeedTree;      Root: 'trees';         Ext: ['.spt']),
@@ -450,10 +451,11 @@ type
       (Typ: atDistantLOD;     Root: 'distantlod';    Ext: ['.cmp', '.lod']), // TES4
       (Typ: atInterface;      Root: 'interface';     Ext: ['.swf', '.txt']),
       (Typ: atProgram;        Root: 'programs';      Ext: ['.swf']), // FO4
-      (Typ: atMenu;           Root: 'menus';         Ext: ['.xml', '.htm', '.txt', '.scc', '.bat']), // TES4
+      (Typ: atMenus;          Root: 'menus';         Ext: ['.xml', '.htm', '.txt', '.scc', '.bat']), // TES4
       (Typ: atFont;           Root: 'fonts';         Ext: ['.fnt', '.tex']), // TES4
       (Typ: atFacegen;        Root: 'facegen';       Ext: ['.ctl']), // TES4
       (Typ: atLSData;         Root: 'lsdata';        Ext: ['.dat']), // TES4
+      (Typ: atShaders;        Root: 'shaders';       Ext: ['.sdp']), // TES4
       (Typ: atGrass;          Root: 'grass';         Ext: ['.gid']),
       (Typ: atPreVis;         Root: 'vis';           Ext: ['.uvd']),
       (Typ: atSeq;            Root: 'seq';           Ext: ['.seq']), // TES5
@@ -655,7 +657,15 @@ class function TwbAsset.GetAssetName(const aFileName: string; const aRoot: strin
 var
   i: Integer;
 begin
-  var path := '\' + LowerCase(aFileName);
+  Result := '';
+
+  // skip too short, empty and beth slop
+  if (Length(aFileName) < 2) or (Trim(aFileName) = '') or (Pos(#8'NOR', aFileName) <> 0) then
+    Exit;
+
+  var path := '\' + StringReplace(LowerCase(aFileName), '/', '\', [rfReplaceAll]);
+
+  try
 
   // searching for Data folder first
   for var f in cDataFolders do begin
@@ -683,13 +693,16 @@ begin
     Exit;
   end;
 
-  // last resort - detect asset type by extension and use its root
-  if AssetType = atNone then
+  // last resort - detect asset type by extension if not provided
+  if AssetType = atNone then begin
     AssetType := AssetTypeByExtension(path);
-  // priority goes to sound over voice and music (audio uses the same extensions mostly)
-  if AssetType in [atVoice, atMusic] then AssetType := atSound;
-  // unknonws go into meshes by default
-  if AssetType = atNone then AssetType := atMesh;
+    // priority goes to sound over voice and music (audio uses the same extensions mostly)
+    if AssetType in [atVoice, atMusic] then AssetType := atSound;
+    // unknonws go into meshes by default
+    if AssetType = atNone then AssetType := atMesh;
+  end;
+
+  // prepend with Asset type root
   for var a in cBSAssets do
     if a.Typ = AssetType then begin
       // use file name only from absolute paths
@@ -699,6 +712,11 @@ begin
         Result := a.Root + '\' + aFileName;
       Exit;
     end;
+
+  finally
+    Result := StringReplace(Result, '/', '\', [rfReplaceAll]);
+    Result := StringReplace(Result, '\\', '\', [rfReplaceAll]);
+  end;
 end;
 
 class function TwbAsset.GetNonASCII(const aFileName: string): string;
@@ -736,7 +754,7 @@ end;
 class function TwbAsset.DoNotCompress(const aFileName: string): Boolean;
 begin
   Result :=
-    (AssetTypeByExtension(aFileName) in [atSound, atVoice, atMusic, atStrings])
+    (AssetTypeByFolder(aFileName) in [atSound, atVoice, atMusic, atStrings])
     and not aFileName.EndsWith('.fuz', True);
 end;
 
@@ -966,7 +984,7 @@ begin
       atVoice:        aFileFlags := aFileFlags or FILE_VOICES;
       atSpeedTree:    aFileFlags := aFileFlags or FILE_TREES;
       atFont:         aFileFlags := aFileFlags or FILE_FONTS;
-      atMenu:         aFileFlags := aFileFlags or FILE_SHADERS;
+      atMenus:        aFileFlags := aFileFlags or FILE_SHADERS;
       atDistantLOD,
       atLODSettings:  aFileFlags := aFileFlags or FILE_MESHES or FILE_MISC;
       else
@@ -1149,10 +1167,13 @@ begin
         Break;
       end;
 
-  if IsDDSArchive(fType) then
+  if IsDDSArchive(fType) or (fType = baSSE) then
     for var f in Self do
       if not f.Compressed then begin
-        Result := Result + ['DDS archive contains uncompressed textures which crash the game'];
+        if (fType = baSSE) and (fHeader.Flags and ARCHIVE_EMBEDNAME <> 0) then
+          Result := Result + ['Contains uncompressed files with Embedded File Names flag, such combination crashes Skyrim SE/AE']
+        else if IsDDSArchive(fType) then
+          Result := Result + ['DDS archive contains uncompressed textures which crash the game'];
         Break;
       end;
 end;
@@ -1611,9 +1632,8 @@ begin
     if not bTexturesOnly then
       fHeader.FileFlags := fHeader.FileFlags and not ARCHIVE_EMBEDNAME
     // SSE crashing bug - textures with embedded names must be compressed
-    else if (fType = baSSE) and (fHeader.Flags and ARCHIVE_EMBEDNAME <> 0) then
-      for i := 0 to Pred(Count) do
-        Items[i].Compress := True;
+    else if not Assigned(fPacker) and (fType = baSSE) and (fHeader.Flags and ARCHIVE_EMBEDNAME <> 0) then
+      for var f in Self do f.Compress := True;
   end
 
   //--------------------------------------------------
@@ -2339,12 +2359,7 @@ begin
     bsa := AddArchive;
     // BSA will use us to get preloaded files data
     bsa.Packer := Self;
-    try
-      bsa.CreateArchive(NewArchiveName, fType, sl, fcomp);
-    except
-      Inc(fErrorCount);
-      raise;
-    end;
+    bsa.CreateArchive(NewArchiveName, fType, sl, fcomp);
   finally
     sl.Free;
   end;
@@ -2376,48 +2391,43 @@ var
 begin
   Size := 0;
 
+  Inc(fLoadingCount);
+  SyncEndWrite;
   try
-    Inc(fLoadingCount);
-    SyncEndWrite;
-    try
-      buf := GetSourceFileData(aPackedFile.FileName, aPackedFile.FileObject);
+    buf := GetSourceFileData(aPackedFile.FileName, aPackedFile.FileObject);
 
-      // non DDS archives - single chunk holding entire file data
-      if not IsDDSArchive(fType) then
-        AddChunk(buf, aPackedFile.Compress)
+    // non DDS archives - single chunk holding entire file data
+    if not IsDDSArchive(fType) then
+      AddChunk(buf, aPackedFile.Compress)
 
-      // DDS archives - multiple chunks for mipmaps
-      else begin
-        if (Length(buf) < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(buf) then
-          raise Exception.Create('Not a valid DDS file');
+    // DDS archives - multiple chunks for mipmaps
+    else begin
+      if (Length(buf) < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(buf) then
+        raise Exception.Create('Not a valid DDS file');
 
+      DDSHeader := @buf[0];
+      // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
+      if (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
+        buf := TwbDDS.RGB24toRGBX32(buf, Length(buf));
         DDSHeader := @buf[0];
-        // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
-        if (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
-          buf := TwbDDS.RGB24toRGBX32(buf, Length(buf));
-          DDSHeader := @buf[0];
-        end;
-        Off := TwbDDS.GetHeaderSize(DDSHeader);
-        // chunk 0 is uncompressed DDS header
-        AddChunk(Copy(buf, 0, Off), False);
-
-        MipSize := TwbDDS.GetMipSize(DDSHeader);
-        var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
-        if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
-        for var i := 1 to c do begin
-          if i = c then MipSize := Length(buf) - Off;
-          AddChunk(Copy(buf, Off, MipSize), aPackedFile.Compress);
-          Inc(Off, MipSize);
-          MipSize := MipSize div 4;
-        end;
       end;
-    finally
-      SyncBeginWrite;
-      Dec(fLoadingCount);
+      Off := TwbDDS.GetHeaderSize(DDSHeader);
+      // chunk 0 is uncompressed DDS header
+      AddChunk(Copy(buf, 0, Off), False);
+
+      MipSize := TwbDDS.GetMipSize(DDSHeader);
+      var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
+      if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
+      for var i := 1 to c do begin
+        if i = c then MipSize := Length(buf) - Off;
+        AddChunk(Copy(buf, Off, MipSize), aPackedFile.Compress);
+        Inc(Off, MipSize);
+        MipSize := MipSize div 4;
+      end;
     end;
-  except
-    Inc(fErrorCount);
-    raise;
+  finally
+    SyncBeginWrite;
+    Dec(fLoadingCount);
   end;
 
   // very rough archive size (over)estimation, don't need to be precize
@@ -2546,11 +2556,13 @@ begin
       end;
 
     except
-      on E: Exception do
+      on E: Exception do begin
+        Inc(fErrorCount);
         if f <> nil then
           raise Exception.CreateFmt('Error processing "%s": %s', [f.FileName, E.Message])
         else
           raise;
+      end;
     end;
 
   finally

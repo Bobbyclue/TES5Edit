@@ -40,7 +40,7 @@ type
     procedure OnHide; override;
     procedure OnStart; override;
 
-    function ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes; override;
+    function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
 
 implementation
@@ -94,13 +94,13 @@ begin
   if not Frame.chkSkipControllerManager.Checked then fOptions := fOptions + [atrCtrlManager];
 end;
 
-function TProcApplyTransform.ProcessFile(const aInputDirectory, aOutputDirectory: string; var aFileName: string): TBytes;
+function TProcApplyTransform.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
 begin
   nif := TwbNifFile.Create;
   try
-    nif.LoadFromFile(aInputDirectory + aFileName);
+    nif.LoadFromData(aFile.GetData);
 
     if nif.BlocksCount = 0 then
       Exit;
