@@ -754,7 +754,7 @@ end;
 class function TwbAsset.DoNotCompress(const aFileName: string): Boolean;
 begin
   Result :=
-    (AssetTypeByFolder(aFileName) in [atSound, atVoice, atMusic, atStrings, atFacegen])
+    (AssetTypeByFolder(aFileName) in [atSound, atVoice, atMusic, atStrings])
     and not aFileName.EndsWith('.fuz', True);
 end;
 
@@ -1172,7 +1172,7 @@ begin
       if not f.Compressed then begin
         if (fType = baSSE) and (fHeader.Flags and ARCHIVE_EMBEDNAME <> 0) then
           Result := Result + ['Contains uncompressed files with Embedded File Names flag, such combination crashes Skyrim SE/AE']
-        else
+        else if IsDDSArchive(fType) then
           Result := Result + ['DDS archive contains uncompressed textures which crash the game'];
         Break;
       end;
@@ -2359,12 +2359,7 @@ begin
     bsa := AddArchive;
     // BSA will use us to get preloaded files data
     bsa.Packer := Self;
-    try
-      bsa.CreateArchive(NewArchiveName, fType, sl, fcomp);
-    except
-      Inc(fErrorCount);
-      raise;
-    end;
+    bsa.CreateArchive(NewArchiveName, fType, sl, fcomp);
   finally
     sl.Free;
   end;
@@ -2396,48 +2391,43 @@ var
 begin
   Size := 0;
 
+  Inc(fLoadingCount);
+  SyncEndWrite;
   try
-    Inc(fLoadingCount);
-    SyncEndWrite;
-    try
-      buf := GetSourceFileData(aPackedFile.FileName, aPackedFile.FileObject);
+    buf := GetSourceFileData(aPackedFile.FileName, aPackedFile.FileObject);
 
-      // non DDS archives - single chunk holding entire file data
-      if not IsDDSArchive(fType) then
-        AddChunk(buf, aPackedFile.Compress)
+    // non DDS archives - single chunk holding entire file data
+    if not IsDDSArchive(fType) then
+      AddChunk(buf, aPackedFile.Compress)
 
-      // DDS archives - multiple chunks for mipmaps
-      else begin
-        if (Length(buf) < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(buf) then
-          raise Exception.Create('Not a valid DDS file');
+    // DDS archives - multiple chunks for mipmaps
+    else begin
+      if (Length(buf) < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(buf) then
+        raise Exception.Create('Not a valid DDS file');
 
+      DDSHeader := @buf[0];
+      // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
+      if (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
+        buf := TwbDDS.RGB24toRGBX32(buf, Length(buf));
         DDSHeader := @buf[0];
-        // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
-        if (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
-          buf := TwbDDS.RGB24toRGBX32(buf, Length(buf));
-          DDSHeader := @buf[0];
-        end;
-        Off := TwbDDS.GetHeaderSize(DDSHeader);
-        // chunk 0 is uncompressed DDS header
-        AddChunk(Copy(buf, 0, Off), False);
-
-        MipSize := TwbDDS.GetMipSize(DDSHeader);
-        var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
-        if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
-        for var i := 1 to c do begin
-          if i = c then MipSize := Length(buf) - Off;
-          AddChunk(Copy(buf, Off, MipSize), aPackedFile.Compress);
-          Inc(Off, MipSize);
-          MipSize := MipSize div 4;
-        end;
       end;
-    finally
-      SyncBeginWrite;
-      Dec(fLoadingCount);
+      Off := TwbDDS.GetHeaderSize(DDSHeader);
+      // chunk 0 is uncompressed DDS header
+      AddChunk(Copy(buf, 0, Off), False);
+
+      MipSize := TwbDDS.GetMipSize(DDSHeader);
+      var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
+      if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
+      for var i := 1 to c do begin
+        if i = c then MipSize := Length(buf) - Off;
+        AddChunk(Copy(buf, Off, MipSize), aPackedFile.Compress);
+        Inc(Off, MipSize);
+        MipSize := MipSize div 4;
+      end;
     end;
-  except
-    Inc(fErrorCount);
-    raise;
+  finally
+    SyncBeginWrite;
+    Dec(fLoadingCount);
   end;
 
   // very rough archive size (over)estimation, don't need to be precize
@@ -2566,11 +2556,13 @@ begin
       end;
 
     except
-      on E: Exception do
+      on E: Exception do begin
+        Inc(fErrorCount);
         if f <> nil then
           raise Exception.CreateFmt('Error processing "%s": %s', [f.FileName, E.Message])
         else
           raise;
+      end;
     end;
 
   finally
