@@ -2,10 +2,10 @@
     <PropertyGroup>
         <Base>True</Base>
         <AppType>Console</AppType>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <FrameworkType>None</FrameworkType>
         <MainSource>BSArch.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectGuid>{CCA5AF23-C2C6-4AE2-8665-3649183AAE90}</ProjectGuid>
         <ProjectName Condition="'$(ProjectName)'==''">BSArch</ProjectName>
         <ProjectVersion>20.2</ProjectVersion>
@@ -94,7 +94,6 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
-        <Debugger_RunParams>unpack &quot;d:\games\Fallout 3\Data\Fallout - Misc.bsa&quot; d:\1</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Debugger_RunParams>pack d:\2\a.bsa+&quot;d:\1\data&quot; d:\1\aaa.bsa -tes5 -z -mt:no -split:3</Debugger_RunParams>
@@ -105,10 +104,10 @@
         </DelphiCompile>
         <DCCReference Include="Core\wbBSArchive.pas"/>
         <DCCReference Include="Core\wbCommandLine.pas"/>
-        <DCCReference Include="Core\wbStreams.pas"/>
-        <DCCReference Include="Core\wbDDS.pas"/>
         <DCCReference Include="Core\wbCompression.pas"/>
+        <DCCReference Include="Core\wbDDS.pas"/>
         <DCCReference Include="Core\wbHash.pas"/>
+        <DCCReference Include="Core\wbStreams.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

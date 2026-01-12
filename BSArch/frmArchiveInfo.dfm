@@ -12,14 +12,12 @@ object FormArchiveInfo: TFormArchiveInfo
   Font.Name = 'Tahoma'
   Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
   OnKeyDown = FormKeyDown
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object vtText: TVirtualStringTree
     Left = 0

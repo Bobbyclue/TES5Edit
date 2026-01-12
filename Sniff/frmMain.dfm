@@ -103,7 +103,6 @@ object FormMain: TFormMain
       Proportional = True
       Stretch = True
       Transparent = True
-      ExplicitTop = 63
     end
     object Label2: TLabel
       Left = 8
@@ -125,9 +124,6 @@ object FormMain: TFormMain
       Caption = 
         'Choose input directory or BSA/BA2 archive, or drag&&drop folders' +
         '/files or a single archive to run selected operation on them'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 706
     end
     object chkInputSubdir: TCheckBox
       Left = 120

@@ -11,8 +11,20 @@ unit frmPack;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, wbBSArchive, wbCompression;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Graphics,
+  Vcl.StdCtrls,
+
+  Winapi.Windows,
+
+  wbBSArchive,
+  wbCompression;
 
 type
   TFormPack = class(TForm)

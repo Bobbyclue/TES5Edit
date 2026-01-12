@@ -37,7 +37,7 @@ object FormMain: TFormMain
       Width = 329
       Height = 21
       EditLabel.Width = 24
-      EditLabel.Height = 13
+      EditLabel.Height = 21
       EditLabel.Caption = 'Filter'
       LabelPosition = lpLeft
       TabOrder = 0
@@ -148,9 +148,6 @@ object FormMain: TFormMain
       PopupMenu = mnAssets
       ShowAccelChar = False
       Layout = tlCenter
-      ExplicitTop = 40
-      ExplicitWidth = 977
-      ExplicitHeight = 112
     end
   end
   object vtAssets: TVirtualStringTree

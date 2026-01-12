@@ -11,9 +11,16 @@ unit ProcCheckForErrors;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Menus;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.ComCtrls,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameCheckForErrors = class(TFrame)
@@ -362,6 +369,15 @@ procedure CheckCollision(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
     Result := IsNaN(t) or SameValue(t, 0.0) or (t < 0.0);
   end;
 
+  procedure GetColObjects(node: TwbNifBlock; sl: TStringList);
+  begin
+    if not Assigned(node) then Exit;
+    var col := node.GetCollision;
+    if Assigned(col) then sl.AddObject(col.Name, col);
+    for var n in node.ChildrenByType('NiNode', True) do
+      GetColObjects(n, sl);
+  end;
+
 begin
   var nif: TwbNifFile := aObj;
 
@@ -451,38 +467,63 @@ begin
     var el := block.Elements[s + '\Cone Max Angle'];
     if Assigned(el) then
       if SameValue(el.NativeValue, 0.0) then
-        Log.Add(#9 + el.Path+ ': 0.0 value causes jittering');
+        Log.Add(#9 + el.Path + ': 0.0 value causes jittering');
   end;
 
-  if nif.NifVersion in [nfTES4, nfFO3] then
-    with TStringList.Create do try
-      Sorted := True;
-      Duplicates := dupIgnore;
-      for var block in nif.BlocksByType('NiControllerSequence', True) do
-        for var b in block.Elements['Controlled Blocks'] do
-          if b.EditValues['Controller Type'] = 'NiTransformController' then begin
-            var n := nif.BlockByName(GetControlledBlockName(b, 'Node Name'));
-            if Assigned(n) then begin
-              var col := n.GetCollision;
-              if Assigned(col) then AddObject(col.Name, col);
-              for var nn in n.ChildrenByType('NiNode', True) do begin
-                col := nn.GetCollision;
-                if Assigned(col) then AddObject(col.Name, col);
-              end;
-            end;
-          end;
-
-      for var i := 0 to Pred(Count) do begin
-        var col := TwbNifBlock(Objects[i]);
-        if not col.NativeValues['Flags\USE_VEL'] then begin
-          var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
-          if Assigned(rigid) and (rigid.EditValues['Motion System'] = 'MO_SYS_KEYFRAMED') then
-            Log.Add(#9 + col.Name + ': Transformed keyframed animated collision is missing USE_VEL flag');
+  var cols := TStringList.Create;
+  try
+    // list of animated collision objects
+    cols.Sorted := True;
+    cols.Duplicates := dupIgnore;
+    // collision of nodes (and their children) targeted by controlled blocks
+    for var block in nif.BlocksByType('NiControllerSequence', True) do
+      for var b in block.Elements['Controlled Blocks'] do
+        if GetControlledBlockName(b, 'Controller Type') = 'NiTransformController' then begin
+          var nodename := GetControlledBlockName(b, 'Node Name');
+          if nodename = '' then Continue;
+          var interp := TwbNifBlock(b.Elements['Interpolator'].LinksTo);
+          if not Assigned(interp) or (interp.BlockType <> 'NiTransformInterpolator') then Continue;
+          if interp.Elements['Data'].LinksTo = nil then Continue;
+          GetColObjects(nif.BlockByName(nodename), cols);
         end;
-      end;
-    finally
-      Free;
+
+    // also nodes with NiTransformController
+    for var block in nif.BlocksByType('NiNode', True) do begin
+      var col := block.GetCollision;
+      if not Assigned(col) then Continue;
+      var contr := block.GetController('NiTransformController', True);
+      if not Assigned(contr) then Continue;
+      var interp := TwbNifBlock(contr.Elements['Interpolator'].LinksTo);
+      if not Assigned(interp) or (interp.BlockType <> 'NiTransformInterpolator') then Continue;
+      if interp.Elements['Data'].LinksTo = nil then Continue;
+      GetColObjects(block, cols);
     end;
+
+    for var col in nif.BlocksByType('bhkCollisionObject', True) do begin
+      var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
+      if Assigned(rigid) and (rigid.NativeValues['Havok Filter\Layer'] = 2) and (cols.IndexOfObject(col) = -1) then
+        Log.Add(#9 + col.Name + ': Animstatic layer is used on non animated collision');
+    end;
+
+    for var i := 0 to Pred(cols.Count) do begin
+      var col := TwbNifBlock(cols.Objects[i]);
+      if col.BlockType <> 'bhkCollisionObject' then Continue;
+      var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
+      if not Assigned(rigid) then Continue;
+
+      if not (Integer(rigid.NativeValues['Havok Filter\Layer']) in [2, 4, 5, 6, {10,} 14, 15, 16]) then
+        Log.Add(#9 + rigid.Name + ': Animated collision must use Animstatic layer');
+
+      if (rigid.NativeValues['Havok Filter\Layer'] = 2) and not col.NativeValues['Flags\SET_LOCAL'] then
+        Log.Add(#9 + col.Name + ': Animstatic layer collision is missing SET_LOCAL flag');
+
+      if nif.NifVersion in [nfTES4, nfFO3] then
+        if not col.NativeValues['Flags\USE_VEL'] and (rigid.EditValues['Motion System'] = 'MO_SYS_KEYFRAMED') then
+          Log.Add(#9 + col.Name + ': Transformed keyframed animated collision is missing USE_VEL flag');
+    end;
+  finally
+    cols.Free;
+  end;
 end;
 
 //==============================================================================
@@ -1996,19 +2037,18 @@ begin
 end;
 
 //==============================================================================
-procedure CheckDdsSize(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
-
-  function IsPowerOf2(x: Cardinal): Boolean;
-  begin
-    Result := (x <> 0) and (x <> 1) and ( (x and (x - 1)) = 0 );
-  end;
-
-
+procedure CheckDDS(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 begin
   var dds: PDDSHeader := aObj;
 
   if not IsPowerOf2(dds.dwWidth) or not IsPowerOf2(dds.dwHeight) then
     Log.Add(Format(#9'Texture size %dx%d is not power of 2', [dds.dwWidth, dds.dwHeight]));
+
+  if TwbDDS.GetDXGI(dds) = DXGI_FORMAT_UNKNOWN then begin
+    var d3d := TwbDDS.GetD3DFMT(dds);
+    if d3d in TwbDDS.D3D_NODXGI then
+      Log.Add(#9 + TwbDDS.GetD3DFMTFormatName(d3d) + ' format is unsupported by DirectX 10+ (Skyrim SE, Fallout 4. etc.');
+  end;
 end;
 
 //==============================================================================
@@ -2171,9 +2211,9 @@ begin
     'Check for strips with repeated degenerate triangles',
     CheckStripsDegenerate, False);
 
-  AddCheck('Invalid texture size', 'Textures', ['.dds'],
-    'Texture size is not power of 2, always crashes the game',
-    CheckDdsSize);
+  AddCheck('Invalid texture size or format', 'Textures', ['.dds'],
+    'Texture size is not power of 2 or unsupported DXGI format, likely to crash the game',
+    CheckDDS);
 
   AddCheck('Unsupported mesh formats', 'Skyrim SE', ['.nif'],
     'Unsupported nif blocks which crash Skyrim SE: NiTriStrips, stripified NiSkipPartition and bhkMultiSphereShape',
@@ -2278,9 +2318,9 @@ end;
 function TProcCheckForErrors.ProcessFile(aFile: TProcFileObject): TBytes;
 var
   nif: TwbNifFile;
-  dds: TDDSHeader;
   Log: TStringList;
   ext: string;
+  buf: TBytes;
   obj: Pointer;
 begin
   nif := nil;
@@ -2292,15 +2332,11 @@ begin
     obj := nil;
 
     if fLoadDDS and SameText(ext, '.dds') then begin
-      var d := aFile.GetData;
-      with TPointerStream.Create(d, Length(d), True) do try
-        if ( Read(dds, SizeOf(dds)) <> SizeOf(dds) ) or (dds.Magic <> 'DDS ') then
-          Log.Add(#9'Not a valid DDS file')
-        else
-          obj := @dds;
-      finally
-        Free;
-      end;
+      buf := aFile.GetData;
+      if not TwbDDS.IsDDS(buf, Length(buf)) then
+        Log.Add(#9'Not a valid DDS file')
+      else
+        obj := buf;
     end
 
     else if fLoadNif and not SameText(ext, '.dds') then begin

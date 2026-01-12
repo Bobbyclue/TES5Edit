@@ -21,28 +21,20 @@ uses
   {$IFDEF EXCEPTION_LOGGING_ENABLED}
   nxExceptionHook,
   {$ENDIF }
-  System.Classes,
-  System.SysUtils,
-  Vcl.Themes,
-  Vcl.Styles,
-  Vcl.Styles.Hooks,
-  Vcl.Styles.Ext,
-  Vcl.Styles.Utils.Menus,
-  Vcl.Styles.Utils.Forms,
-  Vcl.Styles.Utils.StdCtrls,
-  Vcl.Styles.Utils.ComCtrls,
-  Vcl.Styles.Utils.ScreenTips,
-  Vcl.Styles.Utils.SysControls,
-  Vcl.Styles.Utils.SysStyleHook,
-  Vcl.Forms,
-  Vcl.Dialogs,
   System.IOUtils,
-  frmMain in 'BSArch\frmMain.pas' {FormMain},
-  wbBSArchive in 'Core\wbBSArchive.pas',
-  frmSearchReplace in 'BSArch\frmSearchReplace.pas' {FormSearchReplace},
-  wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress},
+  System.SysUtils,
+
+  Vcl.Dialogs,
+  Vcl.Forms,
+  Vcl.Themes,
+
   frmArchiveInfo in 'BSArch\frmArchiveInfo.pas' {FormArchiveInfo},
-  frmPack in 'BSArch\frmPack.pas' {FormPack};
+  frmMain in 'BSArch\frmMain.pas' {FormMain},
+  frmPack in 'BSArch\frmPack.pas' {FormPack},
+  frmSearchReplace in 'BSArch\frmSearchReplace.pas' {FormSearchReplace},
+
+  wbBSArchive in 'Core\wbBSArchive.pas',
+  wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress};
 
 {$R *.res}
 

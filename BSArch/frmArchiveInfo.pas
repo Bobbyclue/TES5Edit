@@ -11,8 +11,23 @@ unit frmArchiveInfo;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, VirtualTrees, Vcl.Menus;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.Forms,
+  Vcl.Menus,
+
+  VirtualTrees,
+  {
+  VirtualTrees.AncestorVCL,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree,
+  VirtualTrees.Types,
+  }
+
+  Winapi.Windows;
 
 type
   TFormArchiveInfo = class(TForm)

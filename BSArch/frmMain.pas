@@ -7,17 +7,43 @@
 *******************************************************************************}
 
 {$WARN SYMBOL_PLATFORM OFF}
-{$DEFINE VT7, uses for VirtualTrees v7.x}
 unit frmMain;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Menus, System.Types, System.UITypes, System.StrUtils, System.IniFiles,
-  Vcl.Themes, Vcl.Styles.Utils.SystemMenu, Vcl.Mask,
-  JsonDataObjects, wbBSArchive, wbCompression, VirtualTrees;
+  System.Classes,
+  System.IniFiles,
+  System.StrUtils,
+  System.SysUtils,
+  System.Types,
+
+  JsonDataObjects,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Graphics,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+  Vcl.Styles.Utils.SystemMenu,
+  Vcl.Themes,
+
+  VirtualTrees,
+  {
+  VirtualTrees.AncestorVCL,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree,
+  VirtualTrees.Types,
+  }
+
+  Winapi.Messages,
+  Winapi.Windows,
+
+  wbBSArchive,
+  wbCompression;
 
 const
   WM_PACK = WM_USER + 3;
@@ -1647,16 +1673,6 @@ begin
     Result := False;
     Exit;
   end;
-end;
-
-//============================================================================
-function FormatSize(Bytes: Int64): string;
-const
-  Description: array [0..8] of string = ('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-begin
-  var i := 0;
-  while Bytes >= IntPower(1024, i + 1) do Inc(i);
-  Result := FormatFloat('###0.##', Bytes / IntPower(1024, i)) + ' ' + Description[i];
 end;
 
 //============================================================================

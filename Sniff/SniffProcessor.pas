@@ -11,8 +11,15 @@ unit SniffProcessor;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.IniFiles, System.SyncObjs,
-  Vcl.Forms, Vcl.Dialogs, wbBSArchive;
+  System.Classes,
+  System.IniFiles,
+  System.SyncObjs,
+  System.SysUtils,
+
+  Vcl.Dialogs,
+  Vcl.Forms,
+
+  wbBSArchive;
 
 type
   TGameType = (gtTES3, gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4);
@@ -116,12 +123,14 @@ function SelectFolder(var aPath: string): Boolean;
 function SelectArchive(var aPath: string): Boolean;
 function TextToString(const aText: string): string;
 function StringToText(const aText: string): string;
+function IsPowerOf2(x: Cardinal): Boolean;
 
 
 implementation
 
 
 uses
+  System.Math,
   System.IOUtils;
 
 
@@ -178,6 +187,13 @@ begin
   Result := StringReplace(Result, '#10', #10, [rfReplaceAll]);
 end;
 
+function IsPowerOf2(x: Cardinal): Boolean;
+begin
+  Result := (x <> 0) and (x <> 1) and ( (x and (x - 1)) = 0 );
+end;
+
+{ TProcFileObject }
+
 function TProcFileObject.GetData: TBytes;
 begin
   if Assigned(FileEntry) then
@@ -196,6 +212,8 @@ begin
   SyncIO := TReadWriteSync.Create;
   {$IFEND}
 end;
+
+{ TProcManager }
 
 destructor TProcManager.Destroy;
 begin
@@ -332,6 +350,8 @@ begin
   fSettings := aFile;
 end;
 
+
+{ TProcBase }
 
 constructor TProcBase.Create(aManager: TProcManager);
 begin

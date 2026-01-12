@@ -11,9 +11,20 @@ unit ProcUniversalFixer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, System.SyncObjs, WinAPI.ShellAPI;
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  System.SyncObjs,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  Winapi.ShellAPI,
+  Winapi.Windows,
+
+  SniffProcessor;
 
 type
   TFrameUniversalFixer = class(TFrame)
@@ -751,7 +762,7 @@ begin
 
     // animstatic layer
     else if (nif.NifVersion >= nfTES5) and (layer = 2) and (rigid.EditValues['Motion System'] <> 'MO_SYS_KEYFRAMED') then begin
-      Result := UpdateElement(rigid, 'Motion System', 'MO_SYS_BOX_STABILIZED', 'MO_SYS_BOX_INERTIA') or Result;
+      Result := UpdateElement(rigid, 'Motion System', 'MO_SYS_BOX_INERTIA') or Result;
       Result := UpdateElement(rigid, 'Motion Quality', 'MO_QUAL_FIXED') or Result;
       Result := UpdateElement(rigid, 'Deactivator Type', 'DEACTIVATOR_NEVER') or Result;
       Result := UpdateElement(rigid, 'Enable Deactivation', 'no') or Result;
