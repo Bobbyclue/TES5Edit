@@ -1425,7 +1425,7 @@ begin
     dlgIdenticalFiles.CustomMainIcon := Application.Icon;
     dlgIdenticalFiles.Title := sl[0] + #13 + sl[1];
     dlgIdenticalFiles.Text := '''
-    To pack indentical files together use "Filter By Indentical", then select all Ctrl+A, right click and Pack selected.
+    To pack identical files together use "Filter By Identical", then select all Ctrl+A, right click and Pack selected.
     Check Share Data option and disable splitting because it splits by overall files size.
 
     When done, right click and Remove selected, Reset filter and press Pack to archive the rest of files with splitting.
