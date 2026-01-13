@@ -150,6 +150,7 @@ type
   public
   const
     cExceptionInvalidDDS = 'Not a valid DDS file';
+    cExceptionUnsupportedDDS = 'Unsupported DDS format';
     // max game supported file offset in .bsa archives
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
@@ -404,6 +405,20 @@ type
     function AddSource(const aPath: string): Integer;
     property Compress: Boolean read fCompress write fCompress;
     property SourceFilesCount: Integer read fSourceFilesCount;
+  end;
+
+  // Group identical datas
+  TwbSameData = record
+    Sync: TLightweightMREW;
+    Datas: array of record
+      Hash: TwbLookupHash;
+      DataSize: UInt64;
+      DataIndices: array of Integer;
+    end;
+    DatasCount: Integer;
+    class operator Initialize(out Dest: TwbSameData);
+    procedure Add(aDataIndex: Integer; aData: Pointer; aDataSize: UInt64); overload;
+    procedure Add(aDataIndex: Integer; const aData: TBytes); overload;
   end;
 
 
@@ -769,6 +784,45 @@ begin
   Result :=
     (AssetTypeByFolder(aFileName) in [atSound, atVoice, atMusic, atStrings])
     and not aFileName.EndsWith('.fuz', True);
+end;
+
+
+{ TwbSameData }
+
+class operator TwbSameData.Initialize(out Dest: TwbSameData);
+begin
+  Dest.DatasCount := 0;
+end;
+
+procedure TwbSameData.Add(aDataIndex: Integer; aData: Pointer; aDataSize: UInt64);
+begin
+  var Hash := TwbHash.LookupHash(aData, aDataSize);
+  Sync.BeginWrite;
+  try
+    for var i := 0 to Pred(DatasCount) do
+      if (Datas[i].DataSize = aDataSize) and (Datas[i].Hash = Hash) then begin
+        Datas[i].DataIndices := Datas[i].DataIndices + [aDataIndex];
+        Exit;
+      end;
+
+    if DatasCount = Length(Datas) then
+      if Length(Datas) = 0 then
+        SetLength(Datas, 8192)
+      else
+        SetLength(Datas, Length(Datas) * 2);
+
+    Datas[DatasCount].DataSize := aDataSize;
+    Datas[DatasCount].Hash := Hash;
+    Datas[DatasCount].DataIndices := [aDataIndex];
+    Inc(DatasCount);
+  finally
+    Sync.EndWrite;
+  end;
+end;
+
+procedure TwbSameData.Add(aDataIndex: Integer; const aData: TBytes);
+begin
+  Add(aDataIndex, aData, Length(aData));
 end;
 
 
@@ -1993,7 +2047,7 @@ begin
   end;
   aFile.DDS.DXGIFormat := Byte(TwbDDS.GetDXGI(DDSHeader));
   if TDXGI(aFile.DDS.DXGIFormat) = DXGI_FORMAT_UNKNOWN then
-    raise Exception.Create('Unsupported DDS format');
+    raise Exception.Create(cExceptionUnsupportedDDS);
   aFile.DDS.Width := DDSHeader.dwWidth;
   aFile.DDS.Height := DDSHeader.dwHeight;
   aFile.DDS.NumMips := DDSHeader.dwMipMapCount;
@@ -2433,11 +2487,13 @@ begin
         buf := TwbDDS.ConvertR8G8B8toB8G8R8X8(buf, Length(buf));
         DDSHeader := @buf[0];
       end;
+      if TwbDDS.GetDXGI(DDSHeader) = DXGI_FORMAT_UNKNOWN then
+        raise Exception.Create(cExceptionUnsupportedDDS);
+
       Off := TwbDDS.GetHeaderSize(DDSHeader);
+      MipSize := TwbDDS.GetMipSize(DDSHeader);
       // chunk 0 is uncompressed DDS header
       AddChunk(Copy(buf, 0, Off), False);
-
-      MipSize := TwbDDS.GetMipSize(DDSHeader);
       var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
       if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
       for var i := 1 to c do begin

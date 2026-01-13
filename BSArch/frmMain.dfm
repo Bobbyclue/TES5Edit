@@ -160,8 +160,9 @@ object FormMain: TFormMain
     BevelOuter = bvRaised
     BorderStyle = bsNone
     Colors.SelectionTextColor = clWindowText
+    DefaultNodeHeight = 17
     Header.AutoSizeIndex = 1
-    Header.Height = 21
+    Header.Height = 17
     Header.Options = [hoAutoResize, hoColumnResize, hoHotTrack, hoShowImages, hoShowSortGlyphs, hoVisible]
     IncrementalSearch = isAll
     IncrementalSearchStart = ssAlwaysStartOver
@@ -221,9 +222,6 @@ object FormMain: TFormMain
       Caption = 'Remove Unselected'
       OnClick = mniAssetRemoveUnselectedClick
     end
-    object N2: TMenuItem
-      Caption = '-'
-    end
     object mniAssetCompressed: TMenuItem
       Caption = 'Compressed'
       OnClick = mniAssetCompressedClick
@@ -232,7 +230,7 @@ object FormMain: TFormMain
       Caption = 'Uncompressed'
       OnClick = mniAssetUncompressedClick
     end
-    object N1: TMenuItem
+    object N2: TMenuItem
       Caption = '-'
     end
     object mniAssetUnpack: TMenuItem
@@ -253,6 +251,13 @@ object FormMain: TFormMain
     object mniAssetPack: TMenuItem
       Caption = 'Pack Selected'
       OnClick = mniAssetPackClick
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object mniAssetFindIdentical: TMenuItem
+      Caption = 'Find Identical Assets'
+      OnClick = mniAssetFindIdenticalClick
     end
     object N4: TMenuItem
       Caption = '-'
@@ -311,5 +316,24 @@ object FormMain: TFormMain
     OnTimer = timerFilterTimer
     Left = 384
     Top = 120
+  end
+  object dlgIdenticalFiles: TTaskDialog
+    Buttons = <
+      item
+        Caption = 'Filter By Identical'
+        CommandLinkHint = 'Show only identical assets in the list'
+        ModalResult = 100
+      end
+      item
+        Caption = 'Show Assets'
+        CommandLinkHint = 'Preview in separate window'
+        ModalResult = 101
+      end>
+    Caption = 'Identical Assets'
+    CommonButtons = [tcbCancel]
+    Flags = [tfUseHiconMain, tfAllowDialogCancellation, tfUseCommandLinks, tfExpandedByDefault, tfPositionRelativeToWindow, tfSizeToContent]
+    RadioButtons = <>
+    Left = 384
+    Top = 376
   end
 end

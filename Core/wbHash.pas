@@ -39,7 +39,8 @@ type
   TwbLookupHash = type TwbXXH64;
 
   TwbHash = class abstract
-    class function LookupHash(const aText: string; aIgnoreCase: Boolean = False): TwbLookupHash;
+    class function LookupHash(aData: Pointer; aLen: NativeInt): TwbLookupHash; overload; inline;
+    class function LookupHash(const aText: string; aIgnoreCase: Boolean = False): TwbLookupHash; overload;
     class function TES3(const aText: string): UInt64;
     class function _TES4(const aText: string; aHasExtension: Boolean = False; aSigned: Boolean = False): UInt64;
     class function TES4(const aText: string; aHasExtension: Boolean = False): UInt64;
@@ -138,6 +139,11 @@ begin
   end;
 end;
 
+class function TwbHash.LookupHash(aData: Pointer; aLen: NativeInt): TwbLookupHash;
+begin
+  Result := XXH64(aData, aLen);
+end;
+
 class function TwbHash.LookupHash(const aText: string; aIgnoreCase: Boolean = False): TwbLookupHash;
 begin
   if aText = '' then
@@ -145,9 +151,9 @@ begin
   else
     if aIgnoreCase then begin
       var s := LowerCase(aText);
-      Result := XXH64(@s[1], ByteLength(s));
+      Result := LookupHash(@s[1], ByteLength(s));
     end else
-      Result := XXH64(@aText[1], ByteLength(aText));
+      Result := LookupHash(@aText[1], ByteLength(aText));
 end;
 
 class function TwbHash.TES3(const aText: string): UInt64;
