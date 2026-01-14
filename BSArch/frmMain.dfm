@@ -24,12 +24,15 @@ object FormMain: TFormMain
     BevelKind = bkTile
     BevelOuter = bvNone
     TabOrder = 0
+    DesignSize = (
+      1024
+      39)
     object lblAssets: TLabel
-      Left = 375
+      Left = 636
       Top = 13
-      Width = 57
+      Width = 38
       Height = 13
-      Caption = '                   '
+      Caption = '0/0 files'
     end
     object edFilter: TLabeledEdit
       Left = 40
@@ -45,7 +48,7 @@ object FormMain: TFormMain
       OnKeyPress = edFilterKeyPress
     end
     object rbAll: TRadioButton
-      Left = 522
+      Left = 385
       Top = 12
       Width = 41
       Height = 17
@@ -56,7 +59,7 @@ object FormMain: TFormMain
       OnClick = rbAllClick
     end
     object rbCompressed: TRadioButton
-      Left = 569
+      Left = 432
       Top = 12
       Width = 88
       Height = 17
@@ -65,7 +68,7 @@ object FormMain: TFormMain
       OnClick = rbAllClick
     end
     object rbUncompressed: TRadioButton
-      Left = 663
+      Left = 526
       Top = 12
       Width = 90
       Height = 17
@@ -74,19 +77,20 @@ object FormMain: TFormMain
       OnClick = rbAllClick
     end
     object btnFilterReset: TButton
-      Left = 776
-      Top = 8
-      Width = 90
-      Height = 25
-      Caption = 'Reset'
+      Left = 765
+      Top = 7
+      Width = 108
+      Height = 24
+      Caption = 'Show All'
       TabOrder = 4
       OnClick = btnFilterResetClick
     end
     object btnClearList: TButton
-      Left = 873
-      Top = 8
-      Width = 90
+      Left = 907
+      Top = 7
+      Width = 108
       Height = 25
+      Anchors = [akTop, akRight]
       Caption = 'Clear List'
       TabOrder = 5
       OnClick = btnClearListClick
@@ -106,9 +110,9 @@ object FormMain: TFormMain
       1024
       47)
     object btnPack: TButton
-      Left = 823
-      Top = 8
-      Width = 90
+      Left = 785
+      Top = 10
+      Width = 108
       Height = 27
       Anchors = [akTop, akRight]
       Caption = 'Pack'
@@ -116,9 +120,9 @@ object FormMain: TFormMain
       OnClick = btnPackClick
     end
     object btnExit: TButton
-      Left = 919
-      Top = 8
-      Width = 90
+      Left = 907
+      Top = 10
+      Width = 108
       Height = 27
       Anchors = [akTop, akRight]
       Caption = 'Exit'
@@ -205,6 +209,10 @@ object FormMain: TFormMain
     OnPopup = mnAssetsPopup
     Left = 384
     Top = 208
+    object mniAssetOpen: TMenuItem
+      Caption = 'Open'
+      OnClick = mniAssetOpenClick
+    end
     object mniAssetEdit: TMenuItem
       Caption = 'Edit'
       OnClick = mniAssetEditClick
@@ -320,17 +328,27 @@ object FormMain: TFormMain
   object dlgIdenticalFiles: TTaskDialog
     Buttons = <
       item
-        Caption = 'Filter By Identical'
-        CommandLinkHint = 'Show only identical assets in the list'
+        Caption = 'Group Identical'
+        CommandLinkHint = 
+          'Reorder list to group identical files and increase their chance ' +
+          'to end up in the same archive'
         ModalResult = 100
       end
       item
-        Caption = 'Show Assets'
-        CommandLinkHint = 'Preview in separate window'
+        Caption = 'Filter By Identical'
+        CommandLinkHint = 'Show identical assets in the list'
         ModalResult = 101
+      end
+      item
+        Caption = 'Show Identical Assets'
+        CommandLinkHint = 'Preview in separate window as text'
+        ModalResult = 102
       end>
     Caption = 'Identical Assets'
     CommonButtons = [tcbCancel]
+    ExpandedText = 
+      'Group Identical files before packing and check Shared Data optio' +
+      'n to take advantage of packing same files together'
     Flags = [tfUseHiconMain, tfAllowDialogCancellation, tfUseCommandLinks, tfExpandedByDefault, tfPositionRelativeToWindow, tfSizeToContent]
     RadioButtons = <>
     Left = 384

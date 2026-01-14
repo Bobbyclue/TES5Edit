@@ -43,7 +43,8 @@ uses
   Winapi.Windows,
 
   wbBSArchive,
-  wbCompression;
+  wbCompression,
+  wbDataFormatMisc;
 
 const
   WM_PACK = WM_USER + 3;
@@ -90,6 +91,7 @@ type
     N4: TMenuItem;
     mniAssetFindIdentical: TMenuItem;
     dlgIdenticalFiles: TTaskDialog;
+    mniAssetOpen: TMenuItem;
     procedure vtAssetsCompareNodes(Sender: TBaseVirtualTree; Node1,
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
     procedure vtAssetsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -127,6 +129,7 @@ type
     procedure mniSaveListClick(Sender: TObject);
     procedure vtAssetsDblClick(Sender: TObject);
     procedure mniAssetFindIdenticalClick(Sender: TObject);
+    procedure mniAssetOpenClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -162,7 +165,7 @@ type
       aCompressed: Boolean = False
     ): TAsset;
     procedure AddAssetsFromFiles(aList: TStrings);
-    procedure RefreshAssets(const aAssets: TAssets = nil);
+    procedure RefreshAssets(const aAssets: TAssets = nil; aFocusSelected: Boolean = True);
     procedure RefreshFilterLabel;
     function GetSelectedAssets: TAssets;
     function SaveList(const aFileName: string; bIgnoreErrors: Boolean = False): Boolean;
@@ -918,7 +921,7 @@ begin
 end;
 
 //============================================================================
-procedure TFormMain.RefreshAssets(const aAssets: TAssets = nil);
+procedure TFormMain.RefreshAssets(const aAssets: TAssets = nil; aFocusSelected: Boolean = True);
 var
   i: integer;
   f: string;
@@ -979,13 +982,16 @@ begin
 
   vtAssets.Clear;
   vtAssets.RootNodeCount := FilteredCount;
-  for var n in vtAssets.Nodes do
-    if PAssetNode(vtAssets.GetNodeData(n)).Asset = FocusedAsset then begin
-      vtAssets.Selected[n] := True;
-      vtAssets.FocusedNode := n;
-      vtAssets.ScrollIntoView(n, True);
-    end;
+  if aFocusSelected then
+    for var n in vtAssets.Nodes do
+      if PAssetNode(vtAssets.GetNodeData(n)).Asset = FocusedAsset then begin
+        vtAssets.Selected[n] := True;
+        vtAssets.FocusedNode := n;
+        vtAssets.ScrollIntoView(n, True);
+      end;
   RefreshFilterLabel;
+
+  btnFilterReset.Visible := (Assets.Count <> 0) and ( (FilteredCount <> Assets.Count) or (edFilter.Text <> '') or not rbAll.Checked );
 end;
 
 //============================================================================
@@ -1158,16 +1164,17 @@ begin
     asset := PAssetNode(vtAssets.GetNodeData(vtAssets.FocusedNode)).Asset;
 
   mniAssetEdit.Visible := vtAssets.SelectedCount = 1;
-  mniAssetReplace.Visible := bHasSelection;
+  mniAssetOpen.Visible := mniAssetEdit.Visible;
+  mniAssetReplace.Visible := vtAssets.SelectedCount > 1;
   mniAssetRemoveSelected.Visible := bHasSelection;
   mniAssetRemoveUnselected.Visible := bHasSelection;
   mniAssetCompressed.Visible := bHasSelection;
   mniAssetUncompressed.Visible := bHasSelection;
   mniAssetUnpack.Visible := Assigned(asset) and (asset.ArchiveName <> '');
-  mniAssetUnpackSaveAs.Visible := mniAssetUnpack.Visible;
+  mniAssetUnpackSaveAs.Visible := mniAssetUnpack.Visible and (vtAssets.SelectedCount = 1);
   mniArchiveInfo.Visible := Assigned(asset) and (asset.ArchiveName <> '');
-  mniAssetFindIdentical.Visible := Length(FilteredAssets) > 1;
   mniAssetPack.Visible := bHasSelection;
+  mniAssetFindIdentical.Visible := Assets.Count <> 0;
   mniSaveList.Visible := Assets.Count <> 0;
 end;
 
@@ -1214,6 +1221,12 @@ end;
 //============================================================================
 procedure TFormMain.vtAssetsDblClick(Sender: TObject);
 begin
+  mniAssetOpen.Click;
+end;
+
+//============================================================================
+procedure TFormMain.mniAssetOpenClick(Sender: TObject);
+begin
   if vtAssets.SelectedCount <> 1 then
     Exit;
 
@@ -1231,6 +1244,17 @@ begin
 
     try
       var data := asset.GetData;
+
+      if f.EndsWith('.fuz', True) then with TwbFuzFile.Create do try
+        try
+          Unserialize(data, PByte(data) + Length(data), Length(data));
+          data := NativeValues['XWM Data'];
+          f := ChangeFileExt(f, '.xwm');
+        except end;
+      finally
+        Free;
+      end;
+
       TFile.WriteAllBytes(f, data);
     except
       on E: Exception do begin
@@ -1311,6 +1335,12 @@ end;
 //============================================================================
 procedure TFormMain.btnClearListClick(Sender: TObject);
 begin
+  if Assets.Count = 0 then
+    Exit;
+
+  if not DialogYesNo('Clear assets list?') then
+    Exit;
+
   for var i := 0 to Pred(Assets.Count) do
     TAsset(Assets[i]).Free;
 
@@ -1369,23 +1399,28 @@ procedure TFormMain.mniAssetFindIdenticalClick(Sender: TObject);
 var
   Same: TwbSameData;
 begin
-  var Assets := Copy(FilteredAssets, Low(FilteredAssets), FilteredCount);
-  if not PreloadArchives(Assets) then
+  if FilteredCount <> Assets.Count then begin
+    DialogMessage('This function works on the entire assets list. Please remove filter and try again.');
+    Exit;
+  end;
+
+  var CompareAssets := Copy(FilteredAssets, Low(FilteredAssets), FilteredCount);
+  if not PreloadArchives(CompareAssets) then
     Exit;
 
   var ProcCompare: TProcessProc :=
     procedure(i: Integer) begin
-      Same.Add(i, Assets[i].GetData);
+      Same.Add(i, CompareAssets[i].GetData);
     end;
 
   with TwbTaskProgress.Create(Self) do try
     Caption := 'Comparing assets data...';
-    LowIndex := Low(Assets);
-    HighIndex := High(Assets);
+    LowIndex := Low(CompareAssets);
+    HighIndex := High(CompareAssets);
     ProcessProc := ProcCompare;
     var mr := Execute;
     if mr = mrAbort then begin
-      DialogError('Error:'#13 + Assets[ErrorIndex].FileName + #13#13 + ErrorMessage);
+      DialogError('Error:'#13 + CompareAssets[ErrorIndex].FileName + #13#13 + ErrorMessage);
       Exit;
     end
     else if mr = mrCancel then
@@ -1394,15 +1429,15 @@ begin
     Free;
   end;
 
-  var Dups: TAssets;
+  var Dups, NotDups: TAssets;
   var sl := TStringList.Create;
   try
     var count := 0;
     var size: UInt64 := 0;
     for var i := 0 to Pred(Same.DatasCount) do with Same.Datas[i] do
       if Length(DataIndices) > 1 then begin
-        for var idx in DataIndices do with Assets[idx] do begin
-          Dups := Dups + [Assets[idx]];
+        for var idx in DataIndices do with CompareAssets[idx] do begin
+          Dups := Dups + [CompareAssets[idx]];
           if ArchiveName <> '' then
             sl.Add(ArchiveName + '\' + FileName)
           else
@@ -1411,7 +1446,8 @@ begin
         sl.Add('');
         Inc(count, Pred(Length(DataIndices)));
         Inc(size, DataSize * UInt64(Pred(Length(DataIndices))));
-      end;
+      end else
+        NotDups := NotDups + [CompareAssets[DataIndices[0]]];
 
     if sl.Count = 0 then begin
       DialogMessage('No identical assets found');
@@ -1424,19 +1460,23 @@ begin
 
     dlgIdenticalFiles.CustomMainIcon := Application.Icon;
     dlgIdenticalFiles.Title := sl[0] + #13 + sl[1];
-    dlgIdenticalFiles.Text := '''
-    To pack identical files together use "Filter By Identical", then select all Ctrl+A, right click and Pack selected.
-    Check Share Data option and disable splitting because it splits by overall files size.
 
-    When done, right click and Remove selected, Reset filter and press Pack to archive the rest of files with splitting.
-    ''';
     if not dlgIdenticalFiles.Execute then
       Exit;
 
-    if dlgIdenticalFiles.ModalResult = 100 then
-      Self.RefreshAssets(Dups)
+    if dlgIdenticalFiles.ModalResult = 100 then begin
+      for var i := Low(Dups) to High(Dups) do
+        Assets[i] := Dups[i];
+      for var i := Low(NotDups) to High(NotDups) do
+        Assets[Length(Dups) + i] := NotDups[i];
+      vtAssets.Header.SortColumn := -1;
+      RefreshAssets(nil, False);
+    end
 
     else if dlgIdenticalFiles.ModalResult = 101 then
+      RefreshAssets(Dups, False)
+
+    else if dlgIdenticalFiles.ModalResult = 102 then
       with TFormArchiveInfo.Create(Self) do begin
         Caption := 'Identical assets';
         aBSA := Caption;
