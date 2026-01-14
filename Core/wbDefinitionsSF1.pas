@@ -15640,9 +15640,9 @@ begin
     ], [ONAM])).IncludeFlag(dfInternalEditOnly, not wbAllowMasterFilesEdit),
 
     wbArray(ONAM, 'Overridden Forms',                                 // Valid in CK
-      wbFormIDCk('Form', [ACHR, LAND, NAVM, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, DLBR, DIAL, INFO, SCEN])
-    ).IncludeFlag(dfExcludeFromBuildRef)
-     .IncludeFlag(dfCollapsed, wbCollapseOther),
+      wbFormIDCk('Form', [ACHR,DIAL,DLBR,INFO,NAVM,PARW,PBAR,PBEA,PCON,PFLA,PGRE,PHZD,PMIS,REFR,SCEN])
+    ).IncludeFlag(dfCollapsed, wbCollapseOther)
+     .IncludeFlag(dfExcludeFromBuildRef),
 
     wbByteArray(SCRN, 'Screenshot'),                                  // If possible then ignored by the runtime. Neither from the CK
 
