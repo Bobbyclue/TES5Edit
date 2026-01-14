@@ -23,20 +23,18 @@ uses
   {$IFDEF EXCEPTION_LOGGING_ENABLED}
   nxExceptionHook,
   {$ENDIF }
-  System.Classes,
-  System.Types,
-  System.SysUtils,
-  System.IOUtils,
-  System.Math,
-  System.Threading,
-  System.SyncObjs,
   System.Diagnostics,
+  System.Math,
+  System.SyncObjs,
+  System.SysUtils,
+  System.Threading,
+
   wbBSArchive in 'Core\wbBSArchive.pas',
   wbCommandLine in 'Core\wbCommandLine.pas',
-  wbStreams in 'Core\wbStreams.pas',
-  wbDDS in 'Core\wbDDS.pas',
   wbCompression in 'Core\wbCompression.pas',
-  wbHash in 'Core\wbHash.pas';
+  wbDDS in 'Core\wbDDS.pas',
+  wbHash in 'Core\wbHash.pas',
+  wbStreams in 'Core\wbStreams.pas';
 
 const
   IMAGE_FILE_LARGE_ADDRESS_AWARE = $0020;

@@ -65,7 +65,7 @@
         <DCC_DcuOutput>.\Temp\Sniff\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\Build</DCC_ExeOutput>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_UnitSearchPath>.\External\JsonDataObjects\Source;.\External\libdeflate-pas;.\External\lz4-delphi;.\Core;.\Sniff;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\Core;.\Sniff;.\External\JsonDataObjects\Source;.\External\lz4-delphi;.\External\libdeflate-pas;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -81,7 +81,7 @@
         <DCC_UsePackage>DBXSqliteDriver;IndyIPCommon;RESTComponents;bindcompdbx;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;svnui;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;FireDAC;vcltouch;vcldb;bindcompfmx;svn;FireDACSqliteDriver;FireDACPgDriver;inetdb;soaprtl;DbxCommonDriver;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;fmxobj;vclwinx;rtl;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <PF_KeyStorePass>853C0DA36405559EA3757169D17BE32C819C055DA057979397B50FF08E723CD8DB05A38FE3431C4DC1CC572EFA9CC37ABAF83612047422E0166545C2E5F1228CC90AB922EE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>853C47DE5F92078FCF65E527A45EE36281C30502A02B979B97EE0FB48E3E3C9EDB56A384E34A1C6BC1AE577CFA9CC360BAE1367E044B22801678459DE5E522CEC91BF36FD558FAD0BFAFAF1107028597F7D7</PF_KeyStorePass>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
@@ -102,7 +102,7 @@
         <DCC_Optimize>true</DCC_Optimize>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
-        <PF_KeyStorePass>853C47DE5F92078FCF657131D12CE37981B20541A00D978D97E60FBE8E6C3C8ADB57A3DEE3551C63C1E35725FAC7C317BA95360204642291163A459CE5B722BEC916F341D513FACCBFF83B05722F8597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>853C0DA36405559EA3757169D17BE32C819C055DA057979397B50FF08E723CD8DB05A38FE3431C4DC1CC572EFA9CC37ABAF83612047422E0166545C2E5F1228CC90AB922EE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -117,7 +117,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <Icon_MainIcon>Sniff_Icon.ico</Icon_MainIcon>
-        <PF_KeyStorePass>853C47DE5F925585A304712AD15DE33A81940557A005978797B40FAA8E6D3CD0DB48A3D6E3181C3AC1B85752FAB3C36BBABA361304262290166845ECE5BA2290C95DF35DD544A8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
+        <PF_KeyStorePass>54E50DFE644355A9A301713BD13FE36081DA0549A057979297EE0FB48E3E3CD9DB5DA38CE3371C4DC1B0577DFADEC37ABAF93641045722CE16654589E5A6228C18D1B922EE8CA8C4D3C63B05722F8597F7D7</PF_KeyStorePass>
         <PF_UWPPackageDisplayName>Sniff</PF_UWPPackageDisplayName>
         <PF_UWPPackageName>zilav.Sniff</PF_UWPPackageName>
         <PF_UWPPublisher>CN=zilav</PF_UWPPublisher>
@@ -132,12 +132,14 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Core\MSHeap.pas"/>
+        <DCCReference Include="Core\wbBSArchive.pas"/>
         <DCCReference Include="Core\wbCommandLine.pas"/>
         <DCCReference Include="Core\wbDataFormat.pas"/>
         <DCCReference Include="Core\wbDataFormatMaterial.pas"/>
         <DCCReference Include="Core\wbDataFormatNif.pas"/>
         <DCCReference Include="Core\wbDataFormatNifTypes.pas"/>
         <DCCReference Include="Core\wbDataFormatMisc.pas"/>
+        <DCCReference Include="Core\wbDDS.pas"/>
         <DCCReference Include="Core\wbMeshOptimize.pas"/>
         <DCCReference Include="Core\wbNifMath.pas"/>
         <DCCReference Include="Sniff\SniffProcessor.pas"/>
@@ -239,6 +241,11 @@
             <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
+        <DCCReference Include="Sniff\Proc\ProcFindTextures.pas">
+            <Form>FrameFindTextures</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcFindUVs.pas">
             <Form>FrameFindUVs</Form>
             <FormType>dfm</FormType>
@@ -256,6 +263,7 @@
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcHavokInfo.pas">
             <Form>FrameHavokInfo</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcHavokSearchMaterial.pas">
@@ -285,6 +293,7 @@
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcMergeProperties.pas">
             <Form>FrameMergeProperties</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcMergeShapes.pas">
@@ -344,6 +353,7 @@
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcSoftParticles.pas">
             <Form>FrameSoftParticles</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcTangents.pas">
@@ -353,6 +363,7 @@
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcTransformInfo.pas">
             <Form>FrameTransformInfo</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcUniversalFixer.pas">
@@ -392,6 +403,7 @@
         </DCCReference>
         <DCCReference Include="Sniff\Proc\ProcWeiExplosion.pas">
             <Form>FrameWeiExplosion</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <BuildConfiguration Include="Base">

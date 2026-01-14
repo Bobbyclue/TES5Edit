@@ -11,8 +11,18 @@ unit wbTaskProgress;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, SyncObjs;
+  System.Classes,
+  System.SyncObjs,
+  System.SysUtils,
+
+  Vcl.ComCtrls,
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  Winapi.Messages,
+  Winapi.Windows;
 
 const
   WM_PROGRESS_UPDATE = WM_USER;
@@ -141,7 +151,11 @@ end;
 //============================================================================
 function CalcThreads(aCores: Integer): Integer;
 begin
-  Result:= Round(aCores * 0.9);
+  // leave one core for the system, we are generous :)
+  Result := aCores - 1;
+  // multithreading means 2 threads at least
+  if Result < 2 then
+    Result := 2;
 end;
 
 //============================================================================

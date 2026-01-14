@@ -2,10 +2,10 @@
     <PropertyGroup>
         <Base>True</Base>
         <AppType>Application</AppType>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <FrameworkType>VCL</FrameworkType>
         <MainSource>BSArchPro.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectGuid>{6BB45C53-4ABF-4657-AC81-F842D25722BD}</ProjectGuid>
         <ProjectName Condition="'$(ProjectName)'==''">BSArchPro</ProjectName>
         <ProjectVersion>20.3</ProjectVersion>
@@ -71,7 +71,7 @@
         <DCC_FOR_LOOP_VAR_VARPAR>error</DCC_FOR_LOOP_VAR_VARPAR>
         <DCC_FOR_VARIABLE>error</DCC_FOR_VARIABLE>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <DCC_UnitSearchPath>.\External\delphi-detours-library\Source;.\External\FileContainer;.\External\ImagingLib\Source\;.\External\ImagingLib\Source\zlib;.\External\libdeflate-pas;.\External\JsonDataObjects\Source;.\External\lz4-delphi;.\External\vcl-styles-utils\Common;.\External\VirtualTrees\Source;.\Core;.\BSArch;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\Core;.\BSArch;.\External\ImagingLib\Source\;.\External\ImagingLib\Source\zlib;.\External\libdeflate-pas;.\External\lz4-delphi;.\External\FileContainer;.\External\XXHash4Delphi;.\External\JsonDataObjects\Source;.\External\VirtualTrees\Source;.\External\vcl-styles-utils\Common;.\External\delphi-detours-library\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_WIDECHAR_REDUCED>false</DCC_WIDECHAR_REDUCED>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -131,25 +131,25 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="BSArch\frmMain.pas">
-            <Form>FormMain</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="Core\wbBSArchive.pas"/>
-        <DCCReference Include="BSArch\frmSearchReplace.pas">
-            <Form>FormSearchReplace</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="Core\wbTaskProgress.pas">
-            <Form>FormTaskProgress</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
         <DCCReference Include="BSArch\frmArchiveInfo.pas">
             <Form>FormArchiveInfo</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="BSArch\frmMain.pas">
+            <Form>FormMain</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <DCCReference Include="BSArch\frmPack.pas">
             <Form>FormPack</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="BSArch\frmSearchReplace.pas">
+            <Form>FormSearchReplace</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="Core\wbBSArchive.pas"/>
+        <DCCReference Include="Core\wbTaskProgress.pas">
+            <Form>FormTaskProgress</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Base">

@@ -11,15 +11,14 @@ unit wbBSArchive;
 interface
 
 uses
-  System.SysUtils,
   System.Classes,
-  Winapi.Windows,
-  //System.Threading,
   System.SyncObjs,
-  wbStreams,
+  System.SysUtils,
+
   wbCompression,
+  wbDDS,
   wbHash,
-  wbDDS;
+  wbStreams;
 
 const
   cBSArchVersion = '0.9.1';
@@ -108,6 +107,7 @@ type
     constructor Create(aArchive: TwbBSArchive);
     destructor Destroy; override;
     function DXGIFormatName: string;
+    function IsCubeMap: Boolean;
     function Unpack: TBytes;
     function Info: string;
     property Compressed: Boolean read GetCompressed;
@@ -149,6 +149,8 @@ type
 
   public
   const
+    cExceptionInvalidDDS = 'Not a valid DDS file';
+    cExceptionUnsupportedDDS = 'Unsupported DDS format';
     // max game supported file offset in .bsa archives
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
@@ -405,6 +407,20 @@ type
     property SourceFilesCount: Integer read fSourceFilesCount;
   end;
 
+  // Group identical datas
+  TwbSameData = record
+    Sync: TLightweightMREW;
+    Datas: array of record
+      Hash: TwbLookupHash;
+      DataSize: UInt64;
+      DataIndices: array of Integer;
+    end;
+    DatasCount: Integer;
+    class operator Initialize(out Dest: TwbSameData);
+    procedure Add(aDataIndex: Integer; aData: Pointer; aDataSize: UInt64); overload;
+    procedure Add(aDataIndex: Integer; const aData: TBytes); overload;
+  end;
+
 
   TwbAssetType = (
     atNone,
@@ -487,10 +503,13 @@ type
     class function DoNotCompress(const aFileName: string): Boolean;
   end;
 
+function FormatSize(Bytes: Int64): string;
+
 
 implementation
 
 uses
+  System.Math,
   System.IOUtils;
 
 const
@@ -576,6 +595,15 @@ begin
   if Length(aStr) > 1 then Result[1] := AnsiChar(aStr[2]);
   if Length(aStr) > 2 then Result[2] := AnsiChar(aStr[3]);
   if Length(aStr) > 3 then Result[3] := AnsiChar(aStr[4]);
+end;
+
+function FormatSize(Bytes: Int64): string;
+const
+  Description: array [0..8] of string = ('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+begin
+  var i := 0;
+  while Bytes >= IntPower(1024, i + 1) do Inc(i);
+  Result := FormatFloat('###0.##', Bytes / IntPower(1024, i)) + ' ' + Description[i];
 end;
 
 
@@ -759,6 +787,45 @@ begin
 end;
 
 
+{ TwbSameData }
+
+class operator TwbSameData.Initialize(out Dest: TwbSameData);
+begin
+  Dest.DatasCount := 0;
+end;
+
+procedure TwbSameData.Add(aDataIndex: Integer; aData: Pointer; aDataSize: UInt64);
+begin
+  var Hash := TwbHash.LookupHash(aData, aDataSize);
+  Sync.BeginWrite;
+  try
+    for var i := 0 to Pred(DatasCount) do
+      if (Datas[i].DataSize = aDataSize) and (Datas[i].Hash = Hash) then begin
+        Datas[i].DataIndices := Datas[i].DataIndices + [aDataIndex];
+        Exit;
+      end;
+
+    if DatasCount = Length(Datas) then
+      if Length(Datas) = 0 then
+        SetLength(Datas, 8192)
+      else
+        SetLength(Datas, Length(Datas) * 2);
+
+    Datas[DatasCount].DataSize := aDataSize;
+    Datas[DatasCount].Hash := Hash;
+    Datas[DatasCount].DataIndices := [aDataIndex];
+    Inc(DatasCount);
+  finally
+    Sync.EndWrite;
+  end;
+end;
+
+procedure TwbSameData.Add(aDataIndex: Integer; const aData: TBytes);
+begin
+  Add(aDataIndex, aData, Length(aData));
+end;
+
+
 { TwbBSFileChunk }
 
 function TwbBSFileChunk.GetCompressed: Boolean;
@@ -792,6 +859,11 @@ end;
 function TwbBSFileEntry.DXGIFormatName: string;
 begin
   Result := TwbDDS.GetDXGIFormatName(TDXGI(DDS.DXGIFormat));
+end;
+
+function TwbBSFileEntry.IsCubeMap: Boolean;
+begin
+  Result := DDS.Flags and DDS_FLAG_CUBEMAP <> 0;
 end;
 
 function TwbBSFileEntry.Unpack: TBytes;
@@ -836,7 +908,7 @@ begin
         Result := Result + Format(#13#10'  Width: %04d  Height: %04d  CubeMap: %s  Format: %s', [
           DDS.Width,
           DDS.Height,
-          IfThen(DDS.Flags and DDS_FLAG_CUBEMAP <> 0, 'Yes', 'No'),
+          IfThen(IsCubeMap, 'Yes', 'No'),
           DXGIFormatName
         ]);
         for var c in DDS.TexChunks do
@@ -923,7 +995,7 @@ end;
 
 class function TwbCustomBSArchive.DefaultCompression(aType: TwbBSArchiveType): TwbCompressionType;
 begin
-  Result := cArchiveCompressionTypes[aType][0];
+  Result :=cArchiveCompressionTypes[aType][0];
 end;
 
 class function TwbCustomBSArchive.SupportsCompression(aType: TwbBSArchiveType; aCType: TwbCompressionType): Boolean;
@@ -1962,16 +2034,20 @@ begin
   end;
 
   // DDS chunks packing
-  if (aSize < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(aData) then
-    raise Exception.Create('Not a valid DDS file');
+  if not TwbDDS.IsDDS(aData, aSize) then
+    raise Exception.Create(cExceptionInvalidDDS);
 
   DDSHeader := aData;
-  // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
-  if not Assigned(fPacker) and (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
-    buf := TwbDDS.RGB24toRGBX32(aData, aSize);
-    DDSHeader := @buf[0];
+  // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
+  if not Assigned(fPacker) and (TwbDDS.GetD3DFMT(DDSHeader) = D3DFMT_R8G8B8) then begin
+    buf := TwbDDS.ConvertR8G8B8toB8G8R8X8(aData, aSize);
+    aData := @buf[0];
+    aSize := Length(buf);
+    DDSHeader := aData;
   end;
   aFile.DDS.DXGIFormat := Byte(TwbDDS.GetDXGI(DDSHeader));
+  if TDXGI(aFile.DDS.DXGIFormat) = DXGI_FORMAT_UNKNOWN then
+    raise Exception.Create(cExceptionUnsupportedDDS);
   aFile.DDS.Width := DDSHeader.dwWidth;
   aFile.DDS.Height := DDSHeader.dwHeight;
   aFile.DDS.NumMips := DDSHeader.dwMipMapCount;
@@ -2089,7 +2165,7 @@ begin
       baFO4dds, baSFdds: begin
         // allocate space for total DDS size
         TexSize := SizeOf(TDDSHeader);
-        if TDXGI(aFile.DDS.DXGIFormat) in DXGI_DX10 then
+        if not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then
           Inc(TexSize, SizeOf(TDDSHeaderDX10));
         // offset to image data (total size of DDS header)
         MipOffset := TexSize;
@@ -2097,7 +2173,7 @@ begin
         SetLength(Result, TexSize);
 
         // set up DDS header
-        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.DDS.Flags and DDS_FLAG_CUBEMAP <> 0);
+        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.IsCubeMap);
         // append mipmap chunks
         for var c in aFile.DDS.TexChunks do begin
           fStream.Position := c.Offset;
@@ -2402,20 +2478,22 @@ begin
 
     // DDS archives - multiple chunks for mipmaps
     else begin
-      if (Length(buf) < SizeOf(TDDSheader)) or not TwbDDS.IsDDS(buf) then
-        raise Exception.Create('Not a valid DDS file');
+      if not TwbDDS.IsDDS(buf, Length(buf)) then
+        raise Exception.Create(cExceptionInvalidDDS);
 
       DDSHeader := @buf[0];
-      // convert unsupported uncompressed 24 bit RGB to 32 bit RGBX
-      if (DDSHeader.ddspf.dwFlags and DDPF_RGB <> 0) and (DDSHeader.ddspf.dwRGBBitCount = 24) then begin
-        buf := TwbDDS.RGB24toRGBX32(buf, Length(buf));
+      // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
+      if TwbDDS.GetD3DFMT(DDSHeader) = D3DFMT_R8G8B8 then begin
+        buf := TwbDDS.ConvertR8G8B8toB8G8R8X8(buf, Length(buf));
         DDSHeader := @buf[0];
       end;
+      if TwbDDS.GetDXGI(DDSHeader) = DXGI_FORMAT_UNKNOWN then
+        raise Exception.Create(cExceptionUnsupportedDDS);
+
       Off := TwbDDS.GetHeaderSize(DDSHeader);
+      MipSize := TwbDDS.GetMipSize(DDSHeader);
       // chunk 0 is uncompressed DDS header
       AddChunk(Copy(buf, 0, Off), False);
-
-      MipSize := TwbDDS.GetMipSize(DDSHeader);
       var c := GetDDSMipChunkNum(DDSHeader.dwWidth, DDSHeader.dwHeight, DDSHeader.dwMipMapCount);
       if TwbDDS.IsCubeMap(DDSHeader) then c := 1; // cubemaps are not chunked
       for var i := 1 to c do begin
@@ -2634,7 +2712,7 @@ procedure TwbMultiSourcePacker.Add(const aAssetName, aSourceFileName: string; aS
   aCheck: Boolean = True);
 var
   i: Integer;
-  Hash: UInt64;
+  Hash: TwbLookupHash;
   bFound: Boolean;
 begin
   bFound := False;

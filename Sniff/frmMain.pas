@@ -12,11 +12,27 @@ unit frmMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  System.Types, System.IniFiles, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Imaging.pngimage, Vcl.ComCtrls, Diagnostics, SniffProcessor, Vcl.Mask,
-  Vcl.Menus, Vcl.Themes;
+  System.Classes,
+  System.Diagnostics,
+  System.IniFiles,
+  System.SysUtils,
+  System.Types,
+
+  Vcl.ComCtrls,
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Imaging.pngimage,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+  Vcl.Themes,
+
+  Winapi.Windows,
+  Winapi.Messages,
+
+  SniffProcessor;
 
 const
   sSniffVersion = '1.9';
@@ -135,6 +151,7 @@ uses
   ProcUnweldedVertices,
   ProcFindDrawCalls,
   ProcFindUVs,
+  ProcFindTextures,
   ProcTransformInfo,
   ProcHavokInfo,
   ProcHavokSettingsUpdate,
@@ -183,10 +200,18 @@ var
 begin
   sl := TStringList.Create;
   try
+    var bFirstFile := True;
     cnt := DragQueryFile(msg.Drop, $FFFFFFFF, fileName, MAX_PATH);
     for i := 0 to Pred(cnt) do begin
       DragQueryFile(msg.Drop, i, fileName, MAX_PATH);
       f := fileName;
+
+      if bFirstFile then begin
+        Manager.InputDirectory := ExtractFilePath(f);
+        Manager.OutputDirectory := ExtractFilePath(f);
+        bFirstFile := False;
+      end;
+
       if TFileAttribute.faDirectory in TPath.GetAttributes(f) then begin
         for ff in TDirectory.GetFiles(f, '*.*', TSearchOption.soAllDirectories) do
           sl.Add(ff);
@@ -371,6 +396,7 @@ begin
   AddProc('Report', TProcUnweldedVertices.Create(Manager));
   AddProc('Report', TProcFindDrawCalls.Create(Manager));
   AddProc('Report', TProcFindUVs.Create(Manager));
+  AddProc('Report', TProcFindTextures.Create(Manager));
 
   AddProc('Animation', TProcCopyControlledBlocks.Create(Manager));
   AddProc('Animation', TProcCopyPriorities.Create(Manager));
@@ -689,14 +715,14 @@ begin
 
   // drag&dropped a single archive
   if (Length(ProcessedFiles) = 1) and TwbBSArchive.IsArchive(ProcessedFiles[0]) then begin
+    edInput.Text := ProcessedFiles[0];
     Manager.InputDirectory := ProcessedFiles[0];
     Manager.OutputDirectory := IncludeTrailingPathDelimiter(edOutput.Text);
   end
 
   // drag&dropped multiple files
   else if Length(ProcessedFiles) <> 0 then begin
-    Manager.InputDirectory := ExtractFilePath(ProcessedFiles[0]);
-    Manager.OutputDirectory := ExtractFilePath(ProcessedFiles[0]);
+    // dirs were set in drop event
   end;
 
   // no drag&drop
@@ -829,7 +855,7 @@ begin
 
     // multi threaded
     with TwbTaskProgress.Create(Self) do try
-      Caption := 'Processing...';
+      Caption := Proc.Title;
       LowIndex := Low(objs);
       HighIndex := High(objs);
       Threads := UseThreads;

@@ -2,21 +2,27 @@ program Sniff;
 
 uses
   MSHeap in 'Core\MSHeap.pas',
+
   Vcl.Forms,
   Vcl.Themes,
-  Vcl.Styles,
+
+  wbBSArchive in 'Core\wbBSArchive.pas',
   wbCommandLine in 'Core\wbCommandLine.pas',
   wbDataFormat in 'Core\wbDataFormat.pas',
   wbDataFormatMaterial in 'Core\wbDataFormatMaterial.pas',
   wbDataFormatNif in 'Core\wbDataFormatNif.pas',
   wbDataFormatNifTypes in 'Core\wbDataFormatNifTypes.pas',
   wbDataFormatMisc in 'Core\wbDataFormatMisc.pas',
+  wbDDS in 'Core\wbDDS.pas',
   wbMeshOptimize in 'Core\wbMeshOptimize.pas',
   wbNifMath in 'Core\wbNifMath.pas',
+
   SniffProcessor in 'Sniff\SniffProcessor.pas',
+
   frmMain in 'Sniff\frmMain.pas' {FormMain},
   frMessages in 'Sniff\frMessages.pas' {FrameMessages: TFrame},
   frmVertexPaintHelper in 'Sniff\frmVertexPaintHelper.pas' {FormVertexPaintHelper},
+
   ProcAddBoundingBox in 'Sniff\Proc\ProcAddBoundingBox.pas' {FrameAddBoundingBox: TFrame},
   ProcAddFacialAnim in 'Sniff\Proc\ProcAddFacialAnim.pas' {FrameAddFacialAnim: TFrame},
   ProcAddHeadtrackingAnim in 'Sniff\Proc\ProcAddHeadtrackingAnim.pas' {FrameAddHeadtrackingAnim: TFrame},
@@ -34,6 +40,7 @@ uses
   ProcCopyGeometryBlocks in 'Sniff\Proc\ProcCopyGeometryBlocks.pas' {FrameCopyGeometryBlocks: TFrame},
   ProcCopyPriorities in 'Sniff\Proc\ProcCopyPriorities.pas' {FrameCopyPriorities: TFrame},
   ProcFindDrawCalls in 'Sniff\Proc\ProcFindDrawCalls.pas' {FrameFindDrawCalls: TFrame},
+  ProcFindTextures in 'Sniff\Proc\ProcFindTextures.pas' {FrameFindTextures: TFrame},
   ProcFindUVs in 'Sniff\Proc\ProcFindUVs.pas' {FrameFindUVs: TFrame},
   ProcFixExportedKFAnim in 'Sniff\Proc\ProcFixExportedKFAnim.pas' {FrameFixExportedKFAnim: TFrame},
   ProcGroupShapes in 'Sniff\Proc\ProcGroupShapes.pas' {FrameGroupShapes: TFrame},

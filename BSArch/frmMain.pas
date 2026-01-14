@@ -7,17 +7,43 @@
 *******************************************************************************}
 
 {$WARN SYMBOL_PLATFORM OFF}
-{$DEFINE VT7, uses for VirtualTrees v7.x}
 unit frmMain;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Menus, System.Types, System.UITypes, System.StrUtils, System.IniFiles,
-  Vcl.Themes, Vcl.Styles.Utils.SystemMenu, Vcl.Mask,
-  JsonDataObjects, wbBSArchive, wbCompression, VirtualTrees;
+  System.Classes,
+  System.IniFiles,
+  System.StrUtils,
+  System.SysUtils,
+  System.Types,
+
+  JsonDataObjects,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Graphics,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+  Vcl.Styles.Utils.SystemMenu,
+  Vcl.Themes,
+
+  VirtualTrees,
+  {
+  VirtualTrees.AncestorVCL,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree,
+  VirtualTrees.Types,
+  }
+
+  Winapi.Messages,
+  Winapi.Windows,
+
+  wbBSArchive,
+  wbCompression;
 
 const
   WM_PACK = WM_USER + 3;
@@ -62,6 +88,8 @@ type
     mniLoadList: TMenuItem;
     mniSaveList: TMenuItem;
     N4: TMenuItem;
+    mniAssetFindIdentical: TMenuItem;
+    dlgIdenticalFiles: TTaskDialog;
     procedure vtAssetsCompareNodes(Sender: TBaseVirtualTree; Node1,
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
     procedure vtAssetsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -98,6 +126,7 @@ type
     procedure mniLoadListClick(Sender: TObject);
     procedure mniSaveListClick(Sender: TObject);
     procedure vtAssetsDblClick(Sender: TObject);
+    procedure mniAssetFindIdenticalClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -140,7 +169,7 @@ type
     function LoadList(const aFileName: string; bIgnoreErrors: Boolean = False): Boolean;
     function PreloadArchives(const aForAssets: TAssets): Boolean;
     procedure UnpackAssets(Assets: TAssets);
-    procedure PackAssets(Assets: TAssets);
+    procedure PackAssets(const Assets: TAssets);
     function BeforePackingChecks(const Assets: TAssets): Boolean;
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -1137,6 +1166,7 @@ begin
   mniAssetUnpack.Visible := Assigned(asset) and (asset.ArchiveName <> '');
   mniAssetUnpackSaveAs.Visible := mniAssetUnpack.Visible;
   mniArchiveInfo.Visible := Assigned(asset) and (asset.ArchiveName <> '');
+  mniAssetFindIdentical.Visible := Length(FilteredAssets) > 1;
   mniAssetPack.Visible := bHasSelection;
   mniSaveList.Visible := Assets.Count <> 0;
 end;
@@ -1335,6 +1365,93 @@ begin
 end;
 
 //============================================================================
+procedure TFormMain.mniAssetFindIdenticalClick(Sender: TObject);
+var
+  Same: TwbSameData;
+begin
+  var Assets := Copy(FilteredAssets, Low(FilteredAssets), FilteredCount);
+  if not PreloadArchives(Assets) then
+    Exit;
+
+  var ProcCompare: TProcessProc :=
+    procedure(i: Integer) begin
+      Same.Add(i, Assets[i].GetData);
+    end;
+
+  with TwbTaskProgress.Create(Self) do try
+    Caption := 'Comparing assets data...';
+    LowIndex := Low(Assets);
+    HighIndex := High(Assets);
+    ProcessProc := ProcCompare;
+    var mr := Execute;
+    if mr = mrAbort then begin
+      DialogError('Error:'#13 + Assets[ErrorIndex].FileName + #13#13 + ErrorMessage);
+      Exit;
+    end
+    else if mr = mrCancel then
+      Exit;
+  finally
+    Free;
+  end;
+
+  var Dups: TAssets;
+  var sl := TStringList.Create;
+  try
+    var count := 0;
+    var size: UInt64 := 0;
+    for var i := 0 to Pred(Same.DatasCount) do with Same.Datas[i] do
+      if Length(DataIndices) > 1 then begin
+        for var idx in DataIndices do with Assets[idx] do begin
+          Dups := Dups + [Assets[idx]];
+          if ArchiveName <> '' then
+            sl.Add(ArchiveName + '\' + FileName)
+          else
+            sl.Add(FileName);
+        end;
+        sl.Add('');
+        Inc(count, Pred(Length(DataIndices)));
+        Inc(size, DataSize * UInt64(Pred(Length(DataIndices))));
+      end;
+
+    if sl.Count = 0 then begin
+      DialogMessage('No identical assets found');
+      Exit;
+    end;
+
+    sl.Insert(0, '');
+    sl.Insert(0, 'Duplicate Size: ' + FormatSize(size) + ' (saved space if all identical files will end up in the same archive with Share Data option)');
+    sl.Insert(0, 'Duplicate Files: ' + count.ToString);
+
+    dlgIdenticalFiles.CustomMainIcon := Application.Icon;
+    dlgIdenticalFiles.Title := sl[0] + #13 + sl[1];
+    dlgIdenticalFiles.Text := '''
+    To pack identical files together use "Filter By Identical", then select all Ctrl+A, right click and Pack selected.
+    Check Share Data option and disable splitting because it splits by overall files size.
+
+    When done, right click and Remove selected, Reset filter and press Pack to archive the rest of files with splitting.
+    ''';
+    if not dlgIdenticalFiles.Execute then
+      Exit;
+
+    if dlgIdenticalFiles.ModalResult = 100 then
+      Self.RefreshAssets(Dups)
+
+    else if dlgIdenticalFiles.ModalResult = 101 then
+      with TFormArchiveInfo.Create(Self) do begin
+        Caption := 'Identical assets';
+        aBSA := Caption;
+        slText := sl;
+        sl := nil;
+        ShowModal;
+      end;
+
+  finally
+    if Assigned(sl) then
+      sl.Free;
+  end;
+end;
+
+//============================================================================
 procedure TFormMain.UnpackAssets(Assets: TAssets);
 var
   Folders: TStringList;
@@ -1346,7 +1463,7 @@ begin
 
   try
     // remove loose files from selection and collect assets folders
-    for var i: Integer := High(assets) downto Low(assets) do
+    for var i := High(assets) downto Low(assets) do
       if assets[i].ArchiveName = '' then
         Delete(assets, i, 1)
       else
@@ -1650,17 +1767,7 @@ begin
 end;
 
 //============================================================================
-function FormatSize(Bytes: Int64): string;
-const
-  Description: array [0..8] of string = ('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-begin
-  var i := 0;
-  while Bytes >= IntPower(1024, i + 1) do Inc(i);
-  Result := FormatFloat('###0.##', Bytes / IntPower(1024, i)) + ' ' + Description[i];
-end;
-
-//============================================================================
-procedure TFormMain.PackAssets(Assets: TAssets);
+procedure TFormMain.PackAssets(const Assets: TAssets);
 var
   slFiles: TStringList;
   bsa: TAssetsPacker;

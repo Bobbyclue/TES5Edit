@@ -5797,7 +5797,7 @@ begin
             .IncludeFlag(dfNotAlignable),
           wbArray('Counters',
             wbIntegeR('Counter', itU32, nil, nil, cpIgnore),
-          -1, ['Textures', 'Addon Nodes', 'Unknown', 'Materials'], cpIgnore)
+          -1, ['Textures', 'Addon Nodes', 'SRGB', 'Materials'], cpIgnore)
             .IncludeFlag(dfCollapsed, wbCollapseModelInfoHeader)
             .IncludeFlag(dfNotAlignable)
         ),
