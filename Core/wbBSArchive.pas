@@ -1354,6 +1354,7 @@ begin
     //--------------------------------------------------
     // Load Oblivion, Fallout 3, New Vegas, Skyrim, Skyrim SE
     baTES4, baFO3, baSSE: begin
+      fCompressionType := ctZLib;
       // read header
       fHeader.FoldersOffset := fStream.ReadCardinal;
       fHeader.Flags := fStream.ReadCardinal;
@@ -1405,6 +1406,7 @@ begin
     //--------------------------------------------------
     // Load Fallout 4, Starfield
     baFO4, baSF: begin
+      fCompressionType := ctZLib;
       // read header
       fHeader.Magic2 := Int2Magic(fStream.ReadCardinal);
       if (fHeader.Magic2 <> MAGIC_GNRL) and (fHeader.Magic2 <> MAGIC_DX10) then
@@ -1422,9 +1424,7 @@ begin
         if fHeader.Version >= HEADER_VERSION_SFv3 then begin
           fHeader.CompressionMethod := fStream.ReadCardinal;
           if fHeader.CompressionMethod = COMPRESSION_METHOD_LZ4 then
-            fCompressionType := ctLZ4
-          else
-            fCompressionType := ctZLib;
+            fCompressionType := ctLZ4;
         end;
       end;
 
