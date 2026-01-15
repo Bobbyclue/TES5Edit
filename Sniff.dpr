@@ -4,6 +4,7 @@ uses
   MSHeap in 'Core\MSHeap.pas',
 
   Vcl.Forms,
+  Vcl.Styles,
   Vcl.Themes,
 
   wbBSArchive in 'Core\wbBSArchive.pas',

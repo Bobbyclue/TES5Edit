@@ -21,7 +21,7 @@ uses
   wbStreams;
 
 const
-  cBSArchVersion = '0.9.1';
+  cBSArchVersion = '0.9.2';
   cBSArchExtension = '.bsarch';
 
 type
@@ -1354,7 +1354,6 @@ begin
     //--------------------------------------------------
     // Load Oblivion, Fallout 3, New Vegas, Skyrim, Skyrim SE
     baTES4, baFO3, baSSE: begin
-      fCompressionType := ctZLib;
       // read header
       fHeader.FoldersOffset := fStream.ReadCardinal;
       fHeader.Flags := fStream.ReadCardinal;
