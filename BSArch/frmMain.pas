@@ -1863,7 +1863,6 @@ begin
       Self.FileFlags := FileFlags;
       Self.Split := Split;
       Self.CompressionType := CompressionType;
-      lblPack.Caption := Format('Packing %.0n files for', [Length(Assets) + 0.0]);
     finally
       Free;
     end;
@@ -1880,11 +1879,12 @@ begin
   if Split = -1 then
     bsa.SplitSize := bsa.DefaultSplitSize(ArchiveType)
   else
-    bsa.SplitSize := Split * 1024 * 1024 * 1024;
+    bsa.SplitSize := Int64(Split) * 1024 * 1024 * 1024;
 
   bsa.CompressionType := TwbCompression.TypeByName(CompressionType);
   if not bsa.SupportsCompression(ArchiveType, bsa.CompressionType) then
     bsa.CompressionType := bsa.DefaultCompression(ArchiveType);
+
   if not AutodetectFlags then begin
     bsa.ArchiveFlags := ArchiveFlags;
     bsa.FileFlags := FileFlags;
@@ -1894,11 +1894,11 @@ begin
   bsa.CreateArchive(ArchiveFileName, ArchiveType, slFiles, lstComp);
 
   // single main thread
-  {if DebugHook <> 0 then begin
+  if DebugHook <> 0 then begin
     for var i := 0 to Pred(bsa.ProcessCount) do bsa.Process;
     bsa.Save;
     bSuccess := True;
-  end else}
+  end else
 
   // multi threaded
   with TwbTaskProgress.Create(Self) do try
@@ -1930,7 +1930,10 @@ begin
   if not bAutoMode and bSuccess then with TTaskDialog.Create(Self) do try
     var s := 'Created archive(s):'#13;
     for var b in bsa.Archives do begin
-      s := s + Format('%s  Size: %s  Files: %.0n'#13, [b.FileName, FormatSize(b.ArchiveSize), b.Count + 0.0]);
+      s := s + Format('%s   %s  %.0n files', [b.FileName, FormatSize(b.ArchiveSize), b.Count + 0.0]);
+      if b.ArchiveSharedFiles <> 0 then
+        s := s + Format('  %.0n shared saving %s', [b.ArchiveSharedFiles + 0.0, FormatSize(b.ArchiveSharedSize)]);
+      s := s + #13;
       for var w in b.Warnings do
         s := s + '  Warning: ' + w + #13;
     end;

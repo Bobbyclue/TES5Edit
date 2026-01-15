@@ -138,6 +138,8 @@ type
     fSingleMipChunkX: Integer;
     fSingleMipChunkY: Integer;
     fArchiveSize: Int64;
+    fArchiveSharedFiles: Integer;
+    fArchiveSharedSize: Int64;
 
     {$IF CompilerVersion >= 34.0} { Delphi 10.4 }
     Sync: TLightweightMREW;
@@ -233,17 +235,18 @@ type
     property SingleMipChunkX: Integer read fSingleMipChunkX write fSingleMipChunkX;
     property SingleMipChunkY: Integer read fSingleMipChunkY write fSingleMipChunkY;
     property ArchiveSize: Int64 read fArchiveSize;
+    property ArchiveSharedSize: Int64 read fArchiveSharedSize;
+    property ArchiveSharedFiles: Integer read fArchiveSharedFiles;
   end;
 
   TwbBSArchive = class(TwbCustomBSArchive)
   type
     TArchiveState = (stReading, stWriting);
     TArchiveStates = set of TArchiveState;
-    TPackedDataHash = TwbXXH64;
     TPackedDataIndex = record
       Chunk: TwbBSFileChunk;
       Size: Cardinal;
-      Hash: TPackedDataHash;
+      Hash: TwbLookupHash;
       Compress: Boolean;
     end;
     TwbBSFolderTES4 = record
@@ -268,9 +271,8 @@ type
     function GetFileEntry(Index: NativeInt): TwbBSFileEntry;
     function GetFilesCount: NativeInt;
     procedure SetFilesCount(aCount: NativeInt);
-    function CalcDataHash(aData: Pointer; aLen: Cardinal): TPackedDataHash;
-    function FindPackedData(aSize: Cardinal; aHash: TPackedDataHash; aChunk: TwbBSFileChunk): Boolean;
-    procedure AddPackedData(aSize: Cardinal; aHash: TPackedDataHash; aChunk: TwbBSFileChunk);
+    function FindPackedData(aSize: Cardinal; aHash: TwbLookupHash; aChunk: TwbBSFileChunk): Boolean;
+    procedure AddPackedData(aSize: Cardinal; aHash: TwbLookupHash; aChunk: TwbBSFileChunk);
     procedure PackData(aFile: TwbBSFileEntry; aChunk: TwbBSFileChunk;
       aData: Pointer; aSize, aUncompressedSize: Integer);
     procedure DecompressBuf(aSrc: Pointer; aSrcSize: Integer; aDst: Pointer; aDstSize: Integer);
@@ -327,6 +329,8 @@ type
       FileObject: Pointer;
       Compress: Boolean;
       ArchiveIndex: Integer;
+      ShareSize: Integer;
+      ShareHash: TwbLookupHash;
       Chunks: array of record
         UncompressedSize: Integer;
         Data: TBytes;
@@ -949,6 +953,8 @@ begin
   fArchiveFlags := 0;
   fFileFlags := 0;
   fArchiveSize := 0;
+  fArchiveSharedSize := 0;
+  fArchiveSharedFiles := 0;
 end;
 
 function TwbCustomBSArchive.GetDDSMipChunkNum(aWidth, aHeight, aMipMaps: Integer): Integer;
@@ -1250,12 +1256,7 @@ begin
       end;
 end;
 
-function TwbBSArchive.CalcDataHash(aData: Pointer; aLen: Cardinal): TPackedDataHash;
-begin
-  Result := TwbHash.XXH64(aData, aLen);
-end;
-
-function TwbBSArchive.FindPackedData(aSize: Cardinal; aHash: TPackedDataHash; aChunk: TwbBSFileChunk): Boolean;
+function TwbBSArchive.FindPackedData(aSize: Cardinal; aHash: TwbLookupHash; aChunk: TwbBSFileChunk): Boolean;
 begin
   Result := False;
 
@@ -1263,22 +1264,24 @@ begin
     Exit;
 
   for var i := 0 to Pred(fPackedDataCount) do
-    if (aSize = fPackedData[i].Size) and
-    {$if SizeOf(aHash) <= SizeOf(Int64)}
-    (aHash = fPackedData[i].Hash)
-    {$else}
-    CompareMem(@aHash, @fPackedData[i].Hash, SizeOf(aHash))
-    {$endif}
-    then begin
+    if (aSize = fPackedData[i].Size) and TwbHash.SameLookupHash(aHash, fPackedData[i].Hash) then begin
       aChunk.Offset := fPackedData[i].Chunk.Offset;
       aChunk.Size := fPackedData[i].Chunk.Size;
       aChunk.PackedSize := fPackedData[i].Chunk.PackedSize;
+      // in DDS archives count shared files for the first 0 mipmap chunk only
+      if not ( (aChunk is TwbBSFileChunkTex) and (TwbBSFileChunkTex(aChunk).StartMip <> 0) ) then
+        Inc(fArchiveSharedFiles);
+      if aChunk.PackedSize <> 0 then
+        Inc(fArchiveSharedSize, aChunk.PackedSize)
+      else
+        Inc(fArchiveSharedSize, aChunk.Size);
+
       Result := True;
       Exit;
     end;
 end;
 
-procedure TwbBSArchive.AddPackedData(aSize: Cardinal; aHash: TPackedDataHash; aChunk: TwbBSFileChunk);
+procedure TwbBSArchive.AddPackedData(aSize: Cardinal; aHash: TwbLookupHash; aChunk: TwbBSFileChunk);
 begin
   if not fShareData then
     Exit;
@@ -1943,11 +1946,11 @@ procedure TwbBSArchive.PackData(aFile: TwbBSFileEntry; aChunk: TwbBSFileChunk;
   aData: Pointer; aSize, aUncompressedSize: Integer);
 var
   buf: TBytes;
-  DataHash: TPackedDataHash;
+  DataHash: TwbLookupHash;
   StartPosition: Int64;
 begin
   if fShareData then
-    DataHash := CalcDataHash(aData, aSize);
+    DataHash := TwbHash.LookupHash(aData, aSize);
 
   SyncBeginWrite;
   try
@@ -2502,9 +2505,26 @@ begin
         MipSize := MipSize div 4;
       end;
     end;
+
+    if fShareData then begin
+      aPackedFile.ShareSize := Length(buf);
+      aPackedFile.ShareHash := TwbHash.LookupHash(buf, Length(buf));
+    end;
+
   finally
     SyncBeginWrite;
     Dec(fLoadingCount);
+  end;
+
+  if fShareData then begin
+    var f := fLoaded;
+    while Assigned(f) do begin
+      if (f.ShareSize = aPackedFile.ShareSize) and TwbHash.SameLookupHash(f.ShareHash, aPackedFile.ShareHash) then begin
+        Size := 0;
+        Break;
+      end;
+      f := f.Next;
+    end;
   end;
 
   // very rough archive size (over)estimation, don't need to be precize
@@ -2719,7 +2739,7 @@ begin
   i := 0; // suppress compiler warning
   if aCheck then
     for i := 0 to Pred(fSourceFilesCount) do
-      if fSourceFiles[i].Hash = Hash then begin
+      if TwbHash.SameLookupHash(fSourceFiles[i].Hash, Hash) then begin
         bFound := True;
         Break;
       end;

@@ -164,7 +164,9 @@ function LZ4Compress(const InBuf: Pointer; InSize: Integer; var OutSize: Integer
   aCompressionLevel: Integer = TwbCompression.LZ4_COMPRESSION_LEVEL): TBytes; overload;
 begin
   SetLength(Result, {$IFDEF WIN64}LZ4_compressBound{$ELSE}_LZ4_compressBound{$ENDIF}(inSize));
-  OutSize := {$IFDEF WIN64}LZ4_compress_HC{$ELSE}_LZ4_compress_HC{$ENDIF}(InBuf, Result, InSize, Length(Result), aCompressionLevel);
+  // crashing bug in LZ4_compress_HC() if InBuf = 0 and InSize = 0, need to point to something allocated
+  var p: Pointer; if InSize = 0 then p := Pointer(Result) else p := InBuf;
+  OutSize := {$IFDEF WIN64}LZ4_compress_HC{$ELSE}_LZ4_compress_HC{$ENDIF}(p, Result, InSize, Length(Result), aCompressionLevel);
   if OutSize = 0 then
     raise Exception.Create('LZ4 error: Compression failed');
 end;

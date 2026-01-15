@@ -58,16 +58,6 @@ begin
 end;
 
 //======================================================================
-function FormatSize(Bytes: Int64): string;
-const
-  Description: array [0..8] of string = ('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-begin
-  var i := 0;
-  while Bytes >= IntPower(1024, i + 1) do Inc(i);
-  Result := FormatFloat('###0.##', Bytes / IntPower(1024, i)) + ' ' + Description[i];
-end;
-
-//======================================================================
 function IfThen(aCondition: Boolean; const aValue1, aValue2: string): string; inline;
 begin
   if aCondition then Result := aValue1 else Result := aValue2;
@@ -264,7 +254,10 @@ begin
     WriteLn;
     WriteLn('Created archives:');
     for var b in bsa.Archives do begin
-      WriteLn(b.FileName, '  ', FormatSize(b.ArchiveSize));
+      Write(Format('%s   %s  %d files', [b.FileName, FormatSize(b.ArchiveSize), b.Count]));
+      if b.ArchiveSharedFiles <> 0 then
+        Write(Format('  %d shared saving %s', [b.ArchiveSharedFiles, FormatSize(b.ArchiveSharedSize)]));
+      WriteLn;
       for var w in b.Warnings do
         WriteLn(#9'Warning: ', w);
     end;
@@ -575,13 +568,13 @@ var
   i: Integer;
 begin
   bsa := TwbMultiSourcePacker.Create;
-  bsa.SplitSize := 10 * 1024 * 1024;
-  bsa.Compress := True;
+  bsa.SplitSize := 600 * 1024;
+  //bsa.Compress := True;
   bsa.ShareData := True;
   bsa.MultiThreaded := True;
-  bsa.AddSourceFolder('d:\2\fnv\meshes\creatures');
+  bsa.AddSourceFolder('d:\1\data\textures');
 
-  bsa.CreateArchive('d:\2\a.bsa', baFO3);
+  bsa.CreateArchive('d:\1\a.bsa', baFO4dds);
 
   try
     var sw := TStopwatch.StartNew;
@@ -598,9 +591,14 @@ begin
         bsa.Process;
 
     bsa.Save;
+    WriteLn('Created archives:');
     for var b in bsa.Archives do begin
-      WriteLn(ExtractFileName(b.FileName), ' ', b.ArchiveSize);
-      //WriteLn(b.Info);
+      Write(Format('%s   %s  %d files', [b.FileName, FormatSize(b.ArchiveSize), b.Count]));
+      if b.ArchiveSharedFiles <> 0 then
+        Write(Format('  %d shared saving %s', [b.ArchiveSharedFiles, FormatSize(b.ArchiveSharedSize)]));
+      WriteLn;
+      for var w in b.Warnings do
+        WriteLn(#9'Warning: ', w);
     end;
 
     sw.Stop;

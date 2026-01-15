@@ -41,6 +41,7 @@ type
   TwbHash = class abstract
     class function LookupHash(aData: Pointer; aLen: NativeInt): TwbLookupHash; overload; inline;
     class function LookupHash(const aText: string; aIgnoreCase: Boolean = False): TwbLookupHash; overload;
+    class function SameLookupHash(aHash1, aHash2: TwbLookupHash): Boolean; inline;
     class function TES3(const aText: string): UInt64;
     class function _TES4(const aText: string; aHasExtension: Boolean = False; aSigned: Boolean = False): UInt64;
     class function TES4(const aText: string; aHasExtension: Boolean = False): UInt64;
@@ -154,6 +155,12 @@ begin
       Result := LookupHash(@s[1], ByteLength(s));
     end else
       Result := LookupHash(@aText[1], ByteLength(aText));
+end;
+
+class function TwbHash.SameLookupHash(aHash1, aHash2: TwbLookupHash): Boolean;
+begin
+  Result :=
+    {$if SizeOf(TwbLookupHash) <= SizeOf(Int64)}(aHash1 = aHash2){$else}CompareMem(@aHash1, aHash2, SizeOf(aHash)){$endif};
 end;
 
 class function TwbHash.TES3(const aText: string): UInt64;
