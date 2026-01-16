@@ -228,6 +228,14 @@ const
   _OtherCount = 500000;
 
 procedure TwbContainerHandler.BuildCache;
+  function CalcHash(const aStr: string): Int64;
+  begin
+    if wbGameMode >= gmTES5 then
+      Result := TwbHash.BSCRC32(aStr)
+    else
+      Result := TwbHash.TES4(aStr, True);
+  end;
+
 begin
   InvalidateCache;
   with chCache do begin
@@ -264,7 +272,7 @@ begin
           lFolderHash := TwbHash.FO4(lFolder)
         else
           lFolderHash := TwbHash.TES4(lFolder);
-        ccFolderHashes.TryAdd(lFolderHash, lFolder);
+        ccFolderHashes.TryAdd(CalcHash(lFolder), lFolder);
       end;
 
       var lFile := ExtractFileName(lFullName).ToLowerInvariant;
@@ -277,7 +285,7 @@ begin
           lFileHash := TwbHash.FO4(lFile)
         else
           lFileHash := TwbHash.TES4(lFile);
-        ccFileHashes.TryAdd(lFileHash, lFile);
+        ccFileHashes.TryAdd(CalcHash(lFile), lFile);
 
         if wbGameMode < gmTES5 then
           if ExtractFileExt(lFile) = '.dds' then
@@ -287,7 +295,7 @@ begin
                 lFileHash := TwbHash.FO4(lFile)
               else
                 lFileHash := TwbHash.TES4(lFile);
-              ccFileHashes.TryAdd(lFileHash, lFile);
+              ccFileHashes.TryAdd(CalcHash(lFile), lFile);
             end;
       end;
     end;
