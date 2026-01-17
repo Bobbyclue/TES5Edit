@@ -1094,9 +1094,10 @@ begin
     if not Supports(aElement, IwbMainRecord, lMainRecord) then
       Exit;
 
-    if Assigned(lMainRecord.ElementBySignature['XWEM']) then
-      if (lMainRecord.ElementNativeValues['Flags'] and $0) = 0 then
-        lMainRecord.RemoveElement(XWEM);
+    if not wbIsFallout4 then
+      if Assigned(lMainRecord.ElementBySignature['XWEM']) then
+        if (lMainRecord.ElementNativeValues['Flags'] and $0) = 0 then
+          lMainRecord.RemoveElement(XWEM);
 
     if wbRemoveOffsetData then begin
       if (wbIsSkyrim or wbIsFallout4 or wbIsFallout76) and (lMainRecord._File.LoadOrder = 0) then
