@@ -239,7 +239,6 @@ procedure TwbContainerHandler.BuildCache;
 begin
   InvalidateCache;
   with chCache do begin
-
     ccAll := TwbResourceDict.Create(_AllCount);
     ccFiles := TwbResourceDict.Create(_OtherCount);
     ccFolders := TwbResourceDict.Create(_OtherCount);
@@ -267,11 +266,6 @@ begin
     for var lFullName in ccAll.Keys do begin
       var lFolder := ExcludeTrailingBackslash(ExtractFilePath(lFullName)).ToLowerInvariant.Replace('/', '\');
       if ccFolders.TryAdd(lFolder, wbNothing) then begin
-        var lFolderHash: Int64;
-        if wbGameMode >= gmTES5 then
-          lFolderHash := TwbHash.FO4(lFolder)
-        else
-          lFolderHash := TwbHash.TES4(lFolder);
         ccFolderHashes.TryAdd(CalcHash(lFolder), lFolder);
       end;
 
@@ -280,21 +274,12 @@ begin
         lFile := ChangeFileExt(lFile, '');
 
       if ccFiles.TryAdd(lFile, wbNothing) then begin
-        var lFileHash: Int64;
-        if wbGameMode >= gmTES5 then
-          lFileHash := TwbHash.FO4(lFile)
-        else
-          lFileHash := TwbHash.TES4(lFile);
         ccFileHashes.TryAdd(CalcHash(lFile), lFile);
 
         if wbGameMode < gmTES5 then
           if ExtractFileExt(lFile) = '.dds' then
             lFile := ChangeFileExt(lFile, '.ddx');
             if ccFiles.TryAdd(lFile, wbNothing) then begin
-              if wbGameMode >= gmTES5 then
-                lFileHash := TwbHash.FO4(lFile)
-              else
-                lFileHash := TwbHash.TES4(lFile);
               ccFileHashes.TryAdd(CalcHash(lFile), lFile);
             end;
       end;
