@@ -853,6 +853,9 @@ begin
   if not Assigned(aElement) then
     Exit;
 
+  if aElement.EditValue = ' ' then
+    Exit;
+
   if wbBeginInternalEdit then try
     if not Assigned(aElement._File) then
       Exit;
@@ -1197,6 +1200,9 @@ begin
     Exit;
 
   if VarSameValue(aOldValue, aNewValue) then
+    Exit;
+
+  if aElement.EditValue = ' ' then
     Exit;
 
   if wbBeginInternalEdit then try
