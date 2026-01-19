@@ -3080,47 +3080,17 @@ begin
       .IncludeFlagOnValue(dfSummaryMembersNoName)
       .IncludeFlag(dfSummaryMembersNoName),
     wbStruct(PSDT, 'Schedule', [
-      wbInteger('Month', itU8,
-        wbEnum([
-          {0}  'January',
-          {1}  'February',
-          {2}  'March',
-          {3}  'April',
-          {4}  'May',
-          {5}  'June',
-          {6}  'July',
-          {7}  'August',
-          {8}  'September',
-          {9}  'October',
-          {10} 'November',
-          {11} 'December',
-          {12} 'Spring (MAM)',
-          {13} 'Summer (JJA)',
-          {14} 'Autumn (SON)',
-          {15} 'Winter (DJF)'
-        ], [
-          255, 'Any'
-        ])).SetDefaultNativeValue(255),
-      wbInteger('Day of week', itU8,
-        wbEnum([
-          {0}  'Sunday',
-          {1}  'Monday',
-          {2}  'Tuesday',
-          {3}  'Wednesday',
-          {4}  'Thursday',
-          {5}  'Friday',
-          {6}  'Saturday',
-          {7}  'Weekdays',
-          {8}  'Weekends',
-          {9}  'Monday, Wednesday, Friday',
-          {10} 'Tuesday, Thursday'
-        ], [
-          255, 'Any'
-        ])).SetDefaultNativeValue(255),
-      wbInteger('Date', itU8),
-      wbInteger('Time', itU8),
-      wbInteger('Duration', itU32)
-    ]).SetRequired,
+      wbInteger('Month', itS8,
+        wbPackagePSDTMonthValueToStr,
+        wbPackagePSDTMonthValueToInt
+      ).SetDefaultEditValue('Any'),
+      wbInteger('Day Of Week', itS8, wbPackageScheduleDayOfWeekEnum).SetDefaultNativeValue(-1),
+      wbInteger('Date', itS8, wbPackageScheduleDayOfMonthEnum)
+        .SetAfterLoad(wbPACKDateAfterLoad)
+        .SetAfterSet(wbPACKDateAfterSet),
+      wbInteger('Time', itS8, wbPackageScheduleHoursEnum).SetDefaultNativeValue(-1),
+      wbInteger('Duration (Hours)', itU32)
+    ], cpNormal, True),
     wbStruct(PTDT, 'Target', [
       wbInteger('Type', itU32,
         wbEnum([

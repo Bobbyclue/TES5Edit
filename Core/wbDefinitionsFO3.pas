@@ -6490,27 +6490,17 @@ begin
       ])
     ], [], cpNormal, False, nil, True),
     wbStruct(PSDT, 'Schedule', [
-      wbInteger('Month', itS8),
-      wbInteger('Day of week', itU8,
-        wbEnum([
-          {0}  'Sunday',
-          {1}  'Monday',
-          {2}  'Tuesday',
-          {3}  'Wednesday',
-          {4}  'Thursday',
-          {5}  'Friday',
-          {6}  'Saturday',
-          {7}  'Weekdays',
-          {8}  'Weekends',
-          {9}  'Monday, Wednesday, Friday',
-          {10} 'Tuesday, Thursday'
-        ], [
-          255, 'Any'
-        ])),
-      wbInteger('Date', itU8),
-      wbInteger('Time', itS8),
-      wbInteger('Duration', itS32)
-    ]).SetRequired,
+      wbInteger('Month', itS8,
+        wbPackagePSDTMonthValueToStr,
+        wbPackagePSDTMonthValueToInt
+      ).SetDefaultEditValue('Any'),
+      wbInteger('Day Of Week', itS8, wbPackageScheduleDayOfWeekEnum).SetDefaultNativeValue(-1),
+      wbInteger('Date', itS8, wbPackageScheduleDayOfMonthEnum)
+        .SetAfterLoad(wbPACKDateAfterLoad)
+        .SetAfterSet(wbPACKDateAfterSet),
+      wbInteger('Time', itS8, wbPackageScheduleHoursEnum).SetDefaultNativeValue(-1),
+      wbInteger('Duration (Hours)', itU32)
+    ], cpNormal, True),
     wbStruct(PTDT, 'Target 1', [
       wbInteger('Type', itU32,
         wbEnum([
