@@ -217,6 +217,10 @@ object FormMain: TFormMain
       Caption = 'Edit'
       OnClick = mniAssetEditClick
     end
+    object mniArchiveInfo: TMenuItem
+      Caption = 'Asset Archive Information'
+      OnClick = mniArchiveInfoClick
+    end
     object mniAssetReplace: TMenuItem
       Caption = 'Search and Replace'
       OnClick = mniAssetReplaceClick
@@ -230,13 +234,16 @@ object FormMain: TFormMain
       Caption = 'Remove Unselected'
       OnClick = mniAssetRemoveUnselectedClick
     end
-    object mniAssetCompressed: TMenuItem
-      Caption = 'Compressed'
-      OnClick = mniAssetCompressedClick
+    object N1: TMenuItem
+      Caption = '-'
     end
-    object mniAssetUncompressed: TMenuItem
-      Caption = 'Uncompressed'
-      OnClick = mniAssetUncompressedClick
+    object mniAssetCompress: TMenuItem
+      Caption = 'Set Compressed Where Applicable'
+      OnClick = mniAssetCompressClick
+    end
+    object mniAssetFindIdentical: TMenuItem
+      Caption = 'Find Identical Assets'
+      OnClick = mniAssetFindIdenticalClick
     end
     object N2: TMenuItem
       Caption = '-'
@@ -249,23 +256,12 @@ object FormMain: TFormMain
       Caption = 'Unpack Asset and Save As'
       OnClick = mniAssetUnpackSaveAsClick
     end
-    object mniArchiveInfo: TMenuItem
-      Caption = 'Archive Info'
-      OnClick = mniArchiveInfoClick
-    end
     object N3: TMenuItem
       Caption = '-'
     end
     object mniAssetPack: TMenuItem
       Caption = 'Pack Selected'
       OnClick = mniAssetPackClick
-    end
-    object N1: TMenuItem
-      Caption = '-'
-    end
-    object mniAssetFindIdentical: TMenuItem
-      Caption = 'Find Identical Assets'
-      OnClick = mniAssetFindIdenticalClick
     end
     object N4: TMenuItem
       Caption = '-'

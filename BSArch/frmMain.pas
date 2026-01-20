@@ -59,8 +59,7 @@ type
     dlgSameAsset: TTaskDialog;
     mniAssetRemoveSelected: TMenuItem;
     mniAssetRemoveUnselected: TMenuItem;
-    mniAssetCompressed: TMenuItem;
-    mniAssetUncompressed: TMenuItem;
+    mniAssetCompress: TMenuItem;
     mniAssetEdit: TMenuItem;
     mniAssetReplace: TMenuItem;
     mniAssetUnpack: TMenuItem;
@@ -100,8 +99,7 @@ type
     procedure mniAssetRemoveSelectedClick(Sender: TObject);
     procedure mnAssetsPopup(Sender: TObject);
     procedure mniAssetRemoveUnselectedClick(Sender: TObject);
-    procedure mniAssetCompressedClick(Sender: TObject);
-    procedure mniAssetUncompressedClick(Sender: TObject);
+    procedure mniAssetCompressClick(Sender: TObject);
     procedure mniAssetEditClick(Sender: TObject);
     procedure mniAssetReplaceClick(Sender: TObject);
     procedure vtAssetsBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -278,15 +276,10 @@ end;
 //============================================================================
 function TAsset.GetData: TBytes;
 begin
-  //try
-    if ArchiveName <> '' then
-      Result := ArchiveManager.OpenArchive(ArchiveName).Unpack(FileName)
-    else
-      Result := TFile.ReadAllBytes(FileName);
-  //except
-  //  on E: Exception do
-  //    raise Exception.Create('Error reading source  "' + FileName + '": ' + E.Message);
-  //end;
+  if ArchiveName <> '' then
+    Result := ArchiveManager.OpenArchive(ArchiveName).Unpack(FileName)
+  else
+    Result := TFile.ReadAllBytes(FileName);
 end;
 
 //============================================================================
@@ -823,7 +816,7 @@ begin
     'Click "Pack" when ready to create a new archive from all assets in the list';
   pnlTip.Align := alClient;
 
-  // settings file be default in the Home path (AppRoaming)
+  // settings file by default in the Home path (AppRoaming)
   // or along with executable if no access there
   var SettingsFolder := TPath.GetHomePath;
   SettingsFolder := TPath.Combine(SettingsFolder, 'BSArchPro');
@@ -950,6 +943,7 @@ begin
 
   end
 
+  // filter assets
   else begin
     f := edFilter.Text;
     if rbAll.Checked then
@@ -1165,26 +1159,25 @@ end;
 procedure TFormMain.mnAssetsPopup(Sender: TObject);
 var
   bHasSelection: Boolean;
-  asset: TAsset;
+  Asset: TAsset;
 begin
-  asset := nil;
+  Asset := nil;
 
   bHasSelection := vtAssets.SelectedCount <> 0;
   if bHasSelection then
-    asset := PAssetNode(vtAssets.GetNodeData(vtAssets.FocusedNode)).Asset;
+    Asset := PAssetNode(vtAssets.GetNodeData(vtAssets.FocusedNode)).Asset;
 
+  mniAssetOpen.Visible := vtAssets.SelectedCount = 1;
   mniAssetEdit.Visible := vtAssets.SelectedCount = 1;
-  mniAssetOpen.Visible := mniAssetEdit.Visible;
+  mniArchiveInfo.Visible := Assigned(Asset) and (Asset.ArchiveName <> '');
   mniAssetReplace.Visible := vtAssets.SelectedCount > 1;
   mniAssetRemoveSelected.Visible := bHasSelection;
   mniAssetRemoveUnselected.Visible := bHasSelection;
-  mniAssetCompressed.Visible := bHasSelection;
-  mniAssetUncompressed.Visible := bHasSelection;
-  mniAssetUnpack.Visible := Assigned(asset) and (asset.ArchiveName <> '');
-  mniAssetUnpackSaveAs.Visible := mniAssetUnpack.Visible and (vtAssets.SelectedCount = 1);
-  mniArchiveInfo.Visible := Assigned(asset) and (asset.ArchiveName <> '');
-  mniAssetPack.Visible := bHasSelection;
+  mniAssetCompress.Visible := Assets.Count <> 0;
   mniAssetFindIdentical.Visible := Assets.Count <> 0;
+  mniAssetUnpack.Visible := Assigned(Asset) and (Asset.ArchiveName <> '');
+  mniAssetUnpackSaveAs.Visible := mniAssetUnpack.Visible and (vtAssets.SelectedCount = 1);
+  mniAssetPack.Visible := bHasSelection;
   mniSaveList.Visible := Assets.Count <> 0;
 end;
 
@@ -1323,21 +1316,15 @@ begin
 end;
 
 //============================================================================
-procedure TFormMain.mniAssetCompressedClick(Sender: TObject);
+procedure TFormMain.mniAssetCompressClick(Sender: TObject);
 begin
-  for var node in vtAssets.GetSortedSelection(False) do begin
-    PAssetNode(vtAssets.GetNodeData(node)).Asset.Compressed := True;
-    node.CheckState := TCheckState.csCheckedNormal;
-  end;
-  vtAssets.Invalidate;
-end;
-
-//============================================================================
-procedure TFormMain.mniAssetUncompressedClick(Sender: TObject);
-begin
-  for var node in vtAssets.GetSortedSelection(False) do begin
-    PAssetNode(vtAssets.GetNodeData(node)).Asset.Compressed := False;
-    node.CheckState := TCheckState.csUncheckedNormal;
+  for var node in vtAssets.Nodes do begin
+    var Asset := PAssetNode(vtAssets.GetNodeData(node)).Asset;
+    Asset.Compressed := not TwbAsset.DoNotCompress(Asset.AssetName);
+    if Asset.Compressed then
+      node.CheckState := TCheckState.csCheckedNormal
+    else
+      node.CheckState := TCheckState.csUncheckedNormal;
   end;
   vtAssets.Invalidate;
 end;
@@ -1879,7 +1866,7 @@ begin
     end;
 
   // DDS archives must be compressed or CTD
-  if ArchiveType in [baFO4dds, baSFdds] then
+  if TwbBSArchive.IsDDSArchive(ArchiveType) then
     for var i := Low(Assets) to High(Assets) do
       lstComp[i] := True;
 
