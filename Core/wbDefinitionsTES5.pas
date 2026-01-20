@@ -10041,7 +10041,7 @@ begin
 
     {--- MultiBound ---}
     wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
-    wbRUnion('', [
+    wbRUnion('Water Current Velocities', [
       wbRStruct('Water Current Velocities', [
         wbInteger(XWCN, 'Velocity Count', itU32, nil, cpBenign),
         wbArray(XWCU, 'Velocities',
