@@ -14,9 +14,7 @@ interface
 uses
   System.Classes,
   System.IniFiles,
-  System.StrUtils,
   System.SysUtils,
-  System.Types,
 
   JsonDataObjects,
 
@@ -24,12 +22,9 @@ uses
   Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.Forms,
-  Vcl.Graphics,
   Vcl.Mask,
   Vcl.Menus,
   Vcl.StdCtrls,
-  Vcl.Styles.Utils.SystemMenu,
-  Vcl.Themes,
 
   VirtualTrees,
   {
@@ -42,9 +37,7 @@ uses
   Winapi.Messages,
   Winapi.Windows,
 
-  wbBSArchive,
-  wbCompression,
-  wbDataFormatMisc;
+  wbBSArchive;
 
 const
   WM_PACK = WM_USER + 3;
@@ -167,7 +160,7 @@ type
     procedure AddAssetsFromFiles(aList: TStrings);
     procedure RefreshAssets(const aAssets: TAssets = nil; aFocusSelected: Boolean = True);
     procedure RefreshFilterLabel;
-    function GetSelectedAssets: TAssets;
+    function GetAssets(aSelected: Boolean = False): TAssets;
     function SaveList(const aFileName: string; bIgnoreErrors: Boolean = False): Boolean;
     function LoadList(const aFileName: string; bIgnoreErrors: Boolean = False): Boolean;
     function PreloadArchives(const aForAssets: TAssets): Boolean;
@@ -227,15 +220,25 @@ implementation
 {$R *.dfm}
 
 uses
-  System.Math,
   System.IOUtils,
+  System.StrUtils,
+  System.Types,
   System.Zip,
-  WinApi.ShellApi,
+
   Vcl.ClipBrd,
-  wbTaskProgress,
-  frmSearchReplace,
+  Vcl.Graphics,
+  Vcl.Styles.Utils.SystemMenu,
+  Vcl.Themes,
+
+  WinApi.ShellApi,
+
   frmArchiveInfo,
-  frmPack;
+  frmPack,
+  frmSearchReplace,
+
+  wbCompression,
+  wbDataFormatMisc,
+  wbTaskProgress;
 
 //============================================================================
 function TAssetsPacker.GetSourceFileData(const aFileName: string; aFileObject: Pointer): TBytes;
@@ -756,7 +759,7 @@ procedure TFormMain.vtAssetsKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Shift = [ssCtrl]) and (Key = Ord('C')) then begin
     var s: string := '';
-    for var asset in GetSelectedAssets do begin
+    for var asset in GetAssets(True) do begin
       if s <> '' then s := s + #13#10;
       s := s + asset.AssetName;
     end;
@@ -995,15 +998,22 @@ begin
 end;
 
 //============================================================================
-function TFormMain.GetSelectedAssets: TAssets;
+function TFormMain.GetAssets(aSelected: Boolean = False): TAssets;
 var
   Nodes: TNodeArray;
   i: Integer;
 begin
-  Nodes := vtAssets.GetSortedSelection(False);
-  SetLength(Result, Length(Nodes));
-  for i := Low(Nodes) to High(Nodes) do
-    Result[i] := PAssetNode(vtAssets.GetNodeData(Nodes[i])).Asset;
+  if aSelected then begin
+    Nodes := vtAssets.GetSortedSelection(False);
+    SetLength(Result, Length(Nodes));
+    for i := Low(Nodes) to High(Nodes) do
+      Result[i] := PAssetNode(vtAssets.GetNodeData(Nodes[i])).Asset;
+  end
+  else begin
+    SetLength(Result, vtAssets.TotalCount);
+    for var n in vtAssets.Nodes do
+      Result[n.Index] := PAssetNode(vtAssets.GetNodeData(n)).Asset;
+  end;
 end;
 
 //============================================================================
@@ -1298,7 +1308,7 @@ begin
     if ShowModal <> mrOk then
       Exit;
 
-    for var asset in GetSelectedAssets do
+    for var asset in GetAssets(True) do
       if rbReplace.Checked then
         asset.AssetName := StringReplace(asset.AssetName, SearchText, ReplaceText, [rfReplaceAll, rfIgnoreCase])
       else if rbPrepend.Checked then
@@ -1363,7 +1373,7 @@ begin
   end
 
   else begin
-    for var asset in GetSelectedAssets do begin
+    for var asset in GetAssets(True) do begin
       Assets.Remove(asset);
       asset.Free;
     end;
@@ -1382,7 +1392,7 @@ begin
   if not DialogYesNo('Remove ' + IntToStr(Assets.Count - vtAssets.SelectedCount) + ' unselected asset(s)?') then
     Exit;
 
-  var selected := GetSelectedAssets;
+  var selected := GetAssets(True);
   Assets.Clear;
   for var asset in selected do
     Assets.Add(asset);
@@ -1399,12 +1409,13 @@ procedure TFormMain.mniAssetFindIdenticalClick(Sender: TObject);
 var
   Same: TwbSameData;
 begin
-  if FilteredCount <> Assets.Count then begin
+  var CompareAssets := GetAssets;
+
+  if Length(CompareAssets) <> Assets.Count then begin
     DialogMessage('This function works on the entire assets list. Please remove filter and try again.');
     Exit;
   end;
 
-  var CompareAssets := Copy(FilteredAssets, Low(FilteredAssets), FilteredCount);
   if not PreloadArchives(CompareAssets) then
     Exit;
 
@@ -1420,7 +1431,7 @@ begin
     ProcessProc := ProcCompare;
     var mr := Execute;
     if mr = mrAbort then begin
-      DialogError('Error:'#13 + CompareAssets[ErrorIndex].FileName + #13#13 + ErrorMessage);
+      DialogError('Error reading:'#13 + CompareAssets[ErrorIndex].FileName + #13#13 + ErrorMessage);
       Exit;
     end
     else if mr = mrCancel then
@@ -1455,7 +1466,7 @@ begin
     end;
 
     sl.Insert(0, '');
-    sl.Insert(0, 'Duplicate Size: ' + FormatSize(size) + ' (saved space if all identical files will end up in the same archive with Share Data option)');
+    sl.Insert(0, 'Duplicate Size: ' + FormatSize(size) + ' (uncompressed saved space if all identical files will end up in the same archive with Shared Data option)');
     sl.Insert(0, 'Duplicate Files: ' + count.ToString);
 
     dlgIdenticalFiles.CustomMainIcon := Application.Icon;
@@ -1582,7 +1593,7 @@ end;
 //============================================================================
 procedure TFormMain.mniAssetUnpackClick(Sender: TObject);
 begin
-  UnpackAssets(GetSelectedAssets);
+  UnpackAssets(GetAssets(True));
 end;
 
 //============================================================================
@@ -1985,7 +1996,7 @@ end;
 //============================================================================
 procedure TFormMain.mniAssetPackClick(Sender: TObject);
 begin
-  PackAssets(GetSelectedAssets);
+  PackAssets(GetAssets(True));
 end;
 
 //============================================================================

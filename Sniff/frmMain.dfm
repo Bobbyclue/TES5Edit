@@ -488,9 +488,9 @@ object FormMain: TFormMain
       TabOrder = 1
     end
     object edProcFilter: TLabeledEdit
-      Left = 56
+      Left = 120
       Top = 2
-      Width = 192
+      Width = 128
       Height = 24
       EditLabel.Width = 34
       EditLabel.Height = 24
@@ -499,6 +499,15 @@ object FormMain: TFormMain
       TabOrder = 2
       Text = ''
       OnChange = edProcFilterChange
+    end
+    object cmbProcGame: TComboBox
+      Left = 8
+      Top = 2
+      Width = 65
+      Height = 24
+      Style = csDropDownList
+      TabOrder = 3
+      OnClick = edProcFilterChange
     end
   end
   object menuPopup: TPopupMenu

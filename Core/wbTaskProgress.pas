@@ -67,8 +67,8 @@ type
     fProcessProc: TProcessProc;
     fThreadPool: array of TwbTaskWorkerThread;
     fThreads: Integer;
-    fCancel: Boolean;
-    fError: Boolean;
+    fCancelled: Boolean;
+    fCancelCloses: Boolean;
     fExceptionIndex: Integer;
     fExceptionMessage: string;
     fHeight: Integer;
@@ -81,6 +81,7 @@ type
     function ProcessNext: Boolean;
   public
     { Public declarations }
+    TaskResult: TModalResult;
   end;
 
   TwbWorkerObjectProc = function: Boolean of object;
@@ -114,7 +115,9 @@ implementation
 {$R *.dfm}
 
 uses
-  ComObj, ShlObj;
+  System.Win.ComObj,
+
+  WinApi.ShlObj;
 
 var
   TaskbarList: ITaskbarList;
@@ -189,8 +192,9 @@ begin
     if fThreads > Count then
       fThreads := Count;
 
-    Result := ShowModal;
+    ShowModal;
 
+    Result := TaskResult;
     Self.ErrorIndex := fExceptionIndex;
     Self.ErrorMessage := fExceptionMessage;
   finally
@@ -301,65 +305,62 @@ end;
 procedure TFormTaskProgress.StartProcessing;
 
   // returns the number of finished threads
-  function Poll: Integer;
-  var
-    t: TwbTaskWorkerThread;
+  function GetFinishedThreads: Integer;
   begin
     Result := 0;
-    for t in fThreadPool do
+    for var t in fThreadPool do
       if t.Finished then Inc(Result);
   end;
 
-var
-  t: TwbTaskWorkerThread;
-  i, j: integer;
 begin
+  fRunning := True;
+
+  // give time for the form to draw itself
+  Sleep(100);
+
   {$IF CompilerVersion < 34.0}
   fObjectLock := TReadWriteSync.Create;
   {$IFEND}
   fCurrentIndex := fLowIndex;
   fExceptionIndex := -1;
-  fRunning := True;
   SetLength(fThreadPool, fThreads);
 
   // create and start worker threads
-  for i := Low(fThreadPool) to High(fThreadPool) do
+  for var i := Low(fThreadPool) to High(fThreadPool) do
     fThreadPool[i] := TwbTaskWorkerThread.Create(ProcessNext);
 
   // poll threads until all have finished
-  repeat
-    Sleep(200);
-    j := Poll;
+  while GetFinishedThreads <> Length(fThreadPool) do begin
+    // stop all threads if Cancel was pressed or exception occured
+    if fCancelled or (fExceptionIndex <> -1) then
+      for var t in fThreadPool do
+        if not t.Finished and not t.Terminated then
+          t.Terminate;
 
-    // if Cancel is pressed or exception occured
-    if fCancel or (fExceptionIndex <> -1) then begin
-      // stop all threads
-      for t in fThreadPool do
-        if not t.Finished then t.Terminate;
-    end;
-  until j = Length(fThreadPool);
+    Sleep(200);
+  end;
 
   // clear threads, all have finished by now
-  for t in fThreadPool do
+  for var t in fThreadPool do
     t.Free;
 
   fRunning := False;
 
-  // do not autoclose window if error has occured
-  if fExceptionMessage <> '' then begin
+  if fExceptionIndex <> -1 then begin
+    TaskResult := mrAbort;
     PostMessage(Handle, WM_PROGRESS_ERROR, 0, 0);
-    ProgressBar.State := pbsError;
-    // Cancel button will close the window
-    fError := True;
+
+    // do not close window if error has occured, Cancel button will close
+    fCancelCloses := True;
   end
   else begin
-    // close progress window
-    PostMessage(Handle, WM_CLOSE, 0, 0);
-
-    if fCancel then
-      ModalResult := mrCancel
+    if fCancelled then
+      TaskResult := mrCancel
     else
-      ModalResult := mrOk;
+      TaskResult := mrOk;
+
+    // close window
+    PostMessage(Handle, WM_CLOSE, 0, 0);
   end;
 end;
 
@@ -377,6 +378,7 @@ end;
 procedure TFormTaskProgress.WMProgressError(var msg: TMessage);
 begin
   ProgressBar.State := pbsError;
+  ProgressBar.Position := fExceptionIndex;
   TaskbarErrorProgress(Application.MainForm.Handle);
 
   Height := fHeight;
@@ -390,8 +392,8 @@ begin
   // since window autocloses when everything is ok, there are only
   // 2 possibilities when Cancel can be pressed: while running or after error
   if fRunning then
-    fCancel := True
-  else if fError then
+    fCancelled := True
+  else if fCancelCloses then
     Close;
 end;
 
@@ -399,16 +401,12 @@ end;
 procedure TFormTaskProgress.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
-  // closing with X is the same as Cancel while running
-  if (ModalResult = mrCancel) and fRunning then begin
+  // closing with X while running is the same as pressing Cancel
+  if fRunning then begin
     btnCancel.Click;
     Action := caNone;
     Exit;
   end;
-
-  // Pressing X sets ModalResult to mrCancel, make sure it is mrAbort if error occured
-  if fError then
-    ModalResult := mrAbort;
 
   TaskbarHideProgress(Application.MainForm.Handle);
 end;

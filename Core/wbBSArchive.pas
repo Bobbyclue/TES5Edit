@@ -787,7 +787,8 @@ class function TwbAsset.DoNotCompress(const aFileName: string): Boolean;
 begin
   Result :=
     (AssetTypeByFolder(aFileName) in [atSound, atVoice, atMusic, atStrings])
-    and not aFileName.EndsWith('.fuz', True);
+    and not aFileName.EndsWith('.fuz', True)
+    and not aFileName.EndsWith('.hkx', True); // anims for dialogue lines in sounds\voice folder
 end;
 
 

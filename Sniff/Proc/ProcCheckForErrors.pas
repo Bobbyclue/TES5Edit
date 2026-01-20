@@ -82,14 +82,14 @@ implementation
 {$R *.dfm}
 
 uses
-  Math,
   System.IOUtils,
+  System.Math,
   System.StrUtils,
+
   wbDataFormat,
   wbDataFormatNif,
-  wbNifMath,
-  wbDDS;
-
+  wbDDS,
+  wbNifMath;
 
 //==============================================================================
 procedure CheckStringIndex(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
@@ -2047,7 +2047,7 @@ begin
   if TwbDDS.GetDXGI(dds) = DXGI_FORMAT_UNKNOWN then begin
     var d3d := TwbDDS.GetD3DFMT(dds);
     if d3d in TwbDDS.D3D_NODXGI then
-      Log.Add(#9 + TwbDDS.GetD3DFMTFormatName(d3d) + ' format is unsupported by DirectX 10+ (Skyrim SE, Fallout 4. etc.');
+      Log.Add(#9 + TwbDDS.GetD3DFMTFormatName(d3d) + ' format is unsupported by DirectX 10+ (Skyrim SE, Fallout 4, etc.)');
   end;
 end;
 
