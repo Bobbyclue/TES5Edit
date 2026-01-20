@@ -469,7 +469,7 @@ begin
     DDSHeaderDX10 := Pointer(PByte(DDSHeader) + SizeOf(DDSHeader^));
     Result := TDXGI(DDSHeaderDX10.dxgiFormat);
   end else
-  if dwFlags and DDPF_RGB <> 0 then case dwRGBBitCount of
+  if dwFlags and (DDPF_RGB or DDPF_LUMINANCE) <> 0 then case dwRGBBitCount of
     32:
       if dwFlags and DDPF_ALPHAPIXELS = 0 then
         Result := DXGI_FORMAT_B8G8R8X8_UNORM
