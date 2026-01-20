@@ -58,6 +58,11 @@ var
   wbWorldImpactMaterialEnum: IwbEnumDef;
   wbZoomOverlayEnum: IwbEnumDef;
   wbZTestFuncEnum: IwbEnumDef;
+  wbPackageScheduleMonthEnum: IwbEnumDef;
+  wbPackageScheduleDayOfWeekEnum: IwbEnumDef;
+  wbPackageScheduleDayOfMonthEnum: IwbEnumDef;
+  wbPackageScheduleHoursEnum: IwbEnumDef;
+  wbPackageScheduleMinutesEnum: IwbEnumDef;
 
   wbFurnitureEntryTypeFlags: IwbFlagsDef;
   wbPackageFlags: IwbFlagsDef;
@@ -292,6 +297,7 @@ function wbVertexToInt0(const aString: string; const aElement: IwbElement): Int6
 function wbVertexToInt1(const aString: string; const aElement: IwbElement): Int64;
 function wbVertexToInt2(const aString: string; const aElement: IwbElement): Int64;
 function wbWeatherCloudSpeedToInt(const aString: string; const aElement: IwbElement): Int64;
+function wbPackagePSDTMonthValueToInt(const aString: string; const aElement: IwbElement): Int64;
 
 {>>> To String Callback Functions <<<} //27
 function wbAliasToStr(aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
@@ -322,6 +328,7 @@ function wbVertexToStr1(aInt: Int64; const aElement: IwbElement; aType: TwbCallb
 function wbVertexToStr2(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbVTXTPosition(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbWeatherCloudSpeedToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbPackagePSDTMonthValueToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 
 {>>> To String Callback Procedures <<<} //17
 procedure wbABGRToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
@@ -914,21 +921,28 @@ procedure wbPACKDateAfterLoad(const aElement: IwbElement);
 begin
   if not Assigned(aElement) then
     Exit;
+  var MainRecord := aElement.GetContainingMainRecord;
+  if not Assigned(MainRecord) then
+    Exit;
 
   if wbBeginInternalEdit then try
     var lMonth := aElement.Container.ElementByName['Month'];
+    var lMonthVal :Integer := lMonth.NativeValue;
+    if MainRecord.Version < 122 then
+      lMonthVal := Succ(lMonthVal);
+
     var lMaxDate : Cardinal;
-    case lMonth.NativeValue of
-      1: lMaxDate := 28;
-      3,5,8,10: lMaxDate := 30;
+    case lMonthVal of
+      2: lMaxDate := 28;
+      4,6,9,11: lMaxDate := 30;
       else
       lMaxDate := 31;
     end;
 
     if aElement.NativeValue > lMaxDate then
       aElement.NativeValue := lMaxDate;
-    if aElement.NativeValue < -1 then
-      aElement.NativeValue := -1;
+    if aElement.NativeValue < 0 then
+      aElement.NativeValue := 0;
   finally
     wbEndInternalEdit;
   end;
@@ -1278,20 +1292,28 @@ begin
   if VarSameValue(aOldValue, aNewValue) then
     Exit;
 
+  var MainRecord := aElement.GetContainingMainRecord;
+  if not Assigned(MainRecord) then
+    Exit;
+
   if wbBeginInternalEdit then try
     var lMonth := aElement.Container.ElementByName['Month'];
+    var lMonthVal :Integer := lMonth.NativeValue;
+    if MainRecord.Version < 122 then
+      lMonthVal := Succ(lMonthVal);
+
     var lMaxDate : Cardinal;
-    case lMonth.NativeValue of
-      1: lMaxDate := 28;
-      3,5,8,10: lMaxDate := 30;
+    case lMonthVal of
+      2: lMaxDate := 28;
+      4,6,9,11: lMaxDate := 30;
       else
       lMaxDate := 31;
     end;
 
     if aElement.NativeValue > lMaxDate then
       aElement.NativeValue := lMaxDate;
-    if aElement.NativeValue < -1 then
-      aElement.NativeValue := -1;
+    if aElement.NativeValue < 0 then
+      aElement.NativeValue := 0;
   finally
     wbEndInternalEdit;
   end;
@@ -2756,6 +2778,18 @@ begin
   Result := Min(Round(f), 254);
 end;
 
+function wbPackagePSDTMonthValueToInt(const aString: string; const aElement: IwbElement): Int64;
+begin
+  Result := wbPackageScheduleMonthEnum.FromEditValue(aString, aElement);
+
+  var MainRecord := aElement.GetContainingMainRecord;
+  if not Assigned(MainRecord) then
+    Exit(0);
+
+  if MainRecord.Version >= 122 then
+    Result := Succ(Result);
+end;
+
 {>>> To String Callback Functions <<<} //27
 
 function wbAliasToStr(aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
@@ -3599,6 +3633,25 @@ begin
   case aType of
     ctToStr, ctToSummary, ctToEditValue: Result := FloatToStrF((aInt - 127)/127/10, ffFixed, 99, 4);
     ctCheck: Result := '';
+  end;
+end;
+
+function wbPackagePSDTMonthValueToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+begin
+  var MainRecord := aElement.GetContainingMainRecord;
+  if not Assigned(MainRecord) then
+    Exit('Unknown: ' + IntToStr(aInt));
+
+  if MainRecord.Version >= 122 then
+    aInt := Pred(aInt);
+
+  case aType of
+    ctToStr, ctToSummary: Result := wbPackageScheduleMonthEnum.ToString(aInt, aElement, aType = ctToSummary);
+    ctToSortKey: Result := IntToHex(aInt, 16);
+    ctCheck: Result := wbPackageScheduleMonthEnum.Check(aInt, aElement);
+    ctToEditValue: Result := wbPackageScheduleMonthEnum.ToEditValue(aInt, aElement);
+    ctEditType: Result := 'ComboBox';
+    ctEditInfo: Result := wbPackageScheduleMonthEnum.EditInfo[aElement].ToCommaText;
   end;
 end;
 
@@ -7072,6 +7125,79 @@ begin
       {19} IsFO76('Camera Long Zoom', ''),
       {20} IsFO76('Camera Night Vision', ''),
       {21} IsFO76('Camera Targeting', '')
+    ]);
+
+  wbPackageScheduleMonthEnum :=
+    wbEnum([
+      {0}  'January',
+      {1}  'February',
+      {2}  'March',
+      {3}  'April',
+      {4}  'May',
+      {5}  'June',
+      {6}  'July',
+      {7}  'August',
+      {8}  'September',
+      {9}  'October',
+      {10} 'November',
+      {11} 'December',
+      {12} 'Spring (MAM)',
+      {13} 'Summer (JJA)',
+      {14} 'Autumn (SON)',
+      {15} 'Winter (DJF)'
+    ], [
+      -1, 'Any'
+    ]);
+
+  wbPackageScheduleDayOfWeekEnum :=
+    wbEnum([
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Weekdays (MTWTF)',
+      'Weekends (SS)',
+      'Monday, Wednesday, Friday',
+      'Tuesday, Thursday'
+    ], [
+      -1, 'Any'
+    ]);
+
+  wbPackageScheduleDayOfMonthEnum :=
+    wbEnum([
+      'Any','1','2','3','4','5','6','7','8','9','10',
+      '11','12','13','14','15','16','17','18','19',
+      '20','21','22','23','24','25','26','27','28',
+      '29','30','31'
+    ]);
+
+  wbPackageScheduleHoursEnum :=
+    wbEnum([
+      '0','1','2','3','4','5','6','7','8','9','10',
+      '11','12','13','14','15','16','17','18','19',
+      '20','21','22','23'
+    ], [
+      -1, 'Any'
+    ]);
+
+  wbPackageScheduleMinutesEnum :=
+    wbEnum([], [
+      -1, 'Any',
+       0,   '0',
+       5,   '5',
+      10,  '10',
+      15,  '15',
+      20,  '20',
+      25,  '25',
+      30,  '30',
+      35,  '35',
+      40,  '40',
+      45,  '45',
+      50,  '50',
+      55,  '55'
     ]);
 
   wbZTestFuncEnum :=
