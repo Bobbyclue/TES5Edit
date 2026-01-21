@@ -120,6 +120,7 @@ const
   AMUS : TwbSignature = 'AMUS'; { New To Starfield }
   ANAM : TwbSignature = 'ANAM';
   ANIO : TwbSignature = 'ANIO';
+  ANLD : TwbSignature = 'ANLD'; { New To Fallout 76 }
   AOBJ : TwbSignature = 'AOBJ';
   AODT : TwbSignature = 'AODT';
   AOPF : TwbSignature = 'AOPF'; { New To Starfield }
@@ -277,6 +278,7 @@ const
   CMIC : TwbSignature = 'CMIC'; { New To Fallout 76 }
   CMNY : TwbSignature = 'CMNY';
   CMPO : TwbSignature = 'CMPO'; { New to Fallout 4 }
+  CMPT : TwbSignature = 'CMPT'; { New to Fallout 76 }
   CNAM : TwbSignature = 'CNAM';
   CNCY : TwbSignature = 'CNCY'; { New To Fallout 76 }
   CNDC : TwbSignature = 'CNDC'; { New To Fallout 76 }
@@ -285,6 +287,7 @@ const
   CNTO : TwbSignature = 'CNTO';
   COBJ : TwbSignature = 'COBJ';
   COCT : TwbSignature = 'COCT'; { New to Skyrim 'Count'}
+  CODG : TwbSignature = 'CODG'; { New To Fallout 76 }
   CODV : TwbSignature = 'CODV'; { New To Fallout 76 }
   COED : TwbSignature = 'COED';
   COEN : TwbSignature = 'COEN'; { New To Fallout 76 }
@@ -415,6 +418,9 @@ const
   DPRT : TwbSignature = 'DPRT'; { New to Fallout 76 }
   DQST : TwbSignature = 'DQST'; { New to Fallout 76 }
   DSCF : TwbSignature = 'DSCF'; { New To Fallout 76 }
+  DSEA : TwbSignature = 'DSEA'; { New To Fallout 76 }
+  DSEB : TwbSignature = 'DSEB'; { New To Fallout 76 }
+  DSES : TwbSignature = 'DSES'; { New To Fallout 76 }
   DSDL : TwbSignature = 'DSDL'; { New To Starfield }
   DSTA : TwbSignature = 'DSTA'; { New To Fallout 4 }
   DSTD : TwbSignature = 'DSTD';
@@ -1242,6 +1248,7 @@ const
   RDSD : TwbSignature = 'RDSD';
   RDSI : TwbSignature = 'RDSI';
   RDSN : TwbSignature = 'RDSN'; { New to Fallout 76 }
+  RDWR : TwbSignature = 'RDWR'; { New to Fallout 76 }
   RDWK : TwbSignature = 'RDWK'; { New to Fallout 76 }
   RDWT : TwbSignature = 'RDWT';
   RECF : TwbSignature = 'RECF'; { New to Fallout 76 }
@@ -1453,15 +1460,21 @@ const
   TPLT : TwbSignature = 'TPLT';
   TPTA : TwbSignature = 'TPTA'; { New To Fallout 4 }
   TRAE : TwbSignature = 'TRAE'; { New To Fallout 76 }
+  TRAP : TwbSignature = 'TRAP'; { New To Fallout 76 }
   TRAV : TwbSignature = 'TRAV'; { New To Starfield }
+  TRCD : TwbSignature = 'TRCD'; { New To Fallout 76 }
   TRDA : TwbSignature = 'TRDA'; { New To Fallout 4 }
   TRDT : TwbSignature = 'TRDT';
   TREE : TwbSignature = 'TREE';
+  TREF : TwbSignature = 'TREF'; { New To Fallout 76 }
   TRES : TwbSignature = 'TRES';
   TRGT : TwbSignature = 'TRGT';
   TRNS : TwbSignature = 'TRNS'; { New To Fallout 4 }
   TROI : TwbSignature = 'TROI'; { New To Starfield }
   TROT : TwbSignature = 'TROT'; { New To Starfield }
+  TRRE : TwbSignature = 'TRRE'; { New To Fallout 76 }
+  TRST : TwbSignature = 'TRST'; { New To Fallout 76 }
+  TRTY : TwbSignature = 'TRTY'; { New To Fallout 76 }
   TSCE : TwbSignature = 'TSCE'; { New To Fallout 4 }
   TSLT : TwbSignature = 'TSLT'; { New To Fallout 76 }
   TTEB : TwbSignature = 'TTEB'; { New To Fallout 4 }
@@ -1728,6 +1741,7 @@ const
   XPCI : TwbSignature = 'XPCI';
   XPCK : TwbSignature = 'XPCK'; { New To Fallout 76 }
   XPCS : TwbSignature = 'XPCS'; { New To Starfield }
+  XPCT : TwbSignature = 'XPCT'; { New To Fallout 76 }
   XPDD : TwbSignature = 'XPDD'; { New To Fallout 4 }
   XPDO : TwbSignature = 'XPDO'; { New To Starfield }
   XPLK : TwbSignature = 'XPLK'; { New To Fallout 4 }

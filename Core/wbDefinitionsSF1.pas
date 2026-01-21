@@ -9241,7 +9241,7 @@ begin
       {0x10000000} 28, 'Navmesh - Only Cut',
       {0x20000000} 29, 'Navmesh - Ignore Erosion/Child Can Use',
       {0x40000000} 30, 'Navmesh - Ground',
-                   31, 'Must Be Unique'
+      {0x80000000} 31, 'Must Be Unique'
     ])).SetFlagHasDontShow(26, wbFlagNavmeshFilterDontShow)
     .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
     .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
