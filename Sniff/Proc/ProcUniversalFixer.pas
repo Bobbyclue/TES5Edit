@@ -11,18 +11,14 @@ unit ProcUniversalFixer;
 interface
 
 uses
-  System.SysUtils,
-  System.Variants,
   System.Classes,
   System.SyncObjs,
+  System.SysUtils,
 
   Vcl.Controls,
   Vcl.Dialogs,
   Vcl.Forms,
   Vcl.StdCtrls,
-
-  Winapi.ShellAPI,
-  Winapi.Windows,
 
   SniffProcessor;
 
@@ -62,11 +58,14 @@ implementation
 {$R *.dfm}
 
 uses
-  wbDataFormat,
-  wbDataFormatNif,
-  Math,
   System.IOUtils,
-  System.StrUtils;
+  System.Math,
+
+  Winapi.ShellAPI,
+  Winapi.Windows,
+
+  wbDataFormat,
+  wbDataFormatNif;
 
 constructor TProcUniversalFixer.Create(aManager: TProcManager);
 begin
@@ -912,7 +911,7 @@ begin
   if not (nif.NifVersion in [nfTES4, nfFO3, nfTES5]) then
     Exit;
 
-  for var shape in nif.BlocksByType('NiTriBasedGeom', True) do begin
+  for var shape in nif.BlocksByType('NiGeometry', True) do begin
     var data := shape.Elements['Data'].LinksTo;
     if not Assigned(data) then
       Continue;
@@ -920,7 +919,7 @@ begin
     if not Assigned(data.Elements['Consistency Flags']) then
       Continue;
 
-    var controller := TwbNifBlock(shape.Elements['Controller'].LinksTo);
+    var controller := shape.GetController;
     if Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) then
       f := 'CT_MUTABLE'
     else

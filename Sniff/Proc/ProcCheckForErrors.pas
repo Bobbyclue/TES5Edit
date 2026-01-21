@@ -84,7 +84,6 @@ implementation
 uses
   System.IOUtils,
   System.Math,
-  System.StrUtils,
 
   wbDataFormat,
   wbDataFormatNif,
@@ -1093,7 +1092,7 @@ begin
   // mutable - vertex buffer can be re-uploaded to the GPU multiple times (as long as something is marked as dirty)
   // volatile - vertex buffer is re-uploaded to the GPU every time it's being rendered. Applied if geometry is skinned, but doesn't support HW skinning
 
-  for var shape in nif.BlocksByType('NiTriBasedGeom', True) do begin
+  for var shape in nif.BlocksByType('NiGeometry', True) do begin
     var data := shape.Elements['Data'].LinksTo;
     if not Assigned(data) then
       Continue;
@@ -1101,7 +1100,7 @@ begin
     if not Assigned(data.Elements['Consistency Flags']) then
       Continue;
 
-    var controller := TwbNifBlock(shape.Elements['Controller'].LinksTo);
+    var controller := shape.GetController;
     if Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) then
       f := 'CT_MUTABLE'
     else
