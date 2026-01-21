@@ -6535,7 +6535,13 @@ begin
       8,  'Dest Inverted Alpha',
       9,  'Dest Color',
       10, 'Dest Inverse Color',
-      11, 'Source Alpha SAT'
+      11, 'Source Alpha SAT',
+      12, IsFO76('Both Source Alpha', ''),
+      13, IsFO76('Both Source Inverse Alpha', ''),
+      14, IsFO76('Blend Factor', ''),
+      15, IsFO76('Blend Inverse Factor', ''),
+      16, IsFO76('Source Color 2', ''),
+      17, IsFO76('Source Color 2 Alpha', '')
     ]);
 
   wbBlendOpEnum :=
@@ -7202,8 +7208,10 @@ begin
 
   wbZTestFuncEnum :=
     wbEnum([], [
+      1, IsFO76('Never', ''),
+      2, IsFO76('Less Than', ''),
       3, 'Equal To',
-      4, 'Normal',
+      4, IsFO76('Less Than or Equal To','Normal'),
       5, 'Greater Than',
       7, 'Greater Than or Equal To',
       8, 'Always Show'
@@ -7310,7 +7318,9 @@ begin
       {12} IsFO3 ('', 'Keywords'),
       {13} IsFO76('Gender',
            IsSF1 ('Reaction Radius', '')),
-      {14} IsSF1 ('Combat Style', '')
+      {14} IsFO76('Sentinel End Of Flags',
+           IsSF1 ('Combat Style', '')),
+      {15} IsFO76('Unused "Game Only"', '')
     ]);
 
   wbHEDR :=

@@ -7236,7 +7236,7 @@ begin
       wbFloat('Directional Fade'),
       wbFloat('Fog Clip Dist'),
       wbFloat('Fog Power'),
-      wbUnused(32), // WindhelmLightingTemplate [LGTM:0007BA87] only find 24 !
+      wbAmbientColors('Unused'), // WindhelmLightingTemplate [LGTM:0007BA87] only find 24 !
       wbFromVersion(34, wbByteColors('Fog Color Far')),
       wbFromVersion(34, wbFloat('Fog Max')),
       wbFromVersion(34, wbStruct('Light Fade Distances', [
