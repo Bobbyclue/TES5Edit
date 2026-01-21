@@ -11,8 +11,13 @@ unit wbDataFormatNif;
 interface
 
 uses
-  Types, SysUtils, StrUtils, Classes, Variants, wbDataFormat, JsonDataObjects,
-  wbNifMath, wbMeshOptimize;
+  System.Classes,
+  System.Types,
+
+  JsonDataObjects,
+
+  wbDataFormat,
+  wbNifMath;
 
 type
   TwbNifVersion = (nfUnknown, nfTES3, nfTES4, nfFO3, nfTES5, nfSSE, nfFO4);
@@ -213,7 +218,13 @@ function GetControlledBlockName(aControlledBlock: TdfElement; const aField: stri
 implementation
 
 uses
-  wbDataFormatNifTypes, Math, SyncObjs;
+  System.Math,
+  System.StrUtils,
+  System.SyncObjs,
+  System.SysUtils,
+
+  wbDataFormatNifTypes,
+  wbMeshOptimize;
 
 const
   sNifMagicGamebryo = 'Gamebryo File Format, Version ';
@@ -1614,12 +1625,8 @@ begin
   // BSTriShape
   else if IsNiObject('BSTriShape') then begin
 
-    if (NativeValues['Num Vertices'] = 0) and (GetSkin <> nil) then begin
-      t.SetNone;
-      SetTransform(t);
-      Result := True;
+    if (NativeValues['Num Vertices'] = 0) and (GetSkin <> nil) then
       Exit;
-    end;
 
     if not CanTransform(Self) then
       Exit;
