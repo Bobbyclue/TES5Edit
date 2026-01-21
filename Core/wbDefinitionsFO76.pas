@@ -4829,7 +4829,8 @@ begin
    {207} 'Mod NPC Normalized Max level',
    {208} 'Mod NPC Normalized Level',
    {209} 'Mod Ammo Spender Max Stack Count',
-   {210} 'Mod Ammo Spender Max Reload Stack Mult'
+   {210} 'Mod Ammo Spender Max Reload Stack Mult',
+   {211} 'Unknown 211'
   ]);
 
   wbEquipType := wbFlags([
@@ -5003,7 +5004,8 @@ begin
       ], [
       Int64(2147483649), 'Light Map?',
       Int64(2147483651), 'Albedo?',
-      Int64(2147483653), 'Unknown 5?'
+      Int64(2147483653), 'Unknown 5?',
+      Int64(2147483654), 'Unknown 6?'
       ]))
   ]);
 
@@ -10461,13 +10463,21 @@ begin
     wbRArray('Camera Shots', wbFormIDCk(SNAM, 'Camera Shot', [CAMS]))
   ]);
 
-  wbRecord(VTYP, 'Voice Type', [
+  wbRecord(VTYP, 'Voice Type',
+    wbFlags(wbFlagsList([
+    2, 'Unknown 2',
+    9, 'Unknown 9'
+    ])), [
     wbEDID,
     wbFULL,
-    wbInteger(DNAM, 'Flags', itU8, wbFlags([
-      'Allow Default Dialog',
-      'Female'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(DNAM, 'Flags', itU8,
+      wbFlags([
+      {0} 'Allow Default Dialog',
+      {1} 'Female',
+      {2} 'Unknown 2'
+      ])
+    ).SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
     wbString(ENAM, 'TTS voice name')
   ]);
 
@@ -15902,7 +15912,7 @@ begin
       ]),
       wbFormIDck('Spell', [SPEL, NULL])
     ]),
-    wbFormIDCk(DAMA, 'Actor Value', [ACTI,NULL]),
+    wbFormIDCk(DAMA, 'Actor Value', [AVIF,NULL]),
     wbFormIDCk(DSEB, 'Status Build Up Actor Value', [AVIF,NULL]),
     wbFormIDCk(DSES, 'Status Recovery Actor Value', [AVIF,NULL]),
     wbFormIDCk(DSEA, 'Status Spell', [SPEL,NULL])
@@ -16699,7 +16709,7 @@ begin
       wbFloat('Value'),
       wbInteger('Min Level', itU8),
       wbInteger('Special', itU8, wbSpecialTypeEnum),
-      wbInteger('Race Restriction', itU16,
+      wbInteger('Race Restriction', itU8,
         wbEnum([
         {0} 'None',
         {1} 'Human',
@@ -17293,15 +17303,19 @@ begin
     wbEDID,
     wbFULL,
     wbInteger(ANAM, 'Opacity (unused)', itU8),
-    wbInteger(FNAM, 'Flags', itU8, wbFlags([
-      {0x01} 'Dangerous',
-      {0x02} 'Unknown 1',
-      {0x04} 'Directional Sound',
-      {0x08} 'Unknown 3',
-      {0x10} 'Unknown 4',
-      {0x20} 'Unknown 5',
-      {0x40} 'Unknown 6'
-    ]), cpNormal, True).IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbInteger(FNAM, 'Flags', itU8,
+      wbFlags([
+      {0} 'Dangerous',
+      {1} 'Unknown 1',
+      {2} 'Directional Sound',
+      {3} 'Unknown 3',
+      {4} 'Unknown 4',
+      {5} 'Unknown 5',
+      {6} 'Unknown 6',
+      {7} 'Unknown 7'
+      ])
+    ).SetRequired
+     .IncludeFlag(dfCollapsed, wbCollapseFlags),
     wbFormIDCk(TNAM, 'Material', [MATT]),
     wbFormIDCk(SNAM, 'Open Sound', [SNDR, NULL]),
     wbFormIDCk(XNAM, 'Consume Spell', [SPEL, ALCH]),
