@@ -14110,7 +14110,9 @@ begin
             ]).IncludeFlag(dfUnionStaticResolve)
           ]).IncludeFlag(dfStructFirstNotRequired)
       ]).IncludeFlag(dfUnionStaticResolve),
-      wbConditions,
+      wbRStruct('Match Conditions', [
+        wbConditions
+      ]),
       wbKeywords,
       wbContainerItems,
       wbFormIDCk(SPOR, 'Spectator override package list', [FLST]),
