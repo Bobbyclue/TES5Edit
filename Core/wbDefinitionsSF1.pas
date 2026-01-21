@@ -16153,20 +16153,22 @@ begin
   ]);
 
   {subrecords checked against Starfield.esm}
-  wbRecord(NOCM, 'Navmesh Obstacle Cover Manager', [
-    wbEDID,
+  wbRecord(NOCM, 'Navmesh Obstacle Manager', [
     wbRArray('Unknown',
       wbRStruct('Unknown', [
-        wbInteger(INDX, 'Index', itU32),
-        wbRArray('Unknown datas',
-          wbStruct(DATA, 'Unknown data', [
-            wbUnknown
-          ])
-        ),
-        wbUnknown(INTV),
+        wbRArray('Unknown',
+          wbRStruct('Unknown', [
+            wbInteger(INDX, 'Index', itU32),
+            wbRArray('Unknown Datas',
+              wbStruct(DATA, 'Unknown Data', [
+                wbByteArray('Unknown 1',2),
+                wbByteArray('Unknown 2',2),
+                wbByteArray('Unknown 4',4)
+              ])),
+            wbUnknown(INTV)
+          ])),
         wbString(NAM1, 'Model')
-      ])
-    )
+      ]))
   ]);
 
   var wbStarSlot :=
