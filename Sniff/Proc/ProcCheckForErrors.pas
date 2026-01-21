@@ -1101,7 +1101,9 @@ begin
       Continue;
 
     var controller := shape.GetController;
-    if Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) then
+    if shape.IsNiObject('NiParticles', True) or
+       ( Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) )
+    then
       f := 'CT_MUTABLE'
     else
       f := 'CT_STATIC';
