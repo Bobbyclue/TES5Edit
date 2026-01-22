@@ -28,13 +28,13 @@ uses
   Vcl.Forms,
   Vcl.Themes,
 
+  wbBSArchive in 'Core\wbBSArchive.pas',
+  wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress},
+
   frmArchiveInfo in 'BSArch\frmArchiveInfo.pas' {FormArchiveInfo},
   frmMain in 'BSArch\frmMain.pas' {FormMain},
   frmPack in 'BSArch\frmPack.pas' {FormPack},
-  frmSearchReplace in 'BSArch\frmSearchReplace.pas' {FormSearchReplace},
-
-  wbBSArchive in 'Core\wbBSArchive.pas',
-  wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress};
+  frmSearchReplace in 'BSArch\frmSearchReplace.pas' {FormSearchReplace};
 
 {$R *.res}
 

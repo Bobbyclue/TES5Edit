@@ -13,10 +13,7 @@ interface
 
 uses
   System.Classes,
-  System.Diagnostics,
   System.IniFiles,
-  System.SysUtils,
-  System.Types,
 
   Vcl.ComCtrls,
   Vcl.Controls,
@@ -29,7 +26,6 @@ uses
   Vcl.StdCtrls,
   Vcl.Themes,
 
-  Winapi.Windows,
   Winapi.Messages,
 
   SniffProcessor;
@@ -75,6 +71,7 @@ type
     mniInputFolder: TMenuItem;
     mniInputArchive: TMenuItem;
     Label4: TLabel;
+    cmbProcGame: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure lvProcsSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
@@ -120,64 +117,72 @@ implementation
 {$R *.dfm}
 
 uses
+  System.Diagnostics,
   System.IOUtils,
   System.StrUtils,
-  ShellApi,
+  System.SysUtils,
+  System.TypInfo,
+  System.Types,
+
+  WinApi.ShellAPI,
+  WinApi.Windows,
+
   wbBSArchive,
-  wbTaskProgress,
-  frMessages,
   wbCommandLine,
-  ProcTangents,
-  ProcUpdateBounds,
-  ProcReplaceAssets,
-  ProcCheckForErrors,
-  ProcAnalyzeMesh,
-  ProcJsonConverter,
-  ProcOptimize,
-  ProcAdjustTransform,
-  ProcApplyTransform,
-  ProcJamAnim,
-  ProcWeiExplosion,
-  ProcAttachParent,
-  ProcCopyControlledBlocks,
-  ProcCopyPriorities,
-  ProcRemoveControlledBlocks,
-  ProcAnimQuadraticToLinear,
-  ProcAnimSkeletonDeath,
-  ProcShaderFlagsUpdate,
-  ProcInertiaUpdate,
-  ProcRagdollConstraintUpdate,
-  ProcMoppUpdate,
-  ProcUnweldedVertices,
-  ProcFindDrawCalls,
-  ProcFindUVs,
-  ProcFindTextures,
-  ProcTransformInfo,
-  ProcHavokInfo,
-  ProcHavokSettingsUpdate,
-  ProcHavokSearchMaterial,
-  ProcCopyGeometryBlocks,
-  ProcVertexPaint,
-  ProcGroupShapes,
-  ProcFixExportedKFAnim,
-  ProcOptimizeKF,
-  ProcRemoveNodes,
-  ProcRemoveUnusedNodes,
-  ProcConvertRootNode,
-  ProcUnskinMesh,
-  ProcMergeShapes,
-  ProcMergeProperties,
-  ProcWallsReflectionFlag,
-  ProcSoftParticles,
-  ProcUniversalTweaker,
-  ProcUniversalFixer,
-  ProcAddHeadtrackingAnim,
-  ProcAddFacialAnim,
+  wbTaskProgress,
+
+  frMessages,
+
   ProcAddBoundingBox,
+  ProcAddFacialAnim,
+  ProcAddHeadtrackingAnim,
   ProcAddLODNode,
   ProcAddRootCollisionNode,
-  ProcSetMissingNames;
-
+  ProcAdjustTransform,
+  ProcAnalyzeMesh,
+  ProcAnimQuadraticToLinear,
+  ProcAnimSkeletonDeath,
+  ProcApplyTransform,
+  ProcAttachParent,
+  ProcCheckForErrors,
+  ProcConvertRootNode,
+  ProcCopyControlledBlocks,
+  ProcCopyGeometryBlocks,
+  ProcCopyPriorities,
+  ProcFindDrawCalls,
+  ProcFindTextures,
+  ProcFindUVs,
+  ProcFixExportedKFAnim,
+  ProcGroupShapes,
+  ProcHavokInfo,
+  ProcHavokSearchMaterial,
+  ProcHavokSettingsUpdate,
+  ProcInertiaUpdate,
+  ProcJamAnim,
+  ProcJsonConverter,
+  ProcMergeProperties,
+  ProcMergeShapes,
+  ProcMoppUpdate,
+  ProcOptimize,
+  ProcOptimizeKF,
+  ProcRagdollConstraintUpdate,
+  ProcRemoveControlledBlocks,
+  ProcRemoveNodes,
+  ProcRemoveUnusedNodes,
+  ProcReplaceAssets,
+  ProcSetMissingNames,
+  ProcShaderFlagsUpdate,
+  ProcSoftParticles,
+  ProcTangents,
+  ProcTransformInfo,
+  ProcUniversalFixer,
+  ProcUniversalTweaker,
+  ProcUnskinMesh,
+  ProcUnweldedVertices,
+  ProcUpdateBounds,
+  ProcVertexPaint,
+  ProcWallsReflectionFlag,
+  ProcWeiExplosion;
 
 procedure TFormMain.CreateWnd;
 begin
@@ -354,6 +359,11 @@ begin
     mniStyle.Add(m);
   end;
 
+  cmbProcGame.Items.AddObject('', Pointer(-1));
+  for var g := Low(TGameType) to High(TGameType) do
+    cmbProcGame.Items.AddObject( GetEnumName(TypeInfo(TGameType), Integer(g)).Replace('gt', ''), Pointer(g) );
+  cmbProcGame.ItemIndex := 0;
+
   Manager := TProcManager.Create;
   Manager.SetIniFile(Settings);
   //Manager.AddMessage(Application.Title);
@@ -424,7 +434,7 @@ begin
 
   //ShowScrollBar(lvProcs.Handle, SB_HORZ, False);
 
-  // operation is provided in the command line
+  // operation is provided in the command line, go into automation mode if valid
   if wbFindCmdLineParam('OP', s) and (s <> '') then
     for var i := Low(Procs) to High(Procs) do
       if SameText(s, Procs[i].Title) then begin
@@ -433,7 +443,7 @@ begin
         Break;
       end;
 
-  // select the last used operation if not in automation mode
+  // apply proc filters and select the last used operation if not in automation mode
   if not bAutoMode then begin
     LastUsedProc := Settings.ReadString('Main', 'Operation', Procs[0].ClassName);
     for var i := Low(Procs) to High(Procs) do
@@ -444,6 +454,11 @@ begin
 
     if lvProcs.ItemIndex = -1 then
       lvProcs.ItemIndex := 0;
+
+    edProcFilter.Text := Settings.ReadString('Main', 'ProcFilter', edProcFilter.Text);
+    try cmbProcGame.ItemIndex := cmbProcGame.Items.IndexOfObject(Pointer(Settings.ReadInteger('Main', 'GameType', -1))); except end;
+    if (cmbProcGame.ItemIndex <> 0) or (edProcFilter.Text <> '') then
+      cmbProcGame.OnClick(nil);
   end;
 
   edInput.Text := Settings.ReadString('Main', 'InputDirectory', ExtractFilePath(Application.ExeName));
@@ -523,6 +538,8 @@ begin
   Settings.WriteBool('Main', 'InputSubDir', chkInputSubdir.Checked);
   Settings.WriteBool('Main', 'SkipOnErrors', chkSkipOnErrors.Checked);
   Settings.WriteBool('Main', 'OutputAll', chkOutputAll.Checked);
+  Settings.WriteInteger('Main', 'GameType', Integer(cmbProcGame.Items.Objects[cmbProcGame.ItemIndex]));
+  Settings.WriteString('Main', 'ProcFilter', edProcFilter.Text);
   if Assigned(Proc) then begin
     Settings.WriteString('Main', 'Operation', Proc.Title);
     Proc.OnHide;
@@ -564,13 +581,14 @@ end;
 
 procedure TFormMain.edProcFilterChange(Sender: TObject);
 begin
+  var g := Integer(cmbProcGame.Items.Objects[cmbProcGame.ItemIndex]);
   var f := LowerCase(Trim(edProcFilter.Text));
   var filtered: TProcBases;
   var selected := '';
   if Assigned(Proc) then
     selected := Proc.Title;
   for var p in Procs do
-    if (f = '') or (Pos(f, LowerCase(p.Title)) <> 0) then
+    if ( (g = -1) or (TGameType(g) in p.SupportedGames) ) and ( (f = '') or (Pos(f, LowerCase(p.Title)) <> 0) ) then
       filtered := filtered + [p];
 
   ShowProcs(filtered);

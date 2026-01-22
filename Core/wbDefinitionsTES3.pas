@@ -1527,10 +1527,10 @@ begin
             wbEnum([], [
             48, 'Equal To',
             49, 'Not Equal To',
-            50, 'Less Than',
-            51, 'Less Than Or Equal To',
-            52, 'Greater Than',
-            53, 'Greater Than Or Equal To'
+            50, 'Greater Than',
+            51, 'Greater Than Or Equal To',
+            52, 'Less Than',
+            53, 'Less Than Or Equal To'
             ])),
           wbString('Variable/Object')
         ]),

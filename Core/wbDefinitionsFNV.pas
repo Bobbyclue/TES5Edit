@@ -5633,35 +5633,33 @@ begin
     wbEnchantment,
     wbFormIDCk(MNAM, 'Image Space Modifier', [IMAD]),
     wbStruct(DATA, 'Data', [
-      {00} wbFloat('Force'),
-      {04} wbFloat('Damage'),
-      {08} wbFloat('Radius'),
-      {12} wbFormIDCk('Light', [LIGH, NULL]),
-      {16} wbFormIDCk('Sound 1', [SOUN, NULL]),
-      {20} wbInteger('Flags', itU32,
-             wbFlags(wbSparseFlags([
-               1, 'Always Uses World Orientation',
-               2, 'Knock Down - Always',
-               3, 'Knock Down - By Formula',
-               4, 'Ignore LOS Check',
-               5, 'Push Explosion Source Ref Only',
-               6, 'Ignore Image Space Swap'
-             ], False, 7), True)
-           ).IncludeFlag(dfCollapsed, wbCollapseFlags),
-      {24} wbFloat('IS Radius'),
-      {28} wbFormIDCk('Impact DataSet', [IPDS, NULL]),
-      {32} wbFormIDCk('Sound 2', [SOUN, NULL]),
-           wbStruct('Radiation', [
-             {36} wbFloat('Level'),
-             {40} wbFloat('Dissipation Time'),
-             {44} wbFloat('Radius')
-           ]),
-      {48} wbInteger('Sound Level', itU32, wbSoundLevelEnum, cpNormal, True)
-    ], cpNormal, True),
-    wbFormIDCk(INAM, 'Placed Impact Object', [TREE, SOUN, ACTI, DOOR, STAT, FURN,
-          CONT, ARMO, AMMO, LVLN, LVLC, MISC, WEAP, BOOK, KEYM, ALCH, LIGH, GRAS,
-          ASPC, IDLM, ARMA, MSTT, NOTE, PWAT, SCOL, TACT, TERM, TXST, CHIP, CMNY,
-          CCRD, IMOD])
+      wbFloat('Force'),
+      wbFloat('Damage'),
+      wbFloat('Radius'),
+      wbFormIDCk('Light', [LIGH,NULL]),
+      wbFormIDCk('Sound 1', [SOUN,NULL]),
+      wbInteger('Flags', itU32,
+        wbFlags([
+        {0} 'Radius in BS Units',
+        {1} 'Always Uses World Orientation',
+        {2} 'Knock Down - Always',
+        {3} 'Knock Down - By Formula',
+        {4} 'Ignore LOS Check',
+        {5} 'Push Explosion Source Ref Only',
+        {6} 'Ignore Image Space Swap'
+        ])
+      ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+      wbFloat('IS Radius'),
+      wbFormIDCk('Impact DataSet', [IPDS,NULL]),
+      wbFormIDCk('Sound 2', [SOUN,NULL]),
+      wbStruct('Radiation', [
+        wbFloat('Level'),
+        wbFloat('Dissipation Time'),
+        wbFloat('Radius')
+      ]),
+      wbInteger('Sound Level', itU32, wbSoundLevelEnum)
+    ]).SetRequired,
+    wbFormIDCk(INAM, 'Placed Impact Object', [ACTI,ALCH,AMMO,ARMA,ARMO,ASPC,BOOK,CCRD,CHIP,CMNY,CONT,DOOR,FURN,GRAS,IDLM,IMOD,KEYM,LIGH,LVLC,LVLN,MISC,MSTT,NOTE,PWAT,SCOL,SOUN,STAT,TACT,TERM,TREE,TXST,WEAP])
   ]);
 
   wbRecord(DEBR, 'Debris', [
@@ -7177,25 +7175,16 @@ begin
       ])
     ], [], cpNormal, False, nil, True),
     wbStruct(PSDT, 'Schedule', [
-      wbInteger('Month', itS8),
-      wbInteger('Day of week', itS8, wbEnum([
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Weekdays',
-        'Weekends',
-        'Monday, Wednesday, Friday',
-        'Tuesday, Thursday'
-      ], [
-        -1, 'Any'
-      ])),
-      wbInteger('Date', itU8),
-      wbInteger('Time', itS8),
-      wbInteger('Duration', itS32)
+      wbInteger('Month', itS8,
+        wbPackagePSDTMonthValueToStr,
+        wbPackagePSDTMonthValueToInt
+      ).SetDefaultEditValue('Any'),
+      wbInteger('Day Of Week', itS8, wbPackageScheduleDayOfWeekEnum).SetDefaultNativeValue(-1),
+      wbInteger('Date', itS8, wbPackageScheduleDayOfMonthEnum)
+        .SetAfterLoad(wbPACKDateAfterLoad)
+        .SetAfterSet(wbPACKDateAfterSet),
+      wbInteger('Time', itS8, wbPackageScheduleHoursEnum).SetDefaultNativeValue(-1),
+      wbInteger('Duration (Hours)', itU32)
     ], cpNormal, True),
     wbStruct(PTDT, 'Target 1', [
       wbInteger('Type', itS32, wbEnum([

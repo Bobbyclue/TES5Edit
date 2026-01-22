@@ -23,16 +23,18 @@ uses
   {$IFDEF EXCEPTION_LOGGING_ENABLED}
   nxExceptionHook,
   {$ENDIF }
-  Winapi.Windows,
-  Forms,
-  Dialogs,
-  SysUtils,
+  System.SysUtils,
+
+  VirtualEditTree,
   VirtualTrees,
   VTEditors,
-  VirtualEditTree,
+
   {$IFNDEF LiteVersion}
   cxVTEditors,
   {$ENDIF}
+
+  Vcl.Dialogs,
+  Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Styles.Hooks,
@@ -40,7 +42,9 @@ uses
   Vcl.Styles.Utils.Forms,
   Vcl.Styles.Utils.StdCtrls,
   Vcl.Styles.Utils.ScreenTips,
-  xeInit in 'xEdit\xeInit.pas',
+
+  Winapi.Windows,
+
   wbBetterStringList in 'Core\wbBetterStringList.pas',
   wbBSA in 'Core\wbBSA.pas',
   wbCommandLine in 'Core\wbCommandLine.pas',
@@ -79,6 +83,8 @@ uses
   wbSaveInterface in 'Core\wbSaveInterface.pas',
   wbSort in 'Core\wbSort.pas',
   wbStreams in 'Core\wbStreams.pas',
+
+  xeInit in 'xEdit\xeInit.pas',
   xeDeveloperMessageForm in 'xEdit\xeDeveloperMessageForm.pas' {frmDeveloperMessage},
   xeEditWarningForm in 'xEdit\xeEditWarningForm.pas' {frmEditWarning},
   xeFileSelectForm in 'xEdit\xeFileSelectForm.pas' {frmFileSelect},
@@ -114,7 +120,7 @@ const
 
 begin
   UseLatestCommonDialogs := True;
-  SysUtils.FormatSettings.DecimalSeparator := '.';
+  FormatSettings.DecimalSeparator := '.';
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

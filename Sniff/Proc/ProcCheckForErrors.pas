@@ -82,14 +82,13 @@ implementation
 {$R *.dfm}
 
 uses
-  Math,
   System.IOUtils,
-  System.StrUtils,
+  System.Math,
+
   wbDataFormat,
   wbDataFormatNif,
-  wbNifMath,
-  wbDDS;
-
+  wbDDS,
+  wbNifMath;
 
 //==============================================================================
 procedure CheckStringIndex(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
@@ -1093,7 +1092,7 @@ begin
   // mutable - vertex buffer can be re-uploaded to the GPU multiple times (as long as something is marked as dirty)
   // volatile - vertex buffer is re-uploaded to the GPU every time it's being rendered. Applied if geometry is skinned, but doesn't support HW skinning
 
-  for var shape in nif.BlocksByType('NiTriBasedGeom', True) do begin
+  for var shape in nif.BlocksByType('NiGeometry', True) do begin
     var data := shape.Elements['Data'].LinksTo;
     if not Assigned(data) then
       Continue;
@@ -1101,8 +1100,10 @@ begin
     if not Assigned(data.Elements['Consistency Flags']) then
       Continue;
 
-    var controller := TwbNifBlock(shape.Elements['Controller'].LinksTo);
-    if Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) then
+    var controller := shape.GetController;
+    if shape.IsNiObject('NiParticles', True) or
+       ( Assigned(controller) and (controller.IsNiObject('NiGeomMorpherController', True) or controller.IsNiObject('NiUVController', True)) )
+    then
       f := 'CT_MUTABLE'
     else
       f := 'CT_STATIC';
@@ -2047,7 +2048,7 @@ begin
   if TwbDDS.GetDXGI(dds) = DXGI_FORMAT_UNKNOWN then begin
     var d3d := TwbDDS.GetD3DFMT(dds);
     if d3d in TwbDDS.D3D_NODXGI then
-      Log.Add(#9 + TwbDDS.GetD3DFMTFormatName(d3d) + ' format is unsupported by DirectX 10+ (Skyrim SE, Fallout 4. etc.');
+      Log.Add(#9 + TwbDDS.GetD3DFMTFormatName(d3d) + ' format is unsupported by DirectX 10+ (Skyrim SE, Fallout 4, etc.)');
   end;
 end;
 

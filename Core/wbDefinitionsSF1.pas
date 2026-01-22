@@ -8939,18 +8939,18 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(LCRT, 'Location Reference Type',
     wbFlags(wbFlagsList([
-      {0x00000004}  2, 'Non-Playable',
-      {0x00000010}  4, 'Ground Piece',
-      {0x00000200}  9, 'Hidden From Local Map',
-      {0x00000800} 11, 'Used As Platform',
-      {0x00080000} 15, 'Restricted',
-      {0x00080000} 19, 'Has Currents',
-      {0x04000000} 26, 'Navmesh - Filter',
-      {0x08000000} 27, 'Navmesh - Bounding Box',
-      {0x10000000} 28, 'Navmesh - Only Cut',
-      {0x20000000} 29, 'Navmesh - Ignore Erosion/Child Can Use',
-      {0x40000000} 30, 'Navmesh - Ground',
-                   31, 'Must Be Unique'
+    2, 'Non-Playable',
+    4, 'Ground Piece',
+    9, 'Hidden From Local Map',
+    11, 'Used As Platform',
+    15, 'Restricted',
+    19, 'Has Currents',
+    26, 'Navmesh - Filter',
+    27, 'Navmesh - Bounding Box',
+    28, 'Navmesh - Only Cut',
+    29, 'Navmesh - Ignore Erosion/Child Can Use',
+    30, 'Navmesh - Ground',
+    31, 'Must Be Unique'
     ])).SetFlagHasDontShow(26, wbFlagNavmeshFilterDontShow)
     .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
     .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
@@ -13806,34 +13806,18 @@ begin
     ], cpNormal, True),
 
     wbStruct(PSDT, 'Schedule', [
-      wbInteger('Month', itS8),
-      wbInteger('Day of week', itS8, wbEnum([
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Weekdays',
-        'Weekends',
-        'Monday, Wednesday, Friday',
-        'Tuesday, Thursday'
-      ], [
-        -1, 'Any'
-      ])),
-      wbInteger('Date', itU8),
-      wbInteger('Hour', itS8,
-        wbEnum([
-        '0','1','2','3','4','5','6','7','8','9','10',
-        '11','12','13','14','15','16','17','18','19',
-        '20','21','22','23'
-        ], [
-        -1, 'Any'
-        ])),
-      wbInteger('Minute', itS8),
+      wbInteger('Month', itS8,
+        wbPackagePSDTMonthValueToStr,
+        wbPackagePSDTMonthValueToInt
+      ).SetDefaultEditValue('Any'),
+      wbInteger('Day of week', itS8, wbPackageScheduleDayOfWeekEnum),
+      wbInteger('Date', itS8, wbPackageScheduleDayOfMonthEnum)
+        .SetAfterLoad(wbPACKDateAfterLoad)
+        .SetAfterSet(wbPACKDateAfterSet),
+      wbInteger('Hour', itS8, wbPackageScheduleHoursEnum).SetDefaultNativeValue(-1),
+      wbInteger('Minute', itS8, wbPackageScheduleMinutesEnum).SetDefaultNativeValue(-1),
       wbUnused(3),
-      wbInteger('Duration (minutes)', itS32)
+      wbInteger('Duration (Hours)', itU32, wbDiv(60, 4))
     ], cpNormal, True),
     wbConditions,
     wbIdleAnimation,
@@ -14126,7 +14110,9 @@ begin
             ]).IncludeFlag(dfUnionStaticResolve)
           ]).IncludeFlag(dfStructFirstNotRequired)
       ]).IncludeFlag(dfUnionStaticResolve),
-      wbConditions,
+      wbRStruct('Match Conditions', [
+        wbConditions
+      ]),
       wbKeywords,
       wbContainerItems,
       wbFormIDCk(SPOR, 'Spectator override package list', [FLST]),
@@ -16167,20 +16153,22 @@ begin
   ]);
 
   {subrecords checked against Starfield.esm}
-  wbRecord(NOCM, 'Navmesh Obstacle Cover Manager', [
-    wbEDID,
+  wbRecord(NOCM, 'Navmesh Obstacle Manager', [
     wbRArray('Unknown',
       wbRStruct('Unknown', [
-        wbInteger(INDX, 'Index', itU32),
-        wbRArray('Unknown datas',
-          wbStruct(DATA, 'Unknown data', [
-            wbUnknown
-          ])
-        ),
-        wbUnknown(INTV),
+        wbRArray('Unknown',
+          wbRStruct('Unknown', [
+            wbInteger(INDX, 'Index', itU32),
+            wbRArray('Unknown Datas',
+              wbStruct(DATA, 'Unknown Data', [
+                wbByteArray('Unknown 1',2),
+                wbByteArray('Unknown 2',2),
+                wbByteArray('Unknown 4',4)
+              ])),
+            wbUnknown(INTV)
+          ])),
         wbString(NAM1, 'Model')
-      ])
-    )
+      ]))
   ]);
 
   var wbStarSlot :=

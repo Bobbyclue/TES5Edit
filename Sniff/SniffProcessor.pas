@@ -16,7 +16,6 @@ uses
   System.SyncObjs,
   System.SysUtils,
 
-  Vcl.Dialogs,
   Vcl.Forms,
 
   wbBSArchive;
@@ -114,6 +113,7 @@ type
     property Title: string read fTitle;
     property NoOutput: Boolean read fNoOutput;
     property Threads: Integer read fThreads write fThreads;
+    property SupportedGames: TGameTypes read fSupportedGames;
     property SupportedGameNames: string read GetSupportedGameNames;
     property ExtensionNames: string read GetExtensionNames write SetExtensionNames;
     property StorageSection: string read GetStorageSection;
@@ -130,8 +130,9 @@ implementation
 
 
 uses
-  System.Math,
-  System.IOUtils;
+  System.IOUtils,
+
+  Vcl.Dialogs;
 
 
 function SelectFolder(var aPath: string): Boolean;

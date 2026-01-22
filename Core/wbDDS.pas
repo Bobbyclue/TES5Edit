@@ -373,8 +373,7 @@ const
 implementation
 
 uses
-  TypInfo;
-
+  System.TypInfo;
 
 class function TwbDDS.IsDDS(aDDSData: Pointer; aSize: Integer): Boolean;
 begin
@@ -419,7 +418,7 @@ end;
 
 class function TwbDDS.GetDXGIFormatName(aDXGI: TDXGI): string;
 begin
-  Result := GetEnumName(TypeInfo(TDXGI), Integer(aDXGI)).Replace('DXGI_FORMAT_', '') ;
+  Result := GetEnumName(TypeInfo(TDXGI), Integer(aDXGI)).Replace('DXGI_FORMAT_', '');
 end;
 
 class function TwbDDS.GetD3DFMTFormatName(aD3DFMT: TD3DFORMAT): string;
@@ -470,7 +469,7 @@ begin
     DDSHeaderDX10 := Pointer(PByte(DDSHeader) + SizeOf(DDSHeader^));
     Result := TDXGI(DDSHeaderDX10.dxgiFormat);
   end else
-  if dwFlags and DDPF_RGB <> 0 then case dwRGBBitCount of
+  if dwFlags and (DDPF_RGB or DDPF_LUMINANCE) <> 0 then case dwRGBBitCount of
     32:
       if dwFlags and DDPF_ALPHAPIXELS = 0 then
         Result := DXGI_FORMAT_B8G8R8X8_UNORM

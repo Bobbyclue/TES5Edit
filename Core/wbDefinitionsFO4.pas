@@ -8926,7 +8926,7 @@ begin
       wbFloat('Directional Fade').SetDefaultEditValue('1.0'),
       wbFloat('Fog Clip Distance'),
       wbFloat('Fog Power').SetDefaultEditValue('1.0'),
-      wbUnused(32),
+      wbAmbientColors('Unused'),
       wbByteColors('Fog Color Far'),
       wbFloat('Fog Max').SetDefaultEditValue('1.0'),
       wbFloat('Light Fade Begin'),
@@ -10571,38 +10571,38 @@ begin
     wbSTCP,
     wbStruct(ACBS, 'Configuration', [
       wbInteger('Flags', itU32, wbFlags([
-        {0x00000001} 'Female',
-        {0x00000002} 'Essential',
-        {0x00000004} 'Is CharGen Face Preset',
-        {0x00000008} 'Respawn',
-        {0x00000010} 'Auto-calc stats',
-        {0x00000020} 'Unique',
-        {0x00000040} 'Doesn''t affect stealth meter',
-        {0x00000080} 'PC Level Mult',
-        {0x00000100} 'Unknown 8',
-        {0x00000200} 'Calc For Each Template',
-        {0x00000400} 'Unknown 10',
-        {0x00000800} 'Protected',
-        {0x00001000} 'Unknown 12',
-        {0x00002000} 'Unknown 13',
-        {0x00004000} 'Summonable',
-        {0x00008000} 'Unknown 15',
-        {0x00010000} 'Doesn''t bleed',
-        {0x00020000} 'Unknown 17',
-        {0x00040000} 'Bleedout Override',
-        {0x00080000} 'Opposite Gender Anims',
-        {0x00100000} 'Simple Actor',
-        {0x00200000} 'Unknown 21',
-        {0x00400000} 'Unknown 22',
-        {0x00800000} 'No Activation/Hellos',
-        {0x01000000} 'Diffuse Alpha Test',
-        {0x02000000} 'Unknown 25',
-        {0x04000000} 'Unknown 26',
-        {0x08000000} 'Unknown 27',
-        {0x10000000} 'Unknown 28',
-        {0x20000000} 'Is Ghost',
-        {0x40000000} 'Unknown 30',
-        {0x80000000} 'Invulnerable'
+      {0}  'Female',
+      {1}  'Essential',
+      {2}  'Is CharGen Face Preset',
+      {3}  'Respawn',
+      {4}  'Auto-calc stats',
+      {5}  'Unique',
+      {6}  'Doesn''t affect stealth meter',
+      {7}  'PC Level Mult',
+      {8}  'Has Base Sound Data',
+      {9}  'Calc For Each Template',
+      {10} 'Use Attack Percentage',
+      {11} 'Protected',
+      {12} 'No Loot',
+      {13} 'No Rumors',
+      {14} 'Summonable',
+      {15} 'Disable Non-Combat Regen',
+      {16} 'Doesn''t bleed',
+      {17} 'Very Simple Actor',
+      {18} 'Has Bleedout Override',
+      {19} 'Swap Gender Anims',
+      {20} 'Simple Actor',
+      {21} 'Unused 21',
+      {22} 'Unused 22',
+      {23} 'No Activation/Hellos',
+      {24} 'Diffuse Alpha Test',
+      {25} 'Disable Combat',
+      {26} 'Spawns Dead',
+      {27} 'Player Protected',
+      {28} 'Do Not Use Load Doors',
+      {29} 'Is Ghost',
+      {30} 'No Bleedout Recovery',
+      {31} 'Invulnerable'
       ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbInteger('XP Value Offset', itS16),
       wbUnion('Level', wbACBSLevelDecider, [
@@ -10616,7 +10616,7 @@ begin
       wbInteger('Template Flags', itU16, wbTemplateFlags)
         .IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbInteger('Bleedout Override', itU16),
-      wbByteArray('Unknown', 2)
+      wbUnused(2)
     ], cpNormal, True),
     wbRArrayS('Factions', wbFaction),
     wbFormIDCk(INAM, 'Death item', [LVLI]),
@@ -10829,74 +10829,18 @@ begin
 
     wbStruct(PSDT, 'Schedule', [
       wbInteger('Month', itS8,
-        wbEnum([
-        {0}  'January',
-        {1}  'February',
-        {2}  'March',
-        {3}  'April',
-        {4}  'May',
-        {5}  'June',
-        {6}  'July',
-        {7}  'August',
-        {8}  'September',
-        {9}  'October',
-        {10} 'November',
-        {11} 'December',
-        {12} 'Spring (MAM)',
-        {13} 'Summer (JJA)',
-        {14} 'Autumn (SON)',
-        {15} 'Winter (DJF)'
-        ], [
-        255, 'Any'
-        ])).SetDefaultNativeValue(255),
-      wbInteger('Day Of Week', itU8,
-        wbEnum([
-        {0}  'Sunday',
-        {1}  'Monday',
-        {2}  'Tuesday',
-        {3}  'Wednesday',
-        {4}  'Thursday',
-        {5}  'Friday',
-        {6}  'Saturday',
-        {7}  'Weekdays',
-        {8}  'Weekends',
-        {9}  'Monday, Wednesday, Friday',
-        {10} 'Tuesday, Thursday'
-        ], [
-        255, 'Any'
-        ])).SetDefaultNativeValue(255),
-      wbInteger('Date', itU8)
+        wbPackagePSDTMonthValueToStr,
+        wbPackagePSDTMonthValueToInt
+      ).SetDefaultEditValue('Any'),
+      wbInteger('Day Of Week', itS8, wbPackageScheduleDayOfWeekEnum).SetDefaultNativeValue(-1),
+      wbInteger('Date', itS8, wbPackageScheduleDayOfMonthEnum)
         .SetAfterLoad(wbPACKDateAfterLoad)
         .SetAfterSet(wbPACKDateAfterSet),
-      wbInteger('Hour', itS8,
-        wbEnum([
-        '0','1','2','3','4','5','6','7','8','9','10',
-        '11','12','13','14','15','16','17','18','19',
-        '20','21','22','23'
-        ], [
-        -1, 'Any'
-        ])),
-      wbInteger('Minute', itU8,
-        wbEnum([
-        {0} '00'
-        ], [
-        5,   '05',
-        10,  '10',
-        15,  '15',
-        20,  '20',
-        25,  '25',
-        30,  '30',
-        35,  '35',
-        40,  '40',
-        45,  '45',
-        50,  '50',
-        55,  '55',
-        255, 'Any'
-        ])),
+      wbInteger('Hour', itS8, wbPackageScheduleHoursEnum).SetDefaultNativeValue(-1),
+      wbInteger('Minute', itS8, wbPackageScheduleMinutesEnum).SetDefaultNativeValue(-1),
       wbUnused(3),
-      wbInteger('Duration', itU32, wbDiv(60))
-    ]).SetRequired,
-
+      wbInteger('Duration (Hours)', itU32, wbDiv(60, 4))
+    ], cpNormal, True),
     wbConditions,
     wbIdleAnimation,
     wbFormIDCk(CNAM, 'Combat Style', [CSTY]),
@@ -12768,21 +12712,21 @@ begin
   ]);
 
   wbRecord(NOCM, 'Navmesh Obstacle Manager', [
-    wbEDID,
     wbRArray('Unknown',
       wbRStruct('Unknown', [
-        wbInteger(INDX, 'Index', itU32),
-        wbRArray('Unknown datas',
-          wbStruct(DATA, 'Unknown data', [
-            wbByteArray('Unknown 1',2),
-            wbByteArray('Unknown 2',2),
-            wbByteArray('Unknown 4',4)
-          ])
-        ),
-        wbUnknown(INTV),
+        wbRArray('Unknown',
+          wbRStruct('Unknown', [
+            wbInteger(INDX, 'Index', itU32),
+            wbRArray('Unknown Datas',
+              wbStruct(DATA, 'Unknown Data', [
+                wbByteArray('Unknown 1',2),
+                wbByteArray('Unknown 2',2),
+                wbByteArray('Unknown 4',4)
+              ])),
+            wbUnknown(INTV)
+          ])),
         wbString(NAM1, 'Model')
-      ])
-    )
+      ]))
   ]);
 
   wbRecord(NOTE, 'Note', [
