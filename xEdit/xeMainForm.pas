@@ -13267,13 +13267,17 @@ begin
         Signatures.Sorted := True;
         Signatures.Duplicates := dupIgnore;
         for i := Pred(BaseSignatures.Count) downto 0 do
+          {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
           if wbFindRecordDef(BaseSignatures[i], MainRecordDef) then
+          {$WARN IMPLICIT_STRING_CAST_LOSS ON}
             for j := 0 to Pred(MainRecordDef^.ReferenceSignatureCount) do
               Signatures.Add(MainRecordDef^.ReferenceSignatures[j]);
       end else
         for i := Pred(Signatures.Count) downto 0 do begin
           FoundAny := False;
+          {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
           if wbFindRecordDef(Signatures[i], MainRecordDef) then
+          {$WARN IMPLICIT_STRING_CAST_LOSS ON}
             for j := 0 to Pred(MainRecordDef^.BaseSignatureCount) do
               if BaseSignatures.Find(MainRecordDef^.BaseSignatures[j], Dummy) then begin
                 FoundAny := True;
@@ -13326,7 +13330,9 @@ begin
     end;
 
     for i := Pred(TopLevelGroups.Count) downto 0 do
+      {$WARN IMPLICIT_STRING_CAST_LOSS OFF}
       if wbFindRecordDef(TopLevelGroups[i], MainRecordDef) then begin
+      {$WARN IMPLICIT_STRING_CAST_LOSS ON}
         if MainRecordDef^.IsReference then
           PotentiallyUnfilteredRefs := True;
         //remove entries here that don't occur in top level groups, will require definitions update to have that information

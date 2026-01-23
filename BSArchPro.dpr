@@ -29,6 +29,10 @@ uses
   Vcl.Themes,
 
   wbBSArchive in 'Core\wbBSArchive.pas',
+  wbCompression in 'Core\wbCompression.pas',
+  wbDDS in 'Core\wbDDS.pas',
+  wbHash in 'Core\wbHash.pas',
+  wbStreams in 'Core\wbStreams.pas',
   wbTaskProgress in 'Core\wbTaskProgress.pas' {FormTaskProgress},
 
   frmArchiveInfo in 'BSArch\frmArchiveInfo.pas' {FormArchiveInfo},

@@ -298,7 +298,7 @@ begin
   Result := CompressedSize;
 end;
 
-function GetRelativeDeciderInteger(anOffset: Integer; aSize: Integer; aContainerName, anIntegerName: String;
+function GetRelativeDeciderInteger(anOffset: UInt32; aSize: Integer; aContainerName, anIntegerName: String;
   aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;

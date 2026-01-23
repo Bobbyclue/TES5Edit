@@ -252,7 +252,6 @@ var
   wbNAM1: IwbSubRecordDef;
   wbLODP: IwbSubRecordDef;
   wbLODLevelOverride: IwbSubRecordStructDef;
-  wbNAM1LODP: IwbSubRecordStructDef;
   wbNAMMarkerParam: IwbStructDef;
   wbPHST: IwbRecordMemberDef;
   wbDOFA: IwbSubRecordDef;

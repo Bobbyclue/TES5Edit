@@ -48,13 +48,6 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win64)'!=''">
-        <Cfg_4_Win64>true</Cfg_4_Win64>
-        <CfgParent>Cfg_4</CfgParent>
-        <Cfg_4>true</Cfg_4>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='DebugSF' or '$(Cfg_5)'!=''">
         <Cfg_5>true</Cfg_5>
         <CfgParent>Cfg_2</CfgParent>
@@ -126,7 +119,6 @@
         <DCC_Define>LiteVersion;$(DCC_Define)</DCC_Define>
         <DCC_UseMSBuildExternally>false</DCC_UseMSBuildExternally>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''"/>
     <PropertyGroup Condition="'$(Cfg_5)'!=''">
         <Icon_MainIcon>xEdit\xEdit_SF_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
@@ -161,6 +153,7 @@
         <DCCReference Include="Core\wbHalfFloat.pas"/>
         <DCCReference Include="Core\wbHardcoded.pas">
             <Form>wbHardcodedContainer</Form>
+            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Core\wbHelpers.pas"/>
@@ -178,15 +171,19 @@
         <DCCReference Include="xEdit\xeInit.pas"/>
         <DCCReference Include="xEdit\xeDeveloperMessageForm.pas">
             <Form>frmDeveloperMessage</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeEditWarningForm.pas">
             <Form>frmEditWarning</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeFileSelectForm.pas">
             <Form>frmFileSelect</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeFilterOptionsForm.pas">
             <Form>frmFilterOptions</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapter.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterDF.pas"/>
@@ -194,41 +191,52 @@
         <DCCReference Include="xEdit\JvI\xejviScriptHost.pas"/>
         <DCCReference Include="xEdit\xeLegendForm.pas">
             <Form>frmLegend</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeLocalizationForm.pas">
             <Form>frmLocalization</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeLocalizePluginForm.pas">
             <Form>frmLocalizePlugin</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeLODGenForm.pas"/>
         <DCCReference Include="xEdit\xeLogAnalyzerForm.pas">
             <Form>frmLogAnalyzer</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeMainForm.pas">
             <Form>frmMain</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeModGroupEditForm.pas"/>
         <DCCReference Include="xEdit\xeModGroupSelectForm.pas"/>
         <DCCReference Include="xEdit\xeModuleSelectForm.pas"/>
         <DCCReference Include="xEdit\xeOptionsForm.pas">
             <Form>frmOptions</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeRichEditForm.pas">
             <Form>frmRichEdit</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeScriptForm.pas">
             <Form>frmScript</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeTipForm.pas"/>
         <DCCReference Include="xEdit\xeViewElementsForm.pas">
             <Form>frmViewElements</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeWaitForm.pas">
             <Form>frmWait</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\xeWorldspaceCellDetailsForm.pas">
             <Form>frmWorldspaceCellDetails</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

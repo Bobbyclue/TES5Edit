@@ -25,6 +25,7 @@ type
   TwbCompressionTypes = array of TwbCompressionType;
 
   TwbCompression = class abstract
+  public
     class function Name(aCType: TwbCompressionType): string; inline;
     class function TypeByName(const aName: string): TwbCompressionType;
     // this method doesn't resize Result to the actual compressed data length

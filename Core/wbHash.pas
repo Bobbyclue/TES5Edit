@@ -13,11 +13,7 @@ unit wbHash;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
-  WinApi.Windows,
-  //libdeflate,
-  xxHash;
+  System.SysUtils;
 
 type
   TwbXXH32 = type Cardinal;
@@ -39,6 +35,7 @@ type
   TwbLookupHash = type TwbXXH64;
 
   TwbHash = class abstract
+  public
     class function LookupHash(aData: Pointer; aLen: NativeInt): TwbLookupHash; overload; inline;
     class function LookupHash(const aText: string; aIgnoreCase: Boolean = False): TwbLookupHash; overload;
     class function SameLookupHash(aHash1, aHash2: TwbLookupHash): Boolean; inline;
@@ -101,6 +98,12 @@ type
 
 implementation
 
+uses
+  System.Classes,
+
+  WinApi.Windows,
+
+  xxHash;
 
 function LastCharPos(const s: string; const Chr: char): Integer;
 begin
