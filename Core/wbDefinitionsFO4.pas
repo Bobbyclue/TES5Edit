@@ -12770,8 +12770,8 @@ begin
     wbDESC,
     wbGenericModel,
     wbStruct(DATA, 'Data', [
-      wbInteger('Include Count', itU32),
-      wbInteger('Property Count', itU32),
+      wbInteger('Include Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
+      wbInteger('Property Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
       wbInteger('Unknown Bool 1', itU8, wbBoolEnum),
       wbInteger('Unknown Bool 2', itU8, wbBoolEnum),
       wbInteger('Form Type', itU32, wbEnum([], [
