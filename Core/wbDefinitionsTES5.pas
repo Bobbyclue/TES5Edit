@@ -5371,7 +5371,7 @@ begin
       {02} wbInteger('Radius', itU16),
       {02} wbByteArray('Unknown 1', 2),
            wbInteger('Only Buys Stolen Items', itU8, wbBoolEnum),
-           wbInteger('Not/Sell Buy', itU8, wbBoolEnum),
+           wbInteger('Not Sell/Buy', itU8, wbBoolEnum),
       {02} wbByteArray('Unknown 2', 2)
       ]).SetRequired,
     wbPLVD,
