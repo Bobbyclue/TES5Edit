@@ -238,6 +238,7 @@ begin
     if ProcessedError <> '' then begin
       WriteLn;
       WriteLn(ProcessedError);
+      System.ExitCode := 1;
       Exit;
     end;
 
@@ -337,9 +338,10 @@ begin
 
     sw.Stop;
     WriteLn;
-    if ProcessedError <> '' then
-      WriteLn(ProcessedError)
-    else
+    if ProcessedError <> '' then begin
+      WriteLn(ProcessedError);
+      System.ExitCode := 1;
+    end else
       WriteLn('Done in ', sw.Elapsed.ToString, '.');
   finally
     bsa.Free;
