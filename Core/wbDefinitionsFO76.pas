@@ -252,7 +252,6 @@ var
   wbNAM1: IwbSubRecordDef;
   wbLODP: IwbSubRecordDef;
   wbLODLevelOverride: IwbSubRecordStructDef;
-  wbNAM1LODP: IwbSubRecordStructDef;
   wbNAMMarkerParam: IwbStructDef;
   wbPHST: IwbRecordMemberDef;
   wbDOFA: IwbSubRecordDef;
@@ -7605,8 +7604,8 @@ begin
   ).SetCountPath('Property Count', False);
 
   wbOBTSReq := wbStruct(OBTS, 'Object Mod Template Item', [
-    wbInteger('Include Count', itU32),  // fixed name for wbOMOD* handlers
-    wbInteger('Property Count', itU32), // fixed name for wbOMOD* handlers
+    wbInteger('Include Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),  // fixed name for wbOMOD* handlers
+    wbInteger('Property Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit), // fixed name for wbOMOD* handlers
     wbInteger('Level Min', itU8),
     wbUnused(1),
     wbInteger('Level Max', itU8),
@@ -16208,8 +16207,8 @@ begin
     wbGenericModel,
     wbInteger(INDX, 'Model Attach Index', itU8),
     wbStruct(DATA, 'Data', [
-      wbInteger('Include Count', itU32),
-      wbInteger('Property Count', itU32),
+      wbInteger('Include Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
+      wbInteger('Property Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
       wbInteger('Unknown Bool 1', itU8, wbBoolEnum),
       wbInteger('Unknown Bool 2', itU8, wbBoolEnum),
       wbInteger('Form Type', itU32, wbEnum([], [

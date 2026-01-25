@@ -21,7 +21,7 @@ uses
   wbStreams;
 
 const
-  cBSArchVersion = '0.9.2';
+  cBSArchVersion = '1.0';
   cBSArchExtension = '.bsarch';
 
 type
@@ -78,6 +78,7 @@ type
   end;
 
   TwbBSFileChunkTex = class(TwbBSFileChunk)
+  public
     StartMip: Word;
     EndMip: Word;
   end;
@@ -157,6 +158,17 @@ type
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
     cDDSArchiveTypes: TwbBSArchiveTypes = [baFO4dds, baSFdds];
+    cArchiveFormatNames: array[TwbBSArchiveType] of string = (
+      'None',
+      'Morrowind',
+      'Oblivion',
+      'Skyrim LE, New Vegas, Fallout 3',
+      'Skyrim AE, Skyrim SE',
+      'Fallout 4',
+      'Fallout 4 DDS',
+      'Starfield',
+      'Starfield DDS'
+    );
     // supported compression types, first is the default one
     cArchiveCompressionTypes: array[TwbBSArchiveType] of TwbCompressionTypes = (
       [ctNone],
@@ -166,7 +178,7 @@ type
       [ctLZ4F],
       [ctZLib],
       [ctZLib],
-      [ctLZ4, ctZLib],
+      [ctZLib, ctLZ4],
       [ctLZ4, ctZLib]
     );
     // default archive extension
@@ -180,17 +192,6 @@ type
       '.ba2',
       '.ba2',
       '.ba2'
-    );
-    cArchiveFormatNames: array[TwbBSArchiveType] of string = (
-      'None',
-      'Morrowind',
-      'Oblivion',
-      'Skyrim LE, New Vegas, Fallout 3',
-      'Skyrim AE, Skyrim SE',
-      'Fallout 4',
-      'Fallout 4 DDS',
-      'Starfield',
-      'Starfield DDS'
     );
     cArchiveFlagNames: array [0..9] of string = (
       'Include Directory Names', 'Include File Names', 'Compressed',
@@ -433,7 +434,7 @@ type
     atScript, atSource,
     atStrings, atSpeedTree, atVideo, atLODSettings, atDistantLOD,
     atInterface, atProgram,
-    atMenus, atFont, atFacegen, atLSData, atShaders,
+    atMenus, atFont, atFacegen, atLSData, atShaders, atShadersFX,
     atGrass, atPreVis, atSeq, atDialogueViews,
     atBookArt, atIcon, atSplash
   );
@@ -455,7 +456,7 @@ type
     end;
   const
     cDataFolders: array [0..1] of string = ('data', 'data files');
-    cBSAssets: array [0..26] of TAssetDesc = (
+    cBSAssets: array [0..27] of TAssetDesc = (
       (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.psa', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
       (Typ: atTexture;        Root: 'textures';      Ext: ['.dds', '.tga', '.png']),
       (Typ: atMaterial;       Root: 'materials';     Ext: ['.bgsm', '.bgem']),
@@ -469,13 +470,14 @@ type
       (Typ: atVideo;          Root: 'video';         Ext: ['.bik', '.bk2']),
       (Typ: atLODSettings;    Root: 'lodsettings';   Ext: ['.lodsettings', '.dlodsettings', '.lod']),
       (Typ: atDistantLOD;     Root: 'distantlod';    Ext: ['.cmp', '.lod']), // TES4
-      (Typ: atInterface;      Root: 'interface';     Ext: ['.swf', '.txt']),
+      (Typ: atInterface;      Root: 'interface';     Ext: ['.swf', '.png', '.txt']),
       (Typ: atProgram;        Root: 'programs';      Ext: ['.swf']), // FO4
       (Typ: atMenus;          Root: 'menus';         Ext: ['.xml', '.htm', '.txt', '.scc', '.bat']), // TES4
       (Typ: atFont;           Root: 'fonts';         Ext: ['.fnt', '.tex']), // TES4
       (Typ: atFacegen;        Root: 'facegen';       Ext: ['.ctl']), // TES4
       (Typ: atLSData;         Root: 'lsdata';        Ext: ['.dat']), // TES4
       (Typ: atShaders;        Root: 'shaders';       Ext: ['.sdp']), // TES4
+      (Typ: atShadersFX;      Root: 'shadersfx';     Ext: ['.fxp']), // TES5
       (Typ: atGrass;          Root: 'grass';         Ext: ['.gid']),
       (Typ: atPreVis;         Root: 'vis';           Ext: ['.uvd']),
       (Typ: atSeq;            Root: 'seq';           Ext: ['.seq']), // TES5
@@ -1594,12 +1596,19 @@ begin
     baSF: begin
       fHeader.Magic := MAGIC_BTDX;
       fHeader.Magic2 := MAGIC_GNRL;
-      fHeader.Version := HEADER_VERSION_SFv3;
+      // official Archive2 tool creates v3 archives for lz4 compression only
+      if fCompressionType = ctLZ4 then
+        fHeader.Version := HEADER_VERSION_SFv3
+      else
+        fHeader.Version := HEADER_VERSION_SFv2;
     end;
     baSFdds: begin
       fHeader.Magic := MAGIC_BTDX;
       fHeader.Magic2 := MAGIC_DX10;
-      fHeader.Version := HEADER_VERSION_SFv3;
+      if fCompressionType = ctLZ4 then
+        fHeader.Version := HEADER_VERSION_SFv3
+      else
+        fHeader.Version := HEADER_VERSION_SFv2;
     end;
   else
     raise Exception.Create('Unsupported archive type');

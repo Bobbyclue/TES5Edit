@@ -7700,11 +7700,11 @@ type
     function GetIsEditable(aInt: Int64; const aElement: IwbElement): Boolean; override;
 
     {---IwbStringDefFormater---}
-    function Check(const aString: string; const aElement: IwbElement): string; overload;
-    function ToString(const aString: string; const aElement: IwbElement; aForSummary: Boolean): string; overload;
-    function ToSortKey(const aString: string; const aElement: IwbElement): string; overload;
+    function Check(const aString: string; const aElement: IwbElement): string; reintroduce; overload;
+    function ToString(const aString: string; const aElement: IwbElement; aForSummary: Boolean): string; reintroduce; overload;
+    function ToSortKey(const aString: string; const aElement: IwbElement): string; reintroduce; overload;
 
-    function ToEditValue(const aString: string; const aElement: IwbElement): string; overload;
+    function ToEditValue(const aString: string; const aElement: IwbElement): string; reintroduce; overload;
     function StringFromEditValue(const aValue: string; const aElement: IwbElement): string; overload;
     function IwbStringDefFormater.FromEditValue = StringFromEditValue;
 

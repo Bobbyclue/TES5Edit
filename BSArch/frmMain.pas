@@ -34,8 +34,8 @@ uses
   VirtualTrees.Types,
   }
 
-  Winapi.Messages,
-  Winapi.Windows,
+  WinApi.Messages,
+  WinApi.Windows,
 
   wbBSArchive;
 
@@ -182,6 +182,7 @@ type
   end;
 
   TArchiveManager = class
+  public
     FList: TArray<TwbBSArchive>;
     function GetCount: Integer;
     function Get(Index: Integer): TwbBSArchive;
@@ -196,6 +197,7 @@ type
   end;
 
   TAsset = class
+  public
     ArchiveManager: TArchiveManager;
     ArchiveName: string;
     FileName: string;

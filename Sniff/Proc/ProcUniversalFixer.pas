@@ -16,7 +16,6 @@ uses
   System.SysUtils,
 
   Vcl.Controls,
-  Vcl.Dialogs,
   Vcl.Forms,
   Vcl.StdCtrls,
 
@@ -60,6 +59,8 @@ implementation
 uses
   System.IOUtils,
   System.Math,
+
+  Vcl.Dialogs,
 
   Winapi.ShellAPI,
   Winapi.Windows,

@@ -13,6 +13,7 @@ interface
 uses
   System.SysUtils;
 
+
 type
   TMagic4 = array [0..3] of AnsiChar;
   PMagic4 = ^TMagic4;
@@ -215,6 +216,7 @@ type
   PDDSHeaderDX10 = ^TDDSHeaderDX10;
 
   TwbDDS = class abstract
+  public
     class function IsDDS(aDDSData: Pointer; aSize: Integer): Boolean;
     class function IsCubeMap(aDDSData: Pointer): Boolean;
     class function HasAlpha(aDXGI: TDXGI): Boolean;
@@ -374,6 +376,7 @@ implementation
 
 uses
   System.TypInfo;
+
 
 class function TwbDDS.IsDDS(aDDSData: Pointer; aSize: Integer): Boolean;
 begin

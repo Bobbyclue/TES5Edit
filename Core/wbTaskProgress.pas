@@ -21,8 +21,7 @@ uses
   Vcl.Forms,
   Vcl.StdCtrls,
 
-  Winapi.Messages,
-  Winapi.Windows;
+  Winapi.Messages;
 
 const
   WM_PROGRESS_UPDATE = WM_USER;
@@ -96,6 +95,7 @@ type
   end;
 
   TwbTaskProgress = class
+  public
     Owner: TComponent;
     Threads: Integer;
     ProcessProc: TProcessProc;
@@ -117,7 +117,8 @@ implementation
 uses
   System.Win.ComObj,
 
-  WinApi.ShlObj;
+  WinApi.ShlObj,
+  Winapi.Windows;
 
 var
   TaskbarList: ITaskbarList;
