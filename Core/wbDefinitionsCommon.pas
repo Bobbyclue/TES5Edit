@@ -647,9 +647,10 @@ function wbModelInfos(aSignature: TwbSignature; aName: string = ''; aDontShow  :
 {>>> Debris Function Defs <<<} //1
 function wbDebrisModel(aTextureFileHashes: IwbRecordMemberDef): IwbRecordMemberDef;
 
-{>>> Image Space Adapater Defs <<<} //3
+{>>> Image Space Adapater Defs <<<} //4
 function wbIMADMultAddCount(const aName: string): IwbValueDef;
-function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef;
+function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef; overload;
+function wbTimeInterpolators(const aName: string): IwbValueDef; overload;
 function wbTimeInterpolatorsMultAdd(const aSignatureMult, aSignatureAdd: TwbSignature; const aName: string): IwbRecordMemberDef;
 
 {>>> NPC Defs <<<} //1
@@ -6191,12 +6192,21 @@ end;
 function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef;
 begin
   Result :=
-    wbSubRecord(aSignature, aName,
-      wbArray('', wbTimeInterpolator)
-        .SetSummaryPassthroughMaxCount(10)
-        .SetSummaryPassthroughMaxLength(100)
-    ).SetRequired
-     .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
+    wbArray(aSignature, aName, wbTimeInterpolator)
+      .SetSummaryPassthroughMaxCountOnValue(10)
+      .SetSummaryPassthroughMaxLengthOnValue(100)
+      .SetRequired
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
+end;
+
+function wbTimeInterpolators(const aName: string): IwbValueDef;
+begin
+  Result :=
+    wbArray(aName, wbTimeInterpolator)
+      .SetSummaryPassthroughMaxCount(10)
+      .SetSummaryPassthroughMaxLength(100)
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators)
+
 end;
 
 function wbTimeInterpolatorsMultAdd(const aSignatureMult, aSignatureAdd: TwbSignature; const aName: string): IwbRecordMemberDef;
