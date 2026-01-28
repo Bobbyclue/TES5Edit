@@ -8197,7 +8197,8 @@ begin
         {11} 'Shadow Hemisphere',
         {12} 'Shadow Omnidirectional',
         {13} 'Portal-strict',
-        {14} IsCS('Inverse Square', '')
+        {14} IsCS('Inverse Square', ''),
+        {15} IsCS('Linear', '')
         ])
       ).SetAfterSet(wbLIGHDataFlagsAfterSet)
        .IncludeFlag(dfCollapsed, wbCollapseFlags),

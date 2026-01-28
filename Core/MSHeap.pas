@@ -22,9 +22,11 @@ unit MSHeap;
 
 interface
 
-uses Windows;
-
 implementation
+
+uses
+  System.SysUtils,
+  WinApi.Windows;
 
 var
   ProcessHeap: THandle = 0;
@@ -64,7 +66,9 @@ function NoMemoryAllocated: Boolean;
 var
   State: TMemoryManagerState;
 begin
+  {$WARN SYMBOL_PLATFORM OFF}
   GetMemoryManagerState(State);
+  {$WARN SYMBOL_PLATFORM ON}
   Result := (State.AllocatedMediumBlockCount = 0) and (State.AllocatedLargeBlockCount = 0);
 end;
 
@@ -97,7 +101,10 @@ initialization
   //SetDllDirectory('');
 
   //{$IFNDEF DEBUG}
+  if TOSVersion.Major >= 10 then
+  {$WARN SYMBOL_PLATFORM OFF}
   if DebugHook = 0 then begin
+  {$WARN SYMBOL_PLATFORM ON}
     Assert(NoMemoryAllocated, 'Can not initialize MSHeap, memory is already allocated');
     ProcessHeap := GetProcessHeap;
     Assert(ProcessHeap <> 0);
