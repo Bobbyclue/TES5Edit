@@ -15949,7 +15949,7 @@ begin
     wbRArray('Ruleset Names', wbString(ZNAM, 'Ruleset Name')),
     wbRArray('Naming Rules',
       wbRStruct('Ruleset', [
-        wbInteger(VNAM, 'Count', itU32),
+        wbInteger(VNAM, 'Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
         // should not be sorted, but can be aligned
         wbRArray('Names',
           wbRStructSK([3, 0], 'Name', [
