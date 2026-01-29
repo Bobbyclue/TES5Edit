@@ -12606,7 +12606,7 @@ begin
     ])),
     wbRArray('Naming Rules',
       wbRStruct('Ruleset', [
-        wbInteger(VNAM, 'Count', itU32),
+        wbInteger(VNAM, 'Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
         // should not be sorted
         wbRArray('Names',
           wbRStruct('Name', [
