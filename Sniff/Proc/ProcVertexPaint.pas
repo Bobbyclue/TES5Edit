@@ -11,9 +11,16 @@ unit ProcVertexPaint;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameVertexPaint = class(TFrame)
@@ -36,6 +43,9 @@ type
     edColor2: TEdit;
     btnColor2Select: TButton;
     lblHelper: TLabel;
+    edName: TLabeledEdit;
+    chkSkipColor: TCheckBox;
+    edSkipColor: TEdit;
     procedure btnColorSelectClick(Sender: TObject);
     procedure rbSetColorsClick(Sender: TObject);
     procedure lblHelperClick(Sender: TObject);
@@ -48,16 +58,19 @@ type
   TProcVertexPaint = class(TProcBase)
   private
     Frame: TFrameVertexPaint;
+    fName: string;
     fMode: Integer;
     fColor: Cardinal;
     fColor2: Cardinal;
+    fSkipColor: Cardinal;
+    fSkip: Boolean;
     fAllWhite: Boolean;
     fAddIfMissing: Boolean;
     fAdjustMod: Integer;
-    fAdjustH: double;
-    fAdjustS: double;
-    fAdjustL: double;
-    fAdjustA: double;
+    fAdjustH: Double;
+    fAdjustS: Double;
+    fAdjustL: Double;
+    fAdjustA: Double;
   public
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
@@ -74,9 +87,13 @@ implementation
 {$R *.dfm}
 
 uses
-  Math,
+  System.Math,
+
+  Vcl.Dialogs,
+
   wbDataFormat,
   wbDataFormatNif,
+
   frmVertexPaintHelper;
 
 constructor TProcVertexPaint.Create(aManager: TProcManager);
@@ -148,6 +165,9 @@ begin
   Frame.rbRemoveColors.Checked := fMode = 2;
   Frame.rbReplaceColor.Checked := fMode = 3;
   Frame.rbSetColorsClick(nil);
+  Frame.edName.Text := StorageGetString('sName', Frame.edName.Text);
+  Frame.chkSkipColor.Checked := StorageGetBool('bSkipColor', Frame.chkSkipColor.Checked);
+  Frame.edSkipColor.Text := StorageGetString('sSkipColor', Frame.edSkipColor.Text);
   Frame.edColor.Text := StorageGetString('sColor', Frame.edColor.Text);
   Frame.edColor2.Text := StorageGetString('sColor2', Frame.edColor2.Text);
   Frame.chkAddIfMissing.Checked := StorageGetBool('bAddIfMissing', Frame.chkAddIfMissing.Checked);
@@ -170,6 +190,9 @@ begin
   if Frame.rbRemoveColors.Checked then fMode := 2 else
     fMode := 3;
   StorageSetInteger('iMode', fMode);
+  StorageSetString('sName', Frame.edName.Text);
+  StorageSetBool('bSkipColor', Frame.chkSkipColor.Checked);
+  StorageSetString('sSkipColor', Frame.edSkipColor.Text);
   StorageSetString('sColor', Frame.edColor.Text);
   StorageSetString('sColor2', Frame.edColor2.Text);
   StorageSetBool('bAllWhite', Frame.chkAllWhite.Checked);
@@ -187,9 +210,17 @@ begin
   if Frame.rbAdjustColors.Checked then fMode := 1 else
   if Frame.rbRemoveColors.Checked then fMode := 2 else
     fMode := 3;
+  fName := LowerCase(Trim(Frame.edName.Text));
+  fSkip := Frame.chkSkipColor.Checked;
   fAllWhite := Frame.chkAllWhite.Checked;
   fAddIfMissing := Frame.chkAddIfMissing.Checked;
   fAdjustMod := Frame.cbAdjustMod.ItemIndex;
+
+  if fSkip then try
+    fSkipColor := StrToInt('$' + Frame.edSkipColor.Text);
+  except
+    raise Exception.Create('Skip color is not a valid hex number');
+  end;
 
   if fMode in [0, 2, 3] then try
     fColor := StrToInt('$' + Frame.edColor.Text);
@@ -342,26 +373,27 @@ function TProcVertexPaint.ProcessFile(aFile: TProcFileObject): TBytes;
 
 var
   nif: TwbNifFile;
-  block: TwbNifBlock;
   entries, entry: TdfElement;
   bChanged, bWhite: Boolean;
-  i, j: Integer;
+  j: Integer;
   r, g, b: Byte;
   a: Double;
-  c, c2: string;
+  c, c2, cskip: string;
 begin
   c := '#' + IntToHex(fColor, 8);
   c2 := '#' + IntToHex(fColor2, 8);
+  cskip := '#' + IntToHex(fSkipColor, 8);
 
   bChanged := False;
   nif := TwbNifFile.Create;
   try
     nif.LoadFromData(aFile.GetData);
 
-    for i := 0 to Pred(nif.BlocksCount) do begin
-      block := nif.Blocks[i];
+    for var block in nif.BlocksByType('NiAVObject', True) do begin
+      if (fName <> '') and not LowerCase(block.EditValues['Name']).Contains(fName) then
+        Continue;
 
-      if block.IsNiobject('NiTriBasedGeom') then begin
+      if block.IsNiObject('NiTriBasedGeom') then begin
         var Data := TwbNifBlock(Block.ElementByName('Data').LinksTo);
         if not Assigned(Data) then
           Continue;
@@ -382,6 +414,7 @@ begin
 
           for j := 0 to Pred(entries.Count) do
             if entries[j].EditValue <> c then begin
+              if fSkip and (entries[j].EditValue = cskip) then Continue;
               entries[j].EditValue := c;
               bChanged := True;
             end;
@@ -394,6 +427,8 @@ begin
             Continue;
 
           for j := 0 to Pred(entries.Count) do begin
+            if fSkip and (entries[j].EditValue = cskip) then Continue;
+
             entry := entries[j];
             r := FloatColorToByte(entry.NativeValues['R']);
             g := FloatColorToByte(entry.NativeValues['G']);
@@ -455,6 +490,7 @@ begin
 
           for j := 0 to Pred(entries.Count) do
             if entries[j].EditValue = c then begin
+              if fSkip and (entries[j].EditValue = cskip) then Continue;
               entries[j].EditValue := c2;
               bChanged := True;
             end;
@@ -475,11 +511,14 @@ begin
           if not Assigned(entries) then
             Continue;
 
-          for j := 0 to Pred(entries.Count) do
-            if entries[j].EditValues['Vertex Colors'] <> c then begin
+          for j := 0 to Pred(entries.Count) do begin
+            var clr := entries[j].EditValues['Vertex Colors'];
+            if fSkip and (clr = cskip) then Continue;
+            if clr <> c then begin
               entries[j].EditValues['Vertex Colors'] := c;
               bChanged := True;
             end;
+          end;
         end
 
         // BSTriShape: adjust vertex colors
@@ -493,6 +532,8 @@ begin
 
           for j := 0 to Pred(entries.Count) do begin
             entry := entries[j].Elements['Vertex Colors'];
+            if fSkip and (entry.EditValue = cskip) then Continue;
+
             r := entry.NativeValues['R'];
             g := entry.NativeValues['G'];
             b := entry.NativeValues['B'];
@@ -569,11 +610,15 @@ begin
           if not Assigned(entries) then
             Continue;
 
-          for j := 0 to Pred(entries.Count) do
-            if entries[j].EditValues['Vertex Colors'] = c then begin
+          for j := 0 to Pred(entries.Count) do begin
+            var clr := entries[j].EditValues['Vertex Colors'];
+            if fSkip and (clr = cskip) then Continue;
+            if clr <> c then begin
               entries[j].EditValues['Vertex Colors'] := c2;
               bChanged := True;
             end;
+          end;
+
         end;
       end;
     end;
