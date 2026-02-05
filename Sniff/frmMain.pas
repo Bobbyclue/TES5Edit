@@ -24,14 +24,13 @@ uses
   Vcl.Mask,
   Vcl.Menus,
   Vcl.StdCtrls,
-  Vcl.Themes,
 
   Winapi.Messages,
 
   SniffProcessor;
 
 const
-  sSniffVersion = '1.9';
+  sSniffVersion = '1.9.1';
   sSniffCaption = 'S''Lanter''s NIF Helper';
   sSniffTitle = sSniffCaption + ' ' + sSniffVersion;
   WM_PROCESSING_START = WM_USER + 10;
@@ -123,6 +122,8 @@ uses
   System.SysUtils,
   System.TypInfo,
   System.Types,
+
+  Vcl.Themes,
 
   WinApi.ShellAPI,
   WinApi.Windows,

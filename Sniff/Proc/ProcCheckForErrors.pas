@@ -434,7 +434,7 @@ begin
       if SameValue(mass, 0.0) then
         Log.Add(#9 + block.Name + ': Zero moveable collision mass');
 
-      if (mass > 0.0) and (mass < 0.1) then
+      if (mass > 0.0) and (mass < 0.95) then
         Log.Add(#9 + block.Name + ': Moveable mass < 0.1 causes physics issues due to precision loss');
 
       if mass > 0.0 then
