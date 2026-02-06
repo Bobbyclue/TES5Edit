@@ -17,7 +17,6 @@ uses
 
   Vcl.ComCtrls,
   Vcl.Controls,
-  Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.Forms,
   Vcl.Imaging.pngimage,
@@ -30,7 +29,7 @@ uses
   SniffProcessor;
 
 const
-  sSniffVersion = '1.9.1';
+  sSniffVersion = '1.9.2';
   sSniffCaption = 'S''Lanter''s NIF Helper';
   sSniffTitle = sSniffCaption + ' ' + sSniffVersion;
   WM_PROCESSING_START = WM_USER + 10;
@@ -123,6 +122,7 @@ uses
   System.TypInfo,
   System.Types,
 
+  Vcl.Dialogs,
   Vcl.Themes,
 
   WinApi.ShellAPI,
