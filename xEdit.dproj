@@ -216,6 +216,9 @@
         <DCCReference Include="xEdit\JvI\xejviScriptAdapter.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterDF.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterMisc.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscJson.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscRegEx.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscVcl.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterElement.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterContainer.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterRecord.pas"/>
