@@ -13365,6 +13365,10 @@ var
 begin
   DoBuildRef(True);
 
+  var lGroup := GetChildGroup;
+  if Assigned(lGroup) then
+    lGroup.Remove;
+
   _File := GetFile as IwbFileInternal;
   if Assigned(_File) then
     _File.RemoveMainRecord(Self);
