@@ -56,7 +56,8 @@ uses
   xejviScriptAdapterContainer,
   xejviScriptAdapterRecord,
   xejviScriptAdapterFile,
-  xejviScriptAdapterResource;
+  xejviScriptAdapterResource,
+  xejviScriptAdapterHost;
 
 const
   cUnit = 'Dummy';
@@ -355,6 +356,7 @@ begin
   xejviScriptAdapterRecord.RegisterJvInterpreterAdapter(GlobalJvInterpreterAdapter);
   xejviScriptAdapterFile.RegisterJvInterpreterAdapter(GlobalJvInterpreterAdapter);
   xejviScriptAdapterResource.RegisterJvInterpreterAdapter(GlobalJvInterpreterAdapter);
+  xejviScriptAdapterHost.RegisterJvInterpreterAdapter(GlobalJvInterpreterAdapter);
 end;
 
 initialization

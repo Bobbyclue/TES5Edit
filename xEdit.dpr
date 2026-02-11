@@ -101,6 +101,7 @@ uses
   xejviScriptAdapterRecord in 'xEdit\JvI\xejviScriptAdapterRecord.pas',
   xejviScriptAdapterFile in 'xEdit\JvI\xejviScriptAdapterFile.pas',
   xejviScriptAdapterResource in 'xEdit\JvI\xejviScriptAdapterResource.pas',
+  xejviScriptAdapterHost in 'xEdit\JvI\xejviScriptAdapterHost.pas',
   xeScriptForm in 'xEdit\xeScriptForm.pas' {frmScript},
   xeTipForm in 'xEdit\xeTipForm.pas', {frmTip}
   xeViewElementsForm in 'xEdit\xeViewElementsForm.pas' {frmViewElements},

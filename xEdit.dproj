@@ -224,6 +224,7 @@
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterRecord.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterFile.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterResource.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterHost.pas"/>
         <DCCReference Include="xEdit\xeScriptForm.pas">
             <Form>frmScript</Form>
             <FormType>dfm</FormType>
