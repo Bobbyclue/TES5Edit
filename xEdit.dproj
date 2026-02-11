@@ -48,13 +48,6 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win64)'!=''">
-        <Cfg_4_Win64>true</Cfg_4_Win64>
-        <CfgParent>Cfg_4</CfgParent>
-        <Cfg_4>true</Cfg_4>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='DebugSF' or '$(Cfg_5)'!=''">
         <Cfg_5>true</Cfg_5>
         <CfgParent>Cfg_2</CfgParent>
@@ -126,7 +119,6 @@
         <DCC_Define>LiteVersion;$(DCC_Define)</DCC_Define>
         <DCC_UseMSBuildExternally>false</DCC_UseMSBuildExternally>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''"/>
     <PropertyGroup Condition="'$(Cfg_5)'!=''">
         <Icon_MainIcon>xEdit\xEdit_SF_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
@@ -194,8 +186,17 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapter.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterContainer.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterDF.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterElement.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterFile.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterHost.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptAdapterMisc.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscJson.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscRegEx.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterMiscVcl.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterRecord.pas"/>
+        <DCCReference Include="xEdit\JvI\xejviScriptAdapterResource.pas"/>
         <DCCReference Include="xEdit\JvI\xejviScriptHost.pas"/>
         <DCCReference Include="xEdit\xeLegendForm.pas">
             <Form>frmLegend</Form>
