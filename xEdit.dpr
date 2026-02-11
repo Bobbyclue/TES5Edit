@@ -93,6 +93,11 @@ uses
   xejviScriptAdapter in 'xEdit\JvI\xejviScriptAdapter.pas',
   xejviScriptAdapterDF in 'xEdit\JvI\xejviScriptAdapterDF.pas',
   xejviScriptAdapterMisc in 'xEdit\JvI\xejviScriptAdapterMisc.pas',
+  xejviScriptAdapterElement in 'xEdit\JvI\xejviScriptAdapterElement.pas',
+  xejviScriptAdapterContainer in 'xEdit\JvI\xejviScriptAdapterContainer.pas',
+  xejviScriptAdapterRecord in 'xEdit\JvI\xejviScriptAdapterRecord.pas',
+  xejviScriptAdapterFile in 'xEdit\JvI\xejviScriptAdapterFile.pas',
+  xejviScriptAdapterResource in 'xEdit\JvI\xejviScriptAdapterResource.pas',
   xeScriptForm in 'xEdit\xeScriptForm.pas' {frmScript},
   xeTipForm in 'xEdit\xeTipForm.pas', {frmTip}
   xeViewElementsForm in 'xEdit\xeViewElementsForm.pas' {frmViewElements},
