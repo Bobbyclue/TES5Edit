@@ -330,6 +330,7 @@ begin
     AddConst(cUnit, 'atShaders',       ord(atShaders));
     AddConst(cUnit, 'atSound',         ord(atSound));
     AddConst(cUnit, 'atSource',        ord(atSource));
+    AddConst(cUnit, 'atSourceSSE',     ord(atSourceSSE));
     AddConst(cUnit, 'atSpeedTree',     ord(atSpeedTree));
     AddConst(cUnit, 'atSplash',        ord(atSplash));
     AddConst(cUnit, 'atStrings',       ord(atStrings));

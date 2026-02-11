@@ -36,7 +36,7 @@ var
   slContainers, slTextures, slChecksum: TStringList;
   NifCache: TJsonObject;
   CurrentRecord: IInterface;
-  optAsset, optMode: integer;
+  optAsset, optMode, PexSource: integer;
   optPath: string;
   ResDescrPrefix: string;
   ChecksumsFileName: string;
@@ -626,12 +626,9 @@ begin
     Exit;
 
   if optAsset and (1 shl atScript) > 0 then
-    ProcessAssetEx(e, 'Scripts\' + s + '.pex', 'Papyrus Script attached to ' + Name(CurrentRecord), atScript);
-  if optAsset and (1 shl atSource) > 0 then
-    if wbGameMode = gmSSE then
-      ProcessAssetEx(e, 'Source\Scripts\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), atSource)
-    else
-      ProcessAssetEx(e, 'Scripts\Source\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), atSource);
+    ProcessAssetEx(e, s + '.pex', 'Papyrus Script attached to ' + Name(CurrentRecord), atScript);
+  if optAsset and (1 shl PexSource) > 0 then
+    ProcessAssetEx(e, s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), PexSource);
 end;
 
 //==========================================================================
@@ -646,7 +643,7 @@ begin
   if not Assigned(e) then
     Exit;
 
-  if optAsset and (1 shl atScript + 1 shl atSource) = 0 then
+  if optAsset and (1 shl atScript + 1 shl PexSource) = 0 then
     Exit;
 
   Scripts := ElementByPath(e, 'Scripts');
@@ -757,7 +754,8 @@ begin
 
   if wbGameMode > gmFNV then begin
     slAssetsType.AddObject('Papyrus Scripts', atScript);
-    slAssetsType.AddObject('Papyrus Source', atSource);
+    if wbGameMode = gmSSE then PexSource := atSourceSSE else PexSource := atSource;
+    slAssetsType.AddObject('Papyrus Source', PexSource);
   end;
 
   if (wbGameMode = gmTES5) or (wbGameMode = gmSSE) or (wbGameMode = gmTES5VR) then
