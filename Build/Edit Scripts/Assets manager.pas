@@ -629,9 +629,9 @@ begin
     ProcessAssetEx(e, 'Scripts\' + s + '.pex', 'Papyrus Script attached to ' + Name(CurrentRecord), atScript);
   if optAsset and (1 shl atSource) > 0 then
     if wbGameMode = gmSSE then
-      ProcessAssetEx(e, 'Source\Scripts\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), -1)
+      ProcessAssetEx(e, 'Source\Scripts\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), atSource)
     else
-      ProcessAssetEx(e, 'Scripts\Source\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), -1);
+      ProcessAssetEx(e, 'Scripts\Source\' + s + '.psc', 'Papyrus Script Source attached to ' + Name(CurrentRecord), atSource);
 end;
 
 //==========================================================================
@@ -698,7 +698,7 @@ begin
   regexp.Options := [preCaseLess];
   regexp.Subject := GetEditValue(e);
   while regexp.MatchAgain do
-    ProcessAssetEx(e, wbNormalizeResourceName(regexp.Groups[2], resTexture), 'Book text image for ' + Name(CurrentRecord), atTexture);
+    ProcessAssetEx(e, wbNormalizeResourceName(regexp.Groups[2], atTexture), 'Book text image for ' + Name(CurrentRecord), atTexture);
   regexp.Free;
 end;
 
