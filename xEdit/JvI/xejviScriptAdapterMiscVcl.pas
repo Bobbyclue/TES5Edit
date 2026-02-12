@@ -36,13 +36,6 @@ uses
   Vcl.Menus,
   Vcl.StdCtrls;
 
-{ TBytesStream }
-
-procedure TBytesStream_Create(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := O2V(TBytesStream.Create(TBytes(Args.Values[0])));
-end;
-
 { TBinaryReader }
 
 procedure TBinaryReader_Create(var Value: Variant; Args: TJvInterpreterArgs);
@@ -80,14 +73,29 @@ begin
   Value := TBinaryReader(Args.Obj).ReadDouble;
 end;
 
+procedure TBinaryReader_ReadInteger(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TBinaryReader(Args.Obj).ReadInteger;
+end;
+
 procedure TBinaryReader_ReadShortInt(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := TBinaryReader(Args.Obj).ReadShortInt;
 end;
 
+procedure TBinaryReader_ReadSingle(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TBinaryReader(Args.Obj).ReadSingle;
+end;
+
 procedure TBinaryReader_ReadSmallInt(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := TBinaryReader(Args.Obj).ReadSmallInt;
+end;
+
+procedure TBinaryReader_ReadString(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TBinaryReader(Args.Obj).ReadString;
 end;
 
 procedure TBinaryReader_ReadUInt16(var Value: Variant; Args: TJvInterpreterArgs);
@@ -98,21 +106,6 @@ end;
 procedure TBinaryReader_ReadUInt32(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := TBinaryReader(Args.Obj).ReadUInt32;
-end;
-
-procedure TBinaryReader_ReadInteger(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TBinaryReader(Args.Obj).ReadInteger;
-end;
-
-procedure TBinaryReader_ReadSingle(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TBinaryReader(Args.Obj).ReadSingle;
-end;
-
-procedure TBinaryReader_ReadString(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TBinaryReader(Args.Obj).ReadString;
 end;
 
 { TBinaryWriter }
@@ -147,16 +140,124 @@ begin
   TBinaryWriter(Args.Obj).Write(Single(Args.Values[0]));
 end;
 
-{ TWinControl }
+{ TBitmap }
 
-procedure TWinControl_Read_DoubleBuffered(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TBitmap_SetSize(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TWinControl(Args.Obj).DoubleBuffered;
+  TBitmap(Args.Obj).SetSize(Args.Values[0], Args.Values[1]);
 end;
 
-procedure TWinControl_Write_DoubleBuffered(const Value: Variant; Args: TJvInterpreterArgs);
+{ TBytesStream }
+
+procedure TBytesStream_Create(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TWinControl(Args.Obj).DoubleBuffered := Boolean(Value);
+  Value := O2V(TBytesStream.Create(TBytes(Args.Values[0])));
+end;
+
+{ TCheckListBox }
+
+type
+  TJvInterpreterCheckListBoxEvents = class(TJvInterpreterEvent)
+  private
+    procedure OnClickCheck(Sender: TObject);
+  end;
+
+procedure TJvInterpreterCheckListBoxEvents.OnClickCheck(Sender: TObject);
+begin
+  CallFunction(nil, [O2V(Sender)]);
+end;
+
+procedure TCheckListBox_Read_AllowGrayed(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TCheckListBox(Args.Obj).AllowGrayed;
+end;
+
+procedure TCheckListBox_Write_AllowGrayed(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).AllowGrayed := Value;
+end;
+
+procedure TCheckListBox_CheckAll(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).CheckAll(Args.Values[0], Args.Values[1], Args.Values[2]);
+end;
+
+procedure TCheckListBox_Read_Checked(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TCheckListBox(Args.Obj).Checked[Args.Values[0]];
+end;
+
+procedure TCheckListBox_Write_Checked(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).Checked[Args.Values[0]] := Value;
+end;
+
+procedure TCheckListBox_Create(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := O2V(TCheckListBox.Create(V2O(Args.Values[0]) as TComponent));
+end;
+
+procedure TCheckListBox_Read_Header(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TCheckListBox(Args.Obj).Header[Args.Values[0]];
+end;
+
+procedure TCheckListBox_Write_Header(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).Header[Args.Values[0]] := Value;
+end;
+
+procedure TCheckListBox_Read_ItemEnabled(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TCheckListBox(Args.Obj).State[Args.Values[0]];
+end;
+
+procedure TCheckListBox_Write_ItemEnabled(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).State[Args.Values[0]] := Value;
+end;
+
+procedure TCheckListBox_Read_State(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TCheckListBox(Args.Obj).State[Args.Values[0]];
+end;
+
+procedure TCheckListBox_Write_State(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCheckListBox(Args.Obj).State[Args.Values[0]] := Value;
+end;
+
+{ TComboBox }
+
+procedure TComboBox_Read_DropDownCount(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TComboBox(Args.Obj).DropDownCount;
+end;
+
+procedure TComboBox_Write_DropDownCount(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TComboBox(Args.Obj).DropDownCount := Value;
+end;
+
+{ TControl }
+
+procedure TControl_ScaleValue(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  case VarType(Args.Values[0]) of
+    varInteger: Value := Args.Values[0] * (Screen.PixelsPerInch / Screen.DefaultPixelsPerInch);
+  else
+    JvInterpreterError(ieTypeMistmatch, -1);
+  end;
+end;
+
+procedure TControl_Read_StyleElements(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := S2V(Byte(TControl(Args.Obj).StyleElements));
+end;
+
+procedure TControl_Write_StyleElements(const Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TControl(Args.Obj).StyleElements := TStyleElements(Byte(V2S(Value)));
 end;
 
 { TCustomForm }
@@ -181,89 +282,86 @@ begin
   TCustomForm(Args.Obj).PopupParent := TCustomForm(V2O(Value));
 end;
 
-{ TCheckListBox }
+{ TCustomIniFile }
 
-type
-  TJvInterpreterCheckListBoxEvents = class(TJvInterpreterEvent)
-  private
-    procedure OnClickCheck(Sender: TObject);
-  end;
-
-procedure TJvInterpreterCheckListBoxEvents.OnClickCheck(Sender: TObject);
+procedure TCustomIniFile_DeleteKey(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  CallFunction(nil, [O2V(Sender)]);
+  TCustomIniFile(Args.Obj).DeleteKey(Args.Values[0], Args.Values[1]);
 end;
 
-procedure TCheckListBox_Create(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_EraseSection(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := O2V(TCheckListBox.Create(V2O(Args.Values[0]) as TComponent));
+  TCustomIniFile(Args.Obj).EraseSection(Args.Values[0]);
 end;
 
-procedure TCheckListBox_CheckAll(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadBool(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).CheckAll(Args.Values[0], Args.Values[1], Args.Values[2]);
+  Value := TCustomIniFile(Args.Obj).ReadBool(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
-procedure TCheckListBox_Read_Checked(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadFloat(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TCheckListBox(Args.Obj).Checked[Args.Values[0]];
+  Value := TCustomIniFile(Args.Obj).ReadFloat(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
-procedure TCheckListBox_Write_Checked(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadInteger(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).Checked[Args.Values[0]] := Value;
+  Value := TCustomIniFile(Args.Obj).ReadInteger(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
-procedure TCheckListBox_Read_State(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadSection(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TCheckListBox(Args.Obj).State[Args.Values[0]];
+  TCustomIniFile(Args.Obj).ReadSection(Args.Values[0], TStrings(V2O(Args.Values[1])));
 end;
 
-procedure TCheckListBox_Write_State(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadSections(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).State[Args.Values[0]] := Value;
+  TCustomIniFile(Args.Obj).ReadSections(TStrings(V2O(Args.Values[0])));
 end;
 
-procedure TCheckListBox_Read_Header(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadSectionValues(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TCheckListBox(Args.Obj).Header[Args.Values[0]];
+  TCustomIniFile(Args.Obj).ReadSectionValues(Args.Values[0], TStrings(V2O(Args.Values[1])));
 end;
 
-procedure TCheckListBox_Write_Header(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ReadString(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).Header[Args.Values[0]] := Value;
+  Value := TCustomIniFile(Args.Obj).ReadString(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
-procedure TCheckListBox_Read_ItemEnabled(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_SectionExists(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TCheckListBox(Args.Obj).State[Args.Values[0]];
+  Value := TCustomIniFile(Args.Obj).SectionExists(Args.Values[0]);
 end;
 
-procedure TCheckListBox_Write_ItemEnabled(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_UpdateFile(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).State[Args.Values[0]] := Value;
+  TCustomIniFile(Args.Obj).UpdateFile;
 end;
 
-procedure TCheckListBox_Read_AllowGrayed(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_ValueExists(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TCheckListBox(Args.Obj).AllowGrayed;
+  Value := TCustomIniFile(Args.Obj).ValueExists(Args.Values[0], Args.Values[1]);
 end;
 
-procedure TCheckListBox_Write_AllowGrayed(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_WriteBool(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TCheckListBox(Args.Obj).AllowGrayed := Value;
+  TCustomIniFile(Args.Obj).WriteBool(Args.Values[0], Args.Values[1], Args.Values[2])
 end;
 
-{ TComboBox }
-
-procedure TComboBox_Read_DropDownCount(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_WriteFloat(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := TComboBox(Args.Obj).DropDownCount;
+  TCustomIniFile(Args.Obj).WriteFloat(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
-procedure TComboBox_Write_DropDownCount(const Value: Variant; Args: TJvInterpreterArgs);
+procedure TCustomIniFile_WriteInteger(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  TComboBox(Args.Obj).DropDownCount := Value;
+  TCustomIniFile(Args.Obj).WriteInteger(Args.Values[0], Args.Values[1], Args.Values[2]);
+end;
+
+procedure TCustomIniFile_WriteString(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TCustomIniFile(Args.Obj).WriteString(Args.Values[0], Args.Values[1], Args.Values[2]);
 end;
 
 { TCustomLabeledEdit }
@@ -296,6 +394,44 @@ end;
 procedure TCustomLabeledEdit_Write_LabelSpacing(const Value: Variant; Args: TJvInterpreterArgs);
 begin
   TCustomLabeledEdit(Args.Obj).LabelSpacing := Value;
+end;
+
+{ TDirectory }
+
+procedure TDirectory_GetDirectories(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TDirectory.GetDirectories(Args.Values[0], Args.Values[1], Args.Values[2]);
+end;
+
+procedure TDirectory_GetFiles(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TDirectory.GetFiles(Args.Values[0], Args.Values[1], Args.Values[2]);
+end;
+
+{ TFile }
+
+procedure TFile_ReadAllText(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TFile.ReadAllText(Args.Values[0]);
+end;
+
+procedure TFile_WriteAllText(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TFile.WriteAllText(Args.Values[0], Args.Values[1]);
+end;
+
+{ THashedStringList }
+
+procedure THashedStringList_Create(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := O2V(THashedStringList.Create);
+end;
+
+{ TIniFile }
+
+procedure TIniFile_Create(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := O2V(TIniFile.Create(String(Args.Values[0])));
 end;
 
 { TLabeledEdit }
@@ -344,6 +480,23 @@ begin
   CallFunction(nil, [O2V(Sender), O2V(Item), Selected]);
 end;
 
+{ TMemIniFile }
+
+procedure TMemIniFile_Create(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := O2V(TMemIniFile.Create(String(Args.Values[0])));
+end;
+
+procedure TMemIniFile_GetStrings(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TMemIniFile(Args.Obj).GetStrings(TStrings(V2O(Args.Values[0])));
+end;
+
+procedure TMemIniFile_SetStrings(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TMemIniFile(Args.Obj).SetStrings(TStrings(V2O(Args.Values[0])));
+end;
+
 { TMenu }
 
 procedure TMenu_Read_AutoHotKeys(var Value: Variant; Args: TJvInterpreterArgs);
@@ -363,126 +516,6 @@ begin
   TMenuItem(Args.Obj).Clear;
 end;
 
-{ TBitmap }
-
-procedure TBitmap_SetSize(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TBitmap(Args.Obj).SetSize(Args.Values[0], Args.Values[1]);
-end;
-
-{ THashedStringList }
-
-procedure THashedStringList_Create(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := O2V(THashedStringList.Create);
-end;
-
-{ TCustomIniFile }
-
-procedure TCustomIniFile_ReadString(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).ReadString(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_ReadInteger(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).ReadInteger(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_ReadFloat(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).ReadFloat(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_ReadBool(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).ReadBool(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_WriteString(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).WriteString(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_WriteInteger(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).WriteInteger(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_WriteFloat(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).WriteFloat(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TCustomIniFile_WriteBool(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).WriteBool(Args.Values[0], Args.Values[1], Args.Values[2])
-end;
-
-procedure TCustomIniFile_DeleteKey(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).DeleteKey(Args.Values[0], Args.Values[1]);
-end;
-
-procedure TCustomIniFile_EraseSection(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).EraseSection(Args.Values[0]);
-end;
-
-procedure TCustomIniFile_SectionExists(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).SectionExists(Args.Values[0]);
-end;
-
-procedure TCustomIniFile_ValueExists(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TCustomIniFile(Args.Obj).ValueExists(Args.Values[0], Args.Values[1]);
-end;
-
-procedure TCustomIniFile_ReadSection(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).ReadSection(Args.Values[0], TStrings(V2O(Args.Values[1])));
-end;
-
-procedure TCustomIniFile_ReadSections(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).ReadSections(TStrings(V2O(Args.Values[0])));
-end;
-
-procedure TCustomIniFile_ReadSectionValues(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).ReadSectionValues(Args.Values[0], TStrings(V2O(Args.Values[1])));
-end;
-
-procedure TCustomIniFile_UpdateFile(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TCustomIniFile(Args.Obj).UpdateFile;
-end;
-
-{ TIniFile }
-
-procedure TIniFile_Create(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := O2V(TIniFile.Create(String(Args.Values[0])));
-end;
-
-{ TMemIniFile }
-
-procedure TMemIniFile_Create(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := O2V(TMemIniFile.Create(String(Args.Values[0])));
-end;
-
-procedure TMemIniFile_GetStrings(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TMemIniFile(Args.Obj).GetStrings(TStrings(V2O(Args.Values[0])));
-end;
-
-procedure TMemIniFile_SetStrings(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TMemIniFile(Args.Obj).SetStrings(TStrings(V2O(Args.Values[0])));
-end;
-
 { TRegistryIniFile }
 
 procedure TRegistryIniFile_Create(var Value: Variant; Args: TJvInterpreterArgs);
@@ -490,49 +523,16 @@ begin
   Value := O2V(TRegistryIniFile.Create(String(Args.Values[0])));
 end;
 
-{ TControl }
+{ TWinControl }
 
-procedure TControl_ScaleValue(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TWinControl_Read_DoubleBuffered(var Value: Variant; Args: TJvInterpreterArgs);
 begin
-  case VarType(Args.Values[0]) of
-    varInteger: Value := Args.Values[0] * (Screen.PixelsPerInch / Screen.DefaultPixelsPerInch);
-  else
-    JvInterpreterError(ieTypeMistmatch, -1);
-  end;
+  Value := TWinControl(Args.Obj).DoubleBuffered;
 end;
 
-procedure TControl_Read_StyleElements(var Value: Variant; Args: TJvInterpreterArgs);
+procedure TWinControl_Write_DoubleBuffered(const Value: Variant; Args: TJvInterpreterArgs);
 begin
-  Value := S2V(Byte(TControl(Args.Obj).StyleElements));
-end;
-
-procedure TControl_Write_StyleElements(const Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TControl(Args.Obj).StyleElements := TStyleElements(Byte(V2S(Value)));
-end;
-
-{ TDirectory }
-
-procedure TDirectory_GetDirectories(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TDirectory.GetDirectories(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-procedure TDirectory_GetFiles(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TDirectory.GetFiles(Args.Values[0], Args.Values[1], Args.Values[2]);
-end;
-
-{ TFile }
-
-procedure TFile_ReadAllText(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  Value := TFile.ReadAllText(Args.Values[0]);
-end;
-
-procedure TFile_WriteAllText(var Value: Variant; Args: TJvInterpreterArgs);
-begin
-  TFile.WriteAllText(Args.Values[0], Args.Values[1]);
+  TWinControl(Args.Obj).DoubleBuffered := Boolean(Value);
 end;
 
 { Registration }
@@ -540,10 +540,6 @@ end;
 procedure RegisterJvInterpreterAdapter(JvInterpreterAdapter: TJvInterpreterAdapter);
 begin
   with JvInterpreterAdapter do begin
-    { TBytesStream }
-    AddClass('Classes', TBytesStream, 'TBytesStream');
-    AddGet(TBytesStream, 'Create', TBytesStream_Create, 1, [varEmpty], varEmpty);
-
     { TBinaryReader }
     AddClass('Classes', TBinaryReader, 'TBinaryReader');
     AddGet(TBinaryReader, 'Create', TBinaryReader_Create, 1, [varEmpty], varEmpty);
@@ -553,13 +549,13 @@ begin
     AddGet(TBinaryReader, 'ReadBytes', TBinaryReader_ReadBytes, 1, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadChar', TBinaryReader_ReadChar, 0, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadDouble', TBinaryReader_ReadDouble, 0, [varEmpty], varEmpty);
+    AddGet(TBinaryReader, 'ReadInteger', TBinaryReader_ReadInteger, 0, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadShortInt', TBinaryReader_ReadShortInt, 0, [varEmpty], varEmpty);
+    AddGet(TBinaryReader, 'ReadSingle', TBinaryReader_ReadSingle, 0, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadSmallInt', TBinaryReader_ReadSmallInt, 0, [varEmpty], varEmpty);
+    AddGet(TBinaryReader, 'ReadString', TBinaryReader_ReadString, 0, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadUInt16', TBinaryReader_ReadUInt16, 0, [varEmpty], varEmpty);
     AddGet(TBinaryReader, 'ReadUInt32', TBinaryReader_ReadUInt32, 0, [varEmpty], varEmpty);
-    AddGet(TBinaryReader, 'ReadInteger', TBinaryReader_ReadInteger, 0, [varEmpty], varEmpty);
-    AddGet(TBinaryReader, 'ReadSingle', TBinaryReader_ReadSingle, 0, [varEmpty], varEmpty);
-    AddGet(TBinaryReader, 'ReadString', TBinaryReader_ReadString, 0, [varEmpty], varEmpty);
 
     { TBinaryWriter }
     AddClass('Classes', TBinaryWriter, 'TBinaryWriter');
@@ -567,9 +563,43 @@ begin
     AddGet(TBinaryWriter, 'Write', TBinaryWriter_Write, 1, [varEmpty], varEmpty);
     AddGet(TBinaryWriter, 'WriteSingle', TBinaryWriter_WriteSingle, 1, [varEmpty], varEmpty);
 
-    { TWinControl }
-    AddGet(TWinControl, 'DoubleBuffered', TWinControl_Read_DoubleBuffered, 0, [varEmpty], varEmpty);
-    AddSet(TWinControl, 'DoubleBuffered', TWinControl_Write_DoubleBuffered, 0, [varEmpty]);
+    { TBitmap }
+    AddGet(TBitmap, 'SetSize', TBitmap_SetSize, 2, [varEmpty, varEmpty], varEmpty);
+
+    { TBoundLabel }
+    AddClass('ExtCtrls', TBoundLabel, 'TBoundLabel');
+
+    { TBytesStream }
+    AddClass('Classes', TBytesStream, 'TBytesStream');
+    AddGet(TBytesStream, 'Create', TBytesStream_Create, 1, [varEmpty], varEmpty);
+
+    { TCheckListBox }
+    AddClass('CheckLst', TCheckListBox, 'TCheckListBox');
+    AddGet(TCheckListBox, 'AllowGrayed', TCheckListBox_Read_AllowGrayed, 0, [varEmpty], varEmpty);
+    AddSet(TCheckListBox, 'AllowGrayed', TCheckListBox_Write_AllowGrayed, 0, [varEmpty]);
+    AddGet(TCheckListBox, 'CheckAll', TCheckListBox_CheckAll, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddIGet(TCheckListBox, 'Checked', TCheckListBox_Read_Checked, 1, [varEmpty], varEmpty);
+    AddISet(TCheckListBox, 'Checked', TCheckListBox_Write_Checked, 1, [varNull]);
+    AddGet(TCheckListBox, 'Create', TCheckListBox_Create, 1, [varEmpty], varEmpty);
+    AddIGet(TCheckListBox, 'Header', TCheckListBox_Read_Header, 1, [varEmpty], varEmpty);
+    AddISet(TCheckListBox, 'Header', TCheckListBox_Write_Header, 1, [varNull]);
+    AddIGet(TCheckListBox, 'ItemEnabled', TCheckListBox_Read_ItemEnabled, 1, [varEmpty], varEmpty);
+    AddISet(TCheckListBox, 'ItemEnabled', TCheckListBox_Write_ItemEnabled, 1, [varNull]);
+    AddIGet(TCheckListBox, 'State', TCheckListBox_Read_State, 1, [varEmpty], varEmpty);
+    AddISet(TCheckListBox, 'State', TCheckListBox_Write_State, 1, [varNull]);
+    AddHandler('CheckLst', 'TNotifyEvent', TJvInterpreterCheckListBoxEvents, @TJvInterpreterCheckListBoxEvents.OnClickCheck);
+
+    { TComboBox }
+    AddGet(TComboBox, 'DropDownCount', TComboBox_Read_DropDownCount, 0, [varEmpty], varEmpty);
+    AddSet(TComboBox, 'DropDownCount', TComboBox_Write_DropDownCount, 0, [varEmpty]);
+
+    { TControl }
+    AddConst('Controls', 'seBorder', Ord(seBorder));
+    AddConst('Controls', 'seClient', Ord(seClient));
+    AddConst('Controls', 'seFont', Ord(seFont));
+    AddGet(TControl, 'ScaleValue', TControl_ScaleValue, 1, [varEmpty], varEmpty);
+    AddGet(TControl, 'StyleElements', TControl_Read_StyleElements, 0, [varEmpty], varEmpty);
+    AddSet(TControl, 'StyleElements', TControl_Write_StyleElements, 0, [varEmpty]);
 
     { TCustomForm }
     AddGet(TCustomForm, 'PopupMode', TCustomForm_Read_PopupMode, 0, [varEmpty], varEmpty);
@@ -577,25 +607,24 @@ begin
     AddGet(TCustomForm, 'PopupParent', TCustomForm_Read_PopupParent, 0, [varEmpty], varEmpty);
     AddSet(TCustomForm, 'PopupParent', TCustomForm_Write_PopupParent, 0, [varEmpty]);
 
-    { TCheckListBox }
-    AddClass('CheckLst', TCheckListBox, 'TCheckListBox');
-    AddGet(TCheckListBox, 'Create', TCheckListBox_Create, 1, [varEmpty], varEmpty);
-    AddGet(TCheckListBox, 'CheckAll', TCheckListBox_CheckAll, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddIGet(TCheckListBox, 'Checked', TCheckListBox_Read_Checked, 1, [varEmpty], varEmpty);
-    AddISet(TCheckListBox, 'Checked', TCheckListBox_Write_Checked, 1, [varNull]);
-    AddIGet(TCheckListBox, 'State', TCheckListBox_Read_State, 1, [varEmpty], varEmpty);
-    AddISet(TCheckListBox, 'State', TCheckListBox_Write_State, 1, [varNull]);
-    AddIGet(TCheckListBox, 'Header', TCheckListBox_Read_Header, 1, [varEmpty], varEmpty);
-    AddISet(TCheckListBox, 'Header', TCheckListBox_Write_Header, 1, [varNull]);
-    AddIGet(TCheckListBox, 'ItemEnabled', TCheckListBox_Read_ItemEnabled, 1, [varEmpty], varEmpty);
-    AddISet(TCheckListBox, 'ItemEnabled', TCheckListBox_Write_ItemEnabled, 1, [varNull]);
-    AddGet(TCheckListBox, 'AllowGrayed', TCheckListBox_Read_AllowGrayed, 0, [varEmpty], varEmpty);
-    AddSet(TCheckListBox, 'AllowGrayed', TCheckListBox_Write_AllowGrayed, 0, [varEmpty]);
-    AddHandler('CheckLst', 'TNotifyEvent', TJvInterpreterCheckListBoxEvents, @TJvInterpreterCheckListBoxEvents.OnClickCheck);
-
-    { TComboBox }
-    AddGet(TComboBox, 'DropDownCount', TComboBox_Read_DropDownCount, 0, [varEmpty], varEmpty);
-    AddSet(TComboBox, 'DropDownCount', TComboBox_Write_DropDownCount, 0, [varEmpty]);
+    { TCustomIniFile }
+    AddClass('IniFiles', TCustomIniFile, 'TCustomIniFile');
+    AddGet(TCustomIniFile, 'DeleteKey', TCustomIniFile_DeleteKey, 2, [varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'EraseSection', TCustomIniFile_EraseSection, 1, [varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadBool', TCustomIniFile_ReadBool, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadFloat', TCustomIniFile_ReadFloat, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadInteger', TCustomIniFile_ReadInteger, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadSection', TCustomIniFile_ReadSection, 2, [varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadSections', TCustomIniFile_ReadSections, 1, [varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadSectionValues', TCustomIniFile_ReadSectionValues, 2, [varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ReadString', TCustomIniFile_ReadString, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'SectionExists', TCustomIniFile_SectionExists, 1, [varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'UpdateFile', TCustomIniFile_UpdateFile, 0, [varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'ValueExists', TCustomIniFile_ValueExists, 2, [varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'WriteBool', TCustomIniFile_WriteBool, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'WriteFloat', TCustomIniFile_WriteFloat, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'WriteInteger', TCustomIniFile_WriteInteger, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TCustomIniFile, 'WriteString', TCustomIniFile_WriteString, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
 
     { TCustomLabeledEdit }
     AddClass('ExtCtrls', TCustomLabeledEdit, 'TCustomLabeledEdit');
@@ -606,12 +635,29 @@ begin
     AddGet(TCustomLabeledEdit, 'LabelSpacing', TCustomLabeledEdit_Read_LabelSpacing, 0, [varEmpty], varEmpty);
     AddSet(TCustomLabeledEdit, 'LabelSpacing', TCustomLabeledEdit_Write_LabelSpacing, 0, [varEmpty]);
 
+    { TDirectory }
+    AddConst('IOUtils', 'soAllDirectories', Ord(TSearchOption.soAllDirectories));
+    AddConst('IOUtils', 'soTopDirectoryOnly', Ord(TSearchOption.soTopDirectoryOnly));
+    AddRec('IOUtils', 'TDirectory', SizeOf(TDirectory), [], nil, nil, nil);
+    AddRecGet('IOUtils', 'TDirectory', 'GetDirectories', TDirectory_GetDirectories, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddRecGet('IOUtils', 'TDirectory', 'GetFiles', TDirectory_GetFiles, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+
+    { TFile }
+    AddRec('IOUtils', 'TFile', SizeOf(TFile), [], nil, nil, nil);
+    AddRecGet('IOUtils', 'TFile', 'ReadAllText', TFile_ReadAllText, 1, [varEmpty], varEmpty);
+    AddRecGet('IOUtils', 'TFile', 'WriteAllText', TFile_WriteAllText, 2, [varEmpty, varEmpty], varEmpty);
+
+    { THashedStringList }
+    AddClass('IniFiles', THashedStringList, 'THashedStringList');
+    AddGet(THashedStringList, 'Create', THashedStringList_Create, 0, [varEmpty], varEmpty);
+
+    { TIniFile }
+    AddClass('IniFiles', TIniFile, 'TIniFile');
+    AddGet(TIniFile, 'Create', TIniFile_Create, 1, [varEmpty], varEmpty);
+
     { TLabeledEdit }
     AddClass('ExtCtrls', TLabeledEdit, 'TLabeledEdit');
     AddGet(TLabeledEdit, 'Create', TLabeledEdit_Create, 1, [varEmpty], varEmpty);
-
-    { TBoundLabel }
-    AddClass('ExtCtrls', TBoundLabel, 'TBoundLabel');
 
     { TListItem }
     AddGet(TListItem, 'SubItems', TListItem_Read_SubItems, 0, [varEmpty], varEmpty);
@@ -624,6 +670,12 @@ begin
     AddHandler('ComCtrls', 'TLVOwnerDataEvent', TJvInterpreterListViewEvents, @TJvInterpreterListViewEvents.OnData);
     AddHandler('ComCtrls', 'TLVSelectItemEvent', TJvInterpreterListViewEvents, @TJvInterpreterListViewEvents.OnSelectItem);
 
+    { TMemIniFile }
+    AddClass('IniFiles', TMemIniFile, 'TMemIniFile');
+    AddGet(TMemIniFile, 'Create', TMemIniFile_Create, 1, [varEmpty], varEmpty);
+    AddGet(TMemIniFile, 'GetStrings', TMemIniFile_GetStrings, 1, [varEmpty], varEmpty);
+    AddGet(TMemIniFile, 'SetStrings', TMemIniFile_SetStrings, 1, [varEmpty], varEmpty);
+
     { TMenu }
     AddGet(TMenu, 'AutoHotKeys', TMenu_Read_AutoHotKeys, 0, [varEmpty], varEmpty);
     AddSet(TMenu, 'AutoHotKeys', TMenu_Write_AutoHotKeys, 0, [varEmpty]);
@@ -631,65 +683,13 @@ begin
     { TMenuItem }
     AddGet(TMenuItem, 'Clear', TMenuItem_Clear, 0, [varEmpty], varEmpty);
 
-    { TBitmap }
-    AddGet(TBitmap, 'SetSize', TBitmap_SetSize, 2, [varEmpty, varEmpty], varEmpty);
-
-    { THashedStringList }
-    AddClass('IniFiles', THashedStringList, 'THashedStringList');
-    AddGet(THashedStringList, 'Create', THashedStringList_Create, 0, [varEmpty], varEmpty);
-
-    { TCustomIniFile }
-    AddClass('IniFiles', TCustomIniFile, 'TCustomIniFile');
-    AddGet(TCustomIniFile, 'ReadString', TCustomIniFile_ReadString, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadInteger', TCustomIniFile_ReadInteger, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadFloat', TCustomIniFile_ReadFloat, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadBool', TCustomIniFile_ReadBool, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'WriteString', TCustomIniFile_WriteString, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'WriteInteger', TCustomIniFile_WriteInteger, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'WriteFloat', TCustomIniFile_WriteFloat, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'WriteBool', TCustomIniFile_WriteBool, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'DeleteKey', TCustomIniFile_DeleteKey, 2, [varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'EraseSection', TCustomIniFile_EraseSection, 1, [varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'SectionExists', TCustomIniFile_SectionExists, 1, [varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ValueExists', TCustomIniFile_ValueExists, 2, [varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadSection', TCustomIniFile_ReadSection, 2, [varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadSections', TCustomIniFile_ReadSections, 1, [varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'ReadSectionValues', TCustomIniFile_ReadSectionValues, 2, [varEmpty, varEmpty], varEmpty);
-    AddGet(TCustomIniFile, 'UpdateFile', TCustomIniFile_UpdateFile, 0, [varEmpty], varEmpty);
-
-    { TIniFile }
-    AddClass('IniFiles', TIniFile, 'TIniFile');
-    AddGet(TIniFile, 'Create', TIniFile_Create, 1, [varEmpty], varEmpty);
-
-    { TMemIniFile }
-    AddClass('IniFiles', TMemIniFile, 'TMemIniFile');
-    AddGet(TMemIniFile, 'Create', TMemIniFile_Create, 1, [varEmpty], varEmpty);
-    AddGet(TMemIniFile, 'GetStrings', TMemIniFile_GetStrings, 1, [varEmpty], varEmpty);
-    AddGet(TMemIniFile, 'SetStrings', TMemIniFile_SetStrings, 1, [varEmpty], varEmpty);
-
     { TRegistryIniFile }
     AddClass('Registry', TRegistryIniFile, 'TRegistryIniFile');
     AddGet(TRegistryIniFile, 'Create', TRegistryIniFile_Create, 1, [varEmpty], varEmpty);
 
-    { TControl }
-    AddConst('Controls', 'seFont', Ord(seFont));
-    AddConst('Controls', 'seClient', Ord(seClient));
-    AddConst('Controls', 'seBorder', Ord(seBorder));
-    AddGet(TControl, 'ScaleValue', TControl_ScaleValue, 1, [varEmpty], varEmpty);
-    AddGet(TControl, 'StyleElements', TControl_Read_StyleElements, 0, [varEmpty], varEmpty);
-    AddSet(TControl, 'StyleElements', TControl_Write_StyleElements, 0, [varEmpty]);
-
-    { TDirectory }
-    AddConst('IOUtils', 'soTopDirectoryOnly', Ord(TSearchOption.soTopDirectoryOnly));
-    AddConst('IOUtils', 'soAllDirectories', Ord(TSearchOption.soAllDirectories));
-    AddRec('IOUtils', 'TDirectory', SizeOf(TDirectory), [], nil, nil, nil);
-    AddRecGet('IOUtils', 'TDirectory', 'GetDirectories', TDirectory_GetDirectories, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-    AddRecGet('IOUtils', 'TDirectory', 'GetFiles', TDirectory_GetFiles, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
-
-    { TFile }
-    AddRec('IOUtils', 'TFile', SizeOf(TFile), [], nil, nil, nil);
-    AddRecGet('IOUtils', 'TFile', 'ReadAllText', TFile_ReadAllText, 1, [varEmpty], varEmpty);
-    AddRecGet('IOUtils', 'TFile', 'WriteAllText', TFile_WriteAllText, 2, [varEmpty, varEmpty], varEmpty);
+    { TWinControl }
+    AddGet(TWinControl, 'DoubleBuffered', TWinControl_Read_DoubleBuffered, 0, [varEmpty], varEmpty);
+    AddSet(TWinControl, 'DoubleBuffered', TWinControl_Write_DoubleBuffered, 0, [varEmpty]);
   end;
 end;
 
