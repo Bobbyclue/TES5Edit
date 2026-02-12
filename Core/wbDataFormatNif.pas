@@ -2497,6 +2497,14 @@ function TwbNifFile.GetAssets: TdfElements;
     Result[Pred(Length(Result))] := el;
   end;
 
+  function IsMaterial(el: TdfElement): Boolean;
+  begin
+    Result := False;
+    if not Assigned(el) then Exit;
+    var s := el.EditValue;
+    Result := s.EndsWith('.bgsm', True) or s.EndsWith('.bgem', True);
+  end;
+
 var
   i, j: Integer;
   el: TdfElement;
@@ -2512,7 +2520,7 @@ begin
     end
 
     // BGSM/BGEM file in the Name field of FO4 meshes
-    else if (NifVersion = nfFO4) and (Block.BlockType = 'BSLightingShaderProperty') then
+    else if (NifVersion = nfFO4) and (Block.BlockType = 'BSLightingShaderProperty') and IsMaterial(Block.Elements['Name']) then
       AddAsset(Block.Elements['Name'])
 
     else if Block.BlockType = 'BSEffectShaderProperty' then begin
@@ -2522,7 +2530,7 @@ begin
       AddAsset(Block.Elements['Normal Texture']);
       AddAsset(Block.Elements['Env Mask Texture']);
       // BGSM/BGEM file in the Name field of FO4 meshes
-      if NifVersion = nfFO4 then
+      if (NifVersion = nfFO4) and IsMaterial(Block.Elements['Name']) then
         AddAsset(Block.Elements['Name']);
     end
 
