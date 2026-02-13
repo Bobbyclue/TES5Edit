@@ -23,6 +23,7 @@ type
     ['{3BE80702-B634-46EB-8A45-38D9D911E6B6}']
 
     function FunctionExists(const aName: string): Boolean;
+    function FunctionIsEmpty(const aName: string): Boolean;
     function CallFunction(const aName: string; const aParams: array of Variant): Variant;
     function GetLastErrorLocation: string;
   end;

@@ -50,6 +50,7 @@ type
     { IxeScript }
     function CallFunction(const aName: string; const aParams: array of Variant): Variant;
     function FunctionExists(const aName: string): Boolean;
+    function FunctionIsEmpty(const aName: string): Boolean;
     function GetLastErrorLocation: string;
   public
     destructor Destroy; override;
@@ -834,6 +835,50 @@ end;
 function TxejviScript.FunctionExists(const aName: string): Boolean;
 begin
   Result := FProgram.FunctionExists('', aName);
+end;
+
+function TxejviScript.FunctionIsEmpty(const aName: string): Boolean;
+var
+  FunctionDesc: TJvInterpreterFunctionDesc;
+  Body: string;
+  P, I: Integer;
+begin
+  Result := False;
+  FunctionDesc := nil;
+  for I := FProgram.Adapter.SrcFunctionList.Count - 1 downto 0 do begin
+    var SrcFun := TJvInterpreterSrcFunction(FProgram.Adapter.SrcFunctionList.Items[I]);
+    if SameText(SrcFun.FunctionDesc.Identifier, aName) then begin
+      FunctionDesc := SrcFun.FunctionDesc;
+      Break;
+    end;
+  end;
+  if not Assigned(FunctionDesc) then
+    Exit;
+
+  Body := Copy(FScript, FunctionDesc.PosBeg, FunctionDesc.PosEnd - FunctionDesc.PosBeg);
+  Body := LowerCase(Body);
+
+  // skip any var section before begin
+  P := Pos('begin', Body);
+  if P = 0 then
+    Exit;
+  Body := Copy(Body, P, Length(Body) - P + 1);
+
+  // strip all whitespace to normalize
+  I := 1;
+  while I <= Length(Body) do
+    if CharInSet(Body[I], [' ', #9, #10, #13]) then
+      Delete(Body, I, 1)
+    else
+      Inc(I);
+
+  // trivially empty: no statements, or only Result := 0
+  Result := (Body = 'beginend') or
+            (Body = 'beginend;') or
+            (Body = 'beginend.') or
+            (Body = 'beginresult:=0;end') or
+            (Body = 'beginresult:=0;end;') or
+            (Body = 'beginresult:=0;end.');
 end;
 
 function TxejviScript.GetLastErrorLocation: string;

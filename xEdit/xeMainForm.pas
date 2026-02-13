@@ -8463,7 +8463,7 @@ begin
         NavCleanupCollapsedNodeChildren;
         try
           try
-            if Script.FunctionExists('Initialize') then begin
+            if Script.FunctionExists('Initialize') and not Script.FunctionIsEmpty('Initialize') then begin
               var Result: Variant;
               Inc(wbHideStartTime);
               try
@@ -8477,14 +8477,14 @@ begin
               end;
             end;
 
-            // skip selected records iteration if Process() function doesn't exist
-            if Script.FunctionExists('Process') then
+            // skip selected records iteration if Process() function doesn't exist or is empty
+            if Script.FunctionExists('Process') and not Script.FunctionIsEmpty('Process') then
               if not aRefByMode then
                 ApplyScriptToSelection(SelectedNodes, Count, bShowMessages)
               else
                 ApplyScriptToSelection(SelectedElements, Count, bShowMessages);
 
-            if Script.FunctionExists('Finalize') then begin
+            if Script.FunctionExists('Finalize') and not Script.FunctionIsEmpty('Finalize') then begin
               var Result: Variant;
               Inc(wbHideStartTime);
               try
