@@ -2815,7 +2815,10 @@ begin
     .SetAfterLoad(wbLVLAfterLoad);
 
   wbRecord(MGEF, 'Magic Effect', [
-    wbStringMgefCode(EDID, 'Magic Effect Code', 4).SetRequired,
+    wbStringMgefCode(EDID, 'Magic Effect Code', 4)
+      .IncludeFlagOnValue(dfHasZeroTerminator)
+      .IncludeFlagOnValue(dfNeedsPrepareSave)
+      .SetRequired,
     {wbStruct(OBME, 'Oblivion Magic Extender', [
       wbInteger('Record Version', itU8),
       wbOBMEVersion,
