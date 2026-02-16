@@ -559,6 +559,56 @@ begin
   );
 end;
 
+procedure _wbSelectedFiles(var Value: Variant; Args: TJvInterpreterArgs);
+var
+  Element: IwbElement;
+  _File: IwbFile;
+  MainRecord: IwbMainRecord;
+  NodeData: PNavNodeData;
+  Nodes: TNodeArray;
+  List: TList;
+  i, j: Integer;
+  Found: Boolean;
+begin
+  List := TList(V2O(Args.Values[0]));
+  if not Assigned(List) then
+    Exit;
+
+  Nodes := frmMain.vstNav.GetSortedSelection(True);
+
+  for i := Low(Nodes) to High(Nodes) do begin
+    NodeData := frmMain.vstNav.GetNodeData(Nodes[i]);
+    if not Assigned(NodeData) then
+      Continue;
+    Element := NodeData.Element;
+    if Supports(Element, IwbFile, _File) then begin
+      // Check if this file is already in the list
+      Found := False;
+      for j := 0 to Pred(List.Count) do begin
+        if Supports(IInterface(Pointer(List[j])), IwbFile, Element) and (Element as IwbFile = _File) then begin
+          Found := True;
+          Break;
+        end;
+      end;
+      if not Found then
+        List.Add(Pointer(_File));
+    end
+    else if Supports(Element, IwbMainRecord, MainRecord) then begin
+      _File := MainRecord._File;
+      // Check if this file is already in the list
+      Found := False;
+      for j := 0 to Pred(List.Count) do begin
+        if Supports(IInterface(Pointer(List[j])), IwbFile, Element) and (Element as IwbFile = _File) then begin
+          Found := True;
+          Break;
+        end;
+      end;
+      if not Found then
+        List.Add(Pointer(_File));
+    end;
+  end;
+end;
+
 procedure _wbSelectedFilesToFileNames(var Value: Variant; Args: TJvInterpreterArgs);
 var
   Element: IwbElement;
@@ -656,6 +706,7 @@ begin
     AddFunction(cUnit, 'wbGetUVRangeTexturesList', _wbGetUVRangeTexturesList, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbBuildAtlasFromTexturesList', _wbBuildAtlasFromTexturesList, 7, [varEmpty, varEmpty, varEmpty, varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
     AddFunction(cUnit, 'wbBuildAtlasFromAtlasMap', _wbBuildAtlasFromAtlasMap, 5, [varEmpty, varEmpty, varEmpty, varEmpty, varEmpty], varEmpty);
+    AddFunction(cUnit, 'wbSelectedFiles', _wbSelectedFiles, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'wbSelectedFilesToFileNames', _wbSelectedFilesToFileNames, 1, [varEmpty], varEmpty);
   end;
 end;
