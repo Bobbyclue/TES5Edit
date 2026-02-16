@@ -518,6 +518,64 @@ begin
   StringSetOp(TSetOperation.U, TStringList(Args.Obj), TStringList(V2O(Args.Values[0])));
 end;
 
+procedure TStrings_AddPair(var Value: Variant; Args: TJvInterpreterArgs);
+var
+  Strings: TStrings;
+  Name, Val: string;
+begin
+  Strings := TStrings(Args.Obj);
+  Name := string(Args.Values[0]);
+  Val := string(Args.Values[1]);
+
+  if Args.Count = 3 then
+    Strings.AddPair(Name, Val, TObject(V2O(Args.Values[2])))
+  else
+    Strings.AddPair(Name, Val);
+
+  Value := O2V(Strings);  // Return TStrings for method chaining
+end;
+
+procedure TStrings_Contains(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TStrings(Args.Obj).Contains(string(Args.Values[0]));
+end;
+
+procedure TStrings_ContainsName(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TStrings(Args.Obj).ContainsName(string(Args.Values[0]));
+end;
+
+procedure TStrings_ContainsObject(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  Value := TStrings(Args.Obj).ContainsObject(TObject(V2O(Args.Values[0])));
+end;
+
+procedure TStrings_InsertObject(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TStrings(Args.Obj).InsertObject(Args.Values[0], string(Args.Values[1]), TObject(V2O(Args.Values[2])));
+end;
+
+procedure TStrings_LoadFromFile(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  if Args.Count = 2 then
+    TStrings(Args.Obj).LoadFromFile(string(Args.Values[0]), TEncoding(V2O(Args.Values[1])))
+  else
+    TStrings(Args.Obj).LoadFromFile(string(Args.Values[0]));
+end;
+
+procedure TStrings_SaveToFile(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  if Args.Count = 2 then
+    TStrings(Args.Obj).SaveToFile(string(Args.Values[0]), TEncoding(V2O(Args.Values[1])))
+  else
+    TStrings(Args.Obj).SaveToFile(string(Args.Values[0]));
+end;
+
+procedure TStrings_SetStrings(var Value: Variant; Args: TJvInterpreterArgs);
+begin
+  TStrings(Args.Obj).SetStrings(TStrings(V2O(Args.Values[0])));
+end;
+
 procedure JvInterpreter_SameText(var Value: Variant; Args: TJvInterpreterArgs);
 begin
   Value := SameText(string(Args.Values[0]), string(Args.Values[1]));
@@ -854,6 +912,14 @@ begin
     { TStringList }
     AddGet(TStrings, 'CaseSensitive', TStringList_Read_CaseSensitive, 0, [varEmpty], varEmpty);
     AddSet(TStrings, 'CaseSensitive', TStringList_Write_CaseSensitive, 0, [varEmpty]);
+    AddGet(TStrings, 'AddPair', TStrings_AddPair, 2, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TStrings, 'Contains', TStrings_Contains, 1, [varEmpty], varEmpty);
+    AddGet(TStrings, 'ContainsName', TStrings_ContainsName, 1, [varEmpty], varEmpty);
+    AddGet(TStrings, 'ContainsObject', TStrings_ContainsObject, 1, [varEmpty], varEmpty);
+    AddGet(TStrings, 'InsertObject', TStrings_InsertObject, 3, [varEmpty, varEmpty, varEmpty], varEmpty);
+    AddGet(TStrings, 'LoadFromFile', TStrings_LoadFromFile, 1, [varEmpty, varEmpty], varEmpty);
+    AddGet(TStrings, 'SaveToFile', TStrings_SaveToFile, 1, [varEmpty, varEmpty], varEmpty);
+    AddGet(TStrings, 'SetStrings', TStrings_SetStrings, 1, [varEmpty], varEmpty);
     AddGet(TStrings, 'Difference', TStringList_Difference, 1, [varEmpty], varEmpty);
     AddGet(TStrings, 'Intersection', TStringList_Intersection, 1, [varEmpty], varEmpty);
     AddGet(TStrings, 'SymmetricDifference', TStringList_SymmetricDifference, 1, [varEmpty], varEmpty);
