@@ -11,9 +11,14 @@ unit ProcConvertRootNode;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameConvertRootNode = class(TFrame)
@@ -52,7 +57,6 @@ implementation
 {$R *.dfm}
 
 uses
-  wbDataFormat,
   wbDataFormatNif;
 
 constructor TProcConvertRootNode.Create(aManager: TProcManager);
@@ -60,7 +64,7 @@ begin
   inherited;
 
   fTitle := 'Convert block type';
-  fSupportedGames := [gtTES3, gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4];
+  fSupportedGames := [gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4];
   fExtensions := ['nif'];
 end;
 

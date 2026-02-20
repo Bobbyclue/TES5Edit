@@ -434,7 +434,7 @@ begin
       if SameValue(mass, 0.0) then
         Log.Add(#9 + block.Name + ': Zero moveable collision mass');
 
-      if (mass > 0.0) and (mass < 0.1) then
+      if (mass > 0.0) and (mass < 0.95) then
         Log.Add(#9 + block.Name + ': Moveable mass < 0.1 causes physics issues due to precision loss');
 
       if mass > 0.0 then
@@ -877,7 +877,8 @@ begin
 
     var Shape := TwbNifBlock(Body.Elements['Shape'].LinksTo);
     if not Assigned(Shape) then begin
-      Log.Add(#9 + Body.Name + ': Missing rigid body shape');
+      if Body.BlockType <> 'bhkAabbPhantom' then
+        Log.Add(#9 + Body.Name + ': Missing rigid body shape');
       Continue;
     end;
 
@@ -923,28 +924,43 @@ begin
   end;
 
 
-  // check controlled block target
-  for var block in nif.BlocksByType('NiControllerSequence') do begin
-    var entries := block.Elements['Controlled Blocks'];
-    for var i := 0 to Pred(entries.Count) do begin
-      var tname := GetControlledBlockName(entries[i], 'Node Name');
-      var t: TwbNifBlock := nil;
-      if tname <> '' then
-        t := nif.BlockByName(tname, 'NiAVObject');
-
-      if not Assigned(t) then begin
-        Log.Add(#9 + block.Name + ': Invalid Node Name "' + tname + '" (must be existing NiAVObject) in ' + entries[i].Path);
+  // check node names in anims
+  for var manager in nif.BlocksByType('NiControllerManager') do
+    for var seq in manager.Elements['Controller Sequences'] do begin
+      var sequence := TwbNifBlock(seq.LinksTo);
+      if not Assigned(sequence) then
         Continue;
+
+      if Assigned(sequence.Elements['Manager']) and (sequence.Elements['Manager'].LinksTo <> manager) then
+        Log.Add(#9 + sequence.Name + ': Invalid Manager field, must be ' + manager.Name);
+
+      if Assigned(sequence.Elements['Accum Root Name']) then begin
+        var rootname := sequence.EditValues['Accum Root Name'];
+        if (rootname = '') or not Assigned(nif.BlockByName(rootname, 'NiAVObject')) then
+          Log.Add(#9 + sequence.Name + ': Invalid Accum Root Name "' + rootname  + '", must be existing NiAVObject');
       end;
 
-      var proptype := GetControlledBlockName(entries[i], 'Property Type');
-      if (proptype <> '') and not Assigned(t.PropertyByType(proptype)) then
-        Log.Add(#9 + block.Name + ': Property ' + proptype  + ' not found for Target "' + tname + '" in ' + entries[i].Path);
+      // check controlled block target
+      for var block in sequence.Elements['Controlled Blocks'] do begin
+        var tname := GetControlledBlockName(block, 'Node Name');
+        var t: TwbNifBlock := nil;
+        if tname <> '' then
+          t := nif.BlockByName(tname, 'NiAVObject');
 
-      if t.Hidden then
-        Log.Add(#9 + block.Name + ': Target "' + tname + '" is hidden in ' + entries[i].Path)
+        if not Assigned(t) then begin
+          Log.Add(#9 + block.Path + ': Invalid Node Name "' + tname + '", must be existing NiAVObject');
+          Continue;
+        end;
+
+        if t.Hidden then
+          Log.Add(#9 + block.Path + ': Target node "' + tname + '" is hidden');
+
+        var proptype := GetControlledBlockName(block, 'Property Type');
+        if (proptype <> '') and not Assigned(t.PropertyByType(proptype)) then
+          Log.Add(#9 + block.Path + ': Property ' + proptype  + ' not found for Target "' + tname + '"');
+      end;
     end;
-  end;
+
 end;
 
 //==============================================================================
@@ -1144,7 +1160,7 @@ begin
 
     for var i := 0 to Pred(textures.Count) do
       if not TPath.HasValidPathChars(textures[i].EditValue, False) then
-        Log.Add(#9 + textures[i].Path + ': Invalid texture ' + textures[i].EditValue)
+        Log.Add(#9 + textures[i].Path + ': Invalid characters in ' + textures[i].EditValue)
       else if TPath.IsPathRooted(textures[i].EditValue) then
         Log.Add(#9 + textures[i].Path + ': Absolute path ' + textures[i].EditValue);
 
@@ -2176,7 +2192,7 @@ begin
     CheckParticleSystem);
 
   AddCheck('Invalid Target field', 'Meshes', ['.nif'],
-    'Check for the invalid Target field in NiCollisionObject, bhkCompressedMeshShape, NiTimeController, NiControllerSequence. Always crashes the game',
+    'Check for the invalid Target field in NiCollisionObject, bhkCompressedMeshShape, NiTimeController. Check for invalid node names in NiControllerSequence',
     CheckTargetField);
 
   AddCheck('Animation stop time', 'Meshes', ['.nif', '.kf'],

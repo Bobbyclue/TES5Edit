@@ -685,6 +685,7 @@ type
     dfIsRecordFlags,
     dfMergeIfMultiple,
     dfMustBeUnion,
+    dfNeedsPrepareSave,
     dfNoCopyAsOverride,
     dfNoMove,
     dfNoReport,
@@ -2553,6 +2554,8 @@ type
     function SetAfterLoad(const aAfterLoad : TwbAfterLoadCallback): IwbValueDef;
     function SetAfterSet(const aAfterSet : TwbAfterSetCallback): IwbValueDef;
     function SetDontShow(const aDontShow : TwbDontShowCallback): IwbValueDef;
+
+    procedure PrepareSave(const aDataContainer : IwbDataContainer);
 
     function ToString(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): string;
     function ToSummary(aDepth: Integer; aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; var aLinksTo: IwbElement): string;
@@ -6538,6 +6541,8 @@ type
     function SetAfterSet(const aAfterSet : TwbAfterSetCallback): IwbValueDef;
     function SetDontShow(const aDontShow : TwbDontShowCallback): IwbValueDef;
 
+    procedure PrepareSave(const aDataContainer : IwbDataContainer); virtual;
+
     function ToString(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): string; reintroduce; virtual; abstract;
     function ToSummary(aDepth: Integer; aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; var aLinksTo: IwbElement): string; virtual;
     function ToSortKey(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aExtended: Boolean): string; virtual;
@@ -6782,6 +6787,8 @@ type
     procedure FromNativeValue(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aValue: Variant); override;
     function GetIsEditable(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Boolean; override;
     function SetToDefault(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Boolean; override;
+
+    procedure PrepareSave(const aDataContainer : IwbDataContainer); override;
 
     {---IwbStringDef---}
     function GetStringSize: Integer;
@@ -16348,9 +16355,11 @@ var
 begin
   b := bsdGetEncoding(aElement).GetBytes(aValue);
 
-  if sdSize > 0 then
-    NewSize := sdSize
-  else begin
+  if sdSize > 0 then begin
+    NewSize := sdSize;
+    if (dfHasZeroTerminator in defFlags) then
+      Inc(NewSize);
+  end else begin
     NewSize := Length(b);
     if not (dfNoZeroTerminator in defFlags) then
       Inc(NewSize);
@@ -16359,12 +16368,12 @@ begin
   aElement.RequestStorageChange(aBasePtr, aEndPtr, NewSize + Ord(ndTerminator));
 
   if sdSize > 0 then begin
-    FillChar(aBasePtr^, sdSize, 0);
-    NewSize := Length(b);
-    if NewSize > sdSize then
-      NewSize := sdSize;
-    if NewSize > 0 then
-      Move(b[0], aBasePtr^, NewSize);
+    FillChar(aBasePtr^, NewSize, 0);
+    var lLen := Length(b);
+    if lLen > sdSize then
+      lLen := sdSize;
+    if lLen > 0 then
+      Move(b[0], aBasePtr^, lLen);
   end else begin
     if NewSize > 1 then
       Move(b[0], aBasePtr^, Length(b));
@@ -16409,6 +16418,25 @@ begin
   Result := sdSize;
 end;
 
+procedure TwbStringDef.PrepareSave(const aDataContainer: IwbDataContainer);
+begin
+  if (sdSize = 0) or not (dfHasZeroTerminator in defFlags) then
+    Exit;
+
+  var lLen := aDataContainer.DataSize;
+  var lEnd := aDataContainer.DataEndPtr;
+
+  if (lLen = sdSize + 1) and (PByte(lEnd)[-1] = 0) then
+    Exit;
+
+  var lNewSize : NativeUInt;
+  lNewSize := sdSize + 1;
+
+  var lBase := aDataContainer.DataBasePtr;
+  aDataContainer.RequestStorageChange(lBase, lEnd, lNewSize);
+  PByte(lBase)[Pred(lNewSize)] := 0;
+end;
+
 function TwbStringDef.SetFormater(const aFormater: IwbStringDefFormater): IwbStringDef;
 begin
   if defIsLocked then
@@ -16440,7 +16468,7 @@ end;
 function TwbStringDef.GetSize(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Integer;
 begin
   if sdSize > 0 then
-    Result := sdSize + Ord(ndTerminator)
+    Result := sdSize + Ord(dfHasZeroTerminator in defFlags) + Ord(ndTerminator)
   else begin
     if aBasePtr = nil then
       Result := 1 + Ord(ndTerminator)
@@ -16460,7 +16488,7 @@ end;
 function TwbStringDef.GetDefaultSize(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Integer;
 begin
   if sdSize > 0 then
-    Result := sdSize + Ord(ndTerminator)
+    Result := sdSize + Ord(dfHasZeroTerminator in defFlags) + Ord(ndTerminator)
   else
     Result := 1 + Ord(ndTerminator);
 end;
@@ -19662,6 +19690,11 @@ begin
   {can be overriden}
 end;
 
+procedure TwbValueDef.PrepareSave(const aDataContainer: IwbDataContainer);
+begin
+  {can be override}
+end;
+
 function TwbValueDef.SetAfterLoad(const aAfterLoad: TwbAfterLoadCallback): IwbValueDef;
 begin
   if defIsLocked then
@@ -21745,20 +21778,22 @@ begin
 
   PCardinal(@b[0])^ := MgefCode;
 
-  if sdSize > 0 then
-    NewSize := sdSize
-  else
+  if sdSize > 0 then begin
+    NewSize := sdSize;
+    if (dfHasZeroTerminator in defFlags) then
+      Inc(NewSize);
+  end else
     NewSize := Succ(Length(b));
 
   aElement.RequestStorageChange(aBasePtr, aEndPtr, NewSize + Ord(ndTerminator));
 
   if sdSize > 0 then begin
-    FillChar(aBasePtr^, sdSize, 0);
-    NewSize := Length(b);
-    if NewSize > sdSize then
-      NewSize := sdSize;
-    if NewSize > 0 then
-      Move(b[0], aBasePtr^, NewSize);
+    FillChar(aBasePtr^, NewSize, 0);
+    var lLen := Length(b);
+    if lLen > sdSize then
+      lLen := sdSize;
+    if lLen > 0 then
+      Move(b[0], aBasePtr^, lLen);
   end else begin
     if NewSize > 1 then
       Move(b[0], aBasePtr^, Length(b));

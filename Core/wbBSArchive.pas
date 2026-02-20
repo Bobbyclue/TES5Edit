@@ -431,7 +431,7 @@ type
     atNone,
     atMesh, atTexture, atMaterial,
     atSound, atVoice, atMusic,
-    atScript, atSource,
+    atScript, atSource, atSourceSSE,
     atStrings, atSpeedTree, atVideo, atLODSettings, atDistantLOD,
     atInterface, atProgram,
     atMenus, atFont, atFacegen, atLSData, atShaders, atShadersFX,
@@ -456,35 +456,36 @@ type
     end;
   const
     cDataFolders: array [0..1] of string = ('data', 'data files');
-    cBSAssets: array [0..27] of TAssetDesc = (
-      (Typ: atMesh;           Root: 'meshes';        Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.psa', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
-      (Typ: atTexture;        Root: 'textures';      Ext: ['.dds', '.tga', '.png']),
-      (Typ: atMaterial;       Root: 'materials';     Ext: ['.bgsm', '.bgem']),
-      (Typ: atVoice;          Root: 'sound\voice';   Ext: ['.lip', '.wav', '.xwm', '.mp3', '.ogg', '.fuz']),
-      (Typ: atSound;          Root: 'sound';         Ext: ['.wav', '.xwm', '.ogg']),
-      (Typ: atMusic;          Root: 'music';         Ext: ['.xwm', '.mp3']),
-      (Typ: atSource;         Root: 'scripts\source';Ext: ['.psc']), // SSE: source\scripts
-      (Typ: atScript;         Root: 'scripts';       Ext: ['.pex', '.psc']),
-      (Typ: atStrings;        Root: 'strings';       Ext: ['.strings', '.ilstrings', '.dlstrings']),
-      (Typ: atSpeedTree;      Root: 'trees';         Ext: ['.spt']),
-      (Typ: atVideo;          Root: 'video';         Ext: ['.bik', '.bk2']),
-      (Typ: atLODSettings;    Root: 'lodsettings';   Ext: ['.lodsettings', '.dlodsettings', '.lod']),
-      (Typ: atDistantLOD;     Root: 'distantlod';    Ext: ['.cmp', '.lod']), // TES4
-      (Typ: atInterface;      Root: 'interface';     Ext: ['.swf', '.png', '.txt']),
-      (Typ: atProgram;        Root: 'programs';      Ext: ['.swf']), // FO4
-      (Typ: atMenus;          Root: 'menus';         Ext: ['.xml', '.htm', '.txt', '.scc', '.bat']), // TES4
-      (Typ: atFont;           Root: 'fonts';         Ext: ['.fnt', '.tex']), // TES4
-      (Typ: atFacegen;        Root: 'facegen';       Ext: ['.ctl']), // TES4
-      (Typ: atLSData;         Root: 'lsdata';        Ext: ['.dat']), // TES4
-      (Typ: atShaders;        Root: 'shaders';       Ext: ['.sdp']), // TES4
-      (Typ: atShadersFX;      Root: 'shadersfx';     Ext: ['.fxp']), // TES5
-      (Typ: atGrass;          Root: 'grass';         Ext: ['.gid']),
-      (Typ: atPreVis;         Root: 'vis';           Ext: ['.uvd']),
-      (Typ: atSeq;            Root: 'seq';           Ext: ['.seq']), // TES5
-      (Typ: atDialogueViews;  Root: 'dialogueviews'; Ext: ['.xml']),
-      (Typ: atBookArt;        Root: 'bookart';       Ext: ['.dds', '.tga']), // TES3
-      (Typ: atIcon;           Root: 'icons';         Ext: ['.dds', '.tga']), // TES3
-      (Typ: atSplash;         Root: 'splash';        Ext: ['.dds', '.tga']) // TES3
+    cBSAssets: array [0..28] of TAssetDesc = (
+      (Typ: atMesh;           Root: 'meshes';         Ext: ['.nif', '.kf', '.kfm', '.egm', '.egt', '.tri', '.psa', '.hkt', '.hkx', '.ssf', '.btr', '.bto', '.btt', '.dtl']),
+      (Typ: atTexture;        Root: 'textures';       Ext: ['.dds', '.tga', '.png']),
+      (Typ: atMaterial;       Root: 'materials';      Ext: ['.bgsm', '.bgem']),
+      (Typ: atVoice;          Root: 'sound\voice';    Ext: ['.lip', '.wav', '.xwm', '.mp3', '.ogg', '.fuz']),
+      (Typ: atSound;          Root: 'sound';          Ext: ['.wav', '.xwm', '.ogg']),
+      (Typ: atMusic;          Root: 'music';          Ext: ['.xwm', '.mp3']),
+      (Typ: atSource;         Root: 'scripts\source'; Ext: ['.psc']),
+      (Typ: atSourceSSE;      Root: 'source\scripts'; Ext: ['.psc']),
+      (Typ: atScript;         Root: 'scripts';        Ext: ['.pex', '.psc']),
+      (Typ: atStrings;        Root: 'strings';        Ext: ['.strings', '.ilstrings', '.dlstrings']),
+      (Typ: atSpeedTree;      Root: 'trees';          Ext: ['.spt']),
+      (Typ: atVideo;          Root: 'video';          Ext: ['.bik', '.bk2']),
+      (Typ: atLODSettings;    Root: 'lodsettings';    Ext: ['.lodsettings', '.dlodsettings', '.lod']),
+      (Typ: atDistantLOD;     Root: 'distantlod';     Ext: ['.cmp', '.lod']), // TES4
+      (Typ: atInterface;      Root: 'interface';      Ext: ['.swf', '.png', '.txt']),
+      (Typ: atProgram;        Root: 'programs';       Ext: ['.swf']), // FO4
+      (Typ: atMenus;          Root: 'menus';          Ext: ['.xml', '.htm', '.txt', '.scc', '.bat']), // TES4
+      (Typ: atFont;           Root: 'fonts';          Ext: ['.fnt', '.tex']), // TES4
+      (Typ: atFacegen;        Root: 'facegen';        Ext: ['.ctl']), // TES4
+      (Typ: atLSData;         Root: 'lsdata';         Ext: ['.dat']), // TES4
+      (Typ: atShaders;        Root: 'shaders';        Ext: ['.sdp']), // TES4
+      (Typ: atShadersFX;      Root: 'shadersfx';      Ext: ['.fxp']), // TES5
+      (Typ: atGrass;          Root: 'grass';          Ext: ['.gid']),
+      (Typ: atPreVis;         Root: 'vis';            Ext: ['.uvd']),
+      (Typ: atSeq;            Root: 'seq';            Ext: ['.seq']), // TES5
+      (Typ: atDialogueViews;  Root: 'dialogueviews';  Ext: ['.xml']),
+      (Typ: atBookArt;        Root: 'bookart';        Ext: ['.dds', '.tga']), // TES3
+      (Typ: atIcon;           Root: 'icons';          Ext: ['.dds', '.tga']), // TES3
+      (Typ: atSplash;         Root: 'splash';         Ext: ['.dds', '.tga']) // TES3
     );
     cSkippedExtensions: array [0..28] of string = (
       '.bsa', '.ba2', '.esm', '.esp', '.esl',

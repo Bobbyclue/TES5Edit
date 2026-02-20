@@ -1027,6 +1027,9 @@ type
     {---IwbElement---}
     function GetRawDataAsString: string; override;
 
+    {---IwbContainerElementRef---}
+    procedure PrepareSave; override;
+
     {---IwbDataContainer---}
     function GetDataBasePtr: Pointer;
     function GetDataEndPtr: Pointer;
@@ -13365,6 +13368,10 @@ var
 begin
   DoBuildRef(True);
 
+  var lGroup := GetChildGroup;
+  if Assigned(lGroup) then
+    lGroup.Remove;
+
   _File := GetFile as IwbFileInternal;
   if Assigned(_File) then
     _File.RemoveMainRecord(Self);
@@ -23905,6 +23912,20 @@ begin
     end;
     dcDataStorage := nil;
   end;
+end;
+
+procedure TwbDataContainer.PrepareSave;
+begin
+  inherited;
+
+  var lValue := GetValueDef;
+  if not Assigned(lValue) then
+    Exit;
+
+  if not (dfNeedsPrepareSave in lValue.DefFlags) then
+    Exit;
+
+  lValue.PrepareSave(Self);
 end;
 
 procedure TwbDataContainer.RequestStorageChange(var aBasePtr, aEndPtr: Pointer; aNewSize: Cardinal);

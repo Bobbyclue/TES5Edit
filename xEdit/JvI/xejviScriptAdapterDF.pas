@@ -20,7 +20,8 @@ procedure RegisterJvInterpreterAdapter(JvInterpreterAdapter: TJvInterpreterAdapt
 implementation
 
 uses
-  Classes,
+  System.Classes,
+
   wbDataFormat,
   wbDataFormatNif,
   wbDataFormatMaterial,

@@ -11,9 +11,19 @@ unit ProcUniversalTweaker;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor, JsonDataObjects,
-  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask, Vcl.Menus;
+  System.Classes,
+  System.SysUtils,
+
+  JsonDataObjects,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameUniversalTweaker = class(TFrame)
@@ -92,10 +102,13 @@ implementation
 {$R *.dfm}
 
 uses
-  System.Types,
-  System.StrUtils,
   System.Math,
   System.RegularExpressionsCore,
+  System.StrUtils,
+  System.Types,
+
+  Vcl.Dialogs,
+
   wbDataFormat,
   wbDataFormatNif,
   wbDataFormatMaterial;
@@ -238,17 +251,17 @@ end;
 
 procedure TProcUniversalTweaker.OnShow;
 const
-  cDefaultPresets: TArray<string> = [
-    '{"Change body part in BSDismemberSkinInstance partitions":{"sBlocks":"BSDismemberSkinInstance","sDescendants":false,"sPath":"Partitions\\[*]\\Body Part","iValueMode":0,"sValue":"SBP_32_BODY","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"SBP_34_FOREARMS"},',
-    '"Set normal texture to diffuse with _n suffix in BSShaderTextureSet":{"sBlocks":"BSShaderTextureSet","sDescendants":false,"sPath":"Textures\\[1]","iValueMode":3,"sValue":"$1_n.dds","bOldValueCheck":true,"sOldPath":"Textures\\[0]","iOldValueMode":10,"sOldValue":"(.+)\\.dds"},',
-    '"Change Author field in NiHeader":{"sBlocks":"NiHeader","sDescendants":false,"sPath":"Export Info\\Author","iValueMode":0,"sValue":"Sniff","bOldValueCheck":false,"sOldPath":"","iOldValueMode":0,"sOldValue":""},',
-    '"Add Hidden flag to EditorMarker nodes":{"sBlocks":"NiAVObject","sDescendants":true,"sPath":"Flags","iValueMode":8,"sValue":"1","bOldValueCheck":true,"sOldPath":"Name","iOldValueMode":4,"sOldValue":"EditorMarker"},',
-    '"Switch to Parallax shader in BSLightingShaderProperty if there is parallax texture":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Type","iValueMode":0,"sValue":"Parallax","bOldValueCheck":true,"sOldPath":"Texture Set\\Textures\\[3]","iOldValueMode":4,"sOldValue":".dds"},',
-    '"Add Glow_Map flag if shader is Glow Shader in BSLightingShaderProperty":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Flags 2","iValueMode":5,"sValue":"| Glow_Map","bOldValueCheck":true,"sOldPath":"Shader Type","iOldValueMode":0,"sOldValue":"Glow Shader"},',
-    '"Change priority of controlled blocks matched by name in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Priority","iValueMode":0,"sValue":"10","bOldValueCheck":true,"sOldPath":"Node Name","iOldValueMode":10,"sOldValue":"Neck|Head"},',
-    '"Change name of controlled blocks in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Node Name","iValueMode":0,"sValue":"Bip01 Head","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"Bip01 Neck"},',
-    '"Trim whitespaces from the Name field":{"sBlocks":"NiObjectNET","sDescendants":true,"sPath":"Name","iValueMode":3,"sValue":"","bOldValueCheck":true,"sOldPath":"","iOldValueMode":10,"sOldValue":"^\\s*|\\s*$"}}'
-  ];
+  cDefaultPresets = '''
+    {"Change body part in BSDismemberSkinInstance partitions":{"sBlocks":"BSDismemberSkinInstance","sDescendants":false,"sPath":"Partitions\\[*]\\Body Part","iValueMode":0,"sValue":"SBP_32_BODY","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"SBP_34_FOREARMS"},
+    "Set normal texture to diffuse with _n suffix in BSShaderTextureSet":{"sBlocks":"BSShaderTextureSet","sDescendants":false,"sPath":"Textures\\[1]","iValueMode":3,"sValue":"$1_n.dds","bOldValueCheck":true,"sOldPath":"Textures\\[0]","iOldValueMode":10,"sOldValue":"(.+)\\.dds"},
+    "Change Author field in NiHeader":{"sBlocks":"NiHeader","sDescendants":false,"sPath":"Export Info\\Author","iValueMode":0,"sValue":"Sniff","bOldValueCheck":false,"sOldPath":"","iOldValueMode":0,"sOldValue":""},
+    "Add Hidden flag to EditorMarker nodes":{"sBlocks":"NiAVObject","sDescendants":true,"sPath":"Flags","iValueMode":8,"sValue":"1","bOldValueCheck":true,"sOldPath":"Name","iOldValueMode":4,"sOldValue":"EditorMarker"},
+    "Switch to Parallax shader in BSLightingShaderProperty if there is parallax texture":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Type","iValueMode":0,"sValue":"Parallax","bOldValueCheck":true,"sOldPath":"Texture Set\\Textures\\[3]","iOldValueMode":4,"sOldValue":".dds"},
+    "Add Glow_Map flag if shader is Glow Shader in BSLightingShaderProperty":{"sBlocks":"BSLightingShaderProperty","sDescendants":false,"sPath":"Shader Flags 2","iValueMode":5,"sValue":"| Glow_Map","bOldValueCheck":true,"sOldPath":"Shader Type","iOldValueMode":0,"sOldValue":"Glow Shader"},
+    "Change priority of controlled blocks matched by name in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Priority","iValueMode":0,"sValue":"10","bOldValueCheck":true,"sOldPath":"Node Name","iOldValueMode":10,"sOldValue":"Neck|Head"},
+    "Change name of controlled blocks in NiControllerSequence":{"sBlocks":"NiControllerSequence","sDescendants":false,"sPath":"Controlled Blocks\\[*]\\Node Name","iValueMode":0,"sValue":"Bip01 Head","bOldValueCheck":true,"sOldPath":"","iOldValueMode":0,"sOldValue":"Bip01 Neck"},
+    "Trim whitespaces from the Name field":{"sBlocks":"NiObjectNET","sDescendants":true,"sPath":"Name","iValueMode":3,"sValue":"","bOldValueCheck":true,"sOldPath":"","iOldValueMode":10,"sOldValue":"^\\s*|\\s*$"}}'
+  ''';
 begin
   Frame.cmbNewValueMode.Items.AddObject('Set', TObject(nvmSet));
   Frame.cmbNewValueMode.Items.AddObject('Add', TObject(nvmAdd));
@@ -293,7 +306,7 @@ begin
   except end;
 
   Frame.fPresets := TJSONObject.Create;
-  try Frame.fPresets.FromJSON(StorageGetString('sPresets', String.Join('', cDefaultPresets))); except end;
+  try Frame.fPresets.FromJSON(StorageGetString('sPresets', cDefaultPresets)); except end;
   with TStringList.Create do try
     for var i := 0 to Pred(Frame.fPresets.Count) do
       Add(Frame.fPresets.Names[i]);
@@ -342,7 +355,7 @@ begin
   if fPath = '' then
     raise Exception.Create('Field path can not be empty');
 
-  fValueMode := TTweakNewValueMode(Frame.cmbNewValueMode.ItemIndex);
+  fValueMode := TTweakNewValueMode(Frame.cmbNewValueMode.Items.Objects[Frame.cmbNewValueMode.ItemIndex]);
   fValue := Frame.edValue.Text;
   if (fValueMode = nvmRound) and (fValue = '') then
     fValue := '1';
@@ -356,10 +369,10 @@ begin
     fOldPath := '';
     fOldValue := '';
   end;
-  fOldValueMode := TTweakOldValueMode(Frame.cmbOldValueMode.ItemIndex);
+  fOldValueMode := TTweakOldValueMode(Frame.cmbOldValueMode.Items.Objects[Frame.cmbOldValueMode.ItemIndex]);
 
   if (fValueMode = nvmReplace) and (not fOldValueCheck or not (fOldValueMode in [ovmContains, ovmStartsWith, ovmEndsWith, ovmRegExp]) or (fOldValue = '')) then
-    raise Exception.Create('When replacing, if field must be checked using "Contains", "Start with", "Ends with" or "Regular Expr" with non-empty value');
+    raise Exception.Create('When replacing, if field must be checked using "Contains", "Starts with", "Ends with" or "Regular Expr" with non-empty value');
 
   if fValueMode in [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound] then try
     dfStrToFloat(fValue);
@@ -385,44 +398,32 @@ function ModifyElement(aBlock: TdfElement;
   Log: TStrings;
   regexp: TPerlRegEx
 ): Boolean;
-var
-  CurrentValue, NewValue, OriginalValue: string;
-  FloatCurrentValue, FloatOldValue, FloatNewValue: Extended;
-  Matched: Boolean;
 
-  function GetEditValue(const path: string; asnum: Boolean): string;
+  function NativeValue(const p: string): Variant;
   begin
-    try
-    if asnum then
-      if aPath <> '' then
-        Result := FloatToStr(aBlock.NativeValues[path])
-      else
-        Result := FloatToStr(aBlock.NativeValue)
+    if p <> '' then
+      Result := aBlock.NativeValues[p]
     else
-      if aPath <> '' then
-        Result := aBlock.EditValues[path]
-      else
-        Result := aBlock.EditValue;
-    except
-      Result := '';
-    end;
+      Result := aBlock.NativeValue;
   end;
 
-  function ToFloat: Boolean;
+  function EditValue(const p: string): string;
   begin
-    Result := True;
-    try
-      FloatCurrentValue := dfStrToFloat(CurrentValue);
-      FloatNewValue := dfStrToFloat(aValue);
-      if aOldValueCheck and (aOldValueMode in MathOld) then
-        FloatOldValue := dfStrToFloat(aOldValue);
-    except
-      Result := False;
-    end;
+    if p <> '' then
+      Result := aBlock.EditValues[p]
+    else
+      Result := aBlock.EditValue;
   end;
 
+var
+  OldValueString, NewValueString: string;
+  OldValueFloat, NewValueFloat: Extended;
+  OldValue, NewValue: string;
+  Matched: Boolean;
 begin
   Result := False;
+  Matched := False;
+  OldValueFloat := 0; NewValueFloat := 0;
 
   // processing all elements in arrays
   var i := Pos('[*]', aPath);
@@ -436,57 +437,72 @@ begin
     Exit;
   end;
 
-  // perform all checks against another element if provided
-  if aOldPath <> '' then
-    CurrentValue := GetEditValue(aOldPath, aOldValueMode in MathOld)
-  else
-    CurrentValue := GetEditValue(aPath, aOldValueMode in MathOld);
+  try
+    if aValueMode in MathNew then
+      NewValueFloat := NativeValue(aPath)
+    else
+      NewValueString := EditValue(aPath);
+  except Exit; end;
 
-  Matched := not aOldValueCheck;
+  if aOldValueCheck then begin
+    var p := '';
+    try
+      if aOldPath <> '' then p := aOldPath else p := aPath;
+      if aOldValueMode in MathOld then
+        OldValueFloat := NativeValue(p)
+      else
+        OldValueString := EditValue(p);
+    except Exit; end;
 
-  if aOldValueCheck then
-  case aOldValueMode of
-    ovmEqual:    Matched := (ToFloat and SameValue(FloatCurrentValue, FloatOldValue)) or SameText(CurrentValue, aOldValue);
-    ovmNotEqual: Matched := (ToFloat and not SameValue(FloatCurrentValue, FloatOldValue)) or not SameText(CurrentValue, aOldValue);
-    ovmGreater:  Matched := ToFloat and (FloatCurrentValue > FloatOldValue);
-    ovmLesser:   Matched := ToFloat and (FloatCurrentValue < FloatOldValue);
-    ovmContains: Matched := ContainsText(CurrentValue, aOldValue);
-    ovmDoesntContain: Matched := not ContainsText(CurrentValue, aOldValue);
-    ovmStartsWith: Matched := CurrentValue.StartsWith(aOldValue, True);
-    ovmEndsWith: Matched := CurrentValue.EndsWith(aOldValue, True);
-    ovmAnd:      Matched := ToFloat and (Trunc(FloatCurrentValue) and Trunc(FloatOldValue) = Trunc(FloatOldValue));
-    ovmAndNot:   Matched := ToFloat and (Trunc(FloatCurrentValue) and Trunc(FloatOldValue) = 0);
-    ovmRegExp:   begin
-      regexp.Subject := CurrentValue;
-      regexp.Replacement := aValue;
-      Matched := regexp.ReplaceAll;
+    // Equal and NotEqual can be used on both string and number values
+    // which to use depends on aOldValue
+    var EqNumber := False;
+    if aOldValueMode in [ovmEqual, ovmNotEqual] then try
+      var f: Extended;
+      EqNumber := TextToFloat(aOldValue, f);
+      if EqNumber then
+        OldValueFloat := NativeValue(p);
+    except EqNumber := False; end;
+
+    case aOldValueMode of
+      ovmEqual:    Matched := (not EqNumber and SameText(OldValueString, aOldValue)) or (EqNumber and SameValue(OldValueFloat, dfStrToFloat(aOldValue)));
+      ovmNotEqual: Matched := (not EqNumber and not SameText(OldValueString, aOldValue)) or (EqNumber and not SameValue(OldValueFloat, dfStrToFloat(aOldValue)));
+      ovmGreater:  Matched := OldValueFloat > dfStrToFloat(aOldValue);
+      ovmLesser:   Matched := OldValueFloat < dfStrToFloat(aOldValue);
+      ovmContains: Matched := ContainsText(OldValueString, aOldValue);
+      ovmDoesntContain: Matched := not ContainsText(OldValueString, aOldValue);
+      ovmStartsWith: Matched := OldValueString.StartsWith(aOldValue, True);
+      ovmEndsWith: Matched := OldValueString.EndsWith(aOldValue, True);
+      ovmAnd:      Matched := Trunc(OldValueFloat) and Trunc(dfStrToFloat(aOldValue)) <> 0;
+      ovmAndNot:   Matched := Trunc(OldValueFloat) and Trunc(dfStrToFloat(aOldValue)) = 0;
+      ovmRegExp:   begin
+        regexp.Subject := OldValueString;
+        regexp.Replacement := aValue;
+        Matched := regexp.ReplaceAll;
+      end;
     end;
+
+    if not Matched then
+      Exit;
   end;
-
-  if not Matched then
-    Exit;
-
-  // if we were checking another element, then get the actual value for tweaking
-  if aOldPath <> '' then
-    CurrentValue := GetEditValue(aPath, aValueMode in MathNew);
 
   case aValueMode of
     nvmSet:     NewValue := aValue;
-    nvmAdd:     if ToFloat then NewValue := dfFloatToStr(FloatCurrentValue + FloatNewValue);
-    nvmMul:     if ToFloat then NewValue := dfFloatToStr(FloatCurrentValue * FloatNewValue);
-    nvmRound:   if ToFloat then NewValue := dfFloatToStr(Round(FloatCurrentValue / FloatNewValue) * FloatNewValue);
-    nvmAnd:     if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) and Trunc(FloatNewValue));
-    nvmAndNot:  if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) and not Trunc(FloatNewValue));
-    nvmOr:      if ToFloat then NewValue := dfFloatToStr(Trunc(FloatCurrentValue) or Trunc(FloatNewValue));
+    nvmAdd:     NewValue := dfFloatToStr(NewValueFloat + dfStrToFloat(aValue));
+    nvmMul:     NewValue := dfFloatToStr(NewValueFloat * dfStrToFloat(aValue));
+    nvmRound:   NewValue := dfFloatToStr(Round(NewValueFloat / dfStrToFloat(aValue)) * dfStrToFloat(aValue));
+    nvmAnd:     NewValue := dfFloatToStr(Trunc(NewValueFloat) and Trunc(dfStrToFloat(aValue)));
+    nvmAndNot:  NewValue := dfFloatToStr(Trunc(NewValueFloat) and not Trunc(dfStrToFloat(aValue)));
+    nvmOr:      NewValue := dfFloatToStr(Trunc(NewValueFloat) or Trunc(dfStrToFloat(aValue)));
     nvmReplace: case aOldValueMode of
-      ovmContains:   NewValue := StringReplace(CurrentValue, aOldValue, aValue, [rfReplaceAll, rfIgnoreCase]);
-      ovmStartsWith: NewValue := aValue + Copy(CurrentValue, Length(aOldValue) + 1, Length(CurrentValue));
-      ovmEndsWith:   NewValue := Copy(CurrentValue, 1, Length(CurrentValue) - Length(aOldValue)) + aValue;
+      ovmContains:   NewValue := StringReplace(NewValueString, aOldValue, aValue, [rfReplaceAll, rfIgnoreCase]);
+      ovmStartsWith: NewValue := aValue + Copy(NewValueString, Length(aOldValue) + 1, Length(NewValueString));
+      ovmEndsWith:   NewValue := Copy(NewValueString, 1, Length(NewValueString) - Length(aOldValue)) + aValue;
       ovmRegExp:     NewValue := regexp.Subject;
     end;
-    nvmPrepend: NewValue := aValue + CurrentValue;
-    nvmAppend : NewValue := CurrentValue + aValue;
-    nvmRemove : NewValue := StringReplace(CurrentValue, aValue, '', [rfIgnoreCase, rfReplaceAll]);
+    nvmPrepend: NewValue := aValue + NewValueString;
+    nvmAppend : NewValue := NewValueString + aValue;
+    nvmRemove : NewValue := StringReplace(NewValueString, aValue, '', [rfIgnoreCase, rfReplaceAll]);
   end;
 
   // if fractional part is zero (ends with .00000)
@@ -497,18 +513,23 @@ begin
       NewValue := Copy(NewValue, 1, Length(NewValue) - Length(z));
   end;
 
-  OriginalValue := GetEditValue(aPath, False);
-
-  if aPath <> '' then
-    aBlock.EditValues[aPath] := NewValue
-  else
+  if aPath <> '' then begin
+    OldValue := aBlock.EditValues[aPath];
+    aBlock.EditValues[aPath] := NewValue;
+    NewValue := aBlock.EditValues[aPath];
+  end
+  else begin
+    OldValue := aBlock.EditValue;
     aBlock.EditValue := NewValue;
+    NewValue := aBlock.EditValue;
+  end;
 
-  Result := OriginalValue <> GetEditValue(aPath, False);
+  Result := OldValue <> NewValue;
+
   if Assigned(Log) and Result then begin
     var p := aBlock.Path;
     if aPath <> '' then p := p + '\' + aPath;
-    Log.Add(#9 + p + ': Changed from "' + OriginalValue + '" to "' + GetEditValue(aPath, False) + '"');
+    Log.Add(#9 + p + ': Changed from "' + OldValue + '" to "' + NewValue + '"');
   end;
 end;
 

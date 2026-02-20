@@ -25,7 +25,6 @@ interface
 implementation
 
 uses
-  System.SysUtils,
   WinApi.Windows;
 
 var
@@ -49,7 +48,7 @@ end;
 
 function SysAllocMem(Size: NativeInt): Pointer; inline;
 begin
-  Result := HeapAlloc(ProcessHeap, 8, Size); // zeromemory in dwflags api call
+  Result := HeapAlloc(ProcessHeap, HEAP_ZERO_MEMORY, Size);
 end;
 
 function SysRegisterExpectedMemoryLeak(P: Pointer): Boolean;
@@ -60,6 +59,25 @@ end;
 function SysUnregisterExpectedMemoryLeak(P: Pointer): Boolean;
 begin
   Result := False;
+end;
+
+function OSVersionMajor: Cardinal;
+const
+  STATUS_SUCCESS = $00000000;
+type
+  TFuncRtlGetVersion = function(var RTL_OSVERSIONINFOEXW): DWORD; stdcall;
+var
+  RtlGetVersion: TFuncRtlGetVersion;
+  VerInfo: TOSVersionInfoExW;
+begin
+  Result := 0;
+  @RtlGetVersion := GetProcAddress(GetModuleHandle('ntdll.dll'), 'RtlGetVersion');
+  if Assigned(RtlGetVersion) then begin
+    ZeroMemory(@VerInfo, SizeOf(VerInfo));
+    VerInfo.dwOSVersionInfoSize := SizeOf(VerInfo);
+    if RtlGetVersion(VerInfo) = STATUS_SUCCESS then
+      Result := VerInfo.dwMajorVersion;
+  end;
 end;
 
 function NoMemoryAllocated: Boolean;
@@ -101,7 +119,7 @@ initialization
   //SetDllDirectory('');
 
   //{$IFNDEF DEBUG}
-  if TOSVersion.Major >= 10 then
+  if OSVersionMajor >= 10 then
   {$WARN SYMBOL_PLATFORM OFF}
   if DebugHook = 0 then begin
   {$WARN SYMBOL_PLATFORM ON}

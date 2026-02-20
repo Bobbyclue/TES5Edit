@@ -16,6 +16,7 @@ uses
   System.SysUtils,
 
   Vcl.Controls,
+  Vcl.Dialogs,
   Vcl.Forms,
   Vcl.StdCtrls,
 
@@ -57,10 +58,8 @@ implementation
 {$R *.dfm}
 
 uses
-  System.IOUtils,
   System.Math,
-
-  Vcl.Dialogs,
+  System.IOUtils,
 
   Winapi.ShellAPI,
   Winapi.Windows,
@@ -242,6 +241,14 @@ begin
     if Pos(#8'NOR', newname) <> 0 then
       newname := '';
 
+    // remove invalid chars
+    for var i := High(newname) downto Low(newname) do
+      if CharInSet(newname[i], [
+        #0, #1, #2, #3, #4, #5, #6, #7, #8, #9, #10, #11, #12, #13, #14, #15, #16,
+        #17, #18, #19, #20, #21, #22, #23, #24, #25, #26, #27, #28, #29, #30, #31
+      ]) then
+        Delete(newname, i, 1);
+
     // detecting used delimiter
     // edge case when path contains both slashes \ and /, don't even ask why...
     if (Pos('\', newname) <> 0) and (Pos('/', newname) <> 0) then begin
@@ -252,8 +259,6 @@ begin
 
     // fix double slashes
     newname := StringReplace(newname, delim + delim, delim, [rfReplaceAll]);
-    // fix new lines
-    newname := newname.Trim([#9, #10, #13]);
 
     // fix absolute paths
     if TPath.IsPathRooted(newname) then begin

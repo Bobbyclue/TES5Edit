@@ -10158,7 +10158,6 @@ begin
     wbGenericModel,
     wbRArrayS('Body Parts',
       wbRStructSK([2], 'Body Part', [
-        wbString(BPVB, 'Bone Name').SetRequired,
         wbLString(BPTN, 'Part Name', 0, cpTranslate), // optional
         wbString(BPNN, 'Part Node').SetRequired,
         wbString(BPNT, 'VATS Target').SetRequired,
@@ -10258,7 +10257,8 @@ begin
         wbFormIDCk(JNAM, 'On Cripple - Blood Impact Material Type', [MATT]),
         wbFormIDCk(CNAM, 'Meat Cap TextureSet', [TXST]),
         wbFormIDCk(NAM2, 'Collar TextureSet', [TXST]),
-        wbString(DNAM, 'Twist Variable Prefix')
+        wbString(DNAM, 'Twist Variable Prefix'),
+        wbString(BPVB, 'Bone Name').SetRequired
       ]).SetSummaryKey([2])
         .IncludeFlag(dfAllowAnyMember)
         .IncludeFlag(dfSummaryMembersNoName)

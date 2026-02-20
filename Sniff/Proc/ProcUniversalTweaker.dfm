@@ -15,6 +15,9 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 23
     Width = 443
     Height = 46
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
     Anchors = [akLeft, akTop, akRight]
     AutoSize = False
     Caption = 
@@ -29,6 +32,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 0
     Width = 475
     Height = 17
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     AutoSize = False
     Caption = 
@@ -46,8 +53,16 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
       'm\Scale", first texture in texture set "Textures\[0]". You can c' +
       'heck field names by converting to JSON format using Convert to J' +
       'SON operation.'
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     EditLabel.Width = 84
     EditLabel.Height = 15
+    EditLabel.Margins.Left = 5
+    EditLabel.Margins.Top = 5
+    EditLabel.Margins.Right = 5
+    EditLabel.Margins.Bottom = 5
     EditLabel.Caption = 'Path to the field'
     ParentShowHint = False
     ShowHint = True
@@ -60,9 +75,17 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 119
     Width = 77
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akLeft, akTop, akRight]
     EditLabel.Width = 28
     EditLabel.Height = 15
+    EditLabel.Margins.Left = 5
+    EditLabel.Margins.Top = 5
+    EditLabel.Margins.Right = 5
+    EditLabel.Margins.Bottom = 5
     EditLabel.Caption = 'Value'
     TabOrder = 2
     Text = '0.8'
@@ -72,6 +95,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 148
     Width = 313
     Height = 17
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'If another field (empty for the same field)'
     TabOrder = 3
     OnClick = chkOldValueCheckClick
@@ -81,6 +108,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 171
     Width = 107
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Style = csDropDownList
     DropDownCount = 20
     TabOrder = 4
@@ -90,6 +121,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 171
     Width = 77
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 5
   end
@@ -98,6 +133,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 119
     Width = 107
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Style = csDropDownList
     DropDownCount = 20
     TabOrder = 6
@@ -107,6 +146,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 75
     Width = 217
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 7
     Text = 'NiMaterialProperty'
@@ -120,6 +163,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
       'When checked also process descendants of specified block types, ' +
       'for example for NiNode it would be BSFadeNode, BSLeadAnimNode, B' +
       'SOrderedNode, etc.'
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akTop, akRight]
     Caption = 'and descendants'
     ParentShowHint = False
@@ -131,6 +178,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 200
     Width = 257
     Height = 17
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Report only, don'#39't save anything'
     TabOrder = 9
   end
@@ -139,6 +190,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 171
     Width = 247
     Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     TabOrder = 10
   end
   object btnPreset: TButton
@@ -146,6 +201,10 @@ object FrameUniversalTweaker: TFrameUniversalTweaker
     Top = 75
     Width = 93
     Height = 25
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akTop, akRight]
     Caption = 'Presets'
     DropDownMenu = menuPreset
