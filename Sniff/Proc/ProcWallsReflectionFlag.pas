@@ -3,15 +3,23 @@ unit ProcWallsReflectionFlag;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, Vcl.Mask, Vcl.ExtCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameWallsReflectionFlag = class(TFrame)
     StaticText1: TStaticText;
     edMapScale: TLabeledEdit;
     edNormalIntensity: TLabeledEdit;
+    edBlendIntensity: TLabeledEdit;
   private
     { Private declarations }
   public
@@ -23,6 +31,7 @@ type
     Frame: TFrameWallsReflectionFlag;
     fMapScale: string;
     fNormalIntensity: string;
+    fBlendIntensity: string;
   public
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
@@ -39,7 +48,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Math,
+  System.Math,
+
   wbDataFormat,
   wbDataFormatNif;
 
@@ -62,12 +72,14 @@ procedure TProcWallsReflectionFlag.OnShow;
 begin
   Frame.edMapScale.Text := StorageGetString('sMapScale', Frame.edMapScale.Text);
   Frame.edNormalIntensity.Text := StorageGetString('sNormalIntensity', Frame.edNormalIntensity.Text);
+  Frame.edBlendIntensity.Text := StorageGetString('sBlendIntensity', Frame.edBlendIntensity.Text);
 end;
 
 procedure TProcWallsReflectionFlag.OnHide;
 begin
   StorageSetString('sMapScale', Frame.edMapScale.Text);
   StorageSetString('sNormalIntensity', Frame.edNormalIntensity.Text);
+  StorageSetString('sBlendIntensity', Frame.edBlendIntensity.Text);
 end;
 
 procedure TProcWallsReflectionFlag.OnStart;
@@ -83,13 +95,37 @@ begin
   if fNormalIntensity <> '' then try
     dfStrToFloat(fNormalIntensity);
   except
-    raise Exception.Create('Invalid float number for strength');
+    raise Exception.Create('Invalid float number for Normal Intensity');
+  end;
+
+  fBlendIntensity := Frame.edBlendIntensity.Text;
+  if fBlendIntensity <> '' then try
+    dfStrToFloat(fBlendIntensity);
+  except
+    raise Exception.Create('Invalid float number for Blend Intensity');
   end;
 end;
 
 function TProcWallsReflectionFlag.ProcessFile(aFile: TProcFileObject): TBytes;
-const
-  cNormalIntensity = 'NormalIntensity';
+
+  function AddFloatExtraData(aBlock: TwbNifBlock; const aName, aValue: string): Boolean;
+  begin
+    Result := False;
+    if aValue = '' then
+      Exit;
+
+    var exdata := aBlock.ExtraDataByName(aName);
+    if not Assigned(exdata) then begin
+      exdata := aBlock.AddExtraData('NiFloatExtraData');
+      exdata.EditValues['Name'] := aName;
+      Result := True;
+    end;
+    if not SameValue(dfStrToFloat(exdata.EditValues['Float Data']), dfStrToFloat(aValue)) then begin
+      exdata.EditValues['Float Data'] := aValue;
+      Result := True;
+    end;
+  end;
+
 var
   nif: TwbNifFile;
   bChanged: Boolean;
@@ -120,20 +156,8 @@ begin
         bChanged := True;
       end;
 
-      if fNormalIntensity <> '' then begin
-        var exdata := block.ExtraDataByName(cNormalIntensity);
-        if not Assigned(exdata) then begin
-          exdata := block.AddExtraData('NiFloatExtraData');
-          exdata.EditValues['Name'] := cNormalIntensity;
-          bChanged := True;
-        end;
-
-        if not SameValue(dfStrToFloat(exdata.EditValues['Float Data']), dfStrToFloat(fNormalIntensity)) then begin
-          exdata.EditValues['Float Data'] := fNormalIntensity;
-          bChanged := True;
-        end;
-      end;
-
+      bChanged := AddFloatExtraData(block, 'NormalIntensity', fNormalIntensity) or bChanged;
+      bChanged := AddFloatExtraData(block, 'BlendIntensity', fBlendIntensity) or bChanged;
     end;
 
     if bChanged then
