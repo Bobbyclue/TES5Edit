@@ -66,12 +66,12 @@ type
   TTweakOldValueModes = set of TTweakOldValueMode;
 
   TTweakNewValueMode = (nvmSet = 0, nvmAdd, nvmMul, nvmReplace, nvmPrepend, nvmAppend,
-    nvmAnd, nvmAndNot, nvmOr, nvmRemove, nvmRound);
+    nvmAnd, nvmAndNot, nvmOr, nvmRemove, nvmRound, nvmMulRound);
   TTweakNewValueModes = set of TTweakNewValueMode;
 
 const
   MathOld: TTweakOldValueModes = [ovmGreater, ovmLesser, ovmAnd, ovmAndNot];
-  MathNew: TTweakNewValueModes = [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound];
+  MathNew: TTweakNewValueModes = [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound, nvmMulRound];
 
 type
   TProcUniversalTweaker = class(TProcBase)
@@ -267,6 +267,7 @@ begin
   Frame.cmbNewValueMode.Items.AddObject('Add', TObject(nvmAdd));
   Frame.cmbNewValueMode.Items.AddObject('Mul', TObject(nvmMul));
   Frame.cmbNewValueMode.Items.AddObject('Round', TObject(nvmRound));
+  Frame.cmbNewValueMode.Items.AddObject('Mul and Round', TObject(nvmMulRound));
   Frame.cmbNewValueMode.Items.AddObject('Replace with', TObject(nvmReplace));
   Frame.cmbNewValueMode.Items.AddObject('Prepend str', TObject(nvmPrepend));
   Frame.cmbNewValueMode.Items.AddObject('Append str', TObject(nvmAppend));
@@ -491,6 +492,7 @@ begin
     nvmAdd:     NewValue := dfFloatToStr(NewValueFloat + dfStrToFloat(aValue));
     nvmMul:     NewValue := dfFloatToStr(NewValueFloat * dfStrToFloat(aValue));
     nvmRound:   NewValue := dfFloatToStr(Round(NewValueFloat / dfStrToFloat(aValue)) * dfStrToFloat(aValue));
+    nvmMulRound:NewValue := dfFloatToStr(Round(NewValueFloat * dfStrToFloat(aValue)));
     nvmAnd:     NewValue := dfFloatToStr(Trunc(NewValueFloat) and Trunc(dfStrToFloat(aValue)));
     nvmAndNot:  NewValue := dfFloatToStr(Trunc(NewValueFloat) and not Trunc(dfStrToFloat(aValue)));
     nvmOr:      NewValue := dfFloatToStr(Trunc(NewValueFloat) or Trunc(dfStrToFloat(aValue)));
