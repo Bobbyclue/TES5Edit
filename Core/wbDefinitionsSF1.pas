@@ -2676,7 +2676,6 @@ const
 
 procedure DefineSF1;
 begin
-  DefineCommon;
   DefineReflection;
 
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));

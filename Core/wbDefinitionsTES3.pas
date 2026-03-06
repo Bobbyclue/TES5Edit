@@ -435,7 +435,6 @@ end;
 
 procedure DefineTES3;
 begin
-  DefineCommon;
   wbHeaderSignature := 'TES3';
 
   wbRecordFlags :=

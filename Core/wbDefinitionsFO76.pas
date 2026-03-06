@@ -4402,8 +4402,6 @@ end;
 
 procedure DefineFO76;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbRecordHeader(wbRecordFlags);

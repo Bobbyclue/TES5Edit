@@ -1044,8 +1044,6 @@ end;
 
 procedure DefineTES4;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbStruct('Record Header', [
