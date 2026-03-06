@@ -14872,7 +14872,7 @@ begin
     {--- Teleport ---}
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot,
+      wbVec3PosRot,
       wbInteger('Flags', itU32, wbFlags([
         'No Alarm',
         'No Load Screen',
@@ -16519,7 +16519,7 @@ begin
     wbEDID,
     wbXALG,
     wbStruct(DATA, 'Data', [
-      wbPosRot,
+      wbVec3PosRot,
       wbFloat('Scale'),
       wbFloat('Zoom Min'),
       wbFloat('Zoom Max')
