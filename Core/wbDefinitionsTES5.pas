@@ -890,7 +890,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName', 0, cpNormal, True),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODS
     ], [], cpNormal, aRequired, aDontShow, True)
     .SetSummaryKey([0])
@@ -3302,7 +3302,7 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseDestruction),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName'),
-          wbDMDT,
+          wbModelInfo(DMDT),
           wbDMDSs
         ], [], cpNormal, False, nil)
           .SetSummaryKey([0])
@@ -5974,7 +5974,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDID,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -9631,10 +9631,10 @@ begin
     ], cpNormal, True, nil, 29),
     wbEmpty(MNAM, 'Male Marker').SetRequired,
     wbString(ANAM, 'Male Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(FNAM, 'Female Marker').SetRequired,
     wbString(ANAM, 'Female Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(NAM2, 'Marker NAM2 #1'),
     wbRArrayS('Movement Type Names', wbString(MTNM, 'Name', 4)).SetDefaultEditValues(['BLDO', 'RUN1', 'SNEK', 'SWIM', 'WALK']).SetRequired,
     wbArray(VTCK, 'Voices', wbFormIDCk('Voice', [VTYP]), ['Male', 'Female'], cpNormal, True).SetDefaultEditValues(['MaleUniqueMolagBal [VTYP:0000002D]', 'FemaleUniqueAzura [VTYP:0000002E]']),

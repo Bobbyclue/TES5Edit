@@ -1082,7 +1082,7 @@ begin
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName', 0, cpNormal, True),
       wbByteArray(MODB, 'Unknown', 4, cpIgnore),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODS,
       wbMODD
     ], [], cpNormal, aRequired, aDontShow, True)
@@ -3031,7 +3031,7 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseDestruction),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName'),
-          wbDMDT
+          wbModelInfo(DMDT)
         ])
         .SetSummaryKey([0])
         .IncludeFlag(dfCollapsed, wbCollapseModels),
@@ -3076,7 +3076,7 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseDestruction),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName'),
-          wbDMDT
+          wbModelInfo(DMDT)
         ])
         .SetSummaryKey([0])
         .IncludeFlag(dfCollapsed, wbCollapseModels),
@@ -5664,7 +5664,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDIDReq,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   wbRecord(IMGS, 'Image Space', [

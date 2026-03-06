@@ -1401,7 +1401,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName'),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF,
@@ -1424,7 +1424,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName', 0, cpNormal, True),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF,
@@ -7180,7 +7180,7 @@ begin
         wbRArray('Models',
           wbRStructSK([0], 'Model', [
             wbString(DMDL, 'Model FileName', 0, cpNormal, True),
-            wbDMDT,
+            wbModelInfo(DMDT),
             wbDMDC,
             wbDMDS,
             wbENLM,
@@ -9759,7 +9759,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDID,
-    wbRArray('Models', wbDebrisModel(wbMODT))
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)))
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -10493,7 +10493,7 @@ begin
     ], False)).IncludeFlag(dfCollapsed, wbCollapseFlags),
     wbFormIDCk(HNAM, 'Havok Impact Data Set', [IPDS]),
     wbString(ANAM, 'Breakable FX'),
-    wbMODT
+    wbModelInfo(MODT)
   ]);
 
   wbRecord(IPCT, 'Impact', [
@@ -14508,12 +14508,12 @@ begin
       wbEmpty(MNAM, 'Male Marker'),
       wbRStruct('Male Skeletal Data', [
         wbString(ANAM, 'Male Skeletal Model'),
-        wbMODT
+        wbModelInfo(MODT)
       ]),
       wbEmpty(FNAM, 'Female Marker'),
       wbRStruct('Female Skeletal Data', [
         wbString(ANAM, 'Female Skeletal Model'),
-        wbMODT
+        wbModelInfo(MODT)
       ])
     ]),
     wbRArrayS('Movement Type Names', wbString(MTNM, 'Name', 4)),

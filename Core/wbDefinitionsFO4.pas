@@ -1042,7 +1042,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName'),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF
@@ -4614,7 +4614,7 @@ begin
         wbString(DSTA, 'Sequence Name'),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName', 0, cpNormal, True),
-          wbDMDT,
+          wbModelInfo(DMDT),
           wbDMDC,
           wbDMDS
         ], [], cpNormal, False, nil, True)
@@ -7670,7 +7670,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDID,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -8260,7 +8260,7 @@ begin
       .SetRequired,
     wbFormIDCk(HNAM, 'Havok Impact Data Set', [IPDS]),
     wbString(ANAM, 'Breakable FX'),
-    wbMODT
+    wbModelInfo(MODT)
   ]);
 
   wbRecord(IPCT, 'Impact', [
@@ -11464,10 +11464,10 @@ begin
 
     wbEmpty(MNAM, 'Male Marker'),
     wbString(ANAM, 'Male Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(FNAM, 'Female Marker'),
     wbString(ANAM, 'Female Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(NAM2, 'Marker NAM2 #1'),
     wbRArrayS('Movement Type Names', wbString(MTNM, 'Name', 4)),
     wbArray(VTCK, 'Voices', wbFormIDCk('Voice', [VTYP]), ['Male', 'Female'], cpNormal, True),

@@ -4359,7 +4359,7 @@ begin
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName', 0, cpNormal, True),
           wbFLLD,
-//          wbDMDT,
+//          wbModelInfo(DMDT),
 //          wbDMDC,
           wbDMDS.IncludeFlagOnValue(dfSummaryExcludeNULL)
         ], [], cpNormal, False, nil, True)
@@ -7121,7 +7121,7 @@ begin
       Result :=
         wbRStructSK([0], 'Model', [
           wbString(MODL, 'Model FileName'),
-    //      wbMODT, // can still be read, might not be properly supported anymore, doesn't occur in Starfield.esm
+    //      wbModelInfo(MODT), // can still be read, might not be properly supported anymore, doesn't occur in Starfield.esm
           wbMOLM(MOLM),
           wbFLLD.SetRequired,
           wbMODC,
@@ -9581,7 +9581,7 @@ begin
   wbRecord(DEBR, 'Debris', [
     wbEDID,
     wbBaseFormComponents,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   {subrecords checked against Starfield.esm}
