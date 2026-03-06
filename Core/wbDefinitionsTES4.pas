@@ -1044,8 +1044,6 @@ end;
 
 procedure DefineTES4;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbStruct('Record Header', [
@@ -1723,7 +1721,7 @@ begin
     wbFormIDCk(XHRS, 'Horse', [ACRE], True),
     wbRagdoll,
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo)
           .SetAfterLoad(wbREFRAfterLoad);
 
@@ -1740,7 +1738,7 @@ begin
     wbXLOD,
     wbXESP,
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRecord(ACTI, 'Activator',
@@ -3330,7 +3328,7 @@ begin
     wbFormIDCk(NAME, 'Base', [ACTI, ALCH, AMMO, APPA, ARMO, BOOK, CLOT, CONT, DOOR, FLOR, FURN, GRAS, INGR, KEYM, LIGH, LVLC, MISC, SBSP, SGST, SLGM, SOUN, STAT, TREE, WEAP], False, cpNormal, True),
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot
+      wbVec3PosRot
     ]),
     wbStruct(XLOC, 'Lock information', [
       wbInteger('Lock Level', itU8),
@@ -3400,7 +3398,7 @@ begin
     wbInteger(XSOL, 'Contained Soul', itU8, wbSoulGemEnum),
     IsTES4R(wbGUID(XAAG), nil),
     IsTES4R(wbStringForward(XACN, 'Unknown', 128).IncludeFlag(dfHasZeroTerminator), nil),
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo)
           .SetAfterLoad(wbREFRAfterLoad);
 

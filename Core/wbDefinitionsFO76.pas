@@ -1401,7 +1401,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName'),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF,
@@ -1424,7 +1424,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName', 0, cpNormal, True),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF,
@@ -4395,15 +4395,13 @@ end;
       wbXPCK,
       wbXSCL,
       wbXLOD,
-      wbDataPosRot,
+      wbVec3PosRot(DATA).SetRequired,
       wbString(MNAM, 'Comments')
     ], True).SetAddInfo(wbPlacedAddInfo);
   end;
 
 procedure DefineFO76;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbRecordHeader(wbRecordFlags);
@@ -5996,7 +5994,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -7180,7 +7178,7 @@ begin
         wbRArray('Models',
           wbRStructSK([0], 'Model', [
             wbString(DMDL, 'Model FileName', 0, cpNormal, True),
-            wbDMDT,
+            wbModelInfo(DMDT),
             wbDMDC,
             wbDMDS,
             wbENLM,
@@ -9759,7 +9757,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDID,
-    wbRArray('Models', wbDebrisModel(wbMODT))
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)))
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -10493,7 +10491,7 @@ begin
     ], False)).IncludeFlag(dfCollapsed, wbCollapseFlags),
     wbFormIDCk(HNAM, 'Havok Impact Data Set', [IPDS]),
     wbString(ANAM, 'Breakable FX'),
-    wbMODT
+    wbModelInfo(MODT)
   ]);
 
   wbRecord(IPCT, 'Impact', [
@@ -14508,12 +14506,12 @@ begin
       wbEmpty(MNAM, 'Male Marker'),
       wbRStruct('Male Skeletal Data', [
         wbString(ANAM, 'Male Skeletal Model'),
-        wbMODT
+        wbModelInfo(MODT)
       ]),
       wbEmpty(FNAM, 'Female Marker'),
       wbRStruct('Female Skeletal Data', [
         wbString(ANAM, 'Female Skeletal Model'),
-        wbMODT
+        wbModelInfo(MODT)
       ])
     ]),
     wbRArrayS('Movement Type Names', wbString(MTNM, 'Name', 4)),
@@ -14872,7 +14870,7 @@ begin
     {--- Teleport ---}
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot,
+      wbVec3PosRot,
       wbInteger('Flags', itU32, wbFlags([
         'No Alarm',
         'No Load Screen',
@@ -15325,7 +15323,7 @@ begin
     ),
     wbXPCK,
     wbFormID(XLLV, 'Cube Map Volume Data Pointer'),
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbFormIDCk(SRGN, 'Sub-Region', [REGN]),
     wbString(MNAM, 'Comments')
   ], True)
@@ -15679,7 +15677,7 @@ begin
     wbEDID,
     wbFormID(PLYR, 'Player', cpNormal, True).SetDefaultNativeValue($7),
     wbFormIDCk(NAME, 'Base', sigBaseObjects).SetRequired,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ]).IncludeFlag(dfInternalEditOnly);
 
   wbRecord(TREE, 'Tree',
@@ -16519,7 +16517,7 @@ begin
     wbEDID,
     wbXALG,
     wbStruct(DATA, 'Data', [
-      wbPosRot,
+      wbVec3PosRot,
       wbFloat('Scale'),
       wbFloat('Zoom Min'),
       wbFloat('Zoom Max')

@@ -1082,7 +1082,7 @@ begin
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName', 0, cpNormal, True),
       wbByteArray(MODB, 'Unknown', 4, cpIgnore),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODS,
       wbMODD
     ], [], cpNormal, aRequired, aDontShow, True)
@@ -2892,8 +2892,6 @@ end;
 
 procedure DefineFNV;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbRecordHeader(wbRecordFlags);
@@ -3031,7 +3029,7 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseDestruction),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName'),
-          wbDMDT
+          wbModelInfo(DMDT)
         ])
         .SetSummaryKey([0])
         .IncludeFlag(dfCollapsed, wbCollapseModels),
@@ -3076,7 +3074,7 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseDestruction),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName'),
-          wbDMDT
+          wbModelInfo(DMDT)
         ])
         .SetSummaryKey([0])
         .IncludeFlag(dfCollapsed, wbCollapseModels),
@@ -3250,7 +3248,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(ACRE, 'Placed Creature',
@@ -3333,7 +3331,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRecord(ACTI, 'Activator',
@@ -5458,7 +5456,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(PMIS, 'Placed Missile', [
@@ -5540,7 +5538,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(PBEA, 'Placed Beam', [
@@ -5622,7 +5620,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
    wbRecord(EXPL, 'Explosion', [
@@ -5664,7 +5662,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDIDReq,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -7626,7 +7624,7 @@ begin
     {--- Teleport ---}
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot,
+      wbVec3PosRot,
       wbInteger('Flags', itU32, wbFlags([
         'No Alarm'
       ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
@@ -7829,7 +7827,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True)
     .SetAddInfo(wbPlacedAddInfo)
     .SetAfterLoad(wbREFRAfterLoad);

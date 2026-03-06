@@ -1042,7 +1042,7 @@ begin
   Result :=
     wbRStructSK([0], 'Model', [
       wbString(MODL, 'Model FileName'),
-      wbMODT,
+      wbModelInfo(MODT),
       wbMODC,
       wbMODS,
       wbMODF
@@ -3587,15 +3587,13 @@ end;
       wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
       wbXSCL,
       wbXLOD,
-      wbDataPosRot,
+      wbVec3PosRot(DATA).SetRequired,
       wbString(MNAM, 'Comments')
     ], True).SetAddInfo(wbPlacedAddInfo);
   end;
 
 procedure DefineFO4;
 begin
-  DefineCommon;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbRecordHeader(wbRecordFlags);
@@ -4614,7 +4612,7 @@ begin
         wbString(DSTA, 'Sequence Name'),
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName', 0, cpNormal, True),
-          wbDMDT,
+          wbModelInfo(DMDT),
           wbDMDC,
           wbDMDS
         ], [], cpNormal, False, nil, True)
@@ -4921,7 +4919,7 @@ begin
     {--- 3D Data ---}
     wbXSCL,
     wbEmpty(ONAM, 'Open by Default'),
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -7670,7 +7668,7 @@ begin
 
   wbRecord(DEBR, 'Debris', [
     wbEDID,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   wbRecord(IMGS, 'Image Space', [
@@ -8260,7 +8258,7 @@ begin
       .SetRequired,
     wbFormIDCk(HNAM, 'Havok Impact Data Set', [IPDS]),
     wbString(ANAM, 'Breakable FX'),
-    wbMODT
+    wbModelInfo(MODT)
   ]);
 
   wbRecord(IPCT, 'Impact', [
@@ -11464,10 +11462,10 @@ begin
 
     wbEmpty(MNAM, 'Male Marker'),
     wbString(ANAM, 'Male Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(FNAM, 'Female Marker'),
     wbString(ANAM, 'Female Skeletal Model'),
-    wbMODT,
+    wbModelInfo(MODT),
     wbEmpty(NAM2, 'Marker NAM2 #1'),
     wbRArrayS('Movement Type Names', wbString(MTNM, 'Name', 4)),
     wbArray(VTCK, 'Voices', wbFormIDCk('Voice', [VTYP]), ['Male', 'Female'], cpNormal, True),
@@ -11820,7 +11818,7 @@ begin
     {--- Teleport ---}
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot,
+      wbVec3PosRot,
       wbInteger('Flags', itU32, wbFlags([
         'No Alarm',
         'No Load Screen',
@@ -12132,7 +12130,7 @@ begin
 
     wbXSCL,
     wbXLOD, // not seen in FO4 vanilla files
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo).SetAfterLoad(wbREFRAfterLoad);
 
@@ -13039,7 +13037,7 @@ begin
     ])), [
     wbEDID,
     wbStruct(DATA, 'Data', [
-      wbPosRot,
+      wbVec3PosRot,
       wbFloat('Scale').SetDefaultEditValue('1.0'),
       wbFloat('Zoom Min').SetDefaultEditValue('-1.0'),
       wbFloat('Zoom Max').SetDefaultEditValue('1.0')

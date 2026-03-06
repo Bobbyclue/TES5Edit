@@ -2676,7 +2676,6 @@ const
 
 procedure DefineSF1;
 begin
-  DefineCommon;
   DefineReflection;
 
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
@@ -4359,7 +4358,7 @@ begin
         wbRStructSK([0], 'Model', [
           wbString(DMDL, 'Model FileName', 0, cpNormal, True),
           wbFLLD,
-//          wbDMDT,
+//          wbModelInfo(DMDT),
 //          wbDMDC,
           wbDMDS.IncludeFlagOnValue(dfSummaryExcludeNULL)
         ], [], cpNormal, False, nil, True)
@@ -7121,7 +7120,7 @@ begin
       Result :=
         wbRStructSK([0], 'Model', [
           wbString(MODL, 'Model FileName'),
-    //      wbMODT, // can still be read, might not be properly supported anymore, doesn't occur in Starfield.esm
+    //      wbModelInfo(MODT), // can still be read, might not be properly supported anymore, doesn't occur in Starfield.esm
           wbMOLM(MOLM),
           wbFLLD.SetRequired,
           wbMODC,
@@ -7687,7 +7686,7 @@ begin
         wbEmpty(XATP, 'Activation Point'),
         wbFormIDCk(XLRL, 'Location Reference', [LCTN], False, cpBenignIfAdded),
         wbXSCL,
-        wbDataPosRot,
+        wbVec3PosRot(DATA).SetRequired,
         wbUnknown(XLTW),
         wbString(MNAM, 'Comments')
       ], True).SetAddInfo(wbPlacedAddInfo);
@@ -9581,7 +9580,7 @@ begin
   wbRecord(DEBR, 'Debris', [
     wbEDID,
     wbBaseFormComponents,
-    wbRArray('Models', wbDebrisModel(wbMODT), cpNormal, True)
+    wbRArray('Models', wbDebrisModel(wbModelInfo(MODT)), cpNormal, True)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -14807,7 +14806,7 @@ begin
     wbEmpty(XATP, 'Activation Point'),
 
     wbXSCL,
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -15058,7 +15057,7 @@ begin
     {--- Teleport ---}
     wbStruct(XTEL, 'Teleport Destination', [
       wbFormIDCk('Door', [REFR], True),
-      wbPosRot,
+      wbVec3PosRot,
       wbInteger('Flags', itU32, wbFlags([
         'No Alarm',
         'No Load Screen',
@@ -15399,7 +15398,7 @@ begin
 
     wbEmpty(ONAM, 'Open by Default'),
 
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
 
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
@@ -16871,7 +16870,7 @@ begin
     wbEDID,
     wbBaseFormComponents,
     wbStruct(DATA, 'Data', [
-      wbPosRot,
+      wbVec3PosRot,
       wbFloat('Scale').SetDefaultEditValue('1.0'),
       wbFloat('Zoom Min'),
       wbFloat('Zoom Max')
