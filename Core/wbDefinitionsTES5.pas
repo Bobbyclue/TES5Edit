@@ -2418,7 +2418,7 @@ end;
       wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
       wbXLOD,
       wbXSCL,
-      wbDataPosRot
+      wbVec3PosRot(DATA).SetRequired
     ], True).SetAddInfo(wbPlacedAddInfo);
   end;
 
@@ -3443,7 +3443,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRecord(ACTI, 'Activator',
@@ -10137,7 +10137,7 @@ begin
     {--- Attach reference ---}
     wbFormIDCk(XATR, 'Attach Ref', [REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA]),
     wbXLOD,
-    wbDataPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True)
     .SetAddInfo(wbPlacedAddInfo)
     .SetAfterLoad(wbREFRAfterLoad);

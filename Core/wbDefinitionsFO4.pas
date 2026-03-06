@@ -3587,7 +3587,7 @@ end;
       wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
       wbXSCL,
       wbXLOD,
-      wbDataPosRot,
+      wbVec3PosRot(DATA).SetRequired,
       wbString(MNAM, 'Comments')
     ], True).SetAddInfo(wbPlacedAddInfo);
   end;
@@ -4921,7 +4921,7 @@ begin
     {--- 3D Data ---}
     wbXSCL,
     wbEmpty(ONAM, 'Open by Default'),
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -12132,7 +12132,7 @@ begin
 
     wbXSCL,
     wbXLOD, // not seen in FO4 vanilla files
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo).SetAfterLoad(wbREFRAfterLoad);
 

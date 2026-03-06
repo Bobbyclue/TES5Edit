@@ -3373,7 +3373,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(ACRE, 'Placed Creature',
@@ -3452,7 +3452,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRecord(ACTI, 'Activator',
@@ -4881,7 +4881,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(PMIS, 'Placed Missile', [
@@ -4959,7 +4959,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRefRecord(PBEA, 'Placed Beam', [
@@ -5037,7 +5037,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
    wbRecord(EXPL, 'Explosion', [
@@ -7093,7 +7093,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True)
     .SetAddInfo(wbPlacedAddInfo)
     .SetAfterLoad(wbREFRAfterLoad);

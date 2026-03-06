@@ -4395,7 +4395,7 @@ end;
       wbXPCK,
       wbXSCL,
       wbXLOD,
-      wbDataPosRot,
+      wbVec3PosRot(DATA).SetRequired,
       wbString(MNAM, 'Comments')
     ], True).SetAddInfo(wbPlacedAddInfo);
   end;
@@ -5996,7 +5996,7 @@ begin
 
     {--- 3D Data ---}
     wbXSCL,
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -15325,7 +15325,7 @@ begin
     ),
     wbXPCK,
     wbFormID(XLLV, 'Cube Map Volume Data Pointer'),
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbFormIDCk(SRGN, 'Sub-Region', [REGN]),
     wbString(MNAM, 'Comments')
   ], True)
@@ -15679,7 +15679,7 @@ begin
     wbEDID,
     wbFormID(PLYR, 'Player', cpNormal, True).SetDefaultNativeValue($7),
     wbFormIDCk(NAME, 'Base', sigBaseObjects).SetRequired,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ]).IncludeFlag(dfInternalEditOnly);
 
   wbRecord(TREE, 'Tree',

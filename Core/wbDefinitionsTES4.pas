@@ -1723,7 +1723,7 @@ begin
     wbFormIDCk(XHRS, 'Horse', [ACRE], True),
     wbRagdoll,
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo)
           .SetAfterLoad(wbREFRAfterLoad);
 
@@ -1740,7 +1740,7 @@ begin
     wbXLOD,
     wbXESP,
     wbXSCL,
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo);
 
   wbRecord(ACTI, 'Activator',
@@ -3400,7 +3400,7 @@ begin
     wbInteger(XSOL, 'Contained Soul', itU8, wbSoulGemEnum),
     IsTES4R(wbGUID(XAAG), nil),
     IsTES4R(wbStringForward(XACN, 'Unknown', 128).IncludeFlag(dfHasZeroTerminator), nil),
-    wbDATAPosRot
+    wbVec3PosRot(DATA).SetRequired
   ], True).SetAddInfo(wbPlacedAddInfo)
           .SetAfterLoad(wbREFRAfterLoad);
 

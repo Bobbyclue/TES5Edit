@@ -7687,7 +7687,7 @@ begin
         wbEmpty(XATP, 'Activation Point'),
         wbFormIDCk(XLRL, 'Location Reference', [LCTN], False, cpBenignIfAdded),
         wbXSCL,
-        wbDataPosRot,
+        wbVec3PosRot(DATA).SetRequired,
         wbUnknown(XLTW),
         wbString(MNAM, 'Comments')
       ], True).SetAddInfo(wbPlacedAddInfo);
@@ -14807,7 +14807,7 @@ begin
     wbEmpty(XATP, 'Activation Point'),
 
     wbXSCL,
-    wbDATAPosRot,
+    wbVec3PosRot(DATA).SetRequired,
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
 
@@ -15399,7 +15399,7 @@ begin
 
     wbEmpty(ONAM, 'Open by Default'),
 
-    wbDataPosRot,
+    wbVec3PosRot(DATA).SetRequired,
 
     wbString(MNAM, 'Comments')
   ], True).SetAddInfo(wbPlacedAddInfo);
