@@ -77,6 +77,7 @@ uses
   System.StrUtils,
 
   wbBSArchive,
+  wbDataFormat,
   wbDataFormatMisc;
 
 procedure TFrameFindTextures.edFormatFilterChange(Sender: TObject);
