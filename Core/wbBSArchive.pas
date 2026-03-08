@@ -2183,17 +2183,25 @@ begin
       end;
 
       baFO4dds, baSFdds: begin
+        var IsXBox := LowerCase(FileName).Contains(' - xbox.');
         // allocate space for total DDS size
         TexSize := SizeOf(TDDSHeader);
-        if not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then
+        if IsXBox or not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then begin
           Inc(TexSize, SizeOf(TDDSHeaderDX10));
+          if IsXBox then
+            Inc(TexSize, SizeOf(TDDSHeaderXBOX));
+        end;
+
         // offset to image data (total size of DDS header)
         MipOffset := TexSize;
         for var c in aFile.DDS.TexChunks do Inc(TexSize, c.Size);
         SetLength(Result, TexSize);
 
         // set up DDS header
-        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.IsCubeMap);
+        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.IsCubeMap, IsXBox);
+        if IsXBox then
+          TwbDDS.HeaderXBOX(Result).tileMode := aFile.DDS.TileMode;
+
         // append mipmap chunks
         for var c in aFile.DDS.TexChunks do begin
           fStream.Position := c.Offset;

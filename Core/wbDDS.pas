@@ -230,6 +230,8 @@ type
     class function IsCubeMap(aDDSData: Pointer): Boolean;
     class function HasAlpha(aDXGI: TDXGI): Boolean;
     class function IsCompressed(aDXGI: TDXGI): Boolean;
+    class function HeaderDX10(aDDSData: Pointer): PDDSHeaderDX10;
+    class function HeaderXBOX(aDDSData: Pointer): PDDSHeaderXBOX;
     class function GetHeaderSize(aDDSData: Pointer): Integer;
     class function GetMipSize(aDDSData: Pointer): Integer;
     class function GetTileMode(aDDSData: Pointer): Integer;
@@ -238,7 +240,7 @@ type
     class function GetD3DFMT(aDDSData: Pointer): TD3DFORMAT;
     class function GetD3DFMTFormatName(aD3DFMT: TD3DFORMAT): string;
     class procedure SetUpHeader(aDDSData: Pointer; aDXGI: TDXGI;
-      aWidth, aHeight, aMipMapCount: Integer; aCubeMap: Boolean);
+      aWidth, aHeight, aMipMapCount: Integer; aCubeMap: Boolean; aXBox: Boolean);
     class function GetBitsPerPixel(aDXGI: TDXGI): Byte; overload;
     class function GetBitsPerPixel(aDDSData: Pointer): Byte; overload;
     class function ConvertR8G8B8toB8G8R8X8(aDDSData: Pointer; aSize: Integer): TBytes;
@@ -382,6 +384,11 @@ const
   // DX10
   DDS_DIMENSION_TEXTURE2D       = $00000003;
   DDS_RESOURCE_MISC_TEXTURECUBE = $00000004;
+  DDS_ALPHA_MODE_UNKNOWN        = $00000000;
+  DDS_ALPHA_MODE_STRAIGHT       = $00000001;
+  DDS_ALPHA_MODE_PREMULTIPLIED  = $00000002;
+  DDS_ALPHA_MODE_OPAQUE         = $00000003;
+  DDS_ALPHA_MODE_CUSTOM         = $00000004;
 
 
 implementation
@@ -430,6 +437,16 @@ begin
     Inc(Result, SizeOf(TDDSHeaderXBOX));
 end;
 
+class function TwbDDS.HeaderDX10(aDDSData: Pointer): PDDSHeaderDX10;
+begin
+  Result := PDDSHeaderDX10(PByte(aDDSData) + SizeOf(TDDSHeader));
+end;
+
+class function TwbDDS.HeaderXBOX(aDDSData: Pointer): PDDSHeaderXBOX;
+begin
+  Result := PDDSHeaderXBOX(PByte(aDDSData) + SizeOf(TDDSHeader) + SizeOf(TDDSHeaderDX10));
+end;
+
 class function TwbDDS.GetMipSize(aDDSData: Pointer): Integer;
 var
   DDSHeader: PDDSHeader;
@@ -441,7 +458,7 @@ end;
 class function TwbDDS.GetTileMode(aDDSData: Pointer): Integer;
 begin
   if IsXBOX(aDDSData) then
-    Result := PDDSHeaderXBOX(PByte(aDDSData) + SizeOf(TDDSHeader) + SizeOf(TDDSHeaderDX10)).tileMode
+    Result := HeaderXBOX(aDDSData).tileMode
   else
     Result := 8;
 end;
@@ -557,13 +574,15 @@ begin
 end;
 
 class procedure TwbDDS.SetUpHeader(aDDSData: Pointer; aDXGI: TDXGI;
-  aWidth, aHeight, aMipMapCount: Integer; aCubeMap: Boolean);
+  aWidth, aHeight, aMipMapCount: Integer; aCubeMap: Boolean; aXBox: Boolean);
 var
   DDSHeader: PDDSHeader;
   DDSHeaderDX10: PDDSHeaderDX10;
+  DDSHeaderXBOX: PDDSHeaderXBOX;
 begin
   DDSHeader := aDDSData;
-  DDSHeaderDX10 := Pointer(PByte(aDDSData) + SizeOf(TDDSHeader));
+  DDSHeaderDX10 := HeaderDX10(aDDSData);
+  DDSHeaderXBOX := HeaderXBOX(aDDSData);
 
   // header
   with DDSHeader^ do begin
@@ -747,12 +766,24 @@ begin
   end;
 
   // additional DX10 header
-  if DDSHeader.ddspf.dwFourCC = MAGIC_DX10 then begin
+  if (DDSHeader.ddspf.dwFourCC = MAGIC_DX10) or aXBox then begin
     DDSHeaderDX10.dxgiFormat := Integer(aDXGI);
     DDSHeaderDX10.resourceDimension := DDS_DIMENSION_TEXTURE2D;
     DDSHeaderDX10.arraySize := 1;
     if aCubeMap then
       DDSHeaderDX10.miscFlags := DDS_RESOURCE_MISC_TEXTURECUBE;
+  end;
+
+  // additional XBOX header
+  if aXBox then begin
+    DDSHeader.ddspf.dwFlags := DDPF_FOURCC;
+    DDSHeader.ddspf.dwFourCC := MAGIC_XBOX;
+    DDSHeader.ddspf.dwRGBBitCount := 0;
+    DDSHeader.ddspf.dwRBitMask := 0;
+    DDSHeader.ddspf.dwGBitMask := 0;
+    DDSHeader.ddspf.dwBBitMask := 0;
+    DDSHeader.ddspf.dwABitMask := 0;
+    DDSHeaderXBOX.xdkVer := 10705; // used by Archive2 when extracting xbox textures
   end;
 end;
 
