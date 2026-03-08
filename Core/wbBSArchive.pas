@@ -154,6 +154,7 @@ type
   const
     cExceptionInvalidDDS = 'Not a valid DDS file';
     cExceptionUnsupportedDDS = 'Unsupported DDS format';
+    cExceptionUnsupportedXBOX = 'XBOX textures are not supported';
     // max game supported file offset in .bsa archives
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
@@ -516,8 +517,8 @@ function FormatSize(Bytes: Int64): string;
 implementation
 
 uses
-  System.Math,
-  System.IOUtils;
+  System.IOUtils,
+  System.Math;
 
 const
   MAGIC_TES3: TMagic4 = #0#1#0#0;
@@ -2008,6 +2009,9 @@ begin
         aChunk.Size := fStream.Position - StartPosition;
         if aFile.Compress xor (fHeader.Flags and ARCHIVE_COMPRESS <> 0) then
           aChunk.Size := aChunk.Size or FILE_SIZE_COMPRESS;
+        // this is purely for warnings check on newly created archives to signal that the file was compressed
+        if aFile.Compress then
+          aChunk.PackedSize := aSize;
       end;
       // baFO4, bfFO4dds, baSF, baSFdds
       else begin
@@ -2050,6 +2054,9 @@ begin
   if not TwbDDS.IsDDS(aData, aSize) then
     raise Exception.Create(cExceptionInvalidDDS);
 
+  //if TwbDDS.IsXBOX(aData) then
+  //  raise Exception.Create(cExceptionUnsupportedXBOX);
+
   DDSHeader := aData;
   // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
   if not Assigned(fPacker) and (TwbDDS.GetD3DFMT(DDSHeader) = D3DFMT_R8G8B8) then begin
@@ -2066,8 +2073,8 @@ begin
   aFile.DDS.NumMips := DDSHeader.dwMipMapCount;
   // DirectXTexDDS.cpp, in DecodeDDSHeader, if dwMipMapCount is 0, it is forced to 1
   if aFile.DDS.NumMips = 0 then Inc(aFile.DDS.NumMips);
+  aFile.DDS.TileMode := TwbDDS.GetTileMode(DDSHeader);
   aFile.DDS.Flags := 0;
-  aFile.DDS.TileMode := 8;
   if TwbDDS.IsCubeMap(DDSHeader) then begin
     aFile.DDS.Flags := aFile.DDS.Flags or DDS_FLAG_CUBEMAP;
     chunks := 1; // cubemaps are not chunked
@@ -2493,6 +2500,9 @@ begin
     else begin
       if not TwbDDS.IsDDS(buf, Length(buf)) then
         raise Exception.Create(cExceptionInvalidDDS);
+
+      //if TwbDDS.IsXBOX(buf) then
+      //  raise Exception.Create(cExceptionUnsupportedXBOX);
 
       DDSHeader := @buf[0];
       // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX

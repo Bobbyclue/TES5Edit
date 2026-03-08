@@ -215,14 +215,24 @@ type
   end;
   PDDSHeaderDX10 = ^TDDSHeaderDX10;
 
+  TDDSHeaderXBOX = packed record
+    tileMode: Cardinal; // see XG_TILE_MODE / XG_SWIZZLE_MODE
+    baseAlignment: Cardinal;
+    dataSize: Cardinal;
+    xdkVer: Cardinal; // matching _XDK_VER / _GXDK_VER  end;
+  end;
+  PDDSHeaderXBOX = ^TDDSHeaderXBOX;
+
   TwbDDS = class abstract
   public
     class function IsDDS(aDDSData: Pointer; aSize: Integer): Boolean;
+    class function IsXBOX(aDDSData: Pointer): Boolean;
     class function IsCubeMap(aDDSData: Pointer): Boolean;
     class function HasAlpha(aDXGI: TDXGI): Boolean;
     class function IsCompressed(aDXGI: TDXGI): Boolean;
     class function GetHeaderSize(aDDSData: Pointer): Integer;
     class function GetMipSize(aDDSData: Pointer): Integer;
+    class function GetTileMode(aDDSData: Pointer): Integer;
     class function GetDXGIFormatName(aDXGI: TDXGI): string;
     class function GetDXGI(aDDSData: Pointer): TDXGI;
     class function GetD3DFMT(aDDSData: Pointer): TD3DFORMAT;
@@ -233,6 +243,7 @@ type
     class function GetBitsPerPixel(aDDSData: Pointer): Byte; overload;
     class function ConvertR8G8B8toB8G8R8X8(aDDSData: Pointer; aSize: Integer): TBytes;
   const
+    MaxHeaderSize = SizeOf(TDDSHeader) + SizeOf(TDDSHeaderDX10) + SizeOf(TDDSHeaderXBOX);
     // formats which don't use additional DX10 header by SetUpHeader()
     DXGI_DX9: TDXGIs = [
       DXGI_FORMAT_BC1_UNORM,
@@ -322,7 +333,6 @@ type
   end;
 
 const
-  MAGIC_DX10: TMagic4 = 'DX10';
   MAGIC_DDS : TMagic4 = 'DDS ';
   MAGIC_DXT1: TMagic4 = 'DXT1';
   MAGIC_DXT3: TMagic4 = 'DXT3';
@@ -333,6 +343,8 @@ const
   MAGIC_BC4U: TMagic4 = 'BC4U';
   MAGIC_BC5S: TMagic4 = 'BC5S';
   MAGIC_BC5U: TMagic4 = 'BC5U';
+  MAGIC_DX10: TMagic4 = 'DX10';
+  MAGIC_XBOX: TMagic4 = 'XBOX';
 
   DDSD_CAPS        = $00000001;
   DDSD_HEIGHT      = $00000002;
@@ -386,6 +398,11 @@ begin
     (aSize >= GetHeaderSize(aDDSData));
 end;
 
+class function TwbDDS.IsXBOX(aDDSData: Pointer): Boolean;
+begin
+  Result := PDDSHeader(aDDSData).ddspf.dwFourCC = MAGIC_XBOX;
+end;
+
 class function TwbDDS.IsCubeMap(aDDSData: Pointer): Boolean;
 begin
   Result := PDDSHeader(aDDSData).dwCaps2 and DDSCAPS2_CUBEMAP <> 0;
@@ -407,8 +424,10 @@ var
 begin
   DDSHeader := aDDSData;
   Result := SizeOf(TDDSHeader);
-  if DDSHeader.ddspf.dwFourCC = MAGIC_DX10 then
+  if (DDSHeader.ddspf.dwFourCC = MAGIC_DX10) or (DDSHeader.ddspf.dwFourCC = MAGIC_XBOX) then
     Inc(Result, SizeOf(TDDSHeaderDX10));
+  if DDSHeader.ddspf.dwFourCC = MAGIC_XBOX then
+    Inc(Result, SizeOf(TDDSHeaderXBOX));
 end;
 
 class function TwbDDS.GetMipSize(aDDSData: Pointer): Integer;
@@ -417,6 +436,14 @@ var
 begin
   DDSHeader := aDDSData;
   Result := (DDSHeader.dwWidth * DDSHeader.dwHeight * GetBitsPerPixel(DDSHeader)) shr 3;
+end;
+
+class function TwbDDS.GetTileMode(aDDSData: Pointer): Integer;
+begin
+  if IsXBOX(aDDSData) then
+    Result := PDDSHeaderXBOX(PByte(aDDSData) + SizeOf(TDDSHeader) + SizeOf(TDDSHeaderDX10)).tileMode
+  else
+    Result := 8;
 end;
 
 class function TwbDDS.GetDXGIFormatName(aDXGI: TDXGI): string;
@@ -468,7 +495,7 @@ begin
   if dwFourCC = MAGIC_ATI2 then Result := DXGI_FORMAT_BC5_UNORM else
   if dwFourCC = MAGIC_BC5U then Result := DXGI_FORMAT_BC5_UNORM else
   if dwFourCC = MAGIC_BC5S then Result := DXGI_FORMAT_BC5_SNORM else
-  if dwFourCC = MAGIC_DX10 then begin
+  if (dwFourCC = MAGIC_DX10) or (dwFourCC = MAGIC_XBOX) then begin
     DDSHeaderDX10 := Pointer(PByte(DDSHeader) + SizeOf(DDSHeader^));
     Result := TDXGI(DDSHeaderDX10.dxgiFormat);
   end else
