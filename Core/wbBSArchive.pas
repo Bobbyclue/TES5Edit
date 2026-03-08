@@ -2183,7 +2183,7 @@ begin
       end;
 
       baFO4dds, baSFdds: begin
-        var IsXBox := LowerCase(FileName).Contains(' - xbox.');
+        var IsXBox := LowerCase(FileName).Contains('_xbox.');
         // allocate space for total DDS size
         TexSize := SizeOf(TDDSHeader);
         if IsXBox or not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then begin
