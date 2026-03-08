@@ -16,8 +16,9 @@ uses
   Vcl.StdCtrls,
   Vcl.ValEdit,
 
-  SniffProcessor,
-  wbDDS;
+  wbDDS,
+
+  SniffProcessor;
 
 type
   TFrameFindTextures = class(TFrame)
@@ -55,6 +56,7 @@ type
     fHasAlpha: string;
     fCubeMap: string;
     fDX10: string;
+    fXBOX: string;
   public
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
@@ -71,12 +73,11 @@ implementation
 {$R *.dfm}
 
 uses
-  Math,
-  System.IOUtils,
+  System.Math,
   System.StrUtils,
-  wbDataFormat,
-  wbDataFormatMisc,
-  wbBSArchive;
+
+  wbBSArchive,
+  wbDataFormatMisc;
 
 procedure TFrameFindTextures.edFormatFilterChange(Sender: TObject);
 begin
@@ -155,7 +156,8 @@ begin
   AddProperty('CubeMap', ['', 'Yes', 'No']);
   AddProperty('BitsPerPixel', ['', '1', '4', '8', '12', '16', '24', '32', '64', '96', '128']);
   AddProperty('Block Compressed', ['', 'Yes', 'No']);
-  AddProperty('DX10+ supported', ['', 'Yes', 'No']);
+  AddProperty('DX10+ Supported', ['', 'Yes', 'No']);
+  AddProperty('XBOX Texture', ['', 'Yes', 'No']);
 end;
 
 constructor TProcFindTextures.Create(aManager: TProcManager);
@@ -229,7 +231,8 @@ begin
   fHasAlpha := Frame.edProp.Values['Has Alpha'];
   fCubeMap := Frame.edProp.Values['CubeMap'];
   fBitsPerPixel := StrToIntDef(Frame.edProp.Values['BitsPerPixel'], 0);
-  fDX10 := Frame.edProp.Values['DX10+ supported'];
+  fDX10 := Frame.edProp.Values['DX10+ Supported'];
+  fXBOX := Frame.edProp.Values['XBOX Texture'];
 end;
 
 function TProcFindTextures.ProcessFile(aFile: TProcFileObject): TBytes;
@@ -261,6 +264,7 @@ var
     Compressed: Boolean;
     Alpha: Boolean;
     CubeMap: Boolean;
+    XBOX: Boolean;
   end;
 begin
   Log := nil; fs := nil; len := 0;
@@ -294,7 +298,7 @@ begin
     // texture in loose file, read dds header only
     else begin
       fs := TFileStream.Create(fManager.InputDirectory + aFile.FileName, fmOpenRead + fmShareDenyNone);
-      SetLength(buf, SizeOf(TDDSHeader) + SizeOf(TDDSHeaderDX10));
+      SetLength(buf, TwbDDS.MaxHeaderSize);
       len := fs.Read(buf, Length(buf));
     end;
 
@@ -310,6 +314,7 @@ begin
     prop.BitsPerPixel := TwbDDS.GetBitsPerPixel(prop.DXGIFormat);
     prop.MipMaps := dds.dwMipMapCount > 1;
     prop.CubeMap := TwbDDS.IsCubeMap(dds);
+    prop.XBOX := TwbDDS.IsXBOX(dds);
     // no valid DXGI type, try D3DFMT
     if prop.DXGIFormat = DXGI_FORMAT_UNKNOWN then begin
       prop.FormatName := TwbDDS.GetD3DFMTFormatName(TwbDDS.GetD3DFMT(dds));
@@ -333,14 +338,15 @@ begin
     CheckBool(fCompressed, prop.Compressed) and
     CheckBool(fHasAlpha, prop.Alpha) and
     CheckBool(fCubeMap, prop.CubeMap) and
-    CheckBool(fDX10, prop.DXGIFormat <> DXGI_FORMAT_UNKNOWN)
+    CheckBool(fDX10, prop.DXGIFormat <> DXGI_FORMAT_UNKNOWN) and
+    CheckBool(fXBOX, prop.XBOX)
   ) then
     Exit;
 
   if fReportOnly then begin
     Log := TStringList.Create;
     Log.Add(aFile.FileName);
-    Log.Add(Format(#9'Width: %04d  Height: %04d  Size: %s    %d Bit  %s  %s%s%s', [
+    Log.Add(Format(#9'Width: %04d  Height: %04d  Size: %s    %d Bit  %s  %s%s%s%s', [
       prop.Width,
       prop.Height,
       FormatSize(prop.Size),
@@ -348,7 +354,8 @@ begin
       prop.FormatName,
       IfThen(prop.MipMaps, '  MipMaps', ''),
       IfThen(prop.Alpha, '  Alpha', ''),
-      IfThen(prop.CubeMap, '  CubeMap', '')
+      IfThen(prop.CubeMap, '  CubeMap', ''),
+      IfThen(prop.XBOX, '  XBOX', '')
     ]));
     if fHeaderDump and not BA2DDS then with TwbDDSFile.Create do try
       UnSerialize(Pointer(buf), @buf[len], len);

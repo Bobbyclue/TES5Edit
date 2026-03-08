@@ -11,7 +11,7 @@ unit wbDataFormatMisc;
 interface
 
 uses
-  SysUtils,
+  System.SysUtils,
 
   wbDataFormat;
 
@@ -59,7 +59,8 @@ var
 
 procedure FUZ_GetLIPSize(const e: TdfElement; var aCount: Integer); begin aCount := e.NativeValues['..\LIP Size']; end;
 procedure FUZ_BeforeSaveLIPSize(const e: TdfElement); begin e.NativeValue := e.Elements['..\LIP Data'].DataSize; end;
-function DDS_EnDX10(const e: TdfElement): Boolean; begin Result := e.EditValues['..\HEADER\ddspf\dwFourCC'] = 'DX10'; end;
+function DDS_EnDX10(const e: TdfElement): Boolean; begin var s := e.EditValues['..\HEADER\ddspf\dwFourCC']; Result := (s = 'DX10') or (s = 'XBOX'); end;
+function DDS_EnXBOX(const e: TdfElement): Boolean; begin var s := e.EditValues['..\HEADER\ddspf\dwFourCC']; Result := s = 'XBOX'; end;
 
 procedure GetTextFourCC(const aElement: TdfElement; var aText: string);
 begin
@@ -336,7 +337,13 @@ begin
         3, 'DDS_ALPHA_MODE_OPAQUE',
         4, 'DDS_ALPHA_MODE_CUSTOM'
       ])
-    ]).SetOnEnabled(DDS_EnDX10)
+    ]).SetOnEnabled(DDS_EnDX10),
+    dfStruct('HEADER_XBOX', [
+      dfInteger('tileMode', dtU32), // see XG_TILE_MODE / XG_SWIZZ
+      dfInteger('baseAlignment', dtU32),
+      dfInteger('dataSize', dtU32),
+      dfInteger('xdkVer', dtU32) // matching _XDK_VER / _GXDK_VER
+    ]).SetOnEnabled(DDS_EnXBOX)
   ]);
 end;
 
