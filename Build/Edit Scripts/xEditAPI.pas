@@ -336,7 +336,7 @@ procedure AddMasters(aeFile: IwbFile; aMasters: TStrings; abSortMasters: boolean
 /// <summary>Adds the specified file as a master for aeFile, if it isn't already a master. If SortMasters is true (the default) all masters will be sorted if any were added. If Silent is true (not the default) then a message log will be omitted.</summary>
 procedure AddMasterIfMissing(aeFile: IwbFile; asMasterFilename: string; abSortMasters: boolean = True; abSilent: boolean = False);
 /// <summary>Adds the list of masters in aMasters to aeFile. If Silent is true (not the default) then a message log will be omitted.</summary>
-procedure AddMastersIfMissing(aeFile: IwbFile; akList: TStringList; abSortMasters: boolean = True; abSilent: boolean = False)
+procedure AddMastersIfMissing(aeFile: IwbFile; akList: TStringList; abSortMasters: boolean = True; abSilent: boolean = False);
 /// <summary>Creates a new, empty plugin in the game's plugin folder (Data) and adds it to the end of the plugins list. Prompts user for the name of the file.</summary>
 /// <param name="abLight">Whether to set the light (aka ESL/small) flag.</param>
 /// <param name="abMedium">Whether to set the medium flag.</param>
@@ -1062,7 +1062,7 @@ procedure AddMasterIfMissing(aeFile: IwbFile; asMasterFilename: string; abSortMa
 begin
 end;
 
-procedure AddMastersIfMissing(aeFile: IwbFile; akList: TStringList; abSortMasters: boolean = True; abSilent: boolean = False)
+procedure AddMastersIfMissing(aeFile: IwbFile; akList: TStringList; abSortMasters: boolean = True; abSilent: boolean = False);
 begin
 end;
 
