@@ -936,14 +936,6 @@ begin
 end;
 
 class function TwbDDS.ConvertR8G8B8toB8G8R8X8(aDDSData: Pointer; aSize: Integer): TBytes;
-
-  function RGB2BGR(aPixel: Cardinal): Cardinal;
-  begin
-    Result := aPixel;
-    PByte(@Result)[0] := PByte(@aPixel)[2];
-    PByte(@Result)[2] := PByte(@aPixel)[0];
-  end;
-
 var
   DDSHeader: PDDSHeader;
   headersize, pixels: Integer;
@@ -963,7 +955,6 @@ begin
     Inc(src, 3);
     Inc(dst, 4);
   end;
-
 end;
 
 

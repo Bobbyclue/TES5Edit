@@ -27,6 +27,7 @@ const
 type
   TwbBSArchiveType = (baNone, baTES3, baTES4, baFO3, baSSE, baFO4, baFO4dds, baSF, baSFdds);
   TwbBSArchiveTypes = set of TwbBSArchiveType;
+  TwbBSArchiveTarget = (btPC, btXBox);
   TwbBSArchive = class;
   TwbBSArchives = array of TwbBSArchive;
   TwbBSArchivePacker = class;
@@ -129,6 +130,7 @@ type
   TwbCustomBSArchive = class abstract
   private
     fType: TwbBSArchiveType;
+    fTarget: TwbBSArchiveTarget;
     fFileName: string;
     fCompressionType: TwbCompressionType;
     fShareData: Boolean;
@@ -154,7 +156,8 @@ type
   const
     cExceptionInvalidDDS = 'Not a valid DDS file';
     cExceptionUnsupportedDDS = 'Unsupported DDS format';
-    cExceptionUnsupportedXBOX = 'XBOX textures are not supported';
+    cExceptionIsXboxDDS = 'DDS is in XBox format';
+    cExceptionIsNotXboxDDS = 'DDS is not in XBox format';
     // max game supported file offset in .bsa archives
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
@@ -228,6 +231,7 @@ type
 
     property FileName: string read fFileName;
     property ArchiveType: TwbBSArchiveType read fType;
+    property ArchiveTarget: TwbBSArchiveTarget read fTarget write fTarget;
     property CompressionType: TwbCompressionType read fCompressionType write fCompressionType;
     property ShareData: Boolean read fShareData write fShareData;
     property MultiThreaded: Boolean read fMultiThreaded write SetMultiThreaded;
@@ -517,8 +521,8 @@ function FormatSize(Bytes: Int64): string;
 implementation
 
 uses
-  System.IOUtils,
-  System.Math;
+  System.Math,
+  System.IOUtils;
 
 const
   MAGIC_TES3: TMagic4 = #0#1#0#0;
@@ -2054,8 +2058,11 @@ begin
   if not TwbDDS.IsDDS(aData, aSize) then
     raise Exception.Create(cExceptionInvalidDDS);
 
-  //if TwbDDS.IsXBOX(aData) then
-  //  raise Exception.Create(cExceptionUnsupportedXBOX);
+  if (fTarget = btPC) and TwbDDS.IsXBOX(aData) then
+    raise Exception.Create(cExceptionIsXboxDDS);
+
+  if (fTarget = btXBox) and not TwbDDS.IsXBOX(aData) then
+    raise Exception.Create(cExceptionIsNotXboxDDS);
 
   DDSHeader := aData;
   // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
@@ -2422,6 +2429,7 @@ end;
 function TwbSplitPacker.AddArchive: TwbBSArchive;
 begin
   Result := TwbBSArchive.Create;
+  Result.ArchiveTarget := fTarget;
   Result.MultiThreaded := fMultiThreaded;
   Result.ShareData := fShareData;
   Result.ArchiveFlags := fArchiveFlags;
@@ -2509,8 +2517,11 @@ begin
       if not TwbDDS.IsDDS(buf, Length(buf)) then
         raise Exception.Create(cExceptionInvalidDDS);
 
-      //if TwbDDS.IsXBOX(buf) then
-      //  raise Exception.Create(cExceptionUnsupportedXBOX);
+      if (fTarget = btPC) and TwbDDS.IsXBOX(buf) then
+        raise Exception.Create(cExceptionIsXboxDDS);
+
+      if (fTarget = btXBox) and not TwbDDS.IsXBOX(buf) then
+        raise Exception.Create(cExceptionIsNotXboxDDS);
 
       DDSHeader := @buf[0];
       // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX

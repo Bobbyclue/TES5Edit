@@ -78,11 +78,24 @@ object FormPack: TFormPack
     WordWrap = True
   end
   object Label4: TLabel
-    Left = 411
-    Top = 351
-    Width = 102
+    Left = 427
+    Top = 349
+    Width = 104
     Height = 13
-    Caption = 'Compression type'
+    Caption = 'Compression Type'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblTarget: TLabel
+    Left = 494
+    Top = 254
+    Width = 38
+    Height = 13
+    Caption = 'Target'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -171,7 +184,7 @@ object FormPack: TFormPack
   object chkSharedData: TCheckBox
     Left = 200
     Top = 348
-    Width = 161
+    Width = 121
     Height = 17
     Hint = 
       'Content of identical files will be shared inside archive to redu' +
@@ -234,11 +247,19 @@ object FormPack: TFormPack
     TabOrder = 10
   end
   object cmbCompression: TComboBox
-    Left = 531
-    Top = 348
-    Width = 81
+    Left = 547
+    Top = 346
+    Width = 65
     Height = 21
     Style = csDropDownList
     TabOrder = 11
+  end
+  object cmbTarget: TComboBox
+    Left = 550
+    Top = 251
+    Width = 62
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 12
   end
 end

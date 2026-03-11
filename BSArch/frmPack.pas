@@ -12,10 +12,8 @@ interface
 
 uses
   System.Classes,
-  System.SysUtils,
 
   Vcl.Controls,
-  Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.Forms,
   Vcl.Graphics,
@@ -46,6 +44,8 @@ type
     Label2: TLabel;
     Label4: TLabel;
     cmbCompression: TComboBox;
+    lblTarget: TLabel;
+    cmbTarget: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure chkAutodetectFlagsClick(Sender: TObject);
@@ -61,6 +61,7 @@ type
     FilesList: TStringList;
     CompressionList: TArray<Boolean>;
     ArchiveType: TwbBSArchiveType;
+    ArchiveTarget: TwbBSArchiveTarget;
     ArchiveFileName: string;
     AutodetectFlags: Boolean;
     MultiThreaded: Boolean;
@@ -79,7 +80,10 @@ implementation
 {$R *.dfm}
 
 uses
-  System.IOUtils;
+  System.IOUtils,
+  System.SysUtils,
+
+  Vcl.Dialogs;
 
 //============================================================================
 procedure TFormPack.FormKeyDown(Sender: TObject; var Key: Word;
@@ -121,18 +125,22 @@ begin
   pnlFileFlags.Visible := chkAutodetectFlags.Visible;
   edFileName.Text := TPath.ChangeExtension(edFileName.Text, TwbBSArchive.DefaultExtension(ArchiveType));
   lblTip.Visible := not chkAutodetectFlags.Visible;
+  cmbTarget.Visible := TwbBSArchive.IsDDSArchive(ArchiveType);
+  lblTarget.Visible := cmbTarget.Visible;
   // update autodetected flags
   if chkAutodetectFlags.Visible and chkAutodetectFlags.Checked then
     chkAutodetectFlagsClick(nil);
 
   case ArchiveType of
     baFO4dds, baSFdds: lblTip.Caption :=
-      'A special type of archive optimized for textures which can''t contain anything else.'#13 +
+      'A special type of archive optimized for textures which can''t contain anything else.'#13#13 +
       'Due to the game engine bug it must be compressed (the game might crash otherwise). ' +
-      'All textures will be compressed no matter their compression status in the list.';
+      'All textures will be compressed no matter their compression status in the list.'#13#13 +
+      'When target platfrom is XBox textures must already be in XBox format. ' +
+      'Otherwise put xtexconv.exe and xg.dll in the same folder with BSArchPro ' +
+      '(they are bundled with Creation Kit) for automatic convertion.';
     baTES3: lblTip.Caption :=
-      'Morrowind doesn''t support compression in archives. All files will always be ' +
-      'uncompressed.';
+      'Morrowind doesn''t support compression in archives. All files will always be uncompressed.';
     else lblTip.Caption := '';
   end;
 
@@ -218,6 +226,7 @@ begin
       Free;
     end;
 
+  ArchiveTarget := TwbBSArchiveTarget(cmbTarget.Items.Objects[cmbTarget.ItemIndex]);
   ArchiveFileName := edFileName.Text;
   if chkAutodetectFlags.Visible then AutodetectFlags := chkAutodetectFlags.Checked;
   MultiThreaded := chkMultiThreaded.Checked;
@@ -253,6 +262,12 @@ begin
   chkAutodetectFlags.Checked := AutodetectFlags;
   chkMultiThreaded.Checked := MultiThreaded;
   chkSharedData.Checked := SharedData;
+
+  cmbTarget.Items.AddObject('PC', TObject(btPC));
+  cmbTarget.Items.AddObject('XBox', TObject(btXBox));
+  i := cmbTarget.Items.IndexOfObject(TObject(ArchiveTarget));
+  if i = -1 then i := 0;
+  cmbTarget.ItemIndex := i;
 
   cmbSplit.Items.AddObject('Auto', TObject(-1));
   cmbSplit.Items.AddObject('None', TObject(0));

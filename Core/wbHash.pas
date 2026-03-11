@@ -225,17 +225,17 @@ begin
 
   hash := 0;
   for i := 2 to l-2 do begin
-    hash := Byte(s[i]) + (hash shl 6) + (hash shl 16) - hash;
-    if aSigned and (Byte(s[i]) > 127) then hash := hash - 256;
+    hash := Cardinal(UInt64(Byte(s[i])) + (UInt64(hash) shl 6) + (UInt64(hash) shl 16) - hash);
+    if aSigned and (Byte(s[i]) > 127) then hash := Cardinal(Int64(hash) - 256);
   end;
-  Result := Result + UInt64(hash) shl 32;
+  Result := Result or (UInt64(hash) shl 32);
 
   hash := 0;
   for i := 1 to Length(e) do begin
-    hash := Byte(e[i]) + (hash shl 6) + (hash shl 16) - hash;
-    if aSigned and (Byte(s[i]) > 127) then hash := hash - 256;
+    hash := Cardinal(UInt64(Byte(e[i])) + (UInt64(hash) shl 6) + (UInt64(hash) shl 16) - hash);
+    if aSigned and (Byte(e[i]) > 127) then hash := Cardinal(Int64(hash) - 256);
   end;
-  Result := Result + UInt64(hash) shl 32;
+  Result := Result or (UInt64(hash) shl 32);
 end;
 
 class function TwbHash.TES4(const aText: string; aHasExtension: Boolean = False): UInt64;
