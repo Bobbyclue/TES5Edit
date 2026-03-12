@@ -17,9 +17,10 @@ procedure DefineTES4;
 implementation
 
 uses
-  Classes,
-  SysUtils,
-  Variants,
+  System.Classes,
+  System.SysUtils,
+  System.Variants,
+
   wbDefinitionsCommon,
   wbDefinitionsSignatures,
   wbInterface;
@@ -568,55 +569,51 @@ begin
 end;
 
 function wbConditionVariableNameToInt(const aString: string; const aElement: IwbElement): Int64;
-var
-  MainRecord : IwbMainRecord;
-  Script     : IwbMainRecord;
-  LocalVars  : IwbContainerElementRef;
-  LocalVar   : IwbContainerElementRef;
 begin
   Result := StrToInt64Def(aString, Low(Cardinal));
   if Result <> Low(Cardinal) then
     Exit;
 
   if not Assigned(aElement) then
-    raise Exception.Create('aElement not specified');
+    Exit;
 
   var Container := GetContainerRefFromUnionOrValue(aElement);
   if not Assigned(Container) then
-    raise Exception.Create('Container not assigned');
+    Exit;
 
   var Param1 := Container.ElementByName['Parameter #1'];
   if not Assigned(Param1) then
-    raise Exception.Create('Could not find "Parameter #1"');
+    Exit;
 
-  if not Supports(Param1.LinksTo, IwbMainRecord, MainRecord) then
-    raise Exception.Create('"Parameter #1" does not reference a valid main record');
+  var lMainRecord : IwbMainRecord;
+  if not Supports(Param1.LinksTo, IwbMainRecord, lMainRecord) then
+    Exit;
 
-  var BaseRecord := MainRecord.BaseRecord;
+  var BaseRecord := lMainRecord.BaseRecord;
   if Assigned(BaseRecord) then
-    MainRecord := BaseRecord;
-  MainRecord := MainRecord.WinningOverride;
+    lMainRecord := BaseRecord;
+  lMainRecord := lMainRecord.WinningOverride;
 
   var ScriptRef := MainRecord.RecordBySignature['SCRI'];
   if not Assigned(ScriptRef) then
-    raise Exception.Create('"' + MainRecord.ShortName + '" does not contain a SCRI subrecord');
+    Exit;
 
-  if not Supports(ScriptRef.LinksTo, IwbMainRecord, Script) then
-    raise Exception.Create('"' + MainRecord.ShortName + '" does not have a valid script');
+  var lScript : IwbMainRecord;
+  if not Supports(ScriptRef.LinksTo, IwbMainRecord, lScript) then
+    Exit;
 
-  Script := Script.HighestOverrideOrSelf[aElement._File.LoadOrder];
-
-  if Supports(Script.ElementByName['Local Variables'], IwbContainerElementRef, LocalVars) then begin
-    for var i := 0 to Pred(LocalVars.ElementCount) do
-      if Supports(LocalVars.Elements[i], IwbContainerElementRef, LocalVar) then begin
-        var j := LocalVar.ElementNativeValues['SLSD\Index'];
-        var s := LocalVar.ElementNativeValues['SCVR'];
+  lScript := lScript.WinningOverride;
+  var lLocalVars : IwbContainerElementRef;
+  if Supports(lScript.ElementByName['Local Variables'], IwbContainerElementRef, lLocalVars) then begin
+    for var i := 0 to Pred(lLocalVars.ElementCount) do begin
+      var lLocalVar : IwbContainerElementRef;
+      if Supports(lLocalVars.Elements[i], IwbContainerElementRef, lLocalVar) then begin
+        var j := lLocalVar.ElementNativeValues['SLSD\Index'];
+        var s := lLocalVar.ElementNativeValues['SCVR'];
         if SameText(s, Trim(aString)) then
           Exit(j);
       end;
   end;
-
-  raise Exception.Create('Variable "' + aString + '" was not found in "' + MainRecord.ShortName + '"');
 end;
 
 function wbCalcPGRRSize(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
