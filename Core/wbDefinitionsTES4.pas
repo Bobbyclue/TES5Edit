@@ -594,7 +594,7 @@ begin
     lMainRecord := BaseRecord;
   lMainRecord := lMainRecord.WinningOverride;
 
-  var ScriptRef := MainRecord.RecordBySignature['SCRI'];
+  var ScriptRef := lMainRecord.RecordBySignature['SCRI'];
   if not Assigned(ScriptRef) then
     Exit;
 
@@ -613,6 +613,7 @@ begin
         if SameText(s, Trim(aString)) then
           Exit(j);
       end;
+    end;
   end;
 end;
 
