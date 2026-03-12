@@ -137,6 +137,7 @@ type
     TempFolder: string;
     // options
     ArchiveType: TwbBSArchiveType;
+    ArchiveTarget: TwbBSArchiveTarget;
     ArchiveFileName: string;
     AutodetectFlags: Boolean;
     MultiThreaded: Boolean;
@@ -178,6 +179,7 @@ type
   PAssetNode = ^TAssetNode;
 
   TAssetsPacker = class(TwbSplitPacker)
+    ConvertDDS2XBOX: Boolean;
     function GetSourceFileData(const aFileName: string; aFileObject: Pointer): TBytes; override;
   end;
 
@@ -237,14 +239,60 @@ uses
   frmSearchReplace,
 
   wbCompression,
+  wbDDS,
   wbDataFormatMisc,
   wbTaskProgress;
+
+
+//============================================================================
+function DDS2XBOX(const aData: TBytes): TBytes;
+var
+  TempFile, params: string;
+  Info: SHELLEXECUTEINFO;
+  ErrCode: Cardinal;
+begin
+  TempFile := TPath.GetTempPath + TPath.GetGUIDFileName + '.dds';
+  try
+    TFile.WriteAllBytes(TempFile, aData);
+  except
+    raise Exception.Create('Can''t create temp file for DDS XBox convertion: ' + TempFile);
+  end;
+
+  params := '-xbox "' + TempFile + '"';
+
+  try
+    FillChar(Info, SizeOf(Info), 0);
+    Info.cbSize := SizeOf(SHELLEXECUTEINFO);
+    Info.fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_NO_UI;
+    Info.nShow := SW_HIDE;
+    Info.lpFile := PChar(ExtractFilePath(ParamStr(0)) + 'xtexconv.exe');
+    Info.lpParameters := PChar(params);
+    Info.lpDirectory := PChar(ExtractFilePath(TempFile));
+
+    if not ShellExecuteEx(@Info) then
+      raise Exception.Create('Unable to start xtexconv.exe');
+
+    WaitForSingleObject(Info.hProcess, INFINITE);
+    GetExitCodeProcess(Info.hProcess, ErrCode);
+    CloseHandle(Info.hProcess);
+
+    if ErrCode <> 0 then
+      raise Exception.Create('xtexconv.exe error code ' + ErrCode.ToHexString(8));
+
+    Result := TFile.ReadAllBytes(TempFile);
+  finally
+    if FileExists(TempFile) then
+      TFile.Delete(TempFile);
+  end;
+end;
 
 //============================================================================
 function TAssetsPacker.GetSourceFileData(const aFileName: string; aFileObject: Pointer): TBytes;
 begin
   try
     Result := TAsset(aFileObject).GetData;
+    if ConvertDDS2XBOX and TwbDDS.IsDDS(Result, Length(Result)) and not TwbDDS.IsXBOX(Result) then
+      Result := DDS2XBOX(Result);
   except
     on E: Exception do
       raise Exception.Create('Error reading source file:'#13 + TAsset(aFileObject).FileNameDescr + #13#13 + E.Message);
@@ -830,6 +878,8 @@ begin
 
   ArchiveType := TwbBSArchiveType(Settings.ReadInteger('General', 'ArchiveType',
     Integer(High(TwbBSArchiveType))) );
+  ArchiveTarget := TwbBSArchiveTarget(Settings.ReadInteger('General', 'ArchiveTarget',
+    Integer(Low(TwbBSArchiveTarget))) );
   ArchiveFileName := Settings.ReadString('General', 'ArchiveFileName',
     ExtractFilePath(ParamStr(0)) + 'New' + TwbBSArchive.DefaultExtension(ArchiveType));
   ArchiveFlags := Settings.ReadInteger('General', 'ArchiveFlags', 0);
@@ -1022,6 +1072,7 @@ begin
   try
     var p := js.O['Packing'];
     p.I['ArchiveType'] := Integer(ArchiveType);
+    p.I['ArchiveTarget'] := Integer(ArchiveTarget);
     p.S['ArchiveFileName'] := ArchiveFileName;
     p.I['ArchiveFlags'] := ArchiveFlags;
     p.I['FileFlags'] := FileFlags;
@@ -1092,6 +1143,7 @@ begin
       // just in case, could happen when loading lists created by other tools
       if ArchiveType = baNone then
         ArchiveType := High(TwbBSArchiveType);
+      ArchiveTarget := TwbBSArchiveTarget(p.I['ArchiveTarget']);
       ArchiveFileName := p.S['ArchiveFileName'];
       ArchiveFlags := p.I['ArchiveFlags'];
       FileFlags := p.I['FileFlags'];
@@ -1842,6 +1894,7 @@ begin
       FilesList := slFiles;
       CompressionList := lstComp;
       ArchiveType := Self.ArchiveType;
+      ArchiveTarget := Self.ArchiveTarget;
       ArchiveFileName := Self.ArchiveFileName;
       AutodetectFlags := Self.AutodetectFlags;
       MultiThreaded := Self.MultiThreaded;
@@ -1855,6 +1908,7 @@ begin
         Exit;
 
       Self.ArchiveType := ArchiveType;
+      Self.ArchiveTarget := ArchiveTarget;
       Self.ArchiveFileName := ArchiveFileName;
       Self.AutodetectFlags := AutodetectFlags;
       Self.MultiThreaded := MultiThreaded;
@@ -1889,6 +1943,10 @@ begin
     bsa.ArchiveFlags := ArchiveFlags;
     bsa.FileFlags := FileFlags;
   end;
+
+  bsa.ArchiveTarget := ArchiveTarget;
+  bsa.ConvertDDS2XBOX := bsa.IsDDSArchive(ArchiveType) and (bsa.ArchiveTarget = btXBox) and
+   FileExists(ExtractFilePath(ParamStr(0)) + 'xtexconv.exe');
 
   var bSuccess := False;
   bsa.CreateArchive(ArchiveFileName, ArchiveType, slFiles, lstComp);

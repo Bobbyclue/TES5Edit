@@ -972,7 +972,7 @@ end;
 
 procedure TdfDef.InsertDefsFrom(const aDef: TdfDef; Index: Integer);
 var
-  i: integer;
+  i: Integer;
 begin
   if Length(aDef.Defs) = 0 then
     Exit;
@@ -982,8 +982,10 @@ begin
   else if (Index < Low(FDefs)) or (Index > High(FDefs)) then
     raise Exception.Create('Invalid index to insert defs');
 
+  i := SizeOf(Pointer) * (Length(FDefs) - Index);
   SetLength(FDefs, Length(FDefs) + Length(aDef.Defs));
-  Move(FDefs[Index], FDefs[Index + Length(aDef.Defs)], SizeOf(Pointer) * (Length(FDefs) - Length(aDef.Defs) - Index));
+  if i > 0 then
+    Move(FDefs[Index], FDefs[Index + Length(aDef.Defs)], i);
   for i := Low(aDef.Defs) to High(aDef.Defs) do
     FDefs[Index + i] := aDef.Defs[i].Clone;
 end;
@@ -1165,7 +1167,7 @@ end;
 
 procedure TdfElement.LoadFromData(const aData: TBytes);
 begin
-  UnSerialize(@aData[0], @aData[Length(aData)], 0);
+  UnSerialize(aData, PByte(aData) + Length(aData), 0);
 end;
 
 procedure TdfElement.LoadFromFile(const aFileName: string);

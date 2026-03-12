@@ -669,7 +669,7 @@ begin
     AddFunction(cUnit, 'ClearElementState', IwbElement_ClearElementState, 2, [varEmpty, varEmpty], varBoolean);
     AddFunction(cUnit, 'ContainingMainRecord', IwbElement_ContainingMainRecord, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ContainingSubRecord', IwbElement_ContainingSubRecord, 1, [varEmpty], varEmpty);
-	AddFunction(cUnit, 'DefType', IwbElement_DefType, 1, [varEmpty], varEmpty);
+	  AddFunction(cUnit, 'DefType', IwbElement_DefType, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'DefTypeAsText', IwbElement_DefTypeAsText, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'DisplayName', IwbElement_DisplayName, 1, [varEmpty], varEmpty);
     AddFunction(cUnit, 'ElementAssign', IwbElement_Assign, 4, [varEmpty, varEmpty, varEmpty, varBoolean], varEmpty);

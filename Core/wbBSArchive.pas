@@ -27,6 +27,7 @@ const
 type
   TwbBSArchiveType = (baNone, baTES3, baTES4, baFO3, baSSE, baFO4, baFO4dds, baSF, baSFdds);
   TwbBSArchiveTypes = set of TwbBSArchiveType;
+  TwbBSArchiveTarget = (btPC, btXBox);
   TwbBSArchive = class;
   TwbBSArchives = array of TwbBSArchive;
   TwbBSArchivePacker = class;
@@ -129,6 +130,7 @@ type
   TwbCustomBSArchive = class abstract
   private
     fType: TwbBSArchiveType;
+    fTarget: TwbBSArchiveTarget;
     fFileName: string;
     fCompressionType: TwbCompressionType;
     fShareData: Boolean;
@@ -154,6 +156,8 @@ type
   const
     cExceptionInvalidDDS = 'Not a valid DDS file';
     cExceptionUnsupportedDDS = 'Unsupported DDS format';
+    cExceptionIsXboxDDS = 'DDS is in XBox format';
+    cExceptionIsNotXboxDDS = 'DDS is not in XBox format';
     // max game supported file offset in .bsa archives
     BSA_MAX_OFFSET = High(Integer);
     // DX10 DDS archive types with chunked textures
@@ -227,6 +231,7 @@ type
 
     property FileName: string read fFileName;
     property ArchiveType: TwbBSArchiveType read fType;
+    property ArchiveTarget: TwbBSArchiveTarget read fTarget write fTarget;
     property CompressionType: TwbCompressionType read fCompressionType write fCompressionType;
     property ShareData: Boolean read fShareData write fShareData;
     property MultiThreaded: Boolean read fMultiThreaded write SetMultiThreaded;
@@ -2008,6 +2013,9 @@ begin
         aChunk.Size := fStream.Position - StartPosition;
         if aFile.Compress xor (fHeader.Flags and ARCHIVE_COMPRESS <> 0) then
           aChunk.Size := aChunk.Size or FILE_SIZE_COMPRESS;
+        // this is purely for warnings check on newly created archives to signal that the file was compressed
+        if aFile.Compress then
+          aChunk.PackedSize := aSize;
       end;
       // baFO4, bfFO4dds, baSF, baSFdds
       else begin
@@ -2050,6 +2058,12 @@ begin
   if not TwbDDS.IsDDS(aData, aSize) then
     raise Exception.Create(cExceptionInvalidDDS);
 
+  if (fTarget = btPC) and TwbDDS.IsXBOX(aData) then
+    raise Exception.Create(cExceptionIsXboxDDS);
+
+  if (fTarget = btXBox) and not TwbDDS.IsXBOX(aData) then
+    raise Exception.Create(cExceptionIsNotXboxDDS);
+
   DDSHeader := aData;
   // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
   if not Assigned(fPacker) and (TwbDDS.GetD3DFMT(DDSHeader) = D3DFMT_R8G8B8) then begin
@@ -2066,8 +2080,8 @@ begin
   aFile.DDS.NumMips := DDSHeader.dwMipMapCount;
   // DirectXTexDDS.cpp, in DecodeDDSHeader, if dwMipMapCount is 0, it is forced to 1
   if aFile.DDS.NumMips = 0 then Inc(aFile.DDS.NumMips);
+  aFile.DDS.TileMode := TwbDDS.GetTileMode(DDSHeader);
   aFile.DDS.Flags := 0;
-  aFile.DDS.TileMode := 8;
   if TwbDDS.IsCubeMap(DDSHeader) then begin
     aFile.DDS.Flags := aFile.DDS.Flags or DDS_FLAG_CUBEMAP;
     chunks := 1; // cubemaps are not chunked
@@ -2176,17 +2190,25 @@ begin
       end;
 
       baFO4dds, baSFdds: begin
+        var IsXBox := LowerCase(FileName).Contains('_xbox.');
         // allocate space for total DDS size
         TexSize := SizeOf(TDDSHeader);
-        if not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then
+        if IsXBox or not (TDXGI(aFile.DDS.DXGIFormat) in TwbDDS.DXGI_DX9) then begin
           Inc(TexSize, SizeOf(TDDSHeaderDX10));
+          if IsXBox then
+            Inc(TexSize, SizeOf(TDDSHeaderXBOX));
+        end;
+
         // offset to image data (total size of DDS header)
         MipOffset := TexSize;
         for var c in aFile.DDS.TexChunks do Inc(TexSize, c.Size);
         SetLength(Result, TexSize);
 
         // set up DDS header
-        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.IsCubeMap);
+        TwbDDS.SetUpHeader(Result, TDXGI(aFile.DDS.DXGIFormat), aFile.DDS.Width, aFile.DDS.Height, aFile.DDS.NumMips, aFile.IsCubeMap, IsXBox);
+        if IsXBox then
+          TwbDDS.HeaderXBOX(Result).tileMode := aFile.DDS.TileMode;
+
         // append mipmap chunks
         for var c in aFile.DDS.TexChunks do begin
           fStream.Position := c.Offset;
@@ -2407,6 +2429,7 @@ end;
 function TwbSplitPacker.AddArchive: TwbBSArchive;
 begin
   Result := TwbBSArchive.Create;
+  Result.ArchiveTarget := fTarget;
   Result.MultiThreaded := fMultiThreaded;
   Result.ShareData := fShareData;
   Result.ArchiveFlags := fArchiveFlags;
@@ -2493,6 +2516,12 @@ begin
     else begin
       if not TwbDDS.IsDDS(buf, Length(buf)) then
         raise Exception.Create(cExceptionInvalidDDS);
+
+      if (fTarget = btPC) and TwbDDS.IsXBOX(buf) then
+        raise Exception.Create(cExceptionIsXboxDDS);
+
+      if (fTarget = btXBox) and not TwbDDS.IsXBOX(buf) then
+        raise Exception.Create(cExceptionIsNotXboxDDS);
 
       DDSHeader := @buf[0];
       // convert unsupported uncompressed 24 bit RGB to 32 bit BGRX
