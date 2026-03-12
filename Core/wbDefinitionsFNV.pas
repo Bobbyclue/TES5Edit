@@ -81,14 +81,12 @@ var
   wbSCHRReq: IwbSubRecordDef;
   wbConditions: IwbRecordMemberDef;
   wbSCROs: IwbRecordMemberDef;
-//  wbPGRP: IwbSubRecordDef;
   wbEmbeddedScript: IwbRecordMemberDef;
   wbEmbeddedScriptPerk: IwbRecordMemberDef;
   wbEmbeddedScriptReq: IwbRecordMemberDef;
   wbSCRI: IwbSubRecordDef;
   wbSCRIActor: IwbSubRecordDef;
   wbENAM: IwbSubRecordDef;
-//  wbFGGS: IwbSubRecordDef;
   wbXESP: IwbSubRecordDef;
   wbICON: IwbSubRecordStructDef;
   wbICONReq: IwbSubRecordStructDef;
