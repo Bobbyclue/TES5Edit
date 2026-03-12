@@ -194,15 +194,17 @@ begin
   Result := Result or UInt64(sum) shl 32;
 end;
 
+{$IFOPT Q+}
+  {$DEFINE HasOverflowChecks}
+{$ENDIF}
+{$OVERFLOWCHECKS OFF}
 class function TwbHash._TES4(const aText: string; aHasExtension: Boolean = False; aSigned: Boolean = False): UInt64;
 var
-  i, l: Integer;
-  hash: Cardinal;
   hash1: array [0..3] of AnsiChar absolute Result;
   s, e: AnsiString;
 begin
   Result := 0;
-  i := LastCharPos(aText, '.');
+  var i := LastCharPos(aText, '.');
   if aHasExtension and (i <> 0) then begin
     s := AnsiString(LowerCase(Copy(aText, 1, Pred(i))));
     e := AnsiString(LowerCase(Copy(aText, i, Length(aText))));
@@ -212,7 +214,7 @@ begin
     e := '';
   end;
 
-  l := Length(s);
+  var l := Length(s);
   if l > 0 then hash1[0] := s[l];
   if l > 2 then hash1[1] := s[l-1];
                 hash1[2] := AnsiChar(l);
@@ -223,20 +225,23 @@ begin
   if e = '.dds' then Result := Result or $8080 else
   if e = '.wav' then Result := Result or $80000000;
 
-  hash := 0;
+  var hash : Cardinal := 0;
   for i := 2 to l-2 do begin
-    hash := Cardinal(UInt64(Byte(s[i])) + (UInt64(hash) shl 6) + (UInt64(hash) shl 16) - hash);
-    if aSigned and (Byte(s[i]) > 127) then hash := Cardinal(Int64(hash) - 256);
+    hash := Byte(s[i]) + (hash shl 6) + (hash shl 16) - hash;
+    if aSigned and (Byte(s[i]) > 127) then hash := hash - 256;
   end;
-  Result := Result or (UInt64(hash) shl 32);
+  Result := Result + UInt64(hash) shl 32;
 
   hash := 0;
   for i := 1 to Length(e) do begin
-    hash := Cardinal(UInt64(Byte(e[i])) + (UInt64(hash) shl 6) + (UInt64(hash) shl 16) - hash);
-    if aSigned and (Byte(e[i]) > 127) then hash := Cardinal(Int64(hash) - 256);
+    hash := Byte(e[i]) + (hash shl 6) + (hash shl 16) - hash;
+    if aSigned and (Byte(e[i]) > 127) then hash := hash - 256;
   end;
-  Result := Result or (UInt64(hash) shl 32);
+  Result := Result + UInt64(hash) shl 32;
 end;
+{$IFDEF HasOverflowChecks}
+  {$OVERFLOWCHECKS ON}
+{$ENDIF}
 
 class function TwbHash.TES4(const aText: string; aHasExtension: Boolean = False): UInt64;
 begin
