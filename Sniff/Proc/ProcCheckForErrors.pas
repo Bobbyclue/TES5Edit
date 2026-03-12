@@ -1338,6 +1338,9 @@ begin
     if nif.NifVersion = nfFO3 then begin
       if (shader.EditValues['Shader Type'] = 'SHADER_SKIN') xor shader.NativeValues['Shader Flags 1\FaceGen'] then
         Log.Add(#9 + shader.Name + ': SHADER_SKIN shader type and FaceGen shader flag must be set together');
+
+      if (shader.EditValues['Shader Type'] = 'SHADER_NOLIGHTING') and (shader.BlockType = 'BSShaderPPLightingProperty') then
+        Log.Add(#9 + shader.Name + ': Invalid shader type SHADER_NOLIGHTING for BSShaderPPLightingProperty');
     end;
 
     // Skyrim
