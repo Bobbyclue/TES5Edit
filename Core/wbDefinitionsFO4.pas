@@ -12,7 +12,18 @@ unit wbDefinitionsFO4;
 
 interface
 
+procedure DefineFO4;
+
+implementation
+
 uses
+  System.Classes,
+  System.SysUtils,
+  System.Variants,
+
+  wbDefinitionsCommon,
+  wbDefinitionsSignatures,
+  wbHelpers,
   wbInterface;
 
 var
@@ -47,20 +58,6 @@ var
   wbKeywordTypeEnum: IwbEnumDef;
   wbReverbClassEnum: IwbEnumDef;
   wbHitBehaviourEnum: IwbEnumDef;
-
-procedure DefineFO4;
-
-implementation
-
-uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  wbHelpers,
-  wbDefinitionsCommon,
-  wbDefinitionsSignatures;
 
 type
   TVarRecs = array of TVarRec;
@@ -12710,17 +12707,16 @@ begin
   ]);
 
   wbRecord(NOCM, 'Navmesh Obstacle Manager', [
+    wbEDID
+      .SetDefaultEditValue('NavmeshObstacleCoverManager')
+      .SetRequired
+      .IncludeFlag(dfInternalEditOnly),
     wbRArray('Unknown',
       wbRStruct('Unknown', [
         wbRArray('Unknown',
           wbRStruct('Unknown', [
             wbInteger(INDX, 'Index', itU32),
-            wbRArray('Unknown Datas',
-              wbStruct(DATA, 'Unknown Data', [
-                wbByteArray('Unknown 1',2),
-                wbByteArray('Unknown 2',2),
-                wbByteArray('Unknown 4',4)
-              ])),
+            wbRArray('Unknown Datas', wbUnknown(DATA)),
             wbUnknown(INTV)
           ])),
         wbString(NAM1, 'Model')

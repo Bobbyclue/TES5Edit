@@ -12,31 +12,25 @@ unit wbDefinitionsSF1;
 
 interface
 
-uses
-  wbInterface;
-
-var
-  wbTerminalArtThemeEnum: IwbEnumDef;
-
 procedure DefineSF1;
 
 implementation
 
 uses
-  System.Types,
   System.Classes,
-  System.SysUtils,
+  System.Generics.Collections,
+  System.IOUtils,
   System.Math,
   System.StrUtils,
+  System.SysUtils,
   System.Variants,
-  System.IOUtils,
-  System.Generics.Defaults,
-  System.Generics.Collections,
+
   JsonDataObjects,
-  wbHelpers,
+
   wbDefinitionsCommon,
   wbDefinitionsReflection,
-  wbDefinitionsSignatures;
+  wbDefinitionsSignatures,
+  wbInterface;
 
 const
   // signatures of reference records
@@ -16153,17 +16147,16 @@ begin
 
   {subrecords checked against Starfield.esm}
   wbRecord(NOCM, 'Navmesh Obstacle Manager', [
+    wbEDID
+      .SetDefaultEditValue('NavmeshObstacleCoverManager')
+      .SetRequired
+      .IncludeFlag(dfInternalEditOnly),
     wbRArray('Unknown',
       wbRStruct('Unknown', [
         wbRArray('Unknown',
           wbRStruct('Unknown', [
             wbInteger(INDX, 'Index', itU32),
-            wbRArray('Unknown Datas',
-              wbStruct(DATA, 'Unknown Data', [
-                wbByteArray('Unknown 1',2),
-                wbByteArray('Unknown 2',2),
-                wbByteArray('Unknown 4',4)
-              ])),
+            wbRArray('Unknown Datas', wbUnknown(DATA)),
             wbUnknown(INTV)
           ])),
         wbString(NAM1, 'Model')
@@ -16723,6 +16716,7 @@ begin
 
   // load terminal theme list from external file if present
   var s := ExtractFilePath(ParamStr(0)) + wbAppName + 'TerminalArtThemes.txt';
+  var wbTerminalArtThemeEnum : IwbEnumDef;
   if FileExists(s) then try
     wbTerminalArtThemeEnum := wbEnum(TFile.ReadAllLines(s));
   except end;

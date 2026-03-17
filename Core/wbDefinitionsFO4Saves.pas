@@ -16,17 +16,13 @@ procedure SwitchToFO4CoSave;
 implementation
 
 uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  wbInterface,
-  wbSaveInterface,
-  wbImplementation,
-  wbLocalization,
+  System.SysUtils,
+
   wbDefinitionsCommon,
-  wbDefinitionsFO4;
+  wbDefinitionsFO4,
+  wbImplementation,
+  wbInterface,
+  wbSaveInterface;
 
 var
   wbExtraTypeEnum    : IwbEnumDef;
@@ -2941,7 +2937,7 @@ begin
   ]);
 
   wbNonRecursiveVariable := wbStruct('Variable', [
-    wbInteger('Type', itU8, wbPropTypeEnum),
+    wbInteger('Type', itU8),
     wbUnion('Value', VariableDecider, [
       wbInteger('Int32', itS32),
       wbStruct('Object', [
@@ -2974,7 +2970,7 @@ begin
   ]);
 
   wbVariable := wbStruct('Variable', [
-    wbInteger('Type', itU8, wbPropTypeEnum),
+    wbInteger('Type', itU8),
     wbUnion('Value', VariableDecider, [
       wbInteger('Int32', itS32),
       wbStruct('Object', [
@@ -3146,7 +3142,7 @@ begin
 
   wbArrayTableEntry := wbStruct('Array Entry Data', [  // UESP: arrayInfo
     wbInteger('Array Handle', itU64, wbVMHandle),
-    wbInteger('Array Type', itU8, wbPropTypeEnum),    // valid values : 0 to 7, 0B to 11
+    wbInteger('Array Type', itU8),    // valid values : 0 to 7, 0B to 11
     wbUnion('Data', ArrayTableEntryOptionalStringDecider, [
       wbNull,
       wbNull,

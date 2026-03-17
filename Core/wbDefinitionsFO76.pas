@@ -12,7 +12,19 @@ unit wbDefinitionsFO76;
 
 interface
 
+procedure DefineFO76;
+
+implementation
+
 uses
+  System.Classes,
+  System.SysUtils,
+  System.Variants,
+  System.IOUtils,
+
+  wbDefinitionsCommon,
+  wbDefinitionsSignatures,
+  wbHelpers,
   wbInterface;
 
 var
@@ -51,7 +63,6 @@ var
   wbWeaponPropertyEnum: IwbEnumDef;
   wbZTestFuncEnum: IwbEnumDef;
   wbDialogueSubtypeEnum: IwbEnumDef;
-  wbStatNameEnum: IwbEnumDef;
   wbKeywordTypeEnum: IwbEnumDef;
   wbReverbClassEnum: IwbEnumDef;
   wbHitBehaviourEnum: IwbEnumDef;
@@ -60,22 +71,6 @@ var
   wbMapMarkerEnum: IwbEnumDef;
   wbCellFlags: IwbFlagsDef;
   wbLVLFFlags : IwbFlagsDef;
-  wbLVLNLVLFFlags : IwbFlagsDef;
-
-procedure DefineFO76;
-
-implementation
-
-uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  IOUtils,
-  wbHelpers,
-  wbDefinitionsCommon,
-  wbDefinitionsSignatures;
 
 type
   TVarRecs = array of TVarRec;
@@ -16063,17 +16058,16 @@ begin
   ]);
 
   wbRecord(NOCM, 'Navmesh Obstacle Manager', [
+    wbEDID
+      .SetDefaultEditValue('NavmeshObstacleCoverManager')
+      .SetRequired
+      .IncludeFlag(dfInternalEditOnly),
     wbRArray('Unknown',
       wbRStruct('Unknown', [
         wbRArray('Unknown',
           wbRStruct('Unknown', [
             wbInteger(INDX, 'Index', itU32),
-            wbRArray('Unknown Datas',
-              wbStruct(DATA, 'Unknown Data', [
-                wbByteArray('Unknown 1',2),
-                wbByteArray('Unknown 2',2),
-                wbByteArray('Unknown 4',4)
-              ])),
+            wbRArray('Unknown Datas', wbUnknown(DATA)),
             wbUnknown(INTV)
           ])),
         wbString(NAM1, 'Model')
