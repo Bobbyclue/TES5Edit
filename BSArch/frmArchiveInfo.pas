@@ -12,22 +12,18 @@ interface
 
 uses
   System.Classes,
-  System.SysUtils,
 
   Vcl.Controls,
-  Vcl.Dialogs,
   Vcl.Forms,
   Vcl.Menus,
 
-  VirtualTrees,
+  VirtualTrees;
   {
   VirtualTrees.AncestorVCL,
   VirtualTrees.BaseAncestorVCL,
   VirtualTrees.BaseTree,
   VirtualTrees.Types,
   }
-
-  Winapi.Windows;
 
 type
   TFormArchiveInfo = class(TForm)
@@ -63,7 +59,12 @@ implementation
 
 uses
   System.StrUtils,
-  ClipBrd;
+  System.SysUtils,
+
+  Vcl.ClipBrd,
+  Vcl.Dialogs,
+
+  Winapi.Windows;
 
 //============================================================================
 procedure TFormArchiveInfo.mniSaveAsClick(Sender: TObject);

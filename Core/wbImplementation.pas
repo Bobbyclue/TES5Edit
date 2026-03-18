@@ -15,23 +15,11 @@ unit wbImplementation;
 interface
 
 uses
-  Variants,
-  Windows,
-  Classes,
-  SysUtils,
-  Contnrs,
-  Math,
+  System.Classes,
+  System.SysUtils,
+
   wbInterface,
-  wbLoadOrder,
-  System.Generics.Collections,
-  {$IFDEF USE_CODESITE}
-  CodeSiteLogging,
-  {$ENDIF}
-{$IFDEF USE_PARALLEL_BUILD_REFS}
-  System.SyncObjs,
-{$ENDIF}
-  wbCompression,
-  wbHash;
+  wbLoadOrder;
 
 const
   DefaultVCS1 = 0;
@@ -89,9 +77,23 @@ function wbMultipleElements(const aElements: IwbElements): IwbMultipleElements;
 implementation
 
 uses
-  TypInfo,
-  wbLocalization,
+  System.Generics.Collections,
+  System.Math,
+{$IFDEF USE_PARALLEL_BUILD_REFS}
+  System.SyncObjs,
+{$ENDIF}
+  System.Variants,
+
+  Winapi.Windows,
+
+{$IFDEF USE_CODESITE}
+  CodeSiteLogging,
+{$ENDIF}
+
+  wbCompression,
+  wbHash,
   wbHelpers,
+  wbLocalization,
   wbSort;
 
 const
@@ -3646,7 +3648,7 @@ begin
     end;
 
     if fsIsTemporary in flStates then try
-      DeleteFile(Self.flFileNameOnDisk);
+      System.SysUtils.DeleteFile(Self.flFileNameOnDisk);
     except
       flProgress('Could not delete temporary file ' + flFileNameOnDisk);
     end;
@@ -3749,7 +3751,7 @@ begin
       end;
 
       if fsIsTemporary in flStates then try
-        DeleteFile(flFileNameOnDisk);
+        System.SysUtils.DeleteFile(flFileNameOnDisk);
       except
         flProgress('Could not delete temporary file ' + flFileNameOnDisk);
       end;
@@ -9242,7 +9244,7 @@ begin
 
                 Assert(Assigned(Member));
                 if not (Member.DefType in [dtSubRecord, dtSubRecordArray, dtSubRecordStruct]) then
-                  Beep;
+                  System.SysUtils.Beep;
               end;
 
               case Member.DefType of

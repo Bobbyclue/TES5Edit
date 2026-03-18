@@ -11,8 +11,14 @@ unit ProcSetMissingNames;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, SniffProcessor;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameSetMissingNames = class(TFrame)

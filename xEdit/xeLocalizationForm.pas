@@ -13,9 +13,19 @@ unit xeLocalizationForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, VirtualTrees, VirtualEditTree, ExtDlgs, Menus,
-  SynEdit, SynMemo, xeMainForm, IniFiles;
+  System.Classes,
+  System.IniFiles,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.ExtDlgs,
+  Vcl.Forms,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+
+  VirtualTrees,
+  VirtualEditTree;
 
 type
   TfrmLocalization = class(TForm)
@@ -61,8 +71,14 @@ implementation
 {$R *.dfm}
 
 uses
+  System.SysUtils,
+
+  Vcl.Graphics,
+
   wbHelpers,
-  wbLocalization;
+  wbLocalization,
+
+  xeMainForm;
 
 type
   TTreeData = record

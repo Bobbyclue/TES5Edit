@@ -11,9 +11,17 @@ unit ProcMoppUpdate;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor, wbNifMath,
-  System.SyncObjs, Vcl.StdCtrls;
+  System.Classes,
+  System.SyncObjs,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  wbNifMath,
+
+  SniffProcessor;
 
 type
   TFrameMoppUpdate = class(TFrame)
@@ -76,6 +84,8 @@ implementation
 {$R *.dfm}
 
 uses
+  Winapi.Windows,
+
   wbDataFormat,
   wbDataFormatNif;
 

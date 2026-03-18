@@ -11,7 +11,6 @@ unit wbSteamVDFParser;
 interface
 
 uses
-  System.SysUtils,
   System.Classes,
   System.Generics.Collections;
 
@@ -49,11 +48,14 @@ type
   function GetSteamInstallFolder: string;
   function GetSteamLibraryListFile: string;
   function GetInstallPathBySteamID(SteamID: string): string;
+
 implementation
 
 Uses
-  Windows,
-  Registry;
+  System.SysUtils,
+  System.Win.Registry,
+
+  Winapi.Windows;
 
 { TSteamVDFParser }
 

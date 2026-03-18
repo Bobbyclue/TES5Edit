@@ -13,9 +13,6 @@ unit xeScriptHost;
 interface
 
 uses
-  Classes,
-  SysUtils,
-  System.Generics.Collections,
   wbInterface;
 
 type
@@ -44,6 +41,10 @@ type
   TxeScriptHostClass = class of TxeScriptHost;
 
 implementation
+
+uses
+  System.Generics.Collections,
+  System.SysUtils;
 
 { TxeScriptHost }
 

@@ -13,68 +13,45 @@ unit xeMainForm;
 interface
 
 uses
-  Windows,
-  Messages,
-  SysUtils,
-  Variants,
-  Classes,
-  Graphics,
-  Controls,
-  Forms,
-  Dialogs,
-  CommCtrl,
-  ExtCtrls,
-  ComCtrls,
-  StdCtrls,
-  Menus,
-  Math,
-  IniFiles,
-  ClipBrd,
-  TypInfo,
-  ActiveX,
-  Buttons,
-  ActnList,
-  ShellAPI,
-  IOUtils,
-  Actions,
-  System.Generics.Defaults,
+  System.Actions,
   System.Generics.Collections,
-{$IFDEF USE_PARALLEL_BUILD_REFS}
-  System.Threading,
-  System.SyncObjs,
-{$ENDIF}
-  System.Diagnostics,
-  pngimage,
-  RegularExpressionsCore,
-  VirtualTrees,
-  VTEditors,
-  VirtualEditTree,
+  System.IniFiles,
+  System.SysUtils,
+  System.Classes,
+
+  Vcl.ActnList,
+  Vcl.Buttons,
+  Vcl.ComCtrls,
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Graphics,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+
+  FileContainer,
+
+  JvBalloonHint,
   JvComponentBase,
-  ImagingTypes,
-  ImagingFormats,
-  ImagingCanvases,
-  Imaging,
+
+  SynMemo,
+
+  VirtualTrees,
+  VirtualEditTree,
+
+  Winapi.ActiveX,
+  Winapi.Messages,
+  Winapi.Windows,
+
   wbDataFormat,
-  wbInterface,
-  wbImplementation,
-  wbLoadOrder,
-  wbBSA,
-  wbNifScanner,
-  wbLOD,
-  wbHelpers,
-  xeInit,
-  wbLocalization,
-  wbModGroups,
   wbHash,
-  wbHardcoded,
-  xeScriptHost,
-  Vcl.Themes,
-  Vcl.Styles,
-  Vcl.Styles.Utils.SystemMenu,
-  Vcl.Styles.Ext,
-  JvBalloonHint, JvExStdCtrls, JvRichEdit, FileContainer, JvExControls,
-  JvButton, JvTransparentButton,
-  SynEdit, SynMemo, SynEditKeyCmds, Vcl.Mask;
+  wbInterface,
+  wbLoadOrder,
+  wbModGroups,
+
+  xeScriptHost;
 
 type
   TMemo = class(TSynMemo);
@@ -1268,40 +1245,71 @@ implementation
 {$R *.dfm}
 
 uses
-  JsonDataObjects,
-  DDetours,
-  {$IFNDEF LiteVersion}
+  System.Diagnostics,
+  System.IOUtils,
+  System.Math,
+  System.RegularExpressionsCore,
+  System.StrUtils,
+{$IFDEF USE_PARALLEL_BUILD_REFS}
+  System.SyncObjs,
+  System.Threading,
+{$ENDIF}
+  System.TypInfo,
+  System.Types,
+{$IFNDEF VER220}
+  System.UITypes,
+{$ENDIF VER220}
+
+  Vcl.ClipBrd,
+  Vcl.Styles,
+  Vcl.Styles.Utils.SystemMenu,
+  Vcl.Themes,
+
+  Winapi.CommCtrl,
+  Winapi.ShellAPI,
+  Winapi.WinInet,
+
+{$IFNDEF LiteVersion}
   cxVTEditors,
-  {$ENDIF}
-  ShlObj,
-  Registry,
-  StrUtils,
-  Types,
-  {$IFNDEF VER220}
-  UITypes,
-  {$ENDIF VER220}
+{$ENDIF}
+
+  DDetours,
+
   Diff,
-  wbSort,
-  wbStreams,
+
+  ImagingTypes,
+
+  JsonDataObjects,
+
+  VTEditors,
+
   wbBetterStringList,
+  wbBSA,
+  wbHardcoded,
+  wbHelpers,
+  wbImplementation,
+  wbLocalization,
+  wbLOD,
+  wbSort,
+
+  xeDeveloperMessageForm,
+  xeEditWarningForm,
   xeFilterOptionsForm,
   xeFileSelectForm,
-  xeViewElementsForm,
-  xeEditWarningForm,
-  xeLocalizationForm,
-  xeLocalizePluginForm,
-  xeScriptForm,
-  xeLogAnalyzerForm,
-  xeLODGenForm,
-  xeOptionsForm,
-  xeTipForm,
-  xeModuleSelectForm,
-  xeModGroupSelectForm,
-  xeModGroupEditForm,
+  xeInit,
   xeLegendForm,
+  xeLocalizePluginForm,
+  xeLocalizationForm,
+  xeLODGenForm,
+  xeLogAnalyzerForm,
+  xeModGroupEditForm,
+  xeModGroupSelectForm,
+  xeModuleSelectForm,
+  xeOptionsForm,
   xeRichEditForm,
-  xeDeveloperMessageForm,
-  WinInet;
+  xeScriptForm,
+  xeTipForm,
+  xeViewElementsForm;
 
 function wbFormatElapsedTime(aElapsed: double): string;
 var
@@ -1553,7 +1561,7 @@ begin
     end else begin
       // remove original file
       wbProgress('Deleting "' + lTo + '".');
-      if not SysUtils.DeleteFile(lTo) then begin
+      if not System.SysUtils.DeleteFile(lTo) then begin
         s := 'Could not delete "' + lTo + '".';
         wbProgress(s);
         if not aSilent then
@@ -5234,7 +5242,7 @@ begin
                 end;
               until 0 <> FindNext(R);
             finally
-              FindClose(R);
+              System.SysUtils.FindClose(R);
             end;
             if (coSaveExt<>'') then
               if FindFirst(ExpandFileName(wbSavePath+'\*'+coSaveExt), faAnyfile, R)=0 then try
@@ -5244,7 +5252,7 @@ begin
                       CheckListBox1.Items.Add(R.Name);
                 until 0 <> FindNext(R);
               finally
-                FindClose(R);
+                System.SysUtils.FindClose(R);
               end;
           end;
           tsPlugins: begin
@@ -5614,7 +5622,7 @@ begin
   end;
 
   CreateActionsForScripts;
-  wbDataFormat.dfResourceGetDataCallback := @dfResourceOpenData;
+  dfResourceGetDataCallback := @dfResourceOpenData;
 
   if wbToolMode in [tmEdit, tmView, tmTranslate] then begin
     i := Settings.ReadInteger('Patreon', 'SnoozeCounter', 0);
@@ -6484,7 +6492,7 @@ begin
         Settings := TMemIniFile.Create(xeSettingsFileName);
     if Assigned(Settings) then begin
       TStyleManager.TrySetStyle(Settings.ReadString('UI', 'Theme', TStyleManager.ActiveStyle.Name), False);
-      Graphics.PaletteChanged;
+      Vcl.Graphics.PaletteChanged;
     end;
   except end;
 
@@ -8813,7 +8821,7 @@ begin
       end;
     until FindNext(F) <> 0;
   finally
-    FindClose(F);
+    System.SysUtils.FindClose(F);
     FreeAndNil(slScript);
   end;
 end;
@@ -15999,7 +16007,7 @@ begin
 
                 if NeedsRename then
                   if CRC = _File.CRC32 then begin
-                    DeleteFile(wbDataPath + s);
+                    System.SysUtils.DeleteFile(wbDataPath + s);
                     NeedsRename := False;
                     TryDirectRename := False;
                     SavedThisOne := False;
@@ -16010,7 +16018,7 @@ begin
                   SavedAny := True;
               except
                 on E: Exception do begin
-                  DeleteFile(wbDataPath + s);
+                  System.SysUtils.DeleteFile(wbDataPath + s);
                   AnyErrors := True;
                   NeedsRename := False;
                   PostAddMessage('[' + wbFormatElapsedTime( Now - wbStartTime) + '] Error saving ' + s + ': ' + E.Message);
@@ -16047,7 +16055,7 @@ begin
                           wbProgress('******** WARNING ********');
                         end;
                         wbProgress('Removing previously queued save "' + wbDataPath + s + '" as a direct save to "' + wbDataPath + u + '" has succeeded.');
-                        DeleteFile(wbDataPath + s);
+                        System.SysUtils.DeleteFile(wbDataPath + s);
                       end else begin
                         wbProgress('Backing up previously queued save "' + wbDataPath + s + '" as a direct save to "' + wbDataPath + u + '" has succeeded.');
                         DoBackupModule(s, u, aSilent);
@@ -21401,7 +21409,7 @@ begin
               t := wbGameName + '.Hardcoded.esp';
               s := wbProgramPath + t;
               if FileExists(s) then
-                DeleteFile(s);
+                System.SysUtils.DeleteFile(s);
             end;
           end;
         end;

@@ -30,7 +30,6 @@ uses
   wbHelpers,
   wbInterface,
   wbLocalization,
-  wbLOD,
   wbNifScanner;
 
 const

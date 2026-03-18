@@ -11,8 +11,8 @@ unit wbNifScanner;
 interface
 
 uses
-  SysUtils,
-  Classes;
+  System.Classes,
+  System.SysUtils;
 
 const
   SLSF1_Environment_Mapping = 1 shl 7;

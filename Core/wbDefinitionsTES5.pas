@@ -12,8 +12,23 @@ unit wbDefinitionsTES5;
 
 interface
 
+procedure DefineTES5;
+
+implementation
+
 uses
+  System.Classes,
+  System.IOUtils,
+  System.SysUtils,
+  System.Variants,
+
+  wbDefinitionsCommon,
+  wbDefinitionsSignatures,
+  wbHelpers,
   wbInterface;
+
+type
+  TVarRecs = array of TVarRec;
 
 var
   wbBipedObjectFlags: IwbFlagsDef;
@@ -45,25 +60,6 @@ var
   wbWardStateEnum: IwbEnumDef;
   wbWeaponAnimTypeEnum: IwbEnumDef;
 
-procedure DefineTES5;
-
-implementation
-
-uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  IOUtils,
-  wbHelpers,
-  wbDefinitionsCommon,
-  wbDefinitionsSignatures;
-
-type
-  TVarRecs = array of TVarRec;
-
-var
   wbEDID: IwbSubRecordDef;
   wbCOED: IwbSubRecordDef;
   wbXLCM: IwbSubRecordDef;

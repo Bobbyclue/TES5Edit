@@ -14,14 +14,14 @@ unit wbInterface;
 interface
 
 uses
-  System.Types,
   System.Classes,
+  System.Generics.Collections,
+  System.Generics.Defaults,
   System.SysUtils,
   System.UITypes,
-  VCL.Graphics,
-  System.Generics.Defaults,
-  System.Generics.Collections,
-  System.RegularExpressions,
+
+  Vcl.Graphics,
+
   wbHash,
   wbStreams;
 
@@ -5182,14 +5182,17 @@ function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile
 implementation
 
 uses
-  Windows,
-  Variants,
-  Math,
-  TypInfo,
-  wbSort,
+  System.Math,
+  System.RegularExpressions,
+  System.TypInfo,
+  System.Variants,
+
+  Winapi.Windows,
+
+  wbHalfFloat,
+  wbImplementation,
   wbLocalization,
-  //wbImplementation,
-  wbHalfFloat;
+  wbSort;
 
 function wbGetGameMasterFile: IwbFile;
 begin

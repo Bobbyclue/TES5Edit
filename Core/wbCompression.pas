@@ -11,13 +11,10 @@ unit wbCompression;
 interface
 
 uses
-  System.SysUtils,
   System.Classes,
+  System.SysUtils,
   System.ZLib,
-  libdeflate,
-  lz4d,
-  lz4d.lz4,
-  lz4d.lz4frame,
+
   lz4d.lz4hc;
 
 type
@@ -58,6 +55,12 @@ type
 
 implementation
 
+uses
+  libdeflate,
+
+  lz4d,
+  lz4d.lz4,
+  lz4d.lz4frame;
 
 { ZLib }
 

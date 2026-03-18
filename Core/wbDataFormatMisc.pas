@@ -11,8 +11,6 @@ unit wbDataFormatMisc;
 interface
 
 uses
-  System.SysUtils,
-
   wbDataFormat;
 
 type
@@ -48,6 +46,9 @@ type
   end;
 
 implementation
+
+uses
+  System.SysUtils;
 
 var
   dfLODSettingsTES5: TdfStructDef;

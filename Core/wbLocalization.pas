@@ -13,8 +13,10 @@ unit wbLocalization;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Math,
-  wbInterface, wbBSA;
+  System.Classes,
+  System.SysUtils,
+
+  wbInterface;
 
 const
   sStringID = 'STRINGID:';
@@ -108,9 +110,6 @@ var
   wbLocalizationHandler: TwbLocalizationHandler;
 
 implementation
-
-uses
-  WideStrUtils;
 
 constructor TwbLocalizationFile.Create(const aFileName: string);
 var

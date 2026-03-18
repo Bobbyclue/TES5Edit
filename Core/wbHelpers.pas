@@ -13,23 +13,14 @@ unit wbHelpers;
 interface
 
 uses
-  Classes,
-  Windows,
-  System.UITypes,
-  System.AnsiStrings,
-  SysUtils,
-  Graphics,
-  Controls,
-  Forms,
-  ShellAPI,
-  ShlObj,
-  IniFiles,
-  Registry,
-  RegularExpressionsCore,
-  wbInterface,
-  Imaging,
-  ImagingTypes,
-  wbHash;
+  System.Classes,
+  System.IniFiles,
+  System.SysUtils,
+
+  Vcl.Graphics,
+
+  wbHash,
+  wbInterface;
 
 function wbDistance(const a, b: TwbVector): Single; overload
 function wbDistance(const a, b: IwbMainRecord): Single; overload;
@@ -40,13 +31,13 @@ function FindMatchText(Strings: TStrings; const Str: string): Integer;
 function IsFileCC(const aFileName: string): Boolean;
 procedure DeleteDirectory(const DirName: string);
 function FullPathToFilename(aString: string): string;
-procedure wbFlipBitmap(aBitmap: TBitmap; MirrorType: Integer); // MirrorType: 1 - horizontal, 2 - vertical, 0 - both
+procedure wbFlipBitmap(aBitmap: Vcl.Graphics.TBitmap; MirrorType: Integer); // MirrorType: 1 - horizontal, 2 - vertical, 0 - both
 function wbAlphaBlend(DestDC, X, Y, Width, Height,
   SrcDC, SrcX, SrcY, SrcWidth, SrcHeight, Alpha: integer): Boolean;
 procedure SaveFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
 procedure LoadFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
-function wbDDSDataToBitmap(aData: TBytes; Bitmap: TBitmap): Boolean;
-function wbDDSStreamToBitmap(aStream: TStream; Bitmap: TBitmap): Boolean;
+function wbDDSDataToBitmap(aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
+function wbDDSStreamToBitmap(aStream: TStream; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 function wbCRC32App: TwbCRC32;
 function wbIsAssociatedWithExtension(aExt: string): Boolean;
 function wbAssociateWithExtension(aExt, aName, aDescr: string): Boolean;
@@ -112,9 +103,23 @@ function wbVarArray(const aElements: array of Variant): Variant;
 implementation
 
 uses
-  System.SyncObjs,
+  System.AnsiStrings,
   System.IOUtils,
-  StrUtils,
+  System.RegularExpressionsCore,
+  System.StrUtils,
+  System.SyncObjs,
+  System.UITypes,
+  System.Win.Registry,
+
+  Vcl.Forms,
+
+  Winapi.ShellAPI,
+  Winapi.ShlObj,
+  Winapi.Windows,
+
+  Imaging,
+  ImagingTypes,
+
   wbSort;
 
 function TStringArrayHelper.AddPrefix(const aPrefix: string): TArray<string>;
@@ -516,15 +521,15 @@ begin
   Result := s;
 end;
 
-procedure wbFlipBitmap(aBitmap: TBitmap; MirrorType: Integer);
+procedure wbFlipBitmap(aBitmap: Vcl.Graphics.TBitmap; MirrorType: Integer);
 var
-  MemBmp: TBitmap;
+  MemBmp: Vcl.Graphics.TBitmap;
   Dest: TRect;
 begin
   if not Assigned(aBitmap) then
     Exit;
 
-  MemBmp := TBitmap.Create;
+  MemBmp := Vcl.Graphics.TBitmap.Create;
   try
     MemBmp.Assign(aBitmap);
     case MirrorType of
@@ -571,7 +576,7 @@ begin
     BlendFunc.AlphaFormat := AC_SRC_ALPHA
   else
     BlendFunc.AlphaFormat := 0;
-  Result := Windows.AlphaBlend(DestDC, X, Y, Width, Height, SrcDC, SrcX, SrcY, SrcWidth, SrcHeight, BlendFunc);
+  Result := AlphaBlend(DestDC, X, Y, Width, Height, SrcDC, SrcX, SrcY, SrcWidth, SrcHeight, BlendFunc);
 end;
 
 procedure SaveFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
@@ -824,11 +829,11 @@ begin
     until FindNext(F) <> 0;
     Result := bsaNames.Count  + bsaMissing.Count - j;
   finally
-    FindClose(F);
+    System.SysUtils.FindClose(F);
   end;
 end;
 
-function wbDDSDataToBitmap(aData: TBytes; Bitmap: TBitmap): Boolean;
+function wbDDSDataToBitmap(aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 var
   img: TImageData;
   ms: TMemoryStream;
@@ -849,7 +854,7 @@ begin
   end;
 end;
 
-function wbDDSStreamToBitmap(aStream: TStream; Bitmap: TBitmap): Boolean;
+function wbDDSStreamToBitmap(aStream: TStream; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 var
   img: TImageData;
   ms: TMemoryStream;
@@ -1044,7 +1049,7 @@ begin
   if FindFirst(s, faAnyFile, F) = 0 then try
     Result := F.TimeStamp;
   finally
-    FindClose(F);
+    System.SysUtils.FindClose(F);
   end else
     Result := TFile.GetLastWriteTime(s);
 end;

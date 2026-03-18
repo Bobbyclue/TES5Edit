@@ -13,23 +13,20 @@ unit wbBSA;
 interface
 
 uses
-  System.Classes,
-  System.IOUtils,
-  System.SysUtils,
-  System.Diagnostics,
-  System.Generics.Defaults,
-  System.Generics.Collections,
-  ImagingDds,
-  wbBSArchive,
-  wbCompression,
-  wbHash,
-  wbInterface,
-  wbSort,
-  wbStreams;
+  wbInterface;
 
 function wbCreateContainerHandler: IwbContainerHandler;
 
 implementation
+
+uses
+  System.Classes,
+  System.Generics.Collections,
+  System.IOUtils,
+  System.SysUtils,
+
+  wbBSArchive,
+  wbHash;
 
 type
   TwbHashToStringDict = TDictionary<Int64, string>;

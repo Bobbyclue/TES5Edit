@@ -128,12 +128,10 @@ function IsPowerOf2(x: Cardinal): Boolean;
 
 implementation
 
-
 uses
   System.IOUtils,
 
   Vcl.Dialogs;
-
 
 function SelectFolder(var aPath: string): Boolean;
 begin

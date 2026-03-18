@@ -11,9 +11,15 @@ unit ProcShaderFlagsUpdate;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, Vcl.CheckLst;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.CheckLst,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameShaderFlagsUpdate = class(TFrame)

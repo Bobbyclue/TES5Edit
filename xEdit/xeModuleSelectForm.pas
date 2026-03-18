@@ -13,11 +13,20 @@ unit xeModuleSelectForm;
 interface
 
 uses
-  Windows, Messages, UITypes, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  RegularExpressionsCore,
-  Dialogs, StdCtrls, Buttons, CheckLst, Menus,
-  Vcl.Styles.Utils.SystemMenu, VirtualTrees, VirtualEditTree,
-  wbInterface, wbLoadOrder, Vcl.ExtCtrls, System.Actions, Vcl.ActnList, Vcl.Mask;
+  System.Actions,
+  System.Classes,
+
+  Vcl.ActnList,
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.Menus,
+  Vcl.StdCtrls,
+
+  VirtualTrees,
+
+  wbLoadOrder;
 
 const
   csPluginsTxt = '<plugins.txt>';
@@ -121,8 +130,19 @@ implementation
 {$R *.dfm}
 
 uses
-  xeMainForm,
-  StrUtils;
+  System.RegularExpressionsCore,
+  System.SysUtils,
+  System.UITypes,
+
+  Vcl.Dialogs,
+  Vcl.Graphics,
+  Vcl.Styles.Utils.SystemMenu,
+
+  Winapi.Windows,
+
+  wbInterface,
+
+  xeMainForm;
 
 procedure TfrmModuleSelect.mniInvertSelectionClick(Sender: TObject);
 var
@@ -472,7 +492,7 @@ begin
       end else if acPresetSave.Execute then
         vstModules.SetFocus
       else
-        Beep;
+        System.SysUtils.Beep;
       Exit;
     end;
     if (ssCtrl in Shift) or (Length(SelectedModules)=0) then
@@ -492,7 +512,7 @@ begin
       if Shift = [ssShift] then begin
         Key := 0;
         if not acPresetDelete.Execute then
-          Beep;
+          System.SysUtils.Beep;
         Exit;
       end;
     end;

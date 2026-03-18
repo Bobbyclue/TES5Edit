@@ -11,7 +11,6 @@ unit wbSaveInterface;
 interface
 
 uses
-  SysUtils,
   wbInterface;
 
 var
@@ -62,6 +61,9 @@ function ToBeDeterminedCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aEleme
 function ToBeDeterminedCountCallback(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 
 implementation
+
+uses
+  System.SysUtils;
 
 { wbVMType }
 

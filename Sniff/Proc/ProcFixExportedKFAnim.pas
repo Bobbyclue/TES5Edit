@@ -11,9 +11,14 @@ unit ProcFixExportedKFAnim;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameFixExportedKFAnim = class(TFrame)
@@ -40,7 +45,8 @@ implementation
 {$R *.dfm}
 
 uses
-  StrUtils,
+  System.StrUtils,
+
   wbDataFormat,
   wbDataFormatNif;
 
