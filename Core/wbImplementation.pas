@@ -77,16 +77,12 @@ function wbCopyElementToRecord(const aSource: IwbElement; aMainRecord: IwbMainRe
 function wbFindWinningMainRecordByEditorID(const aSignature: TwbSignature; const aEditorID: string): IwbMainRecord;
 function wbFormListToArray(const aFormList: IwbMainRecord; const aSignatures: string): TDynMainRecords;
 
-function wbGetGameMasterFile: IwbFile;
-
 function wbCreateKeepAliveRoot: IwbKeepAliveRoot;
 
 function wbBeginKeepAlive: Integer;
 function wbEndKeepAlive: Integer;
 
 function wbFormIDFromIdentity(aFormIDBase, aFormIDNameBase: Byte; aIdentity: string): TwbFormID;
-
-function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
 
 function wbMultipleElements(const aElements: IwbElements): IwbMultipleElements;
 
@@ -3126,7 +3122,6 @@ var
   _NextLightSlot: Integer;
   _NextMediumSlot: Integer;
   _NextLoadOrder: Integer;
-  Files : array of IwbFile;
   FilesMap: TStringList;
 
 constructor TwbFile.Create(const aFileName: string; aLoadOrder: Integer; aCompareTo: string; aStates: TwbFileStates; aData: TBytes);
@@ -23300,20 +23295,6 @@ begin
   end;
 end;
 
-function wbGetGameMasterFile: IwbFile;
-var
-  i     : Integer;
-begin
-  for i := Low(Files) to High(Files) do
-    if fsIsGameMaster in Files[i].FileStates then
-      Exit(Files[i]);
-  for i := Low(Files) to High(Files) do
-    with Files[i].LoadOrderFileID do
-      if IsFullSlot and (FullSlot = 0) then
-        Exit(Files[i]);
-  Result := nil;
-end;
-
 { TwbFlag }
 
 constructor TwbFlag.Create(const aContainer  : IwbContainer;
@@ -25469,24 +25450,6 @@ begin
   end;
 
   Result := TwbFormID.FromCardinal( (Cardinal(aFormIDBase) shl 16) + i );
-end;
-
-function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
-var
-  FileID: TwbFileID;
-begin
-  Result := nil;
-  FileID := aFormID.FileID;
-  for var i:= Low(Files) to High(Files) do
-    if Files[i].LoadOrderFileID = FileID then begin
-      Result := Files[i].RecordByFormID[aFormID, True, False];
-      if Assigned(Result) and Assigned(aSeenFromFile) then begin
-        var lVisibleResult := Result.HighestOverrideVisibleForFile[aSeenFromFile];
-        if Assigned(lVisibleResult) then
-          Result := lVisibleResult;
-      end;
-      Exit;
-    end;
 end;
 
 { TwbTemplateElement }
