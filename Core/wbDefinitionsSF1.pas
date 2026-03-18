@@ -11399,7 +11399,7 @@ begin
                 wbEmpty(VTXT, 'Use Camera Location Alias'),                         //VTXT  none // sets +0x46 to 1 (uint8/bool)
                 wbEmpty(AIDT, 'Ignore Collision'),                                  //AIDT  none // sets +0x48 to 1 (uint8/bool)
                 wbEmpty(MPCD, 'Use Look Target Alias'),                             //MPCD  none // sets +0x47 to 1 (uint8/bool)
-                wbUnknown(AIDT),
+                wbEmpty(AIDT),
                 wbEmpty(VNAM, 'Force Look At 1st Person Camera'),                   //VNAM  none // sets +0x49 to 1 (uint8/bool)
                 wbConditions,                                                       //CTDA  standard CTDA reading // +0x10 //not found in Starfield.esm
                 wbMarkerReq(XNAM)                                                   //XNAM  end marker for CNAM fields
