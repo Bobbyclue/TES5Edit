@@ -11,7 +11,6 @@ unit ProcCopyGeometryBlocks;
 interface
 
 uses
-
   System.SysUtils,
   System.Classes,
 
@@ -21,9 +20,9 @@ uses
   Vcl.Mask,
   Vcl.StdCtrls,
 
-  SniffProcessor,
+  wbDataFormatNif,
 
-  wbDataFormatNif;
+  SniffProcessor;
 
 type
   TFrameCopyGeometryBlocks = class(TFrame)

@@ -7,34 +7,31 @@ interface
 uses
   wbInterface;
 
-var
-  wbREFLColorEnum : IwbEnumDef;
-  wbREFLFloatEnum : IwbEnumDef;
-
-  wbREFLOperationEnum : IwbStringDefFormater;
-
-  wbREFLBETH : IwbValueDef;
-  wbREFLSTRT : IwbValueDef;
-  wbREFLTYPE : IwbValueDef;
-  wbREFLCLAS : IwbValueDef;
-  wbREFLOBJT : IwbValueDef;
-  wbREFLDIFF : IwbValueDef;
-
-  wbREFL : IwbRecordMemberDef;
-  wbRDIF : IwbRecordMemberDef;
-
 function wbREFLStringToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbREFLStringToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbREFLDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbREFLShouldInclude(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
-function wbREFLFormID(const aName: string; aSigs: TwbSignatures = []): IwbValueDef;
+
+function wbREFLColor(const aName: string): IwbValueDef;
+function wbREFLEffect(const aName: string): IwbValueDef;
+function wbREFLFloat(const aName: string; const aDefaultValue: Integer = 0): IwbValueDef;
+function wbREFLFormID(const aName: string; const aSigs: TwbSignatures = []): IwbValueDef;
 function wbREFLWwiseGUID(const aName: string = 'GUID'): IwbValueDef;
 
-procedure DefineReflection;
+function wbREFLColorEnum : IwbEnumDef;
+function wbREFLFloatEnum : IwbEnumDef;
+
+function wbREFLOperationEnum : IwbStringDefFormater;
+
+function wbReflection(const aSig  : TwbSignature;
+                      const aData : IwbValueDef = nil)
+                                  : IwbRecordMemberDef;
 
 implementation
 
 uses
+  System.Variants,
+
   wbDefinitionsCommon,
   wbDefinitionsSignatures;
 
@@ -147,7 +144,45 @@ begin
   Result := PWord(aBasePtr)^ <> $FFFF;
 end;
 
-function wbREFLFormID(const aName: string; aSigs: TwbSignatures = []): IwbValueDef;
+function wbREFLColor(const aName: string): IwbValueDef;
+begin
+  Result :=
+    wbStruct(aName, [
+      wbLenString('Operation', 2)
+        .SetFormater(wbREFLOperationEnum)
+        .SetDefaultEditValue('Replace'),
+      wbFloatRGBA('Value'),
+      wbFloat('Blend Amount').SetDefaultNativeValue(1)
+    ]).SetSummaryKey([1])
+      .IncludeFlag(dfCollapsed)
+end;
+
+function wbREFLEffect(const aName: string): IwbValueDef;
+begin
+  Result :=
+    wbStructSK([0], aName, [
+      wbREFLFormID('Spell', [SPEL,NULL]),
+      wbFloat('Threshold')
+    ]).SetSummaryKey([0])
+      .IncludeFlag(dfCollapsed);
+end;
+
+function wbREFLFloat(const aName: string; const aDefaultValue: Integer = 0): IwbValueDef;
+begin
+  Result :=
+    wbStruct(aName, [
+      wbLenString('Operation', 2)
+        .SetFormater(wbREFLOperationEnum)
+        .SetDefaultEditValue('Replace'),
+      wbFloat('Value').SetDefaultNativeValue(aDefaultValue),
+      wbFloat('Blend Amount').SetDefaultNativeValue(1)
+    ]).SetSummaryKey([1])
+      .IncludeFlag(dfCollapsed)
+end;
+
+function wbREFLFormID(const aName : string;
+                      const aSigs : TwbSignatures = [])
+                                  : IwbValueDef;
 begin
   Result :=
     wbStructSK([1], aName, [
@@ -166,134 +201,106 @@ begin
     ]);
 end;
 
-procedure DefineReflection;
+function wbREFLColorEnum : IwbEnumDef;
 begin
-  wbREFLColorEnum :=
+  Result :=
     wbEnum([
     {0} 'Red',
     {1} 'Green',
     {2} 'Blue',
     {3} 'Alpha'
     ]);
+end;
 
-  wbREFLFloatEnum :=
+function wbREFLFloatEnum : IwbEnumDef;
+begin
+  Result :=
     wbEnum([
     {0} 'Operation',
     {1} 'Value',
     {2} 'Blend Amount'
     ]);
+end;
 
- wbREFLOperationEnum :=
+function wbREFLOperationEnum : IwbStringDefFormater;
+begin
+  Result :=
     wbStringEnum([
     {0} 'Add',
     {1} 'Greater',
     {2} 'Multiply',
     {4} 'Replace'
     ]);
+end;
 
-  wbREFLBETH :=
-    wbStruct('Reflection Header', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Version', itU32),
-      wbInteger('Chunk Count', itU32)
-    ]);
+function wbReflection(const aSig  : TwbSignature;
+                      const aData : IwbValueDef = nil)
+                                  : IwbRecordMemberDef;
+begin
+  var lBoolean := False;
+  if not Assigned(aData) then
+    lBoolean := True;
 
-  wbREFLSTRT :=
-    wbStruct('String Table', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbArray('Strings',
-        wbString('String')
-      ).SetShouldInclude(function(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean
-       begin
-         Result := (PLongWord(aBasePtr)^ <> $45505954);
-       end)
-    ]).SetSummaryKey([2])
-      .IncludeFlag(dfCollapsed);
-
-  wbREFLTYPE :=
-    wbStruct('Type', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Class Count', itU32)
-    ]).SetSummaryKey([2])
-      .SetSummaryMemberPrefixSuffix(2, 'Class Cout: ', '')
-      .IncludeFlag(dfCollapsed);
-
-  wbREFLCLAS :=
-    wbArray('Classes',
-      wbStruct('Class', [
-        wbString('Signature', 4),
+  Result :=
+    wbStruct(aSig, 'Reflection', [
+      wbStruct('Reflection Header', [
+        wbString('Signature', 4).SetDefaultEditValue('BETH'),
+        wbInteger('Data Size', itU32).SetDefaultNativeValue(8),
+        wbInteger('Version', itU32),
+        wbInteger('Chunk Count', itU32)
+      ]).IncludeFlag(dfFastAssign)
+        .IncludeFlag(dfInternalEditOnly),
+      wbStruct('String Table', [
+        wbString('Signature', 4).SetDefaultEditValue('STRT'),
         wbInteger('Data Size', itU32),
-        wbInteger('Class Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-        wbInteger('Form', itS32, wbREFLStringToStr, wbREFLStringToInt),
-        wbInteger('Flags', itU16,
-          wbFlags(wbSparseFlags([
-          2, 'User',
-          3, 'Struct'
-          ], False, 4))
-        ).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbArray('Fields',
-          wbStruct('Field', [
-            wbInteger('Field Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-            wbInteger('Field Type', itS32, wbREFLStringToStr, wbREFLStringToInt),
-            wbInteger('Offset', itU16),
-            wbInteger('Size', itU16)
-          ]).SetSummaryKey([0])
-            .IncludeFlag(dfCollapsed),
-        -2).IncludeFlag(dfCollapsed)
+        wbArray('Strings',
+          wbString('String')
+        ).SetShouldInclude(function(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean
+         begin
+           Result := (PLongWord(aBasePtr)^ <> $45505954);
+         end)
       ]).SetSummaryKey([2])
         .IncludeFlag(dfCollapsed)
-    ).SetCountPath('Type\Class Count', True)
-     .IncludeFlag(dfCollapsed);
-
-  wbREFLOBJT :=
-    wbStruct('Object Data', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-      wbUnknown
-    ]);
-
-  wbREFLDIFF :=
-    wbStruct('Diff', [
-      wbString('Signature', 4),
-      wbInteger('Data Size', itU32),
-      wbInteger('Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
-      wbUnknown
-    ]);
-
-  wbREFL :=
-    wbStruct(REFL, 'Reflection', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbREFLOBJT,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport);
-
-  wbRDIF :=
-    wbStruct(RDIF, 'Reflection Diff', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbREFLDIFF,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport);
-
+        .IncludeFlag(dfInternalEditOnly),
+      wbStruct('Type', [
+        wbString('Signature', 4).SetDefaultEditValue('TYPE'),
+        wbInteger('Data Size', itU32).SetDefaultNativeValue(4),
+        wbInteger('Class Count', itU32)
+      ]).SetSummaryKey([2])
+        .SetSummaryMemberPrefixSuffix(2, 'Class Count: ', '')
+        .IncludeFlag(dfCollapsed)
+        .IncludeFlag(dfInternalEditOnly),
+      wbArray('Classes',
+        wbStruct('Class', [
+          wbString('Signature', 4).SetDefaultEditValue('CLAS'),
+          wbInteger('Data Size', itU32),
+          wbInteger('Class Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
+          wbInteger('Form', itS32, wbREFLStringToStr, wbREFLStringToInt),
+          wbInteger('Flags', itU16,
+            wbFlags(wbSparseFlags([
+            2, 'User',
+            3, 'Struct'
+            ], False, 4))
+          ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+          wbArray('Fields',
+            wbStruct('Field', [
+              wbInteger('Field Name', itS32, wbREFLStringToStr, wbREFLStringToInt),
+              wbInteger('Field Type', itS32, wbREFLStringToStr, wbREFLStringToInt),
+              wbInteger('Offset', itU16),
+              wbInteger('Size', itU16)
+            ]).SetSummaryKey([0])
+              .IncludeFlag(dfCollapsed),
+          -2).IncludeFlag(dfCollapsed)
+        ]).SetSummaryKey([2])
+          .IncludeFlag(dfCollapsed)
+      ).SetCountPath('Type\Class Count', True)
+       .IncludeFlag(dfCollapsed)
+       .IncludeFlag(dfInternalEditOnly),
+      IfThen(lBoolean, wbUnknown(0), nil),
+      aData
+    ]).IncludeFlag(dfCanContainReflection)
+      .IncludeFlag(dfFastAssign)
+      .IncludeFlag(dfIsReflection);
 end;
 
 end.

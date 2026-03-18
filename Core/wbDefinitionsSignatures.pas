@@ -1123,6 +1123,7 @@ const
   PRRF : TwbSignature = 'PRRF'; { New To Starfield }
   PRRK : TwbSignature = 'PRRK'; { New To Starfield }
   PRTN : TwbSignature = 'PRTN'; { New To Starfield }
+  PRUC : TwbSignature = 'PRUC'; { New To Starfield }
   PRVN : TwbSignature = 'PRVN'; { New To Starfield }
   PSCT : TwbSignature = 'PSCT'; { New To Fallout 76 }
   PSDC : TwbSignature = 'PSDC'; { New To Starfield }

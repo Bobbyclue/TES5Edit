@@ -15,23 +15,11 @@ unit wbImplementation;
 interface
 
 uses
-  Variants,
-  Windows,
-  Classes,
-  SysUtils,
-  Contnrs,
-  Math,
+  System.Classes,
+  System.SysUtils,
+
   wbInterface,
-  wbLoadOrder,
-  System.Generics.Collections,
-  {$IFDEF USE_CODESITE}
-  CodeSiteLogging,
-  {$ENDIF}
-{$IFDEF USE_PARALLEL_BUILD_REFS}
-  System.SyncObjs,
-{$ENDIF}
-  wbCompression,
-  wbHash;
+  wbLoadOrder;
 
 const
   DefaultVCS1 = 0;
@@ -77,8 +65,6 @@ function wbCopyElementToRecord(const aSource: IwbElement; aMainRecord: IwbMainRe
 function wbFindWinningMainRecordByEditorID(const aSignature: TwbSignature; const aEditorID: string): IwbMainRecord;
 function wbFormListToArray(const aFormList: IwbMainRecord; const aSignatures: string): TDynMainRecords;
 
-function wbGetGameMasterFile: IwbFile;
-
 function wbCreateKeepAliveRoot: IwbKeepAliveRoot;
 
 function wbBeginKeepAlive: Integer;
@@ -86,16 +72,28 @@ function wbEndKeepAlive: Integer;
 
 function wbFormIDFromIdentity(aFormIDBase, aFormIDNameBase: Byte; aIdentity: string): TwbFormID;
 
-function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
-
 function wbMultipleElements(const aElements: IwbElements): IwbMultipleElements;
 
 implementation
 
 uses
-  TypInfo,
-  wbLocalization,
+  System.Generics.Collections,
+  System.Math,
+{$IFDEF USE_PARALLEL_BUILD_REFS}
+  System.SyncObjs,
+{$ENDIF}
+  System.Variants,
+
+  Winapi.Windows,
+
+{$IFDEF USE_CODESITE}
+  CodeSiteLogging,
+{$ENDIF}
+
+  wbCompression,
+  wbHash,
   wbHelpers,
+  wbLocalization,
   wbSort;
 
 const
@@ -3126,7 +3124,6 @@ var
   _NextLightSlot: Integer;
   _NextMediumSlot: Integer;
   _NextLoadOrder: Integer;
-  Files : array of IwbFile;
   FilesMap: TStringList;
 
 constructor TwbFile.Create(const aFileName: string; aLoadOrder: Integer; aCompareTo: string; aStates: TwbFileStates; aData: TBytes);
@@ -3651,7 +3648,7 @@ begin
     end;
 
     if fsIsTemporary in flStates then try
-      DeleteFile(Self.flFileNameOnDisk);
+      System.SysUtils.DeleteFile(Self.flFileNameOnDisk);
     except
       flProgress('Could not delete temporary file ' + flFileNameOnDisk);
     end;
@@ -3754,7 +3751,7 @@ begin
       end;
 
       if fsIsTemporary in flStates then try
-        DeleteFile(flFileNameOnDisk);
+        System.SysUtils.DeleteFile(flFileNameOnDisk);
       except
         flProgress('Could not delete temporary file ' + flFileNameOnDisk);
       end;
@@ -9247,7 +9244,7 @@ begin
 
                 Assert(Assigned(Member));
                 if not (Member.DefType in [dtSubRecord, dtSubRecordArray, dtSubRecordStruct]) then
-                  Beep;
+                  System.SysUtils.Beep;
               end;
 
               case Member.DefType of
@@ -9947,7 +9944,7 @@ var
 
     if wbGameMode >= gmFO3 then begin
       case wbGameMode of
-        gmSF1                        : BasePtr.mrsVersion^ := 576;
+        gmSF1                        : BasePtr.mrsVersion^ := 581;
         gmFO76                       : BasePtr.mrsVersion^ := 208;
         gmFO4, gmFO4VR               : BasePtr.mrsVersion^ := 131;
         gmSSE, gmTES5VR, gmEnderalSE : BasePtr.mrsVersion^ := 44;
@@ -23300,20 +23297,6 @@ begin
   end;
 end;
 
-function wbGetGameMasterFile: IwbFile;
-var
-  i     : Integer;
-begin
-  for i := Low(Files) to High(Files) do
-    if fsIsGameMaster in Files[i].FileStates then
-      Exit(Files[i]);
-  for i := Low(Files) to High(Files) do
-    with Files[i].LoadOrderFileID do
-      if IsFullSlot and (FullSlot = 0) then
-        Exit(Files[i]);
-  Result := nil;
-end;
-
 { TwbFlag }
 
 constructor TwbFlag.Create(const aContainer  : IwbContainer;
@@ -25469,24 +25452,6 @@ begin
   end;
 
   Result := TwbFormID.FromCardinal( (Cardinal(aFormIDBase) shl 16) + i );
-end;
-
-function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
-var
-  FileID: TwbFileID;
-begin
-  Result := nil;
-  FileID := aFormID.FileID;
-  for var i:= Low(Files) to High(Files) do
-    if Files[i].LoadOrderFileID = FileID then begin
-      Result := Files[i].RecordByFormID[aFormID, True, False];
-      if Assigned(Result) and Assigned(aSeenFromFile) then begin
-        var lVisibleResult := Result.HighestOverrideVisibleForFile[aSeenFromFile];
-        if Assigned(lVisibleResult) then
-          Result := lVisibleResult;
-      end;
-      Exit;
-    end;
 end;
 
 { TwbTemplateElement }

@@ -16,17 +16,13 @@ procedure SwitchToFO3CoSave;
 implementation
 
 uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  wbInterface,
-  wbSaveInterface,
-  wbImplementation,
-  wbLocalization,
+  System.SysUtils,
+
   wbDefinitionsCommon,
-  wbDefinitionsFO3;
+  wbDefinitionsFO3,
+  wbImplementation,
+  wbInterface,
+  wbSaveInterface;
 
 var
   wbActorValueLabels : array of string;

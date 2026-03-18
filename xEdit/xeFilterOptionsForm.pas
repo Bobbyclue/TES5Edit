@@ -13,8 +13,15 @@ unit xeFilterOptionsForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Buttons, CheckLst, Menus, IniFiles, ExtCtrls, System.UITypes;
+  System.Classes,
+  System.IniFiles,
+
+  Vcl.CheckLst,
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Menus,
+  Vcl.StdCtrls;
 
 const
   sFilterSection = 'Filter';
@@ -116,10 +123,17 @@ implementation
 {$R *.dfm}
 
 uses
-  xeMainForm,
-  TypInfo,
+  System.SysUtils,
+  System.TypInfo,
+  System.UITypes,
+
+  Vcl.Dialogs,
+
+  Winapi.Windows,
+
   wbInterface,
-  wbHelpers;
+
+  xeMainForm;
 
 procedure TfrmFilterOptions.FormCreate(Sender: TObject);
 var

@@ -802,7 +802,13 @@ begin
       end;
       Result := UpdateElement(rigid, 'Deactivator Type', 'DEACTIVATOR_SPATIAL') or Result;
       Result := UpdateElement(rigid, 'Enable Deactivation', 'yes') or Result;
-      Result := UpdateElement(rigid, 'Solver Deactivation', 'SOLVER_DEACTIVATION_LOW') or Result;
+
+      Result := UpdateElement(rigid,
+        'Solver Deactivation',
+        'SOLVER_DEACTIVATION_LOW',
+        'SOLVER_DEACTIVATION_MEDIUM, SOLVER_DEACTIVATION_HIGH, SOLVER_DEACTIVATION_MAX'
+      ) or Result;
+
       if SameValue(rigid.NativeValues['Mass'], 0.0) then begin
         rigid.NativeValues['Mass'] := 1.0;
         Log.Add(#9 + rigid.Name + ': Changed Mass to 1.0 because of ' + S + ' collision layer and Mass was 0.0');

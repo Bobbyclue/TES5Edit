@@ -16,17 +16,13 @@ procedure SwitchToFNVCoSave;
 implementation
 
 uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  wbInterface,
-  wbSaveInterface,
-  wbImplementation,
-  wbLocalization,
+  System.SysUtils,
+
   wbDefinitionsCommon,
-  wbDefinitionsFNV;
+  wbDefinitionsFNV,
+  wbImplementation,
+  wbInterface,
+  wbSaveInterface;
 
 var
   wbActorValueLabels : array of string;

@@ -13,7 +13,10 @@ unit wbDataFormat;
 interface
 
 uses
-  SysUtils, StrUtils, Classes, Windows, Math, Variants, JsonDataObjects;
+  System.Classes,
+  System.SysUtils,
+
+  JsonDataObjects;
 
 type
   TdfDataType = (
@@ -720,6 +723,12 @@ function dfChars(
 implementation
 
 uses
+  System.Math,
+  System.StrUtils,
+  System.Variants,
+
+  Winapi.Windows,
+
   wbHalfFloat;
 
 const

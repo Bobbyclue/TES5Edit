@@ -11,9 +11,16 @@ unit ProcCopyPriorities;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask,
-  Vcl.ExtCtrls, SniffProcessor;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameCopyPriorities = class(TFrame)

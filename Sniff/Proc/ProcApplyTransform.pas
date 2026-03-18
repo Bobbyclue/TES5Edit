@@ -11,9 +11,16 @@ unit ProcApplyTransform;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, SniffProcessor,
-  wbDataFormatNif;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  wbDataFormatNif,
+
+  SniffProcessor;
 
 type
   TFrameApplyTransform = class(TFrame)
@@ -49,7 +56,6 @@ implementation
 
 uses
   wbDataFormat;
-  //wbDataFormatNif;
 
 constructor TProcApplyTransform.Create(aManager: TProcManager);
 begin

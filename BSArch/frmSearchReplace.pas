@@ -5,10 +5,7 @@ interface
 uses
   System.Classes,
 
-  Winapi.Windows,
-
   Vcl.Controls,
-  Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.Forms,
   Vcl.Mask,
@@ -39,6 +36,11 @@ var
   FormSearchReplace: TFormSearchReplace;
 
 implementation
+
+uses
+  Vcl.Dialogs,
+
+  Winapi.Windows;
 
 {$R *.dfm}
 

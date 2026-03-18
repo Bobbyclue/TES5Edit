@@ -15,8 +15,7 @@ interface
 uses
   System.Variants,
 
-  wbInterface,
-  wbDefinitionsSignatures;
+  wbInterface;
 
 type
   TwbVarRecs = TArray<TVarRec>;
@@ -672,6 +671,7 @@ uses
   System.SysUtils,
   System.Types,
 
+  wbDefinitionsSignatures,
   wbHelpers,
 
   xeMainForm;

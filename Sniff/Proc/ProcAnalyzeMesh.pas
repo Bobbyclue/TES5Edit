@@ -3,9 +3,16 @@ unit ProcAnalyzeMesh;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, SniffProcessor,
-  Vcl.Mask, Vcl.ExtCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 const
   sLinkMetrics = 'https://github.com/zeux/meshoptimizer/tree/master?tab=readme-ov-file#efficiency-analyzers';
@@ -53,12 +60,15 @@ implementation
 {$R *.dfm}
 
 uses
+  System.Math,
+
+  Winapi.ShellApi,
+  Winapi.Windows,
+
   wbDataFormat,
   wbDataFormatNif,
-  wbNifMath,
   wbMeshOptimize,
-  Math,
-  ShellApi;
+  wbNifMath;
 
 procedure TFrameAnalyzeMesh.lblInfoCacheClick(Sender: TObject);
 begin

@@ -20,7 +20,6 @@ procedure RegisterJvInterpreterAdapter(JvInterpreterAdapter: TJvInterpreterAdapt
 implementation
 
 uses
-  System.Classes,
   System.SysUtils,
 
   wbInterface;

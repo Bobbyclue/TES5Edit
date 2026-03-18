@@ -11,9 +11,14 @@ unit ProcRagdollConstraintUpdate;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameRagdollConstraintUpdate = class(TFrame)
@@ -40,9 +45,10 @@ implementation
 {$R *.dfm}
 
 uses
+  System.Math,
+
   wbDataFormat,
-  wbDataFormatNif,
-  Math;
+  wbDataFormatNif;
 
 constructor TProcRagdollConstraintUpdate.Create(aManager: TProcManager);
 begin
@@ -90,6 +96,7 @@ var
   nif: TwbNifFile;
   i: Integer;
   Constraint: TwbNifBlock;
+  ragdoll: TdfElement;
   bChanged: Boolean;
 begin
   bChanged := False;
@@ -100,19 +107,23 @@ begin
     for i := 0 to Pred(nif.BlocksCount) do begin
       Constraint := nif.Blocks[i];
 
-      if Constraint.BlockType <> 'bhkRagdollConstraint' then
+      if Constraint.BlockType = 'bhkRagdollConstraint' then
+        ragdoll := Constraint.Elements['Ragdoll']
+      else if (Constraint.BlockType = 'bhkMalleableConstraint') and (Constraint.EditValues['Hinge\Type'] = 'Ragdoll') then
+        ragdoll := Constraint.Elements['Hinge\Ragdoll']
+      else
         Continue;
 
       bChanged := CalcUpdate(
-        Constraint.Elements['Ragdoll\Twist A'],
-        Constraint.Elements['Ragdoll\Plane A'],
-        Constraint.Elements['Ragdoll\Motor A']
+        ragdoll.Elements['Twist A'],
+        ragdoll.Elements['Plane A'],
+        ragdoll.Elements['Motor A']
       ) or bChanged;
 
       bChanged := CalcUpdate(
-        Constraint.Elements['Ragdoll\Twist B'],
-        Constraint.Elements['Ragdoll\Plane B'],
-        Constraint.Elements['Ragdoll\Motor B']
+        ragdoll.Elements['Twist B'],
+        ragdoll.Elements['Plane B'],
+        ragdoll.Elements['Motor B']
       ) or bChanged;
 
     end;

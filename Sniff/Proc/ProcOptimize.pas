@@ -11,9 +11,14 @@ unit ProcOptimize;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 const
   sLinkInfo = 'https://github.com/zeux/meshoptimizer?tab=readme-ov-file#vertex-cache-optimization';
@@ -62,7 +67,9 @@ implementation
 {$R *.dfm}
 
 uses
-  ShellApi,
+  Winapi.ShellApi,
+  Winapi.Windows,
+
   wbDataFormat,
   wbDataFormatNif;
 

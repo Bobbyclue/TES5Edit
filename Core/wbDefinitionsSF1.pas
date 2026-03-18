@@ -12,31 +12,25 @@ unit wbDefinitionsSF1;
 
 interface
 
-uses
-  wbInterface;
-
-var
-  wbTerminalArtThemeEnum: IwbEnumDef;
-
 procedure DefineSF1;
 
 implementation
 
 uses
-  System.Types,
   System.Classes,
-  System.SysUtils,
+  System.Generics.Collections,
+  System.IOUtils,
   System.Math,
   System.StrUtils,
+  System.SysUtils,
   System.Variants,
-  System.IOUtils,
-  System.Generics.Defaults,
-  System.Generics.Collections,
+
   JsonDataObjects,
-  wbHelpers,
+
   wbDefinitionsCommon,
   wbDefinitionsReflection,
-  wbDefinitionsSignatures;
+  wbDefinitionsSignatures,
+  wbInterface;
 
 const
   // signatures of reference records
@@ -2676,8 +2670,6 @@ const
 
 procedure DefineSF1;
 begin
-  DefineReflection;
-
   wbRecordFlags := wbInteger('Record Flags', itU32, wbFlags(wbFlagsList([])));
 
   wbMainRecordHeader := wbRecordHeader(wbRecordFlags);
@@ -6299,18 +6291,7 @@ begin
         ]),
         //HoudiniData_Component
         wbRStruct('Component Data - Houdini Data', [
-          wbStruct(PCCC, 'Reflection', [
-            wbREFLBETH,
-            wbREFLSTRT,
-            wbREFLTYPE,
-            wbREFLCLAS,
-            wbUnknown
-          ]).IncludeFlag(dfCanContainFormID)
-            .IncludeFlag(dfCanContainReflection)
-            .IncludeFlag(dfDontAssign)
-            .IncludeFlag(dfInternalEditOnly)
-            .IncludeFlag(dfIsReflection)
-            .IncludeFlag(dfNoReport)
+          wbReflection(PCCC)
         ]),
         //BGSPropertySheet_Component
         wbRStruct('Component Data - Property Sheet', [
@@ -6318,23 +6299,12 @@ begin
         ]),
         //ParticleSystem_Component
         wbRStruct('Component Data - Particle System', [
-          wbStruct(PTCL, 'Reflection', [
-            wbREFLBETH,
-            wbREFLSTRT,
-            wbREFLTYPE,
-            wbREFLCLAS,
-            wbUnknown
-          ]).IncludeFlag(dfCanContainFormID)
-            .IncludeFlag(dfCanContainReflection)
-            .IncludeFlag(dfDontAssign)
-            .IncludeFlag(dfInternalEditOnly)
-            .IncludeFlag(dfIsReflection)
-            .IncludeFlag(dfNoReport)
+          wbReflection(PTCL)
         ]),
         //BGSLodOwner_Component
         //BGSEffectSequenceComponent
         wbRStruct('Component Data - Reflection', [
-          wbREFL
+          wbReflection(REFL)
         ]),
         //BGSSpaceshipAIActor_Component
         wbRStruct('Component Data - Spaceship AI Actor', [
@@ -8932,7 +8902,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -9586,15 +9556,15 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(IMGS, 'Image Space', [
     wbEDID,
-    wbREFL,
+    wbReflection(REFL),
     wbFormIDCk(RFDP, 'Reflection Parent', [IMGS]),
-    wbRDIF
+    wbReflection(RDIF)
   ]);
 
   {subrecords checked against Starfield.esm}
   wbRecord(IMAD, 'Image Space Adapter', [
     wbEDID,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -9781,6 +9751,7 @@ begin
       wbConditions,
       wbActivityTracker,
       wbDESC.SetRequired,
+      wbUnknown(PRUC),
       wbEmpty(PRRF, 'End Marker').SetRequired
     ], [], cpNormal, True),
     wbRArray('Bonus Perks', wbFormIDCk(RNAM, 'Perk', [PERK]))
@@ -9882,18 +9853,7 @@ begin
     wbGenericModel(True),
     wbInteger(DATA, 'Index', itU32).SetRequired,
     wbFormIDCk(LNAM, 'Light', [LIGH]),
-    wbStruct(PSDF, 'Reflection', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport),
+    wbReflection(PSDF),
     wbStruct(DNAM, 'Data', [
       wbInteger('Master Particle System Cap', itU16),
       wbInteger('Flags', itU16, wbEnum([
@@ -11402,8 +11362,8 @@ begin
                 wbEmpty(BTXT, 'Use Camera Location Reference'),                     //BTXT  none // sets +0x44 to 1 (uint8/bool)
                 wbEmpty(ATXT, 'Use Look Target Reference'),                         //ATXT  none // sets +0x45 to 1 (uint8/bool)
                 wbEmpty(VTXT, 'Use Camera Location Alias'),                         //VTXT  none // sets +0x46 to 1 (uint8/bool)
-                wbEmpty(AIDT, 'Ignore Collision'),                                  //AIDT  none // sets +0x48 to 1 (uint8/bool)
                 wbEmpty(MPCD, 'Use Look Target Alias'),                             //MPCD  none // sets +0x47 to 1 (uint8/bool)
+                wbEmpty(AIDT, 'Ignore Collision'),                                  //AIDT  none // sets +0x48 to 1 (uint8/bool)
                 wbEmpty(VNAM, 'Force Look At 1st Person Camera'),                   //VNAM  none // sets +0x49 to 1 (uint8/bool)
                 wbConditions,                                                       //CTDA  standard CTDA reading // +0x10 //not found in Starfield.esm
                 wbMarkerReq(XNAM)                                                   //XNAM  end marker for CNAM fields
@@ -15360,18 +15320,7 @@ begin
       wbUnused(3)
     ], cpNormal, False, nil, 5),
 
-    wbStruct(XNSE, 'Reflection', [
-      wbREFLBETH,
-      wbREFLSTRT,
-      wbREFLTYPE,
-      wbREFLCLAS,
-      wbUnknown
-    ]).IncludeFlag(dfCanContainFormID)
-      .IncludeFlag(dfCanContainReflection)
-      .IncludeFlag(dfDontAssign)
-      .IncludeFlag(dfInternalEditOnly)
-      .IncludeFlag(dfIsReflection)
-      .IncludeFlag(dfNoReport),
+    wbReflection(XNSE),
 
     wbFormIDCk(XATR, 'Attach Ref', sigReferences),
 
@@ -16153,17 +16102,16 @@ begin
 
   {subrecords checked against Starfield.esm}
   wbRecord(NOCM, 'Navmesh Obstacle Manager', [
+    wbEDID
+      .SetDefaultEditValue('NavmeshObstacleCoverManager')
+      .SetRequired
+      .IncludeFlag(dfInternalEditOnly),
     wbRArray('Unknown',
       wbRStruct('Unknown', [
         wbRArray('Unknown',
           wbRStruct('Unknown', [
             wbInteger(INDX, 'Index', itU32),
-            wbRArray('Unknown Datas',
-              wbStruct(DATA, 'Unknown Data', [
-                wbByteArray('Unknown 1',2),
-                wbByteArray('Unknown 2',2),
-                wbByteArray('Unknown 4',4)
-              ])),
+            wbRArray('Unknown Datas', wbUnknown(DATA)),
             wbUnknown(INTV)
           ])),
         wbString(NAM1, 'Model')
@@ -16723,6 +16671,7 @@ begin
 
   // load terminal theme list from external file if present
   var s := ExtractFilePath(ParamStr(0)) + wbAppName + 'TerminalArtThemes.txt';
+  var wbTerminalArtThemeEnum : IwbEnumDef;
   if FileExists(s) then try
     wbTerminalArtThemeEnum := wbEnum(TFile.ReadAllLines(s));
   except end;
@@ -17054,7 +17003,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -17230,7 +17179,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -17445,7 +17394,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -17929,9 +17878,9 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL,
+    wbReflection(REFL),
     wbFormIDCk(RFDP, 'Reflection Parent', [ATMO]),
-    wbRDIF
+    wbReflection(RDIF)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18215,7 +18164,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18238,14 +18187,14 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
   wbRecord(FOGV, 'Fog Volume', [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18268,14 +18217,14 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
   wbRecord(LMSW, 'Layered Material Swap', [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18374,7 +18323,7 @@ begin
       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18652,7 +18601,7 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(PSDC, 'Particle System Define Collection', [ //PSDC -> EDID REFL  (9)
     wbEDID,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -19046,9 +18995,9 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(SUNP, 'Sun Preset', [
     wbEDID,
-    wbREFL,
+    wbReflection(REFL),
     wbFormIDCk(RFDP, 'Reflection Parent', [SUNP]),
-    wbRDIF
+    wbReflection(RDIF)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -19240,7 +19189,7 @@ begin
   wbRecord(TODD, 'Time Of Day Data', [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL
+    wbReflection(REFL)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -19807,9 +19756,9 @@ begin
   wbRecord(WTHS, 'Weather Settings', [
     wbEDID,
     wbBaseFormComponents,
-    wbREFL,
+    wbReflection(REFL),
     wbFormIDCk(RFDP, 'Reflection Parent', [WTHS]),
-    wbRDIF,
+    wbReflection(RDIF),
     wbConditions
   ]);
 

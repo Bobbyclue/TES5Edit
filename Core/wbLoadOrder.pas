@@ -13,9 +13,7 @@ unit wbLoadOrder;
 interface
 
 uses
-  System.Classes,
   System.SysUtils,
-  System.Types,
 
   wbHash,
   wbInterface;
@@ -138,7 +136,9 @@ function wbModulesByLoadOrder(aIncludeTemplates: Boolean = False): TwbModuleInfo
 implementation
 
 uses
+  System.Classes,
   System.IOUtils,
+  System.Types,
 
   wbHelpers,
   wbImplementation,

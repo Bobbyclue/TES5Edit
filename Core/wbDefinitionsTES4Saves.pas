@@ -16,16 +16,11 @@ procedure SwitchToTES4CoSave;
 implementation
 
 uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
+  System.SysUtils,
+
+  wbDefinitionsTES4,
   wbInterface,
-  wbSaveInterface,
-  wbImplementation,
-  wbLocalization,
-  wbDefinitionsTES4;
+  wbSaveInterface;
 
 var
   wbActorValueLabels : array of string;

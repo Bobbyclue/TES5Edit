@@ -11,7 +11,7 @@ unit wbDataFormatNifTypes;
 interface
 
 uses
-  Types, SysUtils, StrUtils, Math, wbDataFormat;
+  wbDataFormat;
 
 var
   // True: Euler YPR, False: Angle and Axis
@@ -171,6 +171,11 @@ function wbBoundingVolume(const aName: string): TdfDef;
 implementation
 
 uses
+  System.Math,
+  System.StrUtils,
+  System.SysUtils,
+  System.Types,
+
   wbNifMath;
 
 procedure GetTextHexColor(const aElement: TdfElement; var aText: string);

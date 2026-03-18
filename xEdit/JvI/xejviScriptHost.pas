@@ -21,13 +21,11 @@ uses
 
   JvInterpreter,
 
-  Vcl.Forms,
-
   wbDataFormat,
   wbInterface,
 
-  xeScriptHost,
-  xeMainForm;
+  xeMainForm,
+  xeScriptHost;
 
 type
   TxejviScript = class(TInterfacedObject, IxeScript)

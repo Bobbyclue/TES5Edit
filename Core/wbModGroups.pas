@@ -13,9 +13,9 @@ unit wbModGroups;
 interface
 
 uses
-  System.Types,
   System.Classes,
   System.SysUtils,
+
   wbHash,
   wbInterface,
   wbLoadOrder;
@@ -143,6 +143,7 @@ implementation
 
 uses
   System.IniFiles,
+
   wbHelpers,
   wbSort;
 

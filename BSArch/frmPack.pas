@@ -16,13 +16,9 @@ uses
   Vcl.Controls,
   Vcl.ExtCtrls,
   Vcl.Forms,
-  Vcl.Graphics,
   Vcl.StdCtrls,
 
-  Winapi.Windows,
-
-  wbBSArchive,
-  wbCompression;
+  wbBSArchive;
 
 type
   TFormPack = class(TForm)
@@ -83,7 +79,12 @@ uses
   System.IOUtils,
   System.SysUtils,
 
-  Vcl.Dialogs;
+  Vcl.Dialogs,
+  Vcl.Graphics,
+
+  Winapi.Windows,
+
+  wbCompression;
 
 //============================================================================
 procedure TFormPack.FormKeyDown(Sender: TObject; var Key: Word;

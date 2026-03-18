@@ -11,26 +11,13 @@ unit wbLOD;
 interface
 
 uses
-  Windows,
-  Classes,
-  SysUtils,
-  IniFiles,
-  Forms,
-  IOUtils,
-  Masks,
-  wbInterface,
-  wbImplementation,
-  wbHash,
-  wbHelpers,
-  wbSort,
-  wbStreams,
-  wbDataFormat,
-  wbDataFormatNif,
-  wbDataFormatMaterial,
+  System.Classes,
+  System.IniFiles,
+  System.SysUtils,
+
   ImagingTypes,
-  ImagingFormats,
-  ImagingCanvases,
-  Imaging;
+
+  wbInterface;
 
 const
   {$IFDEF WIN64}
@@ -305,8 +292,26 @@ const
 implementation
 
 uses
-  Math,
-  wbBSArchive;
+  System.IOUtils,
+  System.Masks,
+  System.Math,
+
+  Vcl.Forms,
+
+  Winapi.Windows,
+
+  Imaging,
+  ImagingCanvases,
+  ImagingFormats,
+
+  wbBSArchive,
+  wbDataFormat,
+  wbDataFormatMaterial,
+  wbDataFormatNif,
+  wbHash,
+  wbHelpers,
+  wbSort,
+  wbStreams;
 
 function wbLODExtraOptionsFileName(const PluginName, WorldspaceID: string): string;
 begin
@@ -402,7 +407,7 @@ begin
 
   // remove temp file
   if FileExists(s) then
-    DeleteFile(s);
+    System.SysUtils.DeleteFile(s);
 end;
 
 { TwbLodSettings }
@@ -2180,7 +2185,7 @@ begin
 
   if FindFirst(LODPath + aWorldspace.EditorID + '*.lod', faAnyFile, F) = 0 then try
     repeat
-      DeleteFile(LODPath + F.Name);
+      System.SysUtils.DeleteFile(LODPath + F.Name);
       Inc(i);
 
       if StartTick + 500 < GetTickCount then begin
@@ -2195,7 +2200,7 @@ begin
 
     until FindNext(F) <> 0;
   finally
-    FindClose(F);
+    System.SysUtils.FindClose(F);
   end;
 
   if Rule > rClear then begin
@@ -2662,7 +2667,7 @@ begin
 
         if FindFirst(ExtractFilePath(LODPath + Lst.AtlasFileName) + '*.' + wbLODTreeBlockFileExt, faAnyFile, F) = 0 then try
           repeat
-            DeleteFile(ExtractFilePath(LODPath + Lst.AtlasFileName) + F.Name);
+            System.SysUtils.DeleteFile(ExtractFilePath(LODPath + Lst.AtlasFileName) + F.Name);
             if StartTick + 500 < GetTickCount then begin
               Application.MainForm.Caption := 'Deleting old LOD files: ' + aWorldspace.Name +
                 ' Elapsed Time: ' + FormatDateTime('nn:ss', Now - wbStartTime);
@@ -2673,7 +2678,7 @@ begin
               Abort;
           until FindNext(F) <> 0;
         finally
-          FindClose(F);
+          System.SysUtils.FindClose(F);
         end;
 
         if Length(LOD4) > 0 then begin
@@ -3179,7 +3184,7 @@ begin
         // disable traditional Trees LOD if trees are generated as objects
         if bTrees3D and (ErrCode = 0) then begin
           s := wbDataPath + lst.ListFileName;
-          if FileExists(s) then DeleteFile(s);
+          if FileExists(s) then System.SysUtils.DeleteFile(s);
           if wbContainerHandler.ResourceExists(lst.ListFileName) then begin
             ForceDirectories(ExtractFilePath(s));
             SetLength(Bytes, 4);

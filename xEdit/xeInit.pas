@@ -14,7 +14,7 @@ unit xeInit;
 interface
 
 uses
-  Classes;
+  System.Classes;
 
 var
   xeScriptToRun            : string;
@@ -59,23 +59,19 @@ procedure xeInitStyles;
 implementation
 
 uses
+  System.IniFiles,
+  System.IOUtils,
+  System.SysUtils,
   System.UITypes,
-  SysUtils,
-  Windows,
-  Registry,
-  ShellApi,
-  Dialogs,
-  ShlObj,
-  IOUtils,
-  IniFiles,
+  System.Win.Registry,
+
+  Vcl.Dialogs,
   Vcl.Themes,
-  Vcl.Styles,
-  wbHelpers,
-  wbInterface,
-  wbImplementation,
+
+  Winapi.ShlObj,
+  Winapi.Windows,
+
   wbCommandLine,
-  wbLocalization,
-  wbDefinitionsCommon,
   wbDefinitionsFNV,
   wbDefinitionsFNVSaves,
   wbDefinitionsFO3,
@@ -83,13 +79,16 @@ uses
   wbDefinitionsFO4,
   wbDefinitionsFO4Saves,
   wbDefinitionsFO76,
+  wbDefinitionsSF1,
   wbDefinitionsTES3,
   wbDefinitionsTES4,
   wbDefinitionsTES4Saves,
   wbDefinitionsTES5,
   wbDefinitionsTES5Saves,
-  wbDefinitionsSF1,
+  wbHelpers,
+  wbInterface,
   wbSteamVDFParser,
+
   xeScriptHost;
 
 function xeCheckForValidExtension(const aFilePath : string): Boolean;
@@ -1578,5 +1577,4 @@ begin
     end;
 end;
 
-initialization
 end.

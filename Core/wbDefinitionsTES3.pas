@@ -17,7 +17,8 @@ procedure DefineTES3;
 implementation
 
 uses
-  SysUtils,
+  System.SysUtils,
+
   wbDefinitionsCommon,
   wbDefinitionsSignatures,
   wbInterface;

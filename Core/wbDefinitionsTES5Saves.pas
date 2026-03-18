@@ -16,17 +16,13 @@ procedure SwitchToTES5CoSave;
 implementation
 
 uses
-  Types,
-  Classes,
-  SysUtils,
-  Math,
-  Variants,
-  wbInterface,
-  wbSaveInterface,
-  wbImplementation,
-  wbLocalization,
+  System.SysUtils,
+
   wbDefinitionsCommon,
-  wbDefinitionsTES5;
+  wbDefinitionsTES5,
+  wbImplementation,
+  wbInterface,
+  wbSaveInterface;
 
 var
   wbSexEnum          : IwbEnumDef;

@@ -14,14 +14,14 @@ unit wbInterface;
 interface
 
 uses
-  System.Types,
   System.Classes,
+  System.Generics.Collections,
+  System.Generics.Defaults,
   System.SysUtils,
   System.UITypes,
-  VCL.Graphics,
-  System.Generics.Defaults,
-  System.Generics.Collections,
-  System.RegularExpressions,
+
+  Vcl.Graphics,
+
   wbHash,
   wbStreams;
 
@@ -5174,17 +5174,53 @@ var
   wbFileBySortOrderComparer        : IComparer<IwbFile>;
   wbFileByReverseSortOrderComparer : IComparer<IwbFile>;
 
+  Files : array of IwbFile;
+
+function wbGetGameMasterFile: IwbFile;
+function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
+
 implementation
 
 uses
-  Windows,
-  Variants,
-  Math,
-  TypInfo,
-  wbSort,
-  wbLocalization,
+  System.Math,
+  System.RegularExpressions,
+  System.TypInfo,
+  System.Variants,
+
+  Winapi.Windows,
+
+  wbHalfFloat,
   wbImplementation,
-  wbHalfFloat;
+  wbLocalization,
+  wbSort;
+
+function wbGetGameMasterFile: IwbFile;
+begin
+  for var lIdx := Low(Files) to High(Files) do
+    if fsIsGameMaster in Files[lIdx].FileStates then
+      Exit(Files[lIdx]);
+  for var lIdx := Low(Files) to High(Files) do
+    with Files[lIdx].LoadOrderFileID do
+      if IsFullSlot and (FullSlot = 0) then
+        Exit(Files[lIdx]);
+  Result := nil;
+end;
+
+function wbRecordByLoadOrderFormID(const aFormID: TwbFormID; const aSeenFromFile: IwbFile): IwbMainRecord;
+begin
+  Result := nil;
+  var lFileID := aFormID.FileID;
+  for var i:= Low(Files) to High(Files) do
+    if Files[i].LoadOrderFileID = lFileID then begin
+      Result := Files[i].RecordByFormID[aFormID, True, False];
+      if Assigned(Result) and Assigned(aSeenFromFile) then begin
+        var lVisibleResult := Result.HighestOverrideVisibleForFile[aSeenFromFile];
+        if Assigned(lVisibleResult) then
+          Result := lVisibleResult;
+      end;
+      Exit;
+    end;
+end;
 
 type
   IwbIntegerDefInternal = interface(IwbIntegerDef)

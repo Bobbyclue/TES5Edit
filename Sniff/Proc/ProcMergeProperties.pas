@@ -3,8 +3,14 @@ unit ProcMergeProperties;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.ComCtrls,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.StdCtrls,
+
   SniffProcessor;
 
 type
@@ -39,6 +45,7 @@ implementation
 
 uses
   JsonDataObjects,
+
   wbDataFormat,
   wbDataFormatNif;
 

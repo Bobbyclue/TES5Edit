@@ -11,9 +11,16 @@ unit ProcAdjustTransform;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SniffProcessor,
-  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Mask;
+  System.Classes,
+  System.SysUtils,
+
+  Vcl.Controls,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  SniffProcessor;
 
 type
   TFrameAdjustTransform = class(TFrame)
@@ -63,7 +70,8 @@ implementation
 {$R *.dfm}
 
 uses
-  StrUtils,
+  System.StrUtils,
+
   wbDataFormat,
   wbDataFormatNif;
 

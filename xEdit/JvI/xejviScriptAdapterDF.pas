@@ -23,9 +23,9 @@ uses
   System.Classes,
 
   wbDataFormat,
-  wbDataFormatNif,
   wbDataFormatMaterial,
-  wbDataFormatMisc;
+  wbDataFormatMisc,
+  wbDataFormatNif;
 
 const
   sDFUnitName = 'wbDataFormat';

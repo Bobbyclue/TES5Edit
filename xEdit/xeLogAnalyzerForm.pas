@@ -13,9 +13,19 @@ unit xeLogAnalyzerForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, VirtualTrees, VirtualEditTree, wbInterface,
-  Vcl.Mask;
+  System.Classes,
+
+  Vcl.Controls,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.Forms,
+  Vcl.Mask,
+  Vcl.StdCtrls,
+
+  VirtualTrees,
+  VirtualEditTree,
+
+  wbInterface;
 
 type
   TLogType = (
@@ -111,6 +121,10 @@ type
 implementation
 
 uses
+  System.SysUtils,
+
+  Winapi.Messages,
+
   xeMainForm;
 
 {$R *.dfm}

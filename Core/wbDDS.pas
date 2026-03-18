@@ -13,7 +13,6 @@ interface
 uses
   System.SysUtils;
 
-
 type
   TMagic4 = array [0..3] of AnsiChar;
   PMagic4 = ^TMagic4;
@@ -395,7 +394,6 @@ implementation
 
 uses
   System.TypInfo;
-
 
 class function TwbDDS.IsDDS(aDDSData: Pointer; aSize: Integer): Boolean;
 begin
