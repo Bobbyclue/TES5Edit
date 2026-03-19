@@ -437,6 +437,7 @@ object frmFilterOptions: TfrmFilterOptions
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'Filter'
+      Default = True
       ModalResult = 1
       TabOrder = 0
     end
