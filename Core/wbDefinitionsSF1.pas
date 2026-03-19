@@ -6301,8 +6301,11 @@ begin
         wbRStruct('Component Data - Particle System', [
           wbReflection(PTCL)
         ]),
-        //BGSLodOwner_Component
         //BGSEffectSequenceComponent
+        //BGSLodOwner_Component
+        //BGSMaterialPropertyComponent
+        //LensFlareAttachmentFormComponent
+        //LightAttachmentFormComponent
         wbRStruct('Component Data - Reflection', [
           wbReflection(REFL)
         ]),
