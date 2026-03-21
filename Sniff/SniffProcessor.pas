@@ -88,7 +88,7 @@ type
     procedure AddMessages(const aStrings: TStrings);
     function GetSupportedGameNames: string;
     function GetExtensionNames: string;
-    procedure SetExtensionNames(aExtensions: string);
+    procedure SetExtensionNames(const aExtensions: string);
     function GetStorageSection: string;
 
     procedure StorageSetBool(const aName: string; aValue: Boolean);
@@ -389,7 +389,7 @@ begin
   end;
 end;
 
-procedure TProcBase.SetExtensionNames(aExtensions: string);
+procedure TProcBase.SetExtensionNames(const aExtensions: string);
 var
   NewExtensions: array of String;
 begin

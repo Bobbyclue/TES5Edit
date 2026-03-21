@@ -138,7 +138,7 @@ end;
 
 procedure TFrameFindTextures.Init;
 
-  procedure AddProperty(const aName: string; aPickList: TArray<string>);
+  procedure AddProperty(const aName: string; const aPickList: TArray<string>);
   begin
     edProp.InsertRow(aName, '', True);
     with edProp.ItemProps[aName] do begin
