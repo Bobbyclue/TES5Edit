@@ -80,7 +80,7 @@ begin
 end;
 
 //======================================================================
-procedure SetError(aText: string);
+procedure SetError(const aText: string);
 begin
   Sync.BeginWrite;
   try
