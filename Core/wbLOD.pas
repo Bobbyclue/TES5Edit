@@ -91,8 +91,8 @@ type
     Stride, LODLevelMin, LODLevelMax, ObjectLevel: Integer;
     procedure Init;
     function GetSize: Integer;
-    function BlockForCell(Cell: TwbGridCell; LODLevel: Integer): TwbGridCell;
-    procedure LoadFromData(aData: TBytes);
+    function BlockForCell(const Cell: TwbGridCell; LODLevel: Integer): TwbGridCell;
+    procedure LoadFromData(const aData: TBytes);
     property Size: Integer read GetSize;
   end;
 
@@ -140,7 +140,7 @@ type
     Width, Height: Single;
     ShiftX, ShiftY, ShiftZ, ScaleFactor: Single;
     Image: TImageData;
-    function LoadFromData(aData: TBytes): Boolean;
+    function LoadFromData(const aData: TBytes): Boolean;
   end;
   PwbLodTES5Tree = ^TwbLodTES5Tree;
 
@@ -162,20 +162,20 @@ type
     function GetTreesListCount: Integer;
     function GetTreesList(Index: Integer): TwbLodTES5TreeType;
     function GetAtlasRect(Index: Integer): TAtlasRect;
-    function GetTreeByFormID(aFormID: TwbFormID): PwbLodTES5Tree;
+    function GetTreeByFormID(const aFormID: TwbFormID): PwbLodTES5Tree;
   public
-    constructor Create(WorldspaceID: string);
+    constructor Create(const WorldspaceID: string);
     destructor Destroy; override;
-    procedure LoadFromData(aData: TBytes);
-    procedure SaveToFile(aFileName: string);
-    procedure LoadAtlas(aData: TBytes);
-    function SaveAtlas(aFileName: string): Boolean;
+    procedure LoadFromData(const aData: TBytes);
+    procedure SaveToFile(const aFileName: string);
+    procedure LoadAtlas(const aData: TBytes);
+    function SaveAtlas(const aFileName: string): Boolean;
     procedure ChangeAtlasBrightness(aBrightness: integer);
-    procedure SaveFromAtlas(aIndex: Integer; aFileName: string);
+    procedure SaveFromAtlas(aIndex: Integer; const aFileName: string);
     procedure CopyFromAtlas(aIndex: Integer; var Img: TImageData; ImgX, ImgY: Integer);
     function BuildAtlas(MaxAtlasSize: Integer): Boolean;
-    function BillboardFileName(aFileName, aModelName: string; aFormID: TwbFormID): string;
-    function AddTree(aFileName, aModelName: string; aFormID: TwbFormID; aWidth, aHeight: Single): PwbLodTES5Tree;
+    function BillboardFileName(const aFileName, aModelName: string; const aFormID: TwbFormID): string;
+    function AddTree(const aFileName, aModelName: string; const aFormID: TwbFormID; aWidth, aHeight: Single): PwbLodTES5Tree;
     property WorldspaceID: string read fWorldspaceID write fWorldspaceID;
     property ListFileName: string read GetListFileName;
     property AtlasFileName: string read GetAtlasFileName;
@@ -183,7 +183,7 @@ type
     property TreesList[Index: Integer]: TwbLodTES5TreeType read GetTreesList;
     property AtlasRect[Index: Integer]: TAtlasRect read GetAtlasRect;
     property Atlas: TImageData read fAtlas;
-    property TreeByFormID[aFormID: TwbFormID]: PwbLodTES5Tree read GetTreeByFormID;
+    property TreeByFormID[const aFormID: TwbFormID]: PwbLodTES5Tree read GetTreeByFormID;
     property RefAllowDuplicates: Boolean read fRefAllowDuplicates write fRefAllowDuplicates;
     property RefFormIDs: TList read fRefFormIDs;
   end;
@@ -196,12 +196,12 @@ type
     Types: array of record Index, Count: Integer; end;
     Refs: array of array of TwbLodTES5TreeRef;
     function GetBlockFileName: string;
-    procedure Init(Trees: TwbLodTES5TreeList; aCell: TwbGridCell; aLODLevel: Integer = 4);
+    procedure Init(Trees: TwbLodTES5TreeList; const aCell: TwbGridCell; aLODLevel: Integer = 4);
     procedure Clear;
-    procedure LoadFromData(aData: TBytes);
-    procedure SaveToFile(aFileName: string);
-    function AddReference(aFormID: TwbFormID; aTreeIndex: Integer;
-      Pos: TwbVector; Scale: Single): Boolean;
+    procedure LoadFromData(const aData: TBytes);
+    procedure SaveToFile(const aFileName: string);
+    function AddReference(const aFormID: TwbFormID; aTreeIndex: Integer;
+      const Pos: TwbVector; Scale: Single): Boolean;
     property FileName: string read GetBlockFileName;
   end;
 
@@ -210,7 +210,7 @@ function wbLODSettingsFileName(const WorldspaceID: string): string;
 function wbLODTreeBlockFileExt: string;
 function wbDefaultNormalTexture(aGameMode: TwbGameMode): string;
 function wbDefaultSpecularTexture(aGameMode: TwbGameMode): string;
-procedure wbPrepareImageAlpha(img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
+procedure wbPrepareImageAlpha(const img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
 
 procedure wbGetUVRangeTexturesList(slMeshes, slTextures: TStrings; UVRange: Single = 1.2);
 
@@ -227,7 +227,7 @@ procedure wbBuildAtlasFromTexturesList(
   aMaxTextureSize,
   aMaxTileSize,
   aWidth, aHeight: integer;
-  aName, aMapName: string;
+  const aName, aMapName: string;
   const Settings: TCustomIniFile
 );
 
@@ -423,13 +423,13 @@ begin
   Result := Ceil(Stride/sqrt(2));
 end;
 
-function TwbLodSettings.BlockForCell(Cell: TwbGridCell; LODLevel: Integer): TwbGridCell;
+function TwbLodSettings.BlockForCell(const Cell: TwbGridCell; LODLevel: Integer): TwbGridCell;
 begin
   Result.x := SWCell.x + ((Cell.x - SWCell.x) div LODLevel) * LODLevel;
   Result.y := SWCell.y + ((Cell.y - SWCell.y) div LODLevel) * LODLevel;
 end;
 
-procedure TwbLodSettings.LoadFromData(aData: TBytes);
+procedure TwbLodSettings.LoadFromData(const aData: TBytes);
 const
   sError = 'Invalid lodsettings file';
 begin
@@ -561,7 +561,7 @@ end;
 
 { TwbLodTES5Tree }
 
-function TwbLodTES5Tree.LoadFromData(aData: TBytes): Boolean;
+function TwbLodTES5Tree.LoadFromData(const aData: TBytes): Boolean;
 begin
   InitImage(Image);
   Result := wbLoadImageFromMemory(@aData[0], Length(aData), Image);
@@ -570,7 +570,7 @@ end;
 
 { TwbLodTES5TreeList }
 
-constructor TwbLodTES5TreeList.Create(WorldspaceID: string);
+constructor TwbLodTES5TreeList.Create(const WorldspaceID: string);
 begin
   fWorldspaceID := WorldspaceID;
   if fWorldspaceID = '' then
@@ -638,7 +638,7 @@ begin
   end;
 end;
 
-function TwbLodTES5TreeList.GetTreeByFormID(aFormID: TwbFormID): PwbLodTES5Tree;
+function TwbLodTES5TreeList.GetTreeByFormID(const aFormID: TwbFormID): PwbLodTES5Tree;
 var
   i: Integer;
 begin
@@ -650,7 +650,7 @@ begin
     end;
 end;
 
-function TwbLodTES5TreeList.BillboardFileName(aFileName, aModelName: string; aFormID: TwbFormID): string;
+function TwbLodTES5TreeList.BillboardFileName(const aFileName, aModelName: string; const aFormID: TwbFormID): string;
 begin
   Result := Format('Textures\Terrain\LODGen\%s\%s_%s.dds', [
     aFileName,
@@ -659,7 +659,7 @@ begin
   ]);
 end;
 
-function TwbLodTES5TreeList.AddTree(aFileName, aModelName: string; aFormID: TwbFormID; aWidth, aHeight: Single): PwbLodTES5Tree;
+function TwbLodTES5TreeList.AddTree(const aFileName, aModelName: string; const aFormID: TwbFormID; aWidth, aHeight: Single): PwbLodTES5Tree;
 var
   i, idx: integer;
 begin
@@ -679,7 +679,7 @@ begin
   Result^.ScaleFactor := 1.0;
 end;
 
-procedure TwbLodTES5TreeList.LoadFromData(aData: TBytes);
+procedure TwbLodTES5TreeList.LoadFromData(const aData: TBytes);
 var
   TreesNum: integer;
 begin
@@ -698,7 +698,7 @@ begin
   Move(aData[4], fTreesList[0], SizeOf(TwbLodTES5TreeType) * TreesNum);
 end;
 
-procedure TwbLodTES5TreeList.SaveToFile(aFileName: string);
+procedure TwbLodTES5TreeList.SaveToFile(const aFileName: string);
 var
   Value: Integer;
 begin
@@ -712,13 +712,13 @@ begin
   end;
 end;
 
-procedure TwbLodTES5TreeList.LoadAtlas(aData: TBytes);
+procedure TwbLodTES5TreeList.LoadAtlas(const aData: TBytes);
 begin
   InitImage(fAtlas);
   LoadImageFromMemory(@aData[0], Length(aData), fAtlas);
 end;
 
-function TwbLodTES5TreeList.SaveAtlas(aFileName: string): Boolean;
+function TwbLodTES5TreeList.SaveAtlas(const aFileName: string): Boolean;
 var
   MipmapImg: TDynImageDataArray;
 begin
@@ -753,7 +753,7 @@ begin
   end;
 end;
 
-procedure TwbLodTES5TreeList.SaveFromAtlas(aIndex: Integer; aFileName: string);
+procedure TwbLodTES5TreeList.SaveFromAtlas(aIndex: Integer; const aFileName: string);
 var
   img: TImageData;
 begin
@@ -861,7 +861,7 @@ end;
 
 { TwbLodTES5TreeBlock }
 
-procedure TwbLodTES5TreeBlock.Init(Trees: TwbLodTES5TreeList; aCell: TwbGridCell; aLODLevel: Integer = 4);
+procedure TwbLodTES5TreeBlock.Init(Trees: TwbLodTES5TreeList; const aCell: TwbGridCell; aLODLevel: Integer = 4);
 begin
   TreeList := Trees;
   Cell := aCell;
@@ -894,7 +894,7 @@ begin
   ]);
 end;
 
-procedure TwbLodTES5TreeBlock.LoadFromData(aData: TBytes);
+procedure TwbLodTES5TreeBlock.LoadFromData(const aData: TBytes);
 const
   sError = 'Invalid tree LOD block file';
 var
@@ -936,7 +936,7 @@ begin
   end;
 end;
 
-procedure TwbLodTES5TreeBlock.SaveToFile(aFileName: string);
+procedure TwbLodTES5TreeBlock.SaveToFile(const aFileName: string);
 var
   Value, i: Integer;
   fs: TFileStream;
@@ -960,8 +960,8 @@ begin
   end;
 end;
 
-function TwbLodTES5TreeBlock.AddReference(aFormID: TwbFormID; aTreeIndex: Integer;
-  Pos: TwbVector; Scale: Single): Boolean;
+function TwbLodTES5TreeBlock.AddReference(const aFormID: TwbFormID; aTreeIndex: Integer;
+  const Pos: TwbVector; Scale: Single): Boolean;
 var
   i, j: integer;
 begin
@@ -997,7 +997,7 @@ begin
   Result := True;
 end;
 
-procedure wbPrepareImageAlpha(img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
+procedure wbPrepareImageAlpha(const img: TImageData; fmt: TImageFormat; threshold: Integer = 0);
 var
   x, y: integer;
   c: TColor32Rec;
@@ -1404,7 +1404,7 @@ procedure wbBuildAtlasFromTexturesList(
   aMaxTextureSize,
   aMaxTileSize,
   aWidth, aHeight: integer;
-  aName, aMapName: string;
+  const aName, aMapName: string;
   const Settings: TCustomIniFile
 );
 var
@@ -2383,7 +2383,7 @@ var
       Result^.Index := -1;
   end;
 
-  procedure GetLargeReferencesPlugin(const aElement: IwbElement; sl: TStringList; ChunkSW, ChunkNE: TwbGridCell);
+  procedure GetLargeReferencesPlugin(const aElement: IwbElement; sl: TStringList; const ChunkSW, ChunkNE: TwbGridCell);
   var
     i, j: integer;
     Grids, GridEntry, References, ReferenceEntry: IwbContainerElementRef;
@@ -2429,7 +2429,7 @@ var
         end;
   end;
 
-  procedure GetLargeReferences(Wrld: IwbMainRecord; sl: TStringList; ChunkSW, ChunkNE: TwbGridCell);
+  procedure GetLargeReferences(Wrld: IwbMainRecord; sl: TStringList; const ChunkSW, ChunkNE: TwbGridCell);
   var
     i: integer;
   begin

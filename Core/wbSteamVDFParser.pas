@@ -47,7 +47,7 @@ type
 
   function GetSteamInstallFolder: string;
   function GetSteamLibraryListFile: string;
-  function GetInstallPathBySteamID(SteamID: string): string;
+  function GetInstallPathBySteamID(const SteamID: string): string;
 
 implementation
 
@@ -234,7 +234,7 @@ begin
 end;
 
 // Returns empty string if it could not locate the game path.
-function GetInstallPathBySteamID(SteamID: string): string;
+function GetInstallPathBySteamID(const SteamID: string): string;
 var
   SteamParser: TSteamVDFParser;
   LibraryFolder: string;

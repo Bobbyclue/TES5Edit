@@ -485,7 +485,7 @@ type
     procedure vstNavFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure vstNavFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure vstNavGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vstNavHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+    procedure vstNavHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
     procedure vstNavIncrementalSearch(Sender: TBaseVirtualTree; Node: PVirtualNode; const SearchText: string; var Result: Integer);
     procedure vstNavInitChildren(Sender: TBaseVirtualTree; Node: PVirtualNode; var ChildCount: Cardinal);
     procedure vstNavInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
@@ -524,7 +524,7 @@ type
 
     {--- vstView ---}
     procedure vstViewAdvancedHeaderDraw(Sender: TVTHeader; var PaintInfo: THeaderPaintInfo; const Elements: THeaderPaintElements);
-    procedure vstViewBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+    procedure vstViewBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; const CellRect: TRect; var ContentRect: TRect);
     procedure vstViewBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
     procedure vstViewCheckHotTrack(Sender: TBaseVirtualTree; HotNode: PVirtualNode; HotColumn: TColumnIndex; var Allow: Boolean);
     procedure vstViewClick(Sender: TObject);
@@ -539,7 +539,7 @@ type
     procedure vstViewFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure vstViewGetEditText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var CellText: string);
     procedure vstViewGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vstViewHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+    procedure vstViewHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
     procedure vstViewHeaderDropped(Sender: TVTHeader; SourceColumn, TargetColumn: TColumnIndex; var Handled: Boolean);
     procedure vstViewHeaderDrawQueryElements(Sender: TVTHeader; var PaintInfo: THeaderPaintInfo; var Elements: THeaderPaintElements);
     procedure vstViewHeaderMouseDown(Sender: TVTHeader; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -547,7 +547,7 @@ type
     procedure vstViewInitChildren(Sender: TBaseVirtualTree; Node: PVirtualNode; var ChildCount: Cardinal);
     procedure vstViewInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
     procedure vstViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure vstViewNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; NewText: string);
+    procedure vstViewNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; const NewText: string);
     procedure vstViewPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType);
     procedure vstViewResize(Sender: TObject);
     procedure vstViewCreateEditor(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
@@ -602,7 +602,7 @@ type
     procedure vstSpreadSheetGetEditText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var CellText: string);
     procedure vstSpreadSheetGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure vstSpreadSheetIncrementalSearch(Sender: TBaseVirtualTree; Node: PVirtualNode; const SearchText: string; var Result: Integer);
-    procedure vstSpreadSheetNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; NewText: string);
+    procedure vstSpreadSheetNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; const NewText: string);
     procedure vstSpreadSheetPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType);
 
     {--- pmuSpreadSheet ---}
@@ -804,7 +804,7 @@ type
     function NodeDatasForMainRecord(const aMainRecord: IwbMainRecord): TDynViewNodeDatas;
     function NodeDatasForContainer(const aContainer: IwbDataContainer): TDynViewNodeDatas;
 
-    procedure ShowChangeReferencedBy(OldFormID: TwbFormID; NewFormID: TwbFormID; const ReferencedBy: TDynMainRecords; aSilent: Boolean);
+    procedure ShowChangeReferencedBy(const OldFormID, NewFormID: TwbFormID; const ReferencedBy: TDynMainRecords; aSilent: Boolean);
     function GetTargetElement(Target: TBaseVirtualTree; var TargetNode: PVirtualNode; TargetColumn: Integer; out TargetIndex: Integer; out TargetElement: IwbElement): Boolean;
     function PerformDrop(TargetTree: TBaseVirtualTree; TargetNode: PVirtualNode; TargetColumn: Integer; const SourceElement: IwbElement): Boolean;
     function GetSourceElement(Source: TObject; out SourceElement: IwbElement): Boolean;
@@ -834,8 +834,8 @@ type
     function CheckForErrors(const aIndent: Integer; const aElement: IwbElement): Boolean;
 
   public
-    function AddNewFileName(aFileName: string; aIsLight, aIsMedium: Boolean): IwbFile; overload;
-    function AddNewFileName(aFileName: string; aTemplate: PwbModuleInfo): IwbFile; overload;
+    function AddNewFileName(const aFileName: string; aIsLight, aIsMedium: Boolean): IwbFile; overload;
+    function AddNewFileName(const aFileName: string; aTemplate: PwbModuleInfo): IwbFile; overload;
     function AddNewFile(out aFile: IwbFile; aIsLight, aIsMedium: Boolean): Boolean; overload;
     function AddNewFile(out aFile: IwbFile; aTemplate: PwbModuleInfo): Boolean; overload;
 
@@ -867,9 +867,9 @@ type
     function SetAllToMaster: Boolean;
     function UpdateAllOnam: Boolean;
     function RestorePluginsFromMaster: Boolean;
-    procedure ApplyScriptToSelection(aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean); overload;
-    procedure ApplyScriptToSelection(aSelection: TDynElements; aCount: Cardinal; const abShowMessages: boolean); overload;
-    procedure ApplyScript(const aScriptName: string; aScript: string; aRefByMode: Boolean = False);
+    procedure ApplyScriptToSelection(const aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean); overload;
+    procedure ApplyScriptToSelection(const aSelection: TDynElements; aCount: Cardinal; const abShowMessages: boolean); overload;
+    procedure ApplyScript(const aScriptName: string; const aScript: string; aRefByMode: Boolean = False);
     procedure CreateActionsForScripts;
     function LOOTDirtyInfo(const aInfo: TLOOTPluginInfo; aFileChanged: Boolean): string;
     function BOSSDirtyInfo(const aInfo: TLOOTPluginInfo): string;
@@ -1055,7 +1055,7 @@ type
 
     procedure ClearActiveContainer; overload;
     function GetViewNodePositionLabel(aNode: PVirtualNode = nil): string;
-    procedure SetViewNodePositionLabel(aViewLabel: string);
+    procedure SetViewNodePositionLabel(const aViewLabel: string);
 
     function ValidateCRC(const aFileName  : string;
                          const aValidCRCs : TDynCardinalArray;
@@ -1092,7 +1092,7 @@ type
     procedure SendAddFile(const aFile: IwbFile);
     procedure SendLoaderDone(const aStartTime: TDateTime; aLoadOrder: Integer);
 
-    procedure PostPluggyChange(aFormID, aBaseFormID, aInventoryFormID, aEnchantmentFormID, aSpellFormID: TwbFormID);
+    procedure PostPluggyChange(const aFormID, aBaseFormID, aInventoryFormID, aEnchantmentFormID, aSpellFormID: TwbFormID);
   end;
 
   TLoaderThread = class(TThread)
@@ -1107,7 +1107,7 @@ type
     procedure Execute; override;
   public
     constructor Create(var aList: TStringList; aFileStates: TwbFileStates = []); overload;
-    constructor Create(aFileName: string; aMaster: string; aLoadOrder: Integer; aFileStates: TwbFileStates = []); overload;
+    constructor Create(const aFileName, aMaster: string; aLoadOrder: Integer; aFileStates: TwbFileStates = []); overload;
     destructor Destroy; override;
   end;
 
@@ -1462,7 +1462,7 @@ end;
 var
   NoNodes                     : TNodeArray;
 
-function Displayable(aSignature: TwbSignature): String;
+function Displayable(const aSignature: TwbSignature): String;
 var
   Sig : TwbSignature;
   i   : Integer;
@@ -1815,7 +1815,7 @@ begin
     tbsMessages.Highlighted := True;
 end;
 
-function TfrmMain.AddNewFileName(aFileName: string; aIsLight, aIsMedium: Boolean): IwbFile;
+function TfrmMain.AddNewFileName(const aFileName: string; aIsLight, aIsMedium: Boolean): IwbFile;
 var
   LoadOrder : Integer;
 begin
@@ -1842,7 +1842,7 @@ begin
   Result._AddRef;
 end;
 
-function TfrmMain.AddNewFileName(aFileName: string; aTemplate: PwbModuleInfo): IwbFile;
+function TfrmMain.AddNewFileName(const aFileName: string; aTemplate: PwbModuleInfo): IwbFile;
 var
   LoadOrder : Integer;
   i: Integer;
@@ -6450,7 +6450,7 @@ begin
       xeSetDoubleBuffered(TWinControl(aControl.Controls[i]));
 end;
 
-procedure xeLoadAndApplyFontAndScale(aIni: TMemIniFile; aSection, aName: string; aWinControl: TWinControl);
+procedure xeLoadAndApplyFontAndScale(aIni: TMemIniFile; const aSection, aName: string; aWinControl: TWinControl);
 var
   OldSize : Integer;
   NewSize : Integer;
@@ -8342,7 +8342,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.ApplyScriptToSelection(aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean);
+procedure TfrmMain.ApplyScriptToSelection(const aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean);
 var
   Node        : PVirtualNode;
 begin
@@ -8407,7 +8407,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.ApplyScriptToSelection(aSelection: TDynElements; aCount: Cardinal; const abShowMessages: boolean);
+procedure TfrmMain.ApplyScriptToSelection(const aSelection: TDynElements; aCount: Cardinal; const abShowMessages: boolean);
 begin
   for var i := Low(aSelection) to High(aSelection) do
   begin
@@ -8447,7 +8447,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.ApplyScript(const aScriptName: string; aScript: string; aRefByMode: Boolean);
+procedure TfrmMain.ApplyScript(const aScriptName: string; const aScript: string; aRefByMode: Boolean);
 const
   sJustWait                   = 'Applying script. Please wait...';
 var
@@ -15537,7 +15537,7 @@ begin
   PostMessage(Handle, WM_USER, UInt64(p), 0);
 end;
 
-procedure TfrmMain.PostPluggyChange(aFormID, aBaseFormID, aInventoryFormID, aEnchantmentFormID, aSpellFormID: TwbFormID);
+procedure TfrmMain.PostPluggyChange(const aFormID, aBaseFormID, aInventoryFormID, aEnchantmentFormID, aSpellFormID: TwbFormID);
 begin
   PluggyFormID := aFormID;
   PluggyBaseFormID := aBaseFormID;
@@ -16624,7 +16624,7 @@ begin
   vstView.FocusedNode := aNode;
 end;
 
-procedure TfrmMain.SetViewNodePositionLabel(aViewLabel: string);
+procedure TfrmMain.SetViewNodePositionLabel(const aViewLabel: string);
 var
   Node, LabelNode: PVirtualNode;
   s, DefName: string;
@@ -16848,7 +16848,7 @@ begin
     pgMain.ActivePage.Visible := True;
 end;
 
-procedure TfrmMain.ShowChangeReferencedBy(OldFormID, NewFormID: TwbFormID; const ReferencedBy: TDynMainRecords; aSilent: Boolean);
+procedure TfrmMain.ShowChangeReferencedBy(const OldFormID, NewFormID: TwbFormID; const ReferencedBy: TDynMainRecords; aSilent: Boolean);
 var
   Counter    : Integer;
   i          : Integer;
@@ -17877,7 +17877,7 @@ begin
   //...
 end;
 
-procedure TfrmMain.vstViewBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+procedure TfrmMain.vstViewBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; const CellRect: TRect; var ContentRect: TRect);
 var
   NodeDatas                   : PViewNodeDatas;
   Factor                      : Double;
@@ -18668,7 +18668,7 @@ begin
     end;
 end;
 
-procedure TfrmMain.vstViewHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+procedure TfrmMain.vstViewHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
 var
   i        : Integer;
   ColWidth : Integer;
@@ -19010,7 +19010,7 @@ begin
 end;
 
 procedure TfrmMain.vstViewNewText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; NewText: string);
+  Node: PVirtualNode; Column: TColumnIndex; const NewText: string);
 var
   NodeDatas                   : PViewNodeDatas;
   Element                     : IwbElement;
@@ -19627,7 +19627,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vstNavHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+procedure TfrmMain.vstNavHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
 begin
   with HitInfo do begin
     UserWasActive := True;
@@ -20652,7 +20652,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vstSpreadSheetNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; NewText: string);
+procedure TfrmMain.vstSpreadSheetNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; const NewText: string);
 var
   NodeDatas                   : PSpreadSheetNodeDatas;
   Element                     : IwbElement;
@@ -21178,7 +21178,7 @@ begin
   FreeOnTerminate := True;
 end;
 
-constructor TLoaderThread.Create(aFileName: string; aMaster: string; aLoadOrder: Integer; aFileStates: TwbFileStates = []);
+constructor TLoaderThread.Create(const aFileName, aMaster: string; aLoadOrder: Integer; aFileStates: TwbFileStates = []);
 begin
   ltLoadOrderOffset := aLoadOrder;
   ltDataPath := '';
@@ -22167,7 +22167,7 @@ var
   CodePointer_TUxThemeStyle_DoDrawIcon : TDoDrawIcon;
 
 function Detour_TUxThemeStyle_DoDrawIcon(Self: TUxThemeStyleHack; DC: HDC;
-  Details: TThemedElementDetails; const R: TRect; himl: HIMAGELIST;
+  const Details: TThemedElementDetails; const R: TRect; himl: HIMAGELIST;
   Index: Integer; DPI: Integer = 0): Boolean;
 var
   Icon: HICON;

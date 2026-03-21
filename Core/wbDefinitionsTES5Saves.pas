@@ -455,7 +455,7 @@ begin
   end;
 end;
 
-function FileLocationTableCountCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function FileLocationTableCountCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
   Element : IwbElement;
   Container: IwbDataContainer;
@@ -1181,7 +1181,7 @@ begin
     Result := 1;
 end;
 
-function HasUnknownS1Decider(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function HasUnknownS1Decider(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   aValue    : Integer;
   Element   : IwbElement;
@@ -2249,7 +2249,7 @@ begin
     Result := wbBytesToDump div wbBytesToGroup + 1;
 end;
 
-function DataLengthCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -2272,7 +2272,7 @@ begin
   end;
 end;
 
-function DataLengthRemainderCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthRemainderCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;

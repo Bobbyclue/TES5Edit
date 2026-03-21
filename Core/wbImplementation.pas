@@ -52,7 +52,7 @@ function wbMastersForFile(const aFileName    : string;
                                 aIsBluePrint : PBoolean = nil)
                                              : Boolean; overload;
 
-function wbFile(const aFileName: string; aLoadOrder: Integer = -1; aCompareTo: string = ''; aStates: TwbFileStates = []; const aData: TBytes = nil): IwbFile;
+function wbFile(const aFileName: string; aLoadOrder: Integer = -1; const aCompareTo: string = ''; aStates: TwbFileStates = []; const aData: TBytes = nil): IwbFile;
 function wbNewFile(const aFileName: string; aLoadOrder: Integer; aIsLight, aIsMedium: Boolean): IwbFile; overload;
 function wbNewFile(const aFileName: string; aLoadOrder: Integer; aTemplate: PwbModuleInfo): IwbFile; overload;
 procedure wbFileForceClosed;
@@ -379,7 +379,7 @@ type
     function GetReferenceFile: IwbFile; virtual;
     function GetSortOrder: Integer;
     procedure BuildRef; virtual;
-    procedure AddReferencedFromID(aFormID: TwbFormID); virtual;
+    procedure AddReferencedFromID(const aFormID: TwbFormID); virtual;
     function CompareExchangeFormID(aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean; virtual;
     function GetIsEditable: Boolean; virtual;
     function GetIsRemovable: Boolean; virtual;
@@ -787,7 +787,7 @@ type
     function BuildOrLoadRef(aOnlyLoad: Boolean): TwbBuildOrLoadRefResult;
 
     function FindFormID(aFormID: TwbFormID; var Index: Integer; aNewMasters: Boolean): Boolean;
-    function FindInjectedID(aFormID: TwbFormID; var Index: Integer): Boolean;
+    function FindInjectedID(const aFormID: TwbFormID; var Index: Integer): Boolean;
     function GetMasterRecordByFormID(aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
 
     function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean; override;
@@ -845,9 +845,9 @@ type
     function GetMasterIndexForFileID(const aFileID: TwbFileID; aNew: Boolean): Integer;
 
     procedure UpdateAllMasters;
-    function GetRecordByFormID(aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
+    function GetRecordByFormID(const aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
     function GetRecordByEditorID(const aEditorID: string): IwbMainRecord;
-    function GetContainedRecordByLoadOrderFormID(aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
+    function GetContainedRecordByLoadOrderFormID(const aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
     function GetRecordFromIndexByKey(aIndex: TwbNamedIndex; const aKey: string): IwbMainRecord;
     function GetGroupBySignature(const aSignature: TwbSignature): IwbGroupRecord;
     function HasGroup(const aSignature: TwbSignature): Boolean;
@@ -868,11 +868,11 @@ type
     function GetResolvedLoadOrderFileID(aNew: Boolean): TwbFileID;
     function GetFileFileID(aNewMasters : Boolean): TwbFileID;
 
-    function LoadOrderFormIDtoFileFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
-    function FileFormIDtoLoadOrderFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+    function LoadOrderFormIDtoFileFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+    function FileFormIDtoLoadOrderFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
 
-    function LoadOrderFileIDtoFileFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
-    function FileFileIDtoLoadOrderFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+    function LoadOrderFileIDtoFileFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+    function FileFileIDtoLoadOrderFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
 
     procedure AddMasters(aMasters: TStrings; aSilent: Boolean = False); overload;
     procedure AddMasters(const aMasters: array of string; aSilent: Boolean = False); overload;
@@ -954,7 +954,7 @@ type
 
     procedure UpdateModuleMasters;
 
-    constructor Create(const aFileName: string; aLoadOrder: Integer; aCompareTo: string; aStates: TwbFileStates; aData: TBytes);
+    constructor Create(const aFileName: string; aLoadOrder: Integer; const aCompareTo: string; aStates: TwbFileStates; const aData: TBytes);
     constructor CreateNew(const aFileName: string; aLoadOrder: Integer; aIsLight, aIsMedium: Boolean); overload;
     constructor CreateNew(const aFileName: string; aLoadOrder: Integer; aTemplate: PwbModuleInfo); overload;
   public
@@ -1262,7 +1262,7 @@ type
 
     function DoBuildRef(aRemove: Boolean): Boolean;
     procedure BuildRef; override;
-    procedure AddReferencedFromID(aFormID: TwbFormID); override;
+    procedure AddReferencedFromID(const aFormID: TwbFormID); override;
     procedure ResetConflict; override;
     procedure ResetReachable; override;
 
@@ -1405,7 +1405,7 @@ type
     procedure SetFormVCS1(aVCS: Cardinal);
     function GetFormVCS2: Cardinal;
     procedure SetFormVCS2(aVCS: Cardinal);
-    procedure ChangeFormSignature(aSignature: TwbSignature);
+    procedure ChangeFormSignature(const aSignature: TwbSignature);
     procedure ClampFormID(aIndex: Byte);
 
     function ContentEquals(const aMainRecord: IwbMainRecord): Boolean;
@@ -1460,7 +1460,7 @@ type
                        const aPrevMainRecord : IwbMainRecord); override;
     constructor Create(const aContainer : IwbContainer;
                        const aSignature : TwbSignature;
-                             aFormID    : TwbFormID); overload;
+                       const aFormID    : TwbFormID); overload;
     destructor Destroy; override;
 
     function GetName: string; override;
@@ -3126,7 +3126,7 @@ var
   _NextLoadOrder: Integer;
   FilesMap: TStringList;
 
-constructor TwbFile.Create(const aFileName: string; aLoadOrder: Integer; aCompareTo: string; aStates: TwbFileStates; aData: TBytes);
+constructor TwbFile.Create(const aFileName: string; aLoadOrder: Integer; const aCompareTo: string; aStates: TwbFileStates; const aData: TBytes);
 var
   s: string;
 begin
@@ -3435,7 +3435,7 @@ begin
   inherited;
 end;
 
-function TwbFile.FileFileIDtoLoadOrderFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+function TwbFile.FileFileIDtoLoadOrderFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
 begin
   if wbComplexFileFileID then case aFileID.ModuleType of
     mtLight:
@@ -3456,7 +3456,7 @@ begin
     raise EFileNoSlotExecption.Create('File has no slot assigned');
 end;
 
-function TwbFile.FileFormIDtoLoadOrderFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+function TwbFile.FileFormIDtoLoadOrderFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
 begin
   Result := aFormID;
   if Result.ObjectID < $800 then
@@ -3559,7 +3559,7 @@ begin
  Index := L;
 end;
 
-function TwbFile.FindInjectedID(aFormID: TwbFormID; var Index: Integer): Boolean;
+function TwbFile.FindInjectedID(const aFormID: TwbFormID; var Index: Integer): Boolean;
 var
   L, H, I, C: Integer;
 begin
@@ -3989,7 +3989,7 @@ begin
   Result := flCompareToFile;
 end;
 
-function TwbFile.GetContainedRecordByLoadOrderFormID(aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
+function TwbFile.GetContainedRecordByLoadOrderFormID(const aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
 
   function LoadOrderToFile(const aFileID: TwbFileID): TwbFileID;
   begin
@@ -4743,7 +4743,7 @@ begin
     end;
 end;
 
-function TwbFile.GetRecordByFormID(aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
+function TwbFile.GetRecordByFormID(const aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
 var
   i: Integer;
 begin
@@ -4949,7 +4949,7 @@ begin
     Result := aFileID.FullSlot >= GetMasterCount(aNew);
 end;
 
-function TwbFile.LoadOrderFileIDtoFileFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+function TwbFile.LoadOrderFileIDtoFileFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
 begin
   if wbComplexFileFileID then begin
     if aFileID = flLoadOrderFileID then
@@ -4986,7 +4986,7 @@ begin
   raise Exception.Create('Load order FileID [' + aFileID.ToString + '] can not be mapped to file FileID for file "' + GetFileName + '"');
 end;
 
-function TwbFile.LoadOrderFormIDtoFileFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+function TwbFile.LoadOrderFormIDtoFileFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
 begin
   Result := aFormID;
   if aFormID.IsHardcoded then
@@ -9066,7 +9066,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TwbMainRecord.AddReferencedFromID(aFormID: TwbFormID);
+procedure TwbMainRecord.AddReferencedFromID(const aFormID: TwbFormID);
 begin
   Assert(mrsBuildingRef in mrStates);
 
@@ -9384,7 +9384,7 @@ var
 
   SelfIntf      : IwbMainRecord;
 
-  procedure ProcessRef(aFormID: TwbFormID; aAdd: Boolean);
+  procedure ProcessRef(const aFormID: TwbFormID; aAdd: Boolean);
   begin
     Result := True;
     var MainRecord: IwbMainRecord := nil;
@@ -9915,7 +9915,7 @@ begin
     Result := MRI.IsSameData(dcBasePtr, dcEndPtr);
 end;
 
-constructor TwbMainRecord.Create(const aContainer: IwbContainer; const aSignature: TwbSignature; aFormID: TwbFormID);
+constructor TwbMainRecord.Create(const aContainer: IwbContainer; const aSignature: TwbSignature; const aFormID: TwbFormID);
 var
   lContainer   : IwbContainer;
   BasePtr      : PwbMainRecordStruct;
@@ -10614,7 +10614,7 @@ var
     Result := lMasterZeroIsGameMaster;
   end;
 
-  procedure MarkMaster(aFormID: TwbFormID);
+  procedure MarkMaster(const aFormID: TwbFormID);
   begin
     if aFormID.IsNull then
       Exit;
@@ -11411,7 +11411,7 @@ begin
   end;
 end;
 
-procedure TwbMainRecord.ChangeFormSignature(aSignature: TwbSignature);
+procedure TwbMainRecord.ChangeFormSignature(const aSignature: TwbSignature);
 begin
   MakeHeaderWriteable;
   mrStruct.mrsSignature := aSignature;
@@ -12618,7 +12618,7 @@ var
 
   SelfIntf      : IwbMainRecord;
 
-  procedure ProcessRef(aFormID: TwbFormID);
+  procedure ProcessRef(const aFormID: TwbFormID);
   begin
     var MainRecord: IwbMainRecord := nil;
 
@@ -18719,7 +18719,7 @@ begin
   raise Exception.Create(ClassName + '.AddIfMissingInternal is not implemented');
 end;
 
-procedure TwbElement.AddReferencedFromID(aFormID: TwbFormID);
+procedure TwbElement.AddReferencedFromID(const aFormID: TwbFormID);
 begin
   if Assigned(eContainer) then
     IwbElement(eContainer).AddReferencedFromID(aFormID);
@@ -23105,7 +23105,7 @@ begin
   _NextLightSlot := 0;
 end;
 
-function wbFile(const aFileName: string; aLoadOrder: Integer = -1; aCompareTo: string = ''; aStates: TwbFileStates = []; const aData: TBytes = nil): IwbFile;
+function wbFile(const aFileName: string; aLoadOrder: Integer = -1; const aCompareTo: string = ''; aStates: TwbFileStates = []; const aData: TBytes = nil): IwbFile;
 var
   FileName: string;
   i: Integer;
@@ -25100,7 +25100,7 @@ begin
 
 end;
 
-function CreateTemporaryCopy(FileName, CompareFile: String): String;
+function CreateTemporaryCopy(const FileName : string; var CompareFile: String): String;
 var
   s : String;
   i : Integer;
@@ -25123,7 +25123,7 @@ begin
   Result := CompareFile;
 end;
 
-function SelectTemporaryCopy(FileName, CompareFile: String): String;
+function SelectTemporaryCopy(const FileName : string; CompareFile: String): String;
 var
   s : String;
   i : Integer;

@@ -2364,7 +2364,7 @@ begin
     Exit(1);
 end;
 
-  procedure ReferenceRecord(aSignature: TwbSignature; const aName: string);
+  procedure ReferenceRecord(const aSignature: TwbSignature; const aName: string);
   begin
     wbRefRecord(aSignature, aName,
       wbFlags(wbFlagsList([

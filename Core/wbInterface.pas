@@ -1002,7 +1002,7 @@ type
     class operator Subtract(const A: TwbFormID; B: Int64): TwbFormID; inline;
     class operator Subtract(const A: TwbFormID; const B: TwbFormID): Int64; inline;
 
-    function ChangeFileID(aFileID: TwbFileID): TwbFormID; inline;
+    function ChangeFileID(const aFileID: TwbFileID): TwbFormID; inline;
     function ToString(aForDisplay: Boolean = False): string;
 
     function IsNull   : Boolean; inline;
@@ -1121,7 +1121,7 @@ type
     procedure SetDataSize(aSize: Integer);
     procedure MergeStorage(var aBasePtr: Pointer; aEndPtr: Pointer);
     procedure InformStorage(var aBasePtr: Pointer; aEndPtr: Pointer);
-    procedure AddReferencedFromID(aFormID: TwbFormID);
+    procedure AddReferencedFromID(const aFormID: TwbFormID);
     function CanContainFormIDs: Boolean;
     function ContainsReflection: Boolean;
     function ContainsUnmappedFormID: Boolean;
@@ -1566,9 +1566,9 @@ type
     function GetMasterForFileID(const aFileID: TwbFileID; aNew, aAllowSelf: Boolean): IwbFile;
     function GetMasterIndexForFileID(const aFileID: TwbFileID; aNew: Boolean): Integer;
 
-    function GetRecordByFormID(aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
+    function GetRecordByFormID(const aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
     function GetRecordByEditorID(const aEditorID: string): IwbMainRecord;
-    function GetContainedRecordByLoadOrderFormID(aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
+    function GetContainedRecordByLoadOrderFormID(const aFormID: TwbFormID; aAllowInjected: Boolean): IwbMainRecord;
     function GetRecordFromIndexByKey(aIndex: TwbNamedIndex; const aKey: string): IwbMainRecord;
     function GetLoadOrder: Integer;
     function GetLoadOrderFileID: TwbFileID;
@@ -1582,11 +1582,11 @@ type
     procedure BuildReachable;
     function BuildOrLoadRef(aOnlyLoad: Boolean): TwbBuildOrLoadRefResult;
 
-    function LoadOrderFormIDtoFileFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
-    function FileFormIDtoLoadOrderFormID(aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+    function LoadOrderFormIDtoFileFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
+    function FileFormIDtoLoadOrderFormID(const aFormID: TwbFormID; aNew: Boolean): TwbFormID;
 
-    function LoadOrderFileIDtoFileFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
-    function FileFileIDtoLoadOrderFileID(aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+    function LoadOrderFileIDtoFileFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
+    function FileFileIDtoLoadOrderFileID(const aFileID: TwbFileID; aNew: Boolean): TwbFileID;
 
     function NewFormID: TwbFormID;
 
@@ -1689,13 +1689,13 @@ type
     property LightMasterCount[aNew: Boolean]: Integer
       read GetLightMasterCount;
 
-    property RecordByFormID[aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean]: IwbMainRecord
+    property RecordByFormID[const aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean]: IwbMainRecord
       read GetRecordByFormID;
     property RecordByEditorID[const aEditorID: string]: IwbMainRecord
       read GetRecordByEditorID;
      property GroupBySignature[const aSignature: TwbSignature]: IwbGroupRecord
       read GetGroupBySignature;
-    property ContainedRecordByLoadOrderFormID[aFormID: TwbFormID; aAllowInjected: Boolean]: IwbMainRecord
+    property ContainedRecordByLoadOrderFormID[const aFormID: TwbFormID; aAllowInjected: Boolean]: IwbMainRecord
       read GetContainedRecordByLoadOrderFormID;
     property RecordFromIndexByKey[aIndex: TwbNamedIndex; const aKey: string]: IwbMainRecord
       read GetRecordFromIndexByKey;
@@ -2039,7 +2039,7 @@ type
     function GetFormVCS2: Cardinal;
     procedure SetFormVCS2(aVCS: Cardinal);
 
-    procedure ChangeFormSignature(aSignature: TwbSignature);
+    procedure ChangeFormSignature(const aSignature: TwbSignature);
     procedure ClampFormID(aIndex: Byte);
 
     function ContentEquals(const aMainRecord: IwbMainRecord): Boolean;
@@ -2375,7 +2375,7 @@ type
     function GetSignatureCount: Integer;
 
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean;
 
@@ -2395,15 +2395,15 @@ type
   IwbRecordDef = interface(IwbSignatureDef)
     ['{89FE380F-7A0B-493C-AA9E-08957A4C167B}']
     function ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Boolean;
     function GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                aSignature     : TwbSignature;
+                          const aSignature     : TwbSignature;
                           const aDataContainer : IwbDataContainer)
                                                : IwbRecordMemberDef;
     function GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Integer;
 
@@ -3176,7 +3176,7 @@ type
     function OpenResource(const aFileName: string): TDynResources;
     function OpenResourceData(const aContainerName, aFileName: string): TBytes;
 
-    function ContainerExists(aContainerName: string): Boolean;
+    function ContainerExists(const aContainerName: string): Boolean;
     procedure ContainerList(const aList: TStrings);
     procedure ContainerResourceList(const aContainerName: string; const aList: TStrings; const aFolder: string = '');
     procedure ContainerResourceDict(const aContainerName: string; const aDict: TwbResourceDict; const aFolder: string = '');
@@ -4790,12 +4790,12 @@ function wbCallback(const aToStr : TwbIntToStrCallback;
                     const aToInt : TwbStrToIntCallback)
                                  : IwbIntegerDefFormater;
 
-function wbFormaterUnion(aDecider : TwbIntegerDefFormaterUnionDecider;
-                         aMembers : array of IwbIntegerDefFormater)
-                                  : IwbIntegerDefFormaterUnion;
+function wbFormaterUnion(      aDecider : TwbIntegerDefFormaterUnionDecider;
+                         const aMembers : array of IwbIntegerDefFormater)
+                                        : IwbIntegerDefFormaterUnion;
 
-function wbIsModule(aFileName: string): Boolean;
-function wbIsSave(aFileName: string): Boolean;
+function wbIsModule(const aFileName: string): Boolean;
+function wbIsSave(const aFileName: string): Boolean;
 
 function wbStr4ToString(aInt: Int64): string;
 
@@ -4860,8 +4860,8 @@ var
   wbGetFormIDCallback : function(const aElement: IwbElement): TwbFormID;
   wbGetCellDetailsForWorldspaceCallback : function (aWorldspace: IwbMainRecord; var aPersistent: Boolean; var aGridCell: TwbGridCell): Boolean;
 
-function wbFlagsList(aFlags: array of const; aDeleted : Boolean = True; aUnknowns: Boolean = False): TDynStrings;
-function wbSparseFlags(aFlags: array of const; aUnknowns: Boolean = False; aSize: Cardinal = 32): TDynStrings;
+function wbFlagsList(const aFlags: array of const; aDeleted : Boolean = True; aUnknowns: Boolean = False): TDynStrings;
+function wbSparseFlags(const aFlags: array of const; aUnknowns: Boolean = False; aSize: Cardinal = 32): TDynStrings;
 function wbGetFormID(const aElement: IwbElement): TwbFormID;
 
 function wbGetCellDetailsForWorldspace(aWorldspace: IwbMainRecord; var aPersistent: Boolean; var aGridCell: TwbGridCell): Boolean;
@@ -5049,7 +5049,7 @@ function wbIsInternalEdit: Boolean;
 function StrToSignature(const s: string): TwbSignature;
 function IntToSignature(aInt: Cardinal): TwbSignature; inline;
 
-function FixupFormID(aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
+function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
 
 threadvar
   _InternalEditCount: Integer;
@@ -5087,7 +5087,7 @@ type
   {$ENDIF WIN64}
 
 function wbReadInteger24(aBasePtr: pointer): Int64;
-procedure InitializeRefIDArray(anArray: TwbRefIDArray);
+procedure InitializeRefIDArray(const anArray: TwbRefIDArray);
 
 function wbFindRecordDef(const aSignature : TwbSignature;
                            out aRecordDef : PwbMainRecordDef)
@@ -5190,7 +5190,6 @@ uses
   Winapi.Windows,
 
   wbHalfFloat,
-  wbImplementation,
   wbLocalization,
   wbSort;
 
@@ -5240,7 +5239,7 @@ begin
     Result := coCopy;
 end;
 
-function RGBTripleToCol(aCol: TRGBTriple ): TColor;
+function RGBTripleToCol(const aCol: TRGBTriple ): TColor;
 begin
   Result := aCol.rgbtRed * 65536;
   Result := Result + aCol.rgbtGreen * 256;
@@ -5255,7 +5254,7 @@ begin
   Result.rgbtBlue := aCol and $000000FF;
 end;
 
-procedure RGBtoHSL(rgb : TRGBTriple; var H, S, L : extended);
+procedure RGBtoHSL(const rgb : TRGBTriple; var H, S, L : extended);
 var
   delta, r, g, b, cmax, cmin: extended;
 begin
@@ -5823,7 +5822,7 @@ begin
       MainRecord2._File.LoadOrder);
 end;
 
-function wbSparseFlags(aFlags: array of const; aUnknowns: Boolean = False; aSize: Cardinal = 32): TDynStrings;
+function wbSparseFlags(const aFlags: array of const; aUnknowns: Boolean = False; aSize: Cardinal = 32): TDynStrings;
 var
   e: IwbEnumDef;
   i: integer;
@@ -5841,7 +5840,7 @@ begin
     end
 end;
 
-function wbFlagsList(aFlags: array of const; aDeleted : Boolean = True; aUnknowns: Boolean = False): TDynStrings;
+function wbFlagsList(const aFlags: array of const; aDeleted : Boolean = True; aUnknowns: Boolean = False): TDynStrings;
 var
   e: IwbEnumDef;
   i: integer;
@@ -6025,7 +6024,7 @@ type
     function GetSignatureCount: Integer; virtual;
 
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean; virtual;
   end;
@@ -6123,15 +6122,15 @@ type
 
     {---IwbRecordDef---}
     function ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Boolean; virtual;
     function GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                aSignature     : TwbSignature;
+                          const aSignature     : TwbSignature;
                           const aDataContainer : IwbDataContainer)
                                                : IwbRecordMemberDef;
     function GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Integer;
     function AllowUnordered: Boolean;
@@ -6260,7 +6259,7 @@ type
     function GetValue: IwbValueDef;
     procedure HasUnusedData;
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean; override;
 
@@ -6358,7 +6357,7 @@ type
     function GetSignatureCount: Integer; override;
 
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean; override;
 
@@ -6426,21 +6425,21 @@ type
     function GetSignatureCount: Integer; override;
 
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean; override;
 
     {---IwbRecordDef---}
     function ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Boolean; virtual;
     function GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                aSignature     : TwbSignature;
+                          const aSignature     : TwbSignature;
                           const aDataContainer : IwbDataContainer)
                                                : IwbRecordMemberDef;
     function GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Integer;
     function AllowUnordered: Boolean;
@@ -6499,21 +6498,21 @@ type
     function GetSignatureCount: Integer; override;
 
     function CanHandle(const aContainer     : IwbContainerElementRef;
-                             aSignature     : TwbSignature;
+                       const aSignature     : TwbSignature;
                        const aDataContainer : IwbDataContainer)
                                             : Boolean; override;
 
     {---IwbRecordDef---}
     function ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Boolean; virtual;
     function GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                aSignature     : TwbSignature;
+                          const aSignature     : TwbSignature;
                           const aDataContainer : IwbDataContainer)
                                                : IwbRecordMemberDef;
     function GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                     aSignature     : TwbSignature;
+                               const aSignature     : TwbSignature;
                                const aDataContainer : IwbDataContainer)
                                                     : Integer;
     function AllowUnordered: Boolean;
@@ -10120,9 +10119,9 @@ begin
   Result := TwbCallbackDef.Create(aToStr, aToInt);
 end;
 
-function wbFormaterUnion(aDecider : TwbIntegerDefFormaterUnionDecider;
-                         aMembers : array of IwbIntegerDefFormater)
-                                  : IwbIntegerDefFormaterUnion;
+function wbFormaterUnion(      aDecider : TwbIntegerDefFormaterUnionDecider;
+                         const aMembers : array of IwbIntegerDefFormater)
+                                        : IwbIntegerDefFormaterUnion;
 begin
   Result := TwbIntegerDefFormaterUnion.Create(aDecider, aMembers);
 end;
@@ -10859,7 +10858,7 @@ begin
 end;
 
 function TwbMainRecordDef.ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                                  aSignature     : TwbSignature;
+                                            const aSignature     : TwbSignature;
                                             const aDataContainer : IwbDataContainer)
                                                                  : Boolean;
 var
@@ -10982,7 +10981,7 @@ begin
 end;
 
 function TwbMainRecordDef.GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                             aSignature     : TwbSignature;
+                                       const aSignature     : TwbSignature;
                                        const aDataContainer : IwbDataContainer)
                                                             : IwbRecordMemberDef;
 var
@@ -10995,7 +10994,7 @@ begin
 end;
 
 function TwbMainRecordDef.GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                                  aSignature     : TwbSignature;
+                                            const aSignature     : TwbSignature;
                                             const aDataContainer : IwbDataContainer)
                                                                  : Integer;
 var
@@ -11534,7 +11533,7 @@ begin
 end;
 
 function TwbSubRecordDef.CanHandle(const aContainer     : IwbContainerElementRef;
-                                         aSignature     : TwbSignature;
+                                   const aSignature     : TwbSignature;
                                    const aDataContainer : IwbDataContainer)
                                                         : Boolean;
 
@@ -12040,7 +12039,7 @@ begin
 end;
 
 function TwbSubRecordArrayDef.CanHandle(const aContainer     : IwbContainerElementRef;
-                                              aSignature     : TwbSignature;
+                                        const aSignature     : TwbSignature;
                                         const aDataContainer : IwbDataContainer)
                                                              : Boolean;
 begin
@@ -12324,7 +12323,7 @@ begin
 end;
 
 function TwbSubRecordStructDef.CanHandle(const aContainer     : IwbContainerElementRef;
-                                               aSignature     : TwbSignature;
+                                         const aSignature     : TwbSignature;
                                          const aDataContainer : IwbDataContainer)
                                                               : Boolean;
 begin
@@ -12350,7 +12349,7 @@ begin
 end;
 
 function TwbSubRecordStructDef.ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                                       aSignature     : TwbSignature;
+                                                 const aSignature     : TwbSignature;
                                                  const aDataContainer : IwbDataContainer)
                                                                       : Boolean;
 var
@@ -12426,7 +12425,7 @@ begin
 end;
 
 function TwbSubRecordStructDef.GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                                  aSignature     : TwbSignature;
+                                            const aSignature     : TwbSignature;
                                             const aDataContainer : IwbDataContainer)
                                                                  : IwbRecordMemberDef;
 var
@@ -12439,7 +12438,7 @@ begin
 end;
 
 function TwbSubRecordStructDef.GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                                       aSignature     : TwbSignature;
+                                                 const aSignature     : TwbSignature;
                                                  const aDataContainer : IwbDataContainer)
                                                                       : Integer;
 var
@@ -12638,7 +12637,7 @@ begin
 end;
 
 function TwbSubRecordUnionDef.CanHandle(const aContainer     : IwbContainerElementRef;
-                                              aSignature     : TwbSignature;
+                                        const aSignature     : TwbSignature;
                                         const aDataContainer : IwbDataContainer)
                                                              : Boolean;
 begin
@@ -12672,7 +12671,7 @@ begin
 end;
 
 function TwbSubRecordUnionDef.ContainsMemberFor(const aContainer     : IwbContainerElementRef;
-                                                      aSignature     : TwbSignature;
+                                                const aSignature     : TwbSignature;
                                                 const aDataContainer : IwbDataContainer)
                                                                      : Boolean;
 begin
@@ -12775,7 +12774,7 @@ begin
 end;
 
 function TwbSubRecordUnionDef.GetMemberFor(const aContainer     : IwbContainerElementRef;
-                                                 aSignature     : TwbSignature;
+                                           const aSignature     : TwbSignature;
                                            const aDataContainer : IwbDataContainer)
                                                                 : IwbRecordMemberDef;
 begin
@@ -12794,7 +12793,7 @@ begin
 end;
 
 function TwbSubRecordUnionDef.GetMemberIndexFor(const aContainer     : IwbContainerElementRef;
-                                                      aSignature     : TwbSignature;
+                                                const aSignature     : TwbSignature;
                                                 const aDataContainer : IwbDataContainer)
                                                                      : Integer;
 begin
@@ -18220,7 +18219,7 @@ begin
   Result := True;
 end;
 
-function FixupFormID(aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
+function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
 var
   FileID : TwbFileID;
   i      : Integer;
@@ -22086,7 +22085,7 @@ end;
 var
   wbRefIDArray : TwbRefIDArray = nil;
 
-procedure InitializeRefIDArray(anArray: TwbRefIDArray);
+procedure InitializeRefIDArray(const anArray: TwbRefIDArray);
 begin
   wbRefIDArray := anArray;
 end;
@@ -22725,7 +22724,7 @@ begin
     ndToStr(Result, aBasePtr, aEndPtr, aElement, ctToStr);
 end;
 
-function wbIsModule(aFileName: string): Boolean;
+function wbIsModule(const aFileName: string): Boolean;
 begin
   Result := SameText(aFileName, wbGameExeName);
   if not Result then
@@ -22734,7 +22733,7 @@ begin
         Exit(True);
 end;
 
-function wbIsSave(aFileName: string): Boolean;
+function wbIsSave(const aFileName: string): Boolean;
 begin
   Result := False;
   for var i := Low(wbSaveExtensions) to High(wbSaveExtensions) do
@@ -22772,7 +22771,7 @@ begin
   Result.ObjectID := Result.ObjectID + B;
 end;
 
-function TwbFormID.ChangeFileID(aFileID: TwbFileID): TwbFormID;
+function TwbFormID.ChangeFileID(const aFileID: TwbFileID): TwbFormID;
 begin
   Result := Self;
   Result.FileID := aFileID;
@@ -23451,7 +23450,7 @@ end;
 { TwbBaseSignatureDef }
 
 function TwbBaseSignatureDef.CanHandle(const aContainer     : IwbContainerElementRef;
-                                             aSignature     : TwbSignature;
+                                       const aSignature     : TwbSignature;
                                        const aDataContainer : IwbDataContainer)
                                                             : Boolean;
 begin
