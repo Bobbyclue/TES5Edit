@@ -88,7 +88,7 @@ type
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
     procedure vtAssetsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vtAssetsHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+    procedure vtAssetsHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
     procedure vtAssetsInitNode(Sender: TBaseVirtualTree; ParentNode,
       Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
     procedure edFilterKeyPress(Sender: TObject; var Key: Char);
@@ -104,7 +104,7 @@ type
     procedure mniAssetReplaceClick(Sender: TObject);
     procedure vtAssetsBeforeCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+      CellPaintMode: TVTCellPaintMode; const CellRect: TRect; var ContentRect: TRect);
     procedure mniAssetUnpackClick(Sender: TObject);
     procedure btnFilterResetClick(Sender: TObject);
     procedure btnExitClick(Sender: TObject);
@@ -708,7 +708,7 @@ end;
 //============================================================================
 procedure TFormMain.vtAssetsBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+  CellPaintMode: TVTCellPaintMode; const CellRect: TRect; var ContentRect: TRect);
 begin
   var Asset := PAssetNode(Sender.GetNodeData(Node)).Asset;
   if Asset.ArchiveName = '' then
@@ -763,7 +763,7 @@ end;
 
 //============================================================================
 procedure TFormMain.vtAssetsHeaderClick(Sender: TVTHeader;
-  HitInfo: TVTHeaderHitInfo);
+  const HitInfo: TVTHeaderHitInfo);
 begin
   with HitInfo do begin
     if Button <> mbLeft then

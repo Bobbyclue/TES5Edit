@@ -124,7 +124,7 @@ begin
   end;
 end;
 
-function FileLocationTableCountCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function FileLocationTableCountCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
   Element : IwbElement;
   Container: IwbDataContainer;
@@ -294,7 +294,7 @@ begin
   Result := CompressedSize;
 end;
 
-function GetRelativeDeciderInteger(anOffset: UInt32; aSize: Integer; aContainerName, anIntegerName: String;
+function GetRelativeDeciderInteger(anOffset: UInt32; aSize: Integer; const aContainerName, anIntegerName: String;
   aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;
@@ -1693,7 +1693,7 @@ begin
     Result := wbBytesToDump div wbBytesToGroup + 1;
 end;
 
-function DataLengthCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -1716,7 +1716,7 @@ begin
   end;
 end;
 
-function DataLengthRemainderCounter(aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthRemainderCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -1823,7 +1823,7 @@ begin
   end;
 end;
 
-function wbCoordXYZ(aName: String): IwbArrayDef;
+function wbCoordXYZ(const aName: String): IwbArrayDef;
 begin
   Result := wbArrayT(aName, wbFloat('Coord'), 3, ['X', 'Y', 'Z'], nil);
 end;

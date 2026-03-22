@@ -106,9 +106,9 @@ type
     procedure SetSettings(aIni: TMemIniFile);
 
     procedure FilterListPresets(aStrings: TStrings);
-    procedure FilterLoadPreset(aPresetName: string = '');
-    function FilterHasPresetChanged(aPresetName: string = ''): Boolean;
-    procedure FilterSavePreset(aPresetName: string = '');
+    procedure FilterLoadPreset(const aPresetName: string = '');
+    function FilterHasPresetChanged(const aPresetName: string = ''): Boolean;
+    procedure FilterSavePreset(const aPresetName: string = '');
 
     property RecordSignatures: string
       read GetRecordSignatures
@@ -285,7 +285,7 @@ begin
   Settings := aIni;
 end;
 
-function TfrmFilterOptions.FilterHasPresetChanged(aPresetName: string): Boolean;
+function TfrmFilterOptions.FilterHasPresetChanged(const aPresetName: string): Boolean;
 var
   i                    : integer;
   Section              : string;
@@ -451,7 +451,7 @@ begin
   FilterLoadPreset(cmbPreset.Text);
 end;
 
-procedure TfrmFilterOptions.FilterLoadPreset(aPresetName: string = '');
+procedure TfrmFilterOptions.FilterLoadPreset(const aPresetName: string = '');
 var
   i                    : integer;
   Section              : string;
@@ -538,7 +538,7 @@ begin
     clbConflictThis.Checked[i] := TConflictThis(i + 2) in FilterConflictThisSet;
 end;
 
-procedure TfrmFilterOptions.FilterSavePreset(aPresetName: string = '');
+procedure TfrmFilterOptions.FilterSavePreset(const aPresetName: string = '');
 var
   i                    : integer;
   Section              : string;

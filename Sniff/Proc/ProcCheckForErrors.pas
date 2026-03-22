@@ -966,7 +966,7 @@ end;
 //==============================================================================
 procedure CheckAnimStopTime(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 
-  procedure CheckKeys(data: TwbNifBlock; keys: TdfElement; aStopTime: string);
+  procedure CheckKeys(data: TwbNifBlock; keys: TdfElement; const aStopTime: string);
   begin
     if not Assigned(keys) or (keys.Count = 0) then
       Exit;

@@ -24,23 +24,23 @@ uses
 
 function wbDistance(const a, b: TwbVector): Single; overload
 function wbDistance(const a, b: IwbMainRecord): Single; overload;
-function wbStringToSignatures(aSignatures: string): TwbSignatures;
+function wbStringToSignatures(const aSignatures: string): TwbSignatures;
 function wbGetSiblingREFRsWithin(const aMainRecord: IwbMainRecord; aDistance: Single): TDynMainRecords;
 function wbGetSiblingRecords(const aElement: IwbElement; aSignatures: TwbSignatures; aOverrides: Boolean): TDynMainRecords;
 function FindMatchText(Strings: TStrings; const Str: string): Integer;
 function IsFileCC(const aFileName: string): Boolean;
 procedure DeleteDirectory(const DirName: string);
-function FullPathToFilename(aString: string): string;
+function FullPathToFilename(const aString: string): string;
 procedure wbFlipBitmap(aBitmap: Vcl.Graphics.TBitmap; MirrorType: Integer); // MirrorType: 1 - horizontal, 2 - vertical, 0 - both
 function wbAlphaBlend(DestDC, X, Y, Width, Height,
   SrcDC, SrcX, SrcY, SrcWidth, SrcHeight, Alpha: integer): Boolean;
-procedure SaveFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
-procedure LoadFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
-function wbDDSDataToBitmap(aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
+procedure SaveFont(aIni: TMemIniFile; const aSection, aName: string; aFont: TFont);
+procedure LoadFont(aIni: TMemIniFile; const aSection, aName: string; aFont: TFont);
+function wbDDSDataToBitmap(const aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 function wbDDSStreamToBitmap(aStream: TStream; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 function wbCRC32App: TwbCRC32;
-function wbIsAssociatedWithExtension(aExt: string): Boolean;
-function wbAssociateWithExtension(aExt, aName, aDescr: string): Boolean;
+function wbIsAssociatedWithExtension(const aExt: string): Boolean;
+function wbAssociateWithExtension(aExt: string; const aName, aDescr: string): Boolean;
 function ExecuteCaptureConsoleOutput(const aCommandLine: string): Cardinal;
 function wbExpandFileName(const aFileName: string): string;
 
@@ -54,15 +54,15 @@ type
 
 procedure wbLeveledListCheckCircular(const aMainRecord: IwbMainRecord; aStack: PnxLeveledListCheckCircularStack);
 
-function wbExtractNameFromPath(aPathName: String): String;
+function wbExtractNameFromPath(const aPathName: String): String;
 
 // BSA helper
 
-function MakeDataFileName(FileName, DataPath: String): String;
-function CheckAddFilesToString(var mIni: TIniFile; var cIni: TIniFile; Section, Ident: String): String;
-function FindBSAs(IniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer; overload;
-function FindBSAs(IniName, CustomIniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer; overload;
-function HasBSAs(ModName, DataPath: String; Exact, modini: Boolean; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
+function MakeDataFileName(const FileName, DataPath: String): String;
+function CheckAddFilesToString(var mIni: TIniFile; var cIni: TIniFile; const Section, Ident: String): String;
+function FindBSAs(const IniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer; overload;
+function FindBSAs(const IniName, CustomIniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer; overload;
+function HasBSAs(ModName : string; const DataPath: String; Exact, modini: Boolean; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
 
 function wbStripDotGhost(const aFileName: string): string;
 
@@ -312,7 +312,7 @@ begin
   Result := wbDistance(PosA, PosB);
 end;
 
-function wbStringToSignatures(aSignatures: string): TwbSignatures;
+function wbStringToSignatures(const aSignatures: string): TwbSignatures;
 var
   i: integer;
   s: AnsiString;
@@ -498,7 +498,7 @@ begin
   SHFileOperation(FileOp);
 end;
 
-function FullPathToFilename(aString: string): string;
+function FullPathToFilename(const aString: string): string;
 var
   i: Integer;
   s: string;
@@ -579,7 +579,7 @@ begin
   Result := AlphaBlend(DestDC, X, Y, Width, Height, SrcDC, SrcX, SrcY, SrcWidth, SrcHeight, BlendFunc);
 end;
 
-procedure SaveFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
+procedure SaveFont(aIni: TMemIniFile; const aSection, aName: string; aFont: TFont);
 begin
   aIni.WriteString(aSection, aName + 'Name', aFont.Name);
   aIni.WriteInteger(aSection, aName + 'CharSet', aFont.CharSet);
@@ -588,7 +588,7 @@ begin
   aIni.WriteInteger(aSection, aName + 'Style', Byte(aFont.Style));
 end;
 
-procedure LoadFont(aIni: TMemIniFile; aSection, aName: string; aFont: TFont);
+procedure LoadFont(aIni: TMemIniFile; const aSection, aName: string; aFont: TFont);
 begin
   aFont.Name    := aIni.ReadString(aSection, aName + 'Name', aFont.Name);
   aFont.CharSet := TFontCharSet(aIni.ReadInteger(aSection, aName + 'CharSet', aFont.CharSet));
@@ -629,7 +629,7 @@ begin
   end;
 end;
 
-function wbExtractNameFromPath(aPathName: String): String;
+function wbExtractNameFromPath(const aPathName: String): String;
 begin
   Result := aPathName;
   while Pos('\', Result) > 0 do
@@ -638,7 +638,7 @@ end;
 
 // BSA helper
 
-function MakeDataFileName(FileName, DataPath: String): String;
+function MakeDataFileName(const FileName, DataPath: String): String;
 begin
   // MO uses 3 chars aliases
   if Length(FileName) < 3 then
@@ -649,7 +649,7 @@ begin
     Result := FileName;
 end;
 
-function CheckAddFilesToString(var mIni: TIniFile; var cIni: TIniFile; Section, Ident: String): String;
+function CheckAddFilesToString(var mIni: TIniFile; var cIni: TIniFile; const Section, Ident: String): String;
 begin
   Result := '';
   if cIni.ValueExists(Section, Ident) then
@@ -658,7 +658,7 @@ begin
     Result := StringReplace(mIni.ReadString(Section, Ident, ''), ',' ,#10, [rfReplaceAll]);
 end;
 
-function FindBSAs(IniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
+function FindBSAs(const IniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
 var
   i: Integer;
   j: Integer;
@@ -720,7 +720,7 @@ begin
     end;
 end;
 
-function FindBSAs(IniName, CustomIniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
+function FindBSAs(const IniName, CustomIniName, DataPath: String; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
 var
   i: Integer;
   j: Integer;
@@ -794,7 +794,7 @@ begin
     end;
 end;
 
-function HasBSAs(ModName, DataPath: String; Exact, modini: Boolean; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
+function HasBSAs(ModName: string; const DataPath: String; Exact, modini: Boolean; var bsaNames: TStringList; var bsaMissing: TStringList): Integer;
 var
   j: Integer;
   t: String;
@@ -833,7 +833,7 @@ begin
   end;
 end;
 
-function wbDDSDataToBitmap(aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
+function wbDDSDataToBitmap(const aData: TBytes; Bitmap: Vcl.Graphics.TBitmap): Boolean;
 var
   img: TImageData;
   ms: TMemoryStream;
@@ -875,7 +875,7 @@ begin
   end;
 end;
 
-function wbIsAssociatedWithExtension(aExt: string): Boolean;
+function wbIsAssociatedWithExtension(const aExt: string): Boolean;
 var
   Name: string;
 begin
@@ -893,7 +893,7 @@ begin
   end;
 end;
 
-function wbAssociateWithExtension(aExt, aName, aDescr: string): Boolean;
+function wbAssociateWithExtension(aExt: string; const aName, aDescr: string): Boolean;
 begin
   Result := False;
 

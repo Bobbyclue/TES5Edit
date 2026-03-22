@@ -60,7 +60,7 @@ type
   public
     Settings: TMemIniFile;
     { Public declarations }
-    procedure EditValue(aFileName: string; ID: integer);
+    procedure EditValue(const aFileName: string; ID: integer);
   end;
 
 var
@@ -220,7 +220,7 @@ begin
   vetStrings.Invalidate;
 end;
 
-procedure TfrmLocalization.EditValue(aFileName: string; ID: integer);
+procedure TfrmLocalization.EditValue(const aFileName: string; ID: integer);
 var
   Data: PTreeData;
   Node: PVirtualNode;

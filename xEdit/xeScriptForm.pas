@@ -88,8 +88,8 @@ type
     ScriptSelectionChangedOnDropDown : Boolean;
     SelectionOnEnter: string;
     SaveOverride: string;
-    function Indent(aText: string; aPrefix: string): string;
-    function Dedent(aText: string; aPrefix: string): string;
+    function Indent(const aText, aPrefix: string): string;
+    function Dedent(const aText, aPrefix: string): string;
     procedure DoScriptSelectionChange;
   public
     { Public declarations }
@@ -290,7 +290,7 @@ begin
   UpdateCaretPos;
 end;
 
-function TfrmScript.Indent(aText: string; aPrefix: string): String;
+function TfrmScript.Indent(const aText, aPrefix: string): String;
 begin
   var lines := TStringList.Create;
   try
@@ -306,7 +306,7 @@ begin
   end;
 end;
 
-function TfrmScript.Dedent(aText: string; aPrefix: string): String;
+function TfrmScript.Dedent(const aText, aPrefix: string): String;
 begin
   var lines := TStringList.Create;
   try

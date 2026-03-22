@@ -71,7 +71,7 @@ type
     procedure vstFormsFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure vstFormsCompareNodes(Sender: TBaseVirtualTree; Node1,
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
-    procedure vstFormsHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+    procedure vstFormsHeaderClick(Sender: TVTHeader; const HitInfo: TVTHeaderHitInfo);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -79,8 +79,8 @@ type
     LogPlugins: array of TLogEntry;
     ProcessLog: function (const aFileName: String): Boolean of object;
 //    function FormIDFromString(s: String): String;
-    function BracketedFormIDFromString(s: String; Brackets: string = '()'): String;
-    function RecordByLoadOrderFormID(FormID: TwbFormID): IwbMainRecord;
+    function BracketedFormIDFromString(const s: String; const Brackets: string = '()'): String;
+    function RecordByLoadOrderFormID(const FormID: TwbFormID): IwbMainRecord;
     procedure BuildPluginsList;
     function ParsePapyrusData(const aData: String): Boolean;
     function ReadPapyrusLog(const aFileName: String): Boolean;
@@ -210,7 +210,7 @@ end;
 
 { TfrmLogAnalyzer }
 
-function TfrmLogAnalyzer.RecordByLoadOrderFormID(FormID: TwbFormID): IwbMainRecord;
+function TfrmLogAnalyzer.RecordByLoadOrderFormID(const FormID: TwbFormID): IwbMainRecord;
 var
   _File  : IwbFile;
   FileID : TwbFileID;
@@ -346,7 +346,7 @@ begin
 end;
 
 procedure TfrmLogAnalyzer.vstFormsHeaderClick(Sender: TVTHeader;
-  HitInfo: TVTHeaderHitInfo);
+  const HitInfo: TVTHeaderHitInfo);
 begin
   with HitInfo do begin
     if Button <> mbLeft then
@@ -404,7 +404,7 @@ begin
   Result := c in ['0'..'9', 'A'..'F'];
 end;
 
-function IsHexStr(s: string): boolean;
+function IsHexStr(const s: string): boolean;
 var
   i: integer;
 begin
@@ -433,7 +433,7 @@ end;
 //  end;
 //end;
 
-function TfrmLogAnalyzer.BracketedFormIDFromString(s: String; Brackets: string = '()'): String;
+function TfrmLogAnalyzer.BracketedFormIDFromString(const s: String; const Brackets: string = '()'): String;
 var
   i: integer;
   f: string;

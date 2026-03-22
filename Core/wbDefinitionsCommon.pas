@@ -153,11 +153,11 @@ function wbTryGetContainerFromUnion(const aElement: IwbElement; out aContainer: 
 function wbTryGetContainerRefFromUnionOrValue(const aElement: IwbElement; out aContainer: IwbContainerElementRef): Boolean;
 function wbTryGetContainerWithValidMainRecord(const aElement: IwbElement; out aContainer: IwbContainerElementRef; out aMainRecord: IwbMainRecord): Boolean;
 function wbTryGetContainingMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord): Boolean;
-function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; aSignature: string = ''): Boolean;
+function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; const aSignature: string = ''): Boolean;
 function wbTrySetContainer(const aElement: IwbElement; aType: TwbCallbackType; out aContainer: IwbContainerElementRef): Boolean;
 
 {>>> To Integer Callbacks <<<} //18
-function Sig2Int(aSignature: TwbSignature): Cardinal; inline;
+function Sig2Int(const aSignature: TwbSignature): Cardinal; inline;
 function wbAliasToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbConditionStringToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbConditionTypeToInt(const aString: string; const aElement: IwbElement): Int64;
@@ -499,18 +499,18 @@ function wbFloatRGBA(const aName     : string = 'Color';
                                      : IwbValueDef; overload;
 
 {>>> Many Record Defs <<<} //2
-function wbModelInfo(aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
+function wbModelInfo(const aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
 function wbOBND(aRequired: Boolean = False): IwbRecordMemberDef;
 
 {>>> Multiple Record Defs <<<} //4
 function wbDamageTypeArray(const aItemName: string): IwbRecordMemberDef;
 function wbEnchantment(aCapacity: Boolean = False): IwbRecordMemberDef;
-function wbLeveledListEntry(aObjectName: string; aSigs: TwbSignatures): IwbRecordMemberDef;
-function wbOwnership(aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
-function wbTexturedModel(aSubRecordName     : string;
-                         aSignatures        : TwbSignatures;
-                         aTextureSubRecords : array of IwbRecordMemberDef)
-                                            : IwbRecordMemberDef;
+function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
+function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
+function wbTexturedModel(const aSubRecordName     : string;
+                         const aSignatures        : TwbSignatures;
+                         const aTextureSubRecords : array of IwbRecordMemberDef)
+                                                  : IwbRecordMemberDef;
 
 {>>> Record Header Def <<<} //1
 function wbRecordHeader(aRecordFlags: IwbIntegerDef): IwbValueDef;
@@ -519,7 +519,7 @@ function wbRecordHeader(aRecordFlags: IwbIntegerDef): IwbValueDef;
 function wbClimateTiming(aTimeCallback: TwbIntToStrCallback; aPhaseCallback: TwbIntToStrCallback): IwbRecordMemberDef;
 
 {>>> Creature Function Defs <<<} //1
-function wbModelInfos(aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
+function wbModelInfos(const aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
 
 {>>> Debris Function Defs <<<} //1
 function wbDebrisModel(aTextureFileHashes: IwbRecordMemberDef): IwbRecordMemberDef;
@@ -2536,7 +2536,7 @@ begin
   Result := True;
 end;
 
-function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; aSignature: string = ''): Boolean;
+function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; const aSignature: string = ''): Boolean;
 begin
   Result := False;
 
@@ -2560,7 +2560,7 @@ end;
 
 {>>> To Integer Callbacks <<<} //18
 
-function Sig2Int(aSignature: TwbSignature): Cardinal; inline;
+function Sig2Int(const aSignature: TwbSignature): Cardinal; inline;
 begin
   Result := PCardinal(@aSignature)^;
 end;
@@ -5797,7 +5797,7 @@ end;
 
 {>>> Many Record Defs <<<} //2
 
-function wbModelInfo(aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
+function wbModelInfo(const aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
 begin
   if wbGameMode < gmTES5 then begin
     if aName = '' then
@@ -5973,7 +5973,7 @@ begin
         .IncludeFlag(dfStructFirstNotRequired);
 end;
 
-function wbLeveledListEntry(aObjectName: string; aSigs: TwbSignatures): IwbRecordMemberDef;
+function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
 begin
   Result :=
     wbStructExSK(LVLO, [0, 2], [3], IsTES4('Leveled List Entry', 'Base Data'), [
@@ -5997,7 +5997,7 @@ begin
     .IncludeFlag(dfCollapsed, wbCollapseLeveledItems);
 end;
 
-function wbOwnership(aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
+function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
 begin
   Result :=
     wbRStruct('Ownership', [
@@ -6022,10 +6022,10 @@ begin
       .IncludeFlag(dfSummaryNoSortKey);
 end;
 
-function wbTexturedModel(aSubRecordName     : string;
-                         aSignatures        : TwbSignatures;
-                         aTextureSubRecords : array of IwbRecordMemberDef)
-                                            : IwbRecordMemberDef;
+function wbTexturedModel(const aSubRecordName     : string;
+                         const aSignatures        : TwbSignatures;
+                         const aTextureSubRecords : array of IwbRecordMemberDef)
+                                                  : IwbRecordMemberDef;
 var
   Members : array of IwbRecordMemberDef;
 begin
@@ -6108,7 +6108,7 @@ end;
 
 {>>> Creature Defs <<<} //1
 
-function wbModelInfos(aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
+function wbModelInfos(const aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
 begin
   if wbGameMode >= gmTES5 then
     raise Exception.Create('Not Supported');

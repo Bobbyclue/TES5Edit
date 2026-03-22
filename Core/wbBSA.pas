@@ -62,8 +62,8 @@ type
     function OpenResource(const aFileName: string): TDynResources;
     function OpenResourceData(const aContainerName, aFileName: string): TBytes;
 
-    function ContainerExists(aContainerName: string): Boolean; overload;
-    function ContainerExists(aContainerName: string; out aContainer: IwbResourceContainer): Boolean; overload;
+    function ContainerExists(const aContainerName: string): Boolean; overload;
+    function ContainerExists(const aContainerName: string; out aContainer: IwbResourceContainer): Boolean; overload;
     procedure ContainerList(const aList: TStrings);
     procedure ContainerResourceList(const aContainerName: string; const aList: TStrings; const aFolder: string = '');
     procedure ContainerResourceDict(const aContainerName: string; const aDict: TwbResourceDict; const aFolder: string = '');
@@ -172,7 +172,7 @@ begin
   chContainers[High(chContainers)] := aContainer;
 end;
 
-function TwbContainerHandler.ContainerExists(aContainerName: string): Boolean;
+function TwbContainerHandler.ContainerExists(const aContainerName: string): Boolean;
 var
   i: Integer;
 begin
@@ -183,7 +183,7 @@ begin
   Result := False;
 end;
 
-function TwbContainerHandler.ContainerExists(aContainerName: string; out aContainer: IwbResourceContainer): Boolean;
+function TwbContainerHandler.ContainerExists(const aContainerName: string; out aContainer: IwbResourceContainer): Boolean;
 var
   i: Integer;
 begin

@@ -590,7 +590,7 @@ const
   FILE_SIZE_COMPRESS = $40000000; // Whether the file is compressed
 
 
-function Magic2Int(aMagic: TMagic4): Cardinal; inline;
+function Magic2Int(const aMagic: TMagic4): Cardinal; inline;
 begin
   Result := PCardinal(@aMagic)^;
 end;
