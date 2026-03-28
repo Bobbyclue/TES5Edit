@@ -33,10 +33,6 @@ type
     procedure lvChecksSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure mniCheckAllClick(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
   TCheckProcedure = procedure(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
@@ -131,7 +127,7 @@ procedure CheckBlocksOrder(aFile: TProcFileObject; aObj: Pointer; Log: TStrings)
       // bhkAction references rigid body and must be loaded after it
       if child.IsNiObject('bhkAction') then begin
         if child.Index < aParent.Index then
-          Log.Add(#9 + child.Name + ': Must have greater index than its parent ' + aParent.Name)
+          Log.Add(#9 + child.Name + ': Must have greater index than its parent ' + aParent.Name);
       end else
 
       // ref objects are the opposite - must be loaded before each other
@@ -302,7 +298,7 @@ end;
 //==============================================================================
 procedure CheckHardcodedBlockNames(aFile: TProcFileObject; aObj: Pointer; Log: TStrings);
 type
-  TBlockName = record BlockType, Name: string end;
+  TBlockName = record BlockType, Name: string; end;
 const
   cNames: array [0..14] of TBlockName = (
     (BlockType: 'BSBehaviorGraphExtraData';         Name: 'BGED'),
@@ -500,8 +496,8 @@ begin
 
     for var col in nif.BlocksByType('bhkCollisionObject', True) do begin
       var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
-      if Assigned(rigid) and (rigid.NativeValues['Havok Filter\Layer'] = 2) and (cols.IndexOfObject(col) = -1) then
-        Log.Add(#9 + col.Name + ': Animstatic layer is used on non animated collision');
+      if Assigned(rigid) and (Integer(rigid.NativeValues['Havok Filter\Layer']) in [2, 28]) and (cols.IndexOfObject(col) = -1) then
+        Log.Add(#9 + col.Name + ': Animated layer is used on non animated collision');
     end;
 
     for var i := 0 to Pred(cols.Count) do begin
@@ -510,11 +506,13 @@ begin
       var rigid := TwbNifBlock(col.Elements['Body'].LinksTo);
       if not Assigned(rigid) then Continue;
 
-      if not (Integer(rigid.NativeValues['Havok Filter\Layer']) in [2, 4, 5, 6, {10,} 14, 15, 16]) then
-        Log.Add(#9 + rigid.Name + ': Animated collision must use Animstatic layer');
+      if not (Integer(rigid.NativeValues['Havok Filter\Layer']) in [2, 4, 5, 6, {10,} 14, 15, 16, 28]) then
+        Log.Add(#9 + rigid.Name + ': Animated collision must use Animated layer');
 
-      if (rigid.NativeValues['Havok Filter\Layer'] = 2) and not col.NativeValues['Flags\SET_LOCAL'] then
-        Log.Add(#9 + col.Name + ': Animstatic layer collision is missing SET_LOCAL flag');
+      // SET_LOCAL is set at runtime in previous games
+      if nif.NifVersion in [nfTES5, nfSSE] then
+        if (Integer(rigid.NativeValues['Havok Filter\Layer']) in [2, 28]) and not col.NativeValues['Flags\SET_LOCAL'] then
+          Log.Add(#9 + col.Name + ': Animated layer collision is missing SET_LOCAL flag');
 
       if nif.NifVersion in [nfTES4, nfFO3] then
         if not col.NativeValues['Flags\USE_VEL'] and (rigid.EditValues['Motion System'] = 'MO_SYS_KEYFRAMED') then
@@ -2364,7 +2362,7 @@ begin
       obj := nif;
     end;
 
-    if obj <> nil then
+    if Assigned(Obj) then
       for var i: Integer := Low(Checks) to High(Checks) do
         if Checks[i].Active and Checks[i].DoesExtension(ext) then
           Checks[i].Proc(aFile, obj, Log);
@@ -2376,7 +2374,7 @@ begin
     end;
 
   finally
-    if Assigned(nif) then nif.Free;
+    nif.Free;
     Log.Free;
   end;
 

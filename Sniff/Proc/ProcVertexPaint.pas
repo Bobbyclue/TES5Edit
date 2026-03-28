@@ -11,8 +11,8 @@ unit ProcVertexPaint;
 interface
 
 uses
-  System.Classes,
   System.SysUtils,
+  System.Classes,
 
   Vcl.Controls,
   Vcl.ExtCtrls,
@@ -49,10 +49,6 @@ type
     procedure btnColorSelectClick(Sender: TObject);
     procedure rbSetColorsClick(Sender: TObject);
     procedure lblHelperClick(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
   TProcVertexPaint = class(TProcBase)
@@ -205,6 +201,8 @@ begin
 end;
 
 procedure TProcVertexPaint.OnStart;
+var
+  fAdjustDefault: Double;
 begin
   if Frame.rbSetColors.Checked then fMode := 0 else
   if Frame.rbAdjustColors.Checked then fMode := 1 else
@@ -215,6 +213,11 @@ begin
   fAllWhite := Frame.chkAllWhite.Checked;
   fAddIfMissing := Frame.chkAddIfMissing.Checked;
   fAdjustMod := Frame.cbAdjustMod.ItemIndex;
+
+  if fAdjustMod = 0 then
+    fAdjustDefault := 1
+  else
+    fAdjustDefault := 0;
 
   if fSkip then try
     fSkipColor := StrToInt('$' + Frame.edSkipColor.Text);
@@ -235,26 +238,41 @@ begin
   end;
 
   if fMode = 1 then begin
+    if (Frame.edAdjustH.Text = '') and (Frame.edAdjustS.Text = '') and (Frame.edAdjustL.Text = '') and (Frame.edAdjustA.Text = '') then
+      raise Exception.Create('Empty adjust values');
+
     try
-      fAdjustH := StrToFloat(Frame.edAdjustH.Text);
+      if Frame.edAdjustH.Text <> '' then
+        fAdjustH := StrToFloat(Frame.edAdjustH.Text)
+      else
+        fAdjustH := fAdjustDefault;
     except
       raise Exception.Create('Adjust H is not a float value');
     end;
 
     try
-      fAdjustS := StrToFloat(Frame.edAdjustS.Text);
+      if Frame.edAdjustS.Text <> '' then
+        fAdjustS := StrToFloat(Frame.edAdjustS.Text)
+      else
+        fAdjustS := fAdjustDefault;
     except
       raise Exception.Create('Adjust S is not a float value');
     end;
 
     try
-      fAdjustL := StrToFloat(Frame.edAdjustL.Text);
+      if Frame.edAdjustL.Text <> '' then
+        fAdjustL := StrToFloat(Frame.edAdjustL.Text)
+      else
+        fAdjustL := fAdjustDefault;
     except
       raise Exception.Create('Adjust L is not a float value');
     end;
 
     try
-      fAdjustA := StrToFloat(Frame.edAdjustA.Text);
+      if Frame.edAdjustA.Text <> '' then
+        fAdjustA := StrToFloat(Frame.edAdjustA.Text)
+      else
+        fAdjustA := fAdjustDefault;
     except
       raise Exception.Create('Adjust A is not a float value');
     end;
