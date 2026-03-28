@@ -60,7 +60,6 @@ var
 type
   TwbWwiseGUIDsDicationary = TDictionary<TGUID, TJSONObject>;
 
-type
   TConditionParameterType = (
     //Misc
     {1} ptNone,
@@ -849,7 +848,7 @@ begin
       else if not ((Container.ElementByName['Run On'].NativeValue = 5) and (Desc.Name = 'GetIsCurrentPackage')) then
       // except for this func when Run On = Quest Alias, then alias is param3 and package is param1
       // [INFO:00020D3C]
-        ParamType := ptAlias    {>>> 'use aliases' is set <<<}
+        ParamType := ptAlias;    {>>> 'use aliases' is set <<<}
       end
       else if ParamFlag and $08 > 0 then
         ParamType := ptPackdata;  {>>> 'use packdata' is set <<<}
@@ -959,7 +958,7 @@ begin
         if Supports(MainRecord.Container, IwbGroupRecord, GroupRecord) then
           if Supports(GroupRecord.ChildrenOf, IwbMainRecord, MainRecord) then
             if MainRecord.Signature = QUST then
-              Result := MainRecord.FixedFormID.ToCardinal
+              Result := MainRecord.FixedFormID.ToCardinal;
     end else if MainRecord.Signature = PACK then begin
       Element := MainRecord.ElementBySignature[QNAM];
       if Assigned(Element) then
@@ -976,7 +975,7 @@ begin
               if Supports(MainRecord.Container, IwbGroupRecord, GroupRecord) then
                 if Supports(GroupRecord.ChildrenOf, IwbMainRecord, MainRecord) then
                   if MainRecord.Signature = QUST then
-                    Result := MainRecord.FixedFormID.ToCardinal
+                    Result := MainRecord.FixedFormID.ToCardinal;
           end;
     end;
   end;
@@ -1032,7 +1031,7 @@ function wbQuestStageToStr(aStageIndex : Int64;
                      const aQuest      : IwbMainRecord;
                            aAllowNone  : Boolean)
                                        : string;
-begin;
+begin
   case aType of
     ctToStr, ctToSummary: begin
       Result := aStageIndex.ToString;
@@ -1217,7 +1216,7 @@ begin
         LegendaryIndex := i;
         Break;
       end;
-    end
+    end;
   end;
 
   if LegendaryIndex = -1 then
@@ -1307,7 +1306,7 @@ begin
         Result := '<Warning: Could not resolve Star [' + aInt.ToString + ']>';
 
       Exit;
-    End;
+    end;
     ctEditType: Result := '';
     ctEditInfo: Result := '';
   end;
@@ -1315,12 +1314,8 @@ begin
   if (aInt = -1) and (aType <> ctEditType) and (aType <> ctEditInfo) then
     Exit;
 
-  case aType of
-    ctEditType: begin
-      Result := '';
-      Exit;
-    end;
-  end;
+  if (aType = ctEditType) then
+    Exit('');
 
   lStarID := aElement.NativeValue;
 
@@ -1769,9 +1764,8 @@ begin
   if VarIsEmpty(ArchType) then
     Exit;
 
-  case Integer(ArchType) of
-    5: Result := 1;  // dual value modifier
-  end;
+  if ArchType = 5 then
+    Exit(1);
 end;
 
 procedure wbMGEFAssocItemAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
@@ -1969,9 +1963,9 @@ begin
   end;
 
   try
-    value := StrToFloat(aString)
+    value := StrToFloat(aString);
   except
-    value := 0.0
+    value := 0.0;
   end;
 
   Result := PInteger(@value)^;
@@ -2445,7 +2439,7 @@ begin
     s := aString;
 
   try
-    Result := StrToInt64('$' + s)
+    Result := StrToInt64('$' + s);
   except
     Result := 0;
   end;
@@ -2676,7 +2670,6 @@ begin
 
   var wbNull := wbUnused(-255);
   var wbLLCT := wbInteger(LLCT, 'Count', itU8, nil, cpBenign);
-  var wbCITC := wbInteger(CITC, 'Condition Count', itU32, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit);
   var wbCITCReq := wbInteger(CITC, 'Condition Count', itU32, nil, cpBenign, True).IncludeFlag(dfSkipImplicitEdit);
   var wbLVLDReq := wbFloat(LVLD, 'Chance None', cpNormal, True);
 
@@ -2697,7 +2690,6 @@ begin
 
   var wbCDIX := wbArray(CDIX, 'Component Display Indices', wbInteger('Display Index', itU8));
 
-  //wbActorValue := wbInteger('Actor Value', itS32, wbActorValueEnum);
   var wbActorValue := function(aName: string = 'Actor Value'): IwbIntegerDef
   begin
     Result := wbFormIDCkNoReach(aName, [AVIF, NULL]);
@@ -2792,7 +2784,7 @@ begin
            ])),
       {13} wbInteger('Is Diffuse', itU8, wbBoolEnum),
       {14} wbUnused(2) // padding
-    ], cpNormal, aRequired)
+    ], cpNormal, aRequired);
   end;
 
 
@@ -2826,7 +2818,6 @@ begin
   end;
 
   var wbFLGDReq := wbLightGoboData(FLGD, True);
-  var wbXLGD := wbLightGoboData(XLGD);
   var wbFLADReq := wbLightAreaLightData(FLAD, True);
   var wbXALD := wbLightAreaLightData(XALD);
   var wbFLRDReq := wbLightRoundnessData(FLRD, True);
@@ -3286,17 +3277,6 @@ begin
     {0x00004000} 'Torch'
   ], True);
 
-  var wbEmotionTypeEnum := wbEnum([
-    {0} 'Neutral',
-    {1} 'Anger',
-    {2} 'Disgust',
-    {3} 'Fear',
-    {4} 'Sad',
-    {5} 'Happy',
-    {6} 'Surprise',
-    {7} 'Puzzled'
-  ]);
-
   var wbFurnitureAnimTypeEnum := wbEnum([
     {0} '',
     {1} 'Sit',
@@ -3376,19 +3356,6 @@ begin
     $3156, 'Value1',        //V1
     $3256, 'Value2',        //V2
     $7FFFFFFF, 'All'
-  ]);
-
-  var wbWeaponAnimTypeEnum := wbEnum([
-    {0} 'HandToHandMelee',
-    {1} 'OneHandSword',
-    {2} 'OneHandDagger',
-    {3} 'OneHandAxe',
-    {4} 'OneHandMace',
-    {5} 'TwoHandSword',
-    {6} 'TwoHandAxe',
-    {7} 'Bow',
-    {8} 'Staff',
-    {9} 'Crossbow'
   ]);
 
   var wbReverbClassEnum := wbEnum([
@@ -4261,9 +4228,7 @@ begin
 
   var wbMODS := wbFloat(MODS, 'Color Remapping Index');
   var wbMO2S := wbFloat(MO2S, 'Color Remapping Index');
-  var wbMO3S := wbFloat(MO3S, 'Color Remapping Index');
   var wbMO4S := wbFloat(MO4S, 'Color Remapping Index');
-  var wbMO5S := wbFloat(MO5S, 'Color Remapping Index');
 
   var wbModelFlags := wbFlags([
     'Has FaceBones Model',
@@ -4275,8 +4240,6 @@ begin
   var wbMO3F := wbInteger(MO3F, 'Flags', itU8, wbModelFlags).IncludeFlag(dfCollapsed, wbCollapseFlags);
   var wbMO4F := wbInteger(MO4F, 'Flags', itU8, wbModelFlags).IncludeFlag(dfCollapsed, wbCollapseFlags);
   var wbMO5F := wbInteger(MO5F, 'Flags', itU8, wbModelFlags).IncludeFlag(dfCollapsed, wbCollapseFlags);
-  var wbMO6F := wbInteger(MO6F, 'Flags', itU8, wbModelFlags).IncludeFlag(dfCollapsed, wbCollapseFlags);
-  var wbMO7F := wbInteger(MO7F, 'Flags', itU8, wbModelFlags).IncludeFlag(dfCollapsed, wbCollapseFlags);
 
   var wbMODC := wbFloat(MODC, 'Color Remapping Index');
   var wbMO2C := wbFloat(MO2C, 'Color Remapping Index');
@@ -4606,201 +4569,6 @@ begin
     wbMarker(HNAM).SetRequired
   ]).IncludeFlag(dfTemplate);
 
-  var wbVatsValueFunctionEnum :=
-    wbEnum([
-      { 0} 'Weapon Is',
-      { 1} 'Weapon In List',
-      { 2} 'Target Is',
-      { 3} 'Target In List',
-      { 4} 'Target Distance',
-      { 5} 'Target Part',
-      { 6} 'VATS Action',
-      { 7} 'Is Success',
-      { 8} 'Is Critical',
-      { 9} 'Critical Effect Is',
-      {10} 'Critical Effect In List',
-      {11} 'Is Fatal',
-      {12} 'Explode Part',
-      {13} 'Dismember Part',
-      {14} 'Cripple Part',
-      {15} 'Weapon Type Is',
-      {16} 'Is Stranger',
-      {17} 'Is Paralyzing Palm',
-      {18} 'Projectile Type Is',
-      {19} 'Delivery Type Is',
-      {20} 'Casting Type Is'
-    ]);
-
-  var wbActorValueEnum :=
-    wbEnum([
-    {00} 'Aggression',
-    {01} 'Confidence',
-    {02} 'Energy',
-    {03} 'Morality',
-    {04} 'Mood',
-    {05} 'Assistance',
-    {06} 'One-Handed',
-    {07} 'Two-Handed',
-    {08} 'Archery',
-    {09} 'Block',
-    {10} 'Smithing',
-    {11} 'Heavy Armor',
-    {12} 'Light Armor',
-    {13} 'Pickpocket',
-    {14} 'Lockpicking',
-    {15} 'Sneak',
-    {16} 'Alchemy',
-    {17} 'Speech',
-    {18} 'Alteration',
-    {19} 'Conjuration',
-    {20} 'Destruction',
-    {21} 'Illusion',
-    {22} 'Restoration',
-    {23} 'Enchanting',
-    {24} 'Health',
-    {25} 'Magicka',
-    {26} 'Stamina',
-    {27} 'Heal Rate',
-    {28} 'Magicka Rate',
-    {29} 'Stamina Rate',
-    {30} 'Speed Mult',
-    {31} 'Inventory Weight',
-    {32} 'Carry Weight',
-    {33} 'Critical Chance',
-    {34} 'Melee Damage',
-    {35} 'Unarmed Damage',
-    {36} 'Mass',
-    {37} 'Voice Points',
-    {38} 'Voice Rate',
-    {39} 'Damage Resist',
-    {40} 'Poison Resist',
-    {41} 'Resist Fire',
-    {42} 'Resist Shock',
-    {43} 'Resist Frost',
-    {44} 'Resist Magic',
-    {45} 'Resist Disease',
-    {46} 'Unknown 46',
-    {47} 'Unknown 47',
-    {48} 'Unknown 48',
-    {49} 'Unknown 49',
-    {50} 'Unknown 50',
-    {51} 'Unknown 51',
-    {52} 'Unknown 52',
-    {53} 'Paralysis',
-    {54} 'Invisibility',
-    {55} 'Night Eye',
-    {56} 'Detect Life Range',
-    {57} 'Water Breathing',
-    {58} 'Water Walking',
-    {59} 'Unknown 59',
-    {60} 'Fame',
-    {61} 'Infamy',
-    {62} 'Jumping Bonus',
-    {63} 'Ward Power',
-    {64} 'Right Item Charge',
-    {65} 'Armor Perks',
-    {66} 'Shield Perks',
-    {67} 'Ward Deflection',
-    {68} 'Variable01',
-    {69} 'Variable02',
-    {70} 'Variable03',
-    {71} 'Variable04',
-    {72} 'Variable05',
-    {73} 'Variable06',
-    {74} 'Variable07',
-    {75} 'Variable08',
-    {76} 'Variable09',
-    {77} 'Variable10',
-    {78} 'Bow Speed Bonus',
-    {79} 'Favor Active',
-    {80} 'Favors Per Day',
-    {81} 'Favors Per Day Timer',
-    {82} 'Left Item Charge',
-    {83} 'Absorb Chance',
-    {84} 'Blindness',
-    {85} 'Weapon Speed Mult',
-    {86} 'Shout Recovery Mult',
-    {87} 'Bow Stagger Bonus',
-    {88} 'Telekinesis',
-    {89} 'Favor Points Bonus',
-    {90} 'Last Bribed Intimidated',
-    {91} 'Last Flattered',
-    {92} 'Movement Noise Mult',
-    {93} 'Bypass Vendor Stolen Check',
-    {94} 'Bypass Vendor Keyword Check',
-    {95} 'Waiting For Player',
-    {96} 'One-Handed Modifier',
-    {97} 'Two-Handed Modifier',
-    {98} 'Marksman Modifier',
-    {99} 'Block Modifier',
-   {100} 'Smithing Modifier',
-   {101} 'Heavy Armor Modifier',
-   {102} 'Light Armor Modifier',
-   {103} 'Pickpocket Modifier',
-   {104} 'Lockpicking Modifier',
-   {105} 'Sneaking Modifier',
-   {106} 'Alchemy Modifier',
-   {107} 'Speechcraft Modifier',
-   {108} 'Alteration Modifier',
-   {109} 'Conjuration Modifier',
-   {110} 'Destruction Modifier',
-   {111} 'Illusion Modifier',
-   {112} 'Restoration Modifier',
-   {113} 'Enchanting Modifier',
-   {114} 'One-Handed Skill Advance',
-   {115} 'Two-Handed Skill Advance',
-   {116} 'Marksman Skill Advance',
-   {117} 'Block Skill Advance',
-   {118} 'Smithing Skill Advance',
-   {119} 'Heavy Armor Skill Advance',
-   {120} 'Light Armor Skill Advance',
-   {121} 'Pickpocket Skill Advance',
-   {122} 'Lockpicking Skill Advance',
-   {123} 'Sneaking Skill Advance',
-   {124} 'Alchemy Skill Advance',
-   {125} 'Speechcraft Skill Advance',
-   {126} 'Alteration Skill Advance',
-   {127} 'Conjuration Skill Advance',
-   {128} 'Destruction Skill Advance',
-   {129} 'Illusion Skill Advance',
-   {130} 'Restoration Skill Advance',
-   {131} 'Enchanting Skill Advance',
-   {132} 'Left Weapon Speed Multiply',
-   {133} 'Dragon Souls',
-   {134} 'Combat Health Regen Multiply',
-   {135} 'One-Handed Power Modifier',
-   {136} 'Two-Handed Power Modifier',
-   {137} 'Marksman Power Modifier',
-   {138} 'Block Power Modifier',
-   {139} 'Smithing Power Modifier',
-   {140} 'Heavy Armor Power Modifier',
-   {141} 'Light Armor Power Modifier',
-   {142} 'Pickpocket Power Modifier',
-   {143} 'Lockpicking Power Modifier',
-   {144} 'Sneaking Power Modifier',
-   {145} 'Alchemy Power Modifier',
-   {146} 'Speechcraft Power Modifier',
-   {147} 'Alteration Power Modifier',
-   {148} 'Conjuration Power Modifier',
-   {149} 'Destruction Power Modifier',
-   {150} 'Illusion Power Modifier',
-   {151} 'Restoration Power Modifier',
-   {152} 'Enchanting Power Modifier',
-   {153} 'Dragon Rend',
-   {154} 'Attack Damage Mult',
-   {155} 'Heal Rate Mult',
-   {156} 'Magicka Rate Mult',
-   {157} 'Stamina Rate Mult',
-   {158} 'Werewolf Perks',
-   {159} 'Vampire Perks',
-   {160} 'Grab Actor Offset',
-   {161} 'Grabbed',
-   {162} 'Unknown 162',
-   {163} 'Reflect Damage'
-      ], [
-        -1, 'None'
-      ]);
-
   var wbCastEnum := wbEnum([
     {0} 'Constant Effect',
     {1} 'Fire and Forget',
@@ -4913,7 +4681,6 @@ begin
     ]);
 
   var wbETYP := wbFormIDCk(ETYP, 'Equipment Type', [EQUP, NULL]);
-  var wbETYPReq := wbFormIDCk(ETYP, 'Equipment Type', [EQUP, NULL], False, cpNormal, True);
 
   var wbFormTypeEnum := wbEnum([], [
      0, 'Activator',
@@ -5308,14 +5075,6 @@ begin
     Sig2Int('ZKEY'), 'Z Key Object'
   ]);
 
-  var wbAdvanceActionEnum := wbEnum([
-    'Normal Usage',
-    'Power Attack',
-    'Bash',
-    'Lockpick Success',
-    'Lockpick Broken'
-  ]);
-
   var wbStaggerEnum := wbEnum([
     'None',
     'Small',
@@ -5570,8 +5329,6 @@ begin
   ]);
 
   var wbICON := wbString(ICON, 'Inventory Image');
-  var wbMICO := wbString(MICO, 'Message Icon');
-  var wbPTRN := wbFormIDCk(PTRN, 'Preview Transform', [TRNS]);
   var wbSTCP := wbFormIDCk(STCP, 'Animation Sound', [STAG]);
   var wbNTRM := wbFormIDCk(NTRM, 'Native Terminal', [TMLM]);
   var wbINRD := wbFormIDCk(INRD, 'Instance Naming', [INNR]);
@@ -5752,7 +5509,7 @@ begin
           // Check numeric value
           var lDeg: Double;
           try
-            lDeg := StrToFloat(Copy(aValue, 1, lPosDegree - 1))
+            lDeg := StrToFloat(Copy(aValue, 1, lPosDegree - 1));
           except
             Exit;
           end;
@@ -6776,130 +6533,6 @@ begin
       wbFromVersion(555, wbUnused(3)) // padding
     ], cpNormal, False, nil, 4));
 
-  var wbArmorPropertyEnum := wbEnum([
-    { 0} 'Enchantments',
-    { 1} 'BashImpactDataSet',
-    { 2} 'BlockMaterial',
-    { 3} 'Keywords',
-    { 4} 'Weight',
-    { 5} 'Value',
-    { 6} 'Rating',
-    { 7} 'AddonIndex',
-    { 8} 'BodyPart',
-    { 9} 'DamageTypeValue',
-    {10} 'ActorValues',
-    {11} 'Health',
-    {12} 'ColorRemappingIndex',
-    {13} 'MaterialSwaps'
-  ]);
-
-  var wbActorPropertyEnum := wbEnum([
-    { 0} 'Keywords',
-    { 1} 'ForcedInventory',
-    { 2} 'XPOffset',
-    { 3} 'Enchantments',
-    { 4} 'ColorRemappingIndex',
-    { 5} 'MaterialSwaps'
-  ]);
-
-  var wbWeaponPropertyEnum := wbEnum([
-    { 0} 'Speed',
-    { 1} 'Reach',
-    { 2} 'MinRange',
-    { 3} 'MaxRange',
-    { 4} 'AttackDelaySec',
-    { 5} 'Unknown 5',
-    { 6} 'OutOfRangeDamageMult',
-    { 7} 'SecondaryDamage',
-    { 8} 'CriticalChargeBonus',
-    { 9} 'HitBehaviour',
-    {10} 'Rank',
-    {11} 'Unknown 11',
-    {12} 'AmmoCapacity',
-    {13} 'Unknown 13',
-    {14} 'Unknown 14',
-    {15} 'Type',
-    {16} 'IsPlayerOnly',
-    {17} 'NPCsUseAmmo',
-    {18} 'HasChargingReload',
-    {19} 'IsMinorCrime',
-    {20} 'IsFixedRange',
-    {21} 'HasEffectOnDeath',
-    {22} 'HasAlternateRumble',
-    {23} 'IsNonHostile',
-    {24} 'IgnoreResist',
-    {25} 'IsAutomatic',
-    {26} 'CantDrop',
-    {27} 'IsNonPlayable',
-    {28} 'AttackDamage',
-    {29} 'Value',
-    {30} 'Weight',
-    {31} 'Keywords',
-    {32} 'AimModel',
-    {33} 'AimModelMinConeDegrees',
-    {34} 'AimModelMaxConeDegrees',
-    {35} 'AimModelConeIncreasePerShot',
-    {36} 'AimModelConeDecreasePerSec',
-    {37} 'AimModelConeDecreaseDelayMs',
-    {38} 'AimModelConeSneakMultiplier',
-    {39} 'AimModelRecoilDiminishSpringForce',
-    {40} 'AimModelRecoilDiminishSightsMult',
-    {41} 'AimModelRecoilMaxDegPerShot',
-    {42} 'AimModelRecoilMinDegPerShot',
-    {43} 'AimModelRecoilHipMult',
-    {44} 'AimModelRecoilShotsForRunaway',
-    {45} 'AimModelRecoilArcDeg',
-    {46} 'AimModelRecoilArcRotateDeg',
-    {47} 'AimModelConeIronSightsMultiplier',
-    {48} 'HasScope',
-    {49} 'ZoomDataFOVMult',
-    {50} 'FireSeconds',
-    {51} 'NumProjectiles',
-    {52} 'AttackSound',
-    {53} 'AttackSound2D',
-    {54} 'AttackLoop',
-    {55} 'AttackFailSound',
-    {56} 'IdleSound',
-    {57} 'EquipSound',
-    {58} 'UnEquipSound',
-    {59} 'SoundLevel',
-    {50} 'ImpactDataSet',
-    {61} 'Ammo',
-    {62} 'CritEffect',
-    {63} 'BashImpactDataSet',
-    {64} 'BlockMaterial',
-    {65} 'Enchantments',
-    {66} 'AimModelBaseStability',
-    {67} 'ZoomData',
-    {68} 'ZoomDataOverlay',
-    {69} 'ZoomDataImageSpace',
-    {70} 'ZoomDataCameraOffsetX',
-    {71} 'ZoomDataCameraOffsetY',
-    {72} 'ZoomDataCameraOffsetZ',
-    {73} 'EquipSlot',
-    {74} 'SoundLevelMult',
-    {75} 'NPCAmmoList',
-    {76} 'ReloadSpeed',
-    {77} 'DamageTypeValues',
-    {78} 'AccuracyBonus',
-    {79} 'AttackActionPointCost',
-    {80} 'OverrideProjectile',
-    {81} 'HasBoltAction',
-    {82} 'StaggerValue',
-    {83} 'SightedTransitionSeconds',
-    {84} 'FullPowerSeconds',
-    {85} 'HoldInputToPower',
-    {86} 'HasRepeatableSingleFire',
-    {87} 'MinPowerPerShot',
-    {88} 'ColorRemappingIndex',
-    {89} 'MaterialSwaps',
-    {90} 'CriticalDamageMult',
-    {91} 'FastEquipSound',
-    {92} 'DisableShells',
-    {93} 'HasChargingAttack',
-    {94} 'ActorValues'
-  ]);
-
   var wbObjectModProperties :=
    wbArrayS('Properties', wbStructSK([4], 'Property', [
       wbInteger('Value Type', itU8, wbEnum([
@@ -6981,75 +6614,6 @@ begin
       .IncludeFlag(dfStructFirstNotRequired)
     ).SetCountPath(OBTE).SetRequired
   ]).SetSummaryKey([1]);
-
-  // sorting /should/ be applicable, but will need testing first
-  var wbBoneDataItem :=
-      wbRStruct('Bone Data Set', [
-        wbRStruct('Bone Weight Scale Data', [
-          wbInteger(BSMP, 'Weight Scale Target Gender', itU32, wbSexEnum),
-          // should not be sorted!!!
-          wbRArray('Bone Weight Scales',
-            wbRStructSK([0], 'Bone Weight Scale Set', [
-              wbString(BSMB, 'Name'),
-              wbStruct(BSMS, 'Scale Set', [
-                wbVec3('Thin'),
-                wbVec3('Muscular'),
-                wbVec3('Fat')
-              ])
-              .SetSummaryKeyOnValue([0,1,2])
-              .SetSummaryPrefixSuffixOnValue(0, 'Thin: ', '')
-              .SetSummaryPrefixSuffixOnValue(1, 'Muscular: ', '')
-              .SetSummaryPrefixSuffixOnValue(2, 'Fat: ', '')
-              .SetSummaryDelimiterOnValue(', ')
-              .SetRequired
-            ])
-            .SetSummaryKey([1])
-            .IncludeFlag(dfCollapsed, wbCollapseRACEBoneData)
-          )
-        ]),
-        wbRStruct('Bone Range Modifier Data', [
-          wbInteger(BMMP, 'Range Modifier Target Gender', itU32, wbSexEnum),
-          // should not be sorted!!!
-          wbRArray('Bone Range Modifiers',
-            wbRStructSK([0], 'Bone Range Modifier', [
-              wbString(BSMB, 'Name'),
-              wbStruct(BSMS, 'Range', [
-                wbFloat('Min Y'),
-                wbFloat('Min Z'),
-                wbFloat('Max Y'),
-                wbFloat('Max Z')
-              ])
-              .SetSummaryKeyOnValue([0,2,1,3])
-              .SetSummaryPrefixSuffixOnValue(0, 'Y: [', '')
-              .SetSummaryPrefixSuffixOnValue(2, 'to ', '],')
-              .SetSummaryPrefixSuffixOnValue(1, 'Z: [', '')
-              .SetSummaryPrefixSuffixOnValue(3, 'to ', ']')
-              .IncludeFlag(dfCollapsed, wbCollapseRange)
-              .SetRequired
-            ])
-            .SetSummaryKey([1])
-            .IncludeFlag(dfCollapsed, wbCollapseRACEBoneData)
-          )
-        ])
-      ]);
-
-  var wbArmorAddonBoneDataItem :=
-      wbRStruct('Bone Scale Modifier Set', [
-        wbInteger(BSMP, 'Target Gender', itU32, wbSexEnum),
-        wbRArray('Bone Scale Modifiers',
-          wbRStructSK([0], 'Bone Scale Modifier', [
-            wbString(BSMB, 'Bone Name'),
-            wbVec3(BSMS, 'Bone Scale Delta')
-              .SetRequired
-          ])
-          .SetSummaryKey([1])
-          .IncludeFlag(dfCollapsed, wbCollapseARMABoneData)
-        )
-      ]);
-
-  var wbBSMPSequence := wbRArray('Bone Scale Data', wbBoneDataItem);
-
-  var wbArmorAddonBSMPSequence := wbRArray('Sculpt Data', wbArmorAddonBoneDataItem);
 
   {subrecords checked against Starfield.esm}
   var wbEffect :=
@@ -10335,15 +9899,6 @@ begin
     wbInteger(YNAM, 'Planet ID', itS32)
   ]);
 
-
-  var wbMenuButton :=
-    wbRStruct('Menu Button', [
-      wbLStringKC(ITXT, 'Button Text', 0, cpTranslate),
-      wbString(IBIN, 'Event Name'),  // unsure if localized or not
-      wbConditions,
-      wbFormIDCk(DODT, 'Reference', [REFR, PLYR, NULL])
-    ]);
-
   {subrecords checked against Starfield.esm}
   wbRecord(MESG, 'Message',
     wbFlags(wbFlagsList([
@@ -13239,75 +12794,6 @@ begin
     {0x8000} 'Unknown 16'
   ]); // // CK has no facility to set or view these flags [13, 14, 15, 16] appears to be garbage data leftover from memory re-use and isn't cleared or read by CK
 
-  var wbBlendOperationEnum: IwbEnumDef;
-
-  var wbTintTemplateGroups :=
-  function(const aName: string): IwbSubRecordArrayDef
-  var
-    wbTintTemplateGroup: IwbSubRecordStructDef;
-    wbTintTemplateOption: IwbSubRecordStructDef;
-  begin
-    wbTintTemplateOption :=
-      wbRStruct('Option', [
-        wbStruct(TETI, 'Index', [
-          wbInteger('Slot', itU16, wbEnum([
-            'Forehead Mask',
-            'Eyes Mask',
-            'Nose Mask',
-            'Ears Mask',
-            'Cheeks Mask',
-            'Mouth Mask',
-            'Neck Mask',
-            'Lip Color',
-            'Cheek Color',
-            'Eyeliner',
-            'Eye Socket Upper',
-            'Eye Socket Lower',
-            'Skin Tone',
-            'Paint',
-            'Laugh Lines',
-            'Cheek Color Lower',
-            'Nose',
-            'Chin',
-            'Neck',
-            'Forehead',
-            'Dirt',
-            'Scars',
-            'Face Detail',
-            'Brows',
-            'Wrinkles',
-            'Beards'
-          ])),
-          wbInteger('Index', itU16)
-        ]),
-        wbLString(TTGP, 'Name', 0, cpTranslate),
-        wbInteger(TTEF, 'Flags', itU16, wbFlags([
-          'On/Off only',
-          'Chargen Detail',
-          'Takes Skin Tone'
-        ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbConditions,
-        wbRArray('Textures', wbString(TTET, 'Texture')),
-        wbInteger(TTEB, 'Blend Operation', itU32, wbBlendOperationEnum),
-        wbArray(TTEC, 'Template Colors', wbStruct('Template Color', [
-          wbFormIDCk('Color', [CLFM]),
-          wbFloat('Alpha'),
-          wbInteger('Template Index', itU16),
-          wbInteger('Blend Operation', itU32, wbBlendOperationEnum)
-        ])),
-        wbFloat(TTED, 'Default')
-      ]);
-
-    wbTintTemplateGroup :=
-      wbRStruct('Group', [
-        wbLString(TTGP, 'Group Name', 0, cpTranslate),
-        wbRArray('Options', wbTintTemplateOption),
-        wbInteger(TTGE, 'Category Index', itU32)
-      ]);
-
-    Result := wbRArray(aName, wbTintTemplateGroup);
-  end;
-
   var wbMorphGroups :=
   function(const aName: string): IwbSubRecordArrayDef
   begin
@@ -13351,14 +12837,6 @@ begin
         ]).IncludeFlag(dfAllowAnyMember)
       );
   end;
-
-  wbBlendOperationEnum := wbEnum([
-            'Default',
-            'Multiply',
-            'Overlay',
-            'Soft Light',
-            'Hard Light'
-          ]);
 
   var wbUNAMs := wbRArray('Data Inputs', wbRStruct('Data Input', [
     wbInteger(UNAM, 'Index', itS8),
@@ -14024,18 +13502,6 @@ begin
 
     wbString(SCCM, 'Script Comment')
   ]);
-
-  var wbRACEDAT2UnknownStruct :=
-    wbStruct('Unknown', [
-      wbUnknown(1),
-      wbFloat,
-      wbFloat,
-      wbFloat,
-      wbFloat,
-      wbUnknown(4),
-      wbFloat,
-      wbFloat
-    ]);
 
   {subrecords checked against Starfield.esm}
   wbRecord(RACE, 'Race',
@@ -15839,7 +15305,7 @@ begin
         .SetSummaryPassthroughMaxCountOnValue(5)
         .SetCountFromEnumOnValue(wbLGDIStarSlot)
         .SetSummaryName('Star Slots')
-        .IncludeFlag(dfNoMove)
+        .IncludeFlag(dfNoMove);
     end;
 
   var wbLGDIFiltersToStr: TwbIntToStrCallback :=
@@ -18887,18 +18353,6 @@ begin
       wbInteger('Unknown', itU32)
     ])
   ]);
-
-  var wbWMKFDecider := function:TwbRUnionDecider
-  begin
-    Result := function(const aContainer: IwbContainerElementRef): Integer
-    begin
-      Result := -1;
-        var lContainer := aContainer.ContainingMainRecord;
-        var lType := lContainer.ElementBySignature[WMTI];
-        if Assigned(lType) then
-          Result := lType.NativeValue;
-    end;
-  end;
 
   {subrecords checked against Starfield.esm}
   // TESDataHandlerPersistentCreatedUtil::BGSPersistentIDsForm
