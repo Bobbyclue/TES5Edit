@@ -1170,20 +1170,6 @@ begin
   Result := wbQuestStageToStr(aInt, aElement, aType, 'Quest in Parameter #1', lMainRecord, True);
 end;
 
-function wbIntPrefixedStrToInt(const aString: string; const aElement: IwbElement): Int64;
-var
-  i    : Integer;
-  s    : string;
-begin
-  i := 1;
-  s := Trim(aString);
-  while (i <= Length(s)) and (ANSIChar(s[i]) in ['-', '0'..'9']) do
-    Inc(i);
-  s := Copy(s, 1, Pred(i));
-
-  Result := StrToInt(s);
-end;
-
 function wbStringToInt(const aString: string; const aElement: IwbElement): Int64;
 begin
   Result := StrToIntDef(aString, 0);
@@ -3450,18 +3436,23 @@ begin
     {2} 'Filter'
   ]);
 
-  var wbObjectModPropertiesWEAPEnum := wbEnum([],[
-                 28, 'Physical Weapon Damage',                    //Applied directly to WEAP records
-                 29, 'Unknown 29',                    //Applied directly to WEAP records
-                 71, 'Damage Type Value',                    //Applied directly to WEAP records
-                 85, 'Layered Material Swap 85'                    //Applied directly to WEAP records
+  var wbObjectModPropertiesWEAPEnum :=
+    wbEnum([],[
+    28, 'Physical Weapon Damage',                    //Applied directly to WEAP records
+    29, 'Unknown 29',                    //Applied directly to WEAP records
+    71, 'Damage Type Value',                    //Applied directly to WEAP records
+    85, 'Layered Material Swap 85'                    //Applied directly to WEAP records
+    ]);
+  var wbObjectModPropertiesARMOEnum :=
+    wbEnum([],[
+     0, 'Unknown 0',
+     3, 'Unknown 3',
+    14, 'Layered Material Swap 14'      //applied directly to ARMO records
   ]);
-  var wbObjectModPropertiesARMOEnum := wbEnum([],[
-                 14, 'Layered Material Swap 14'      //applied directly to ARMO records
-  ]);
-  var wbObjectModPropertiesNPCEnum := wbEnum([],[
-                  6, 'Layered Material Swap 6'       //Applied directly to NPC_ records
-  ]);
+  var wbObjectModPropertiesNPCEnum :=
+    wbEnum([],[
+    6, 'Layered Material Swap 6'       //Applied directly to NPC_ records
+    ]);
 
   var wbObjectModPropertiesEnum := wbEnum([],[
     Sig2Int('AACT'), 'Armor - Actor Value',
@@ -3563,10 +3554,10 @@ begin
     Sig2Int('WRC1'), 'Weapon (AMDL)- Aim Model Recoil - Diminish Spring Force',
     Sig2Int('WRC2'), 'Weapon (AMDL)- Aim Model Recoil - Diminish Sights Mult',
     Sig2Int('WRC3'), 'Weapon (AMDL)- Aim Model Recoil - Max Degree Per Shot',
-//    Sig2Int('WRC4'), 'Weapon (AMDL)- ',                                         {both "Aim Model Recoil Arc Degree" and "Aim Model Recoil Min Degree Per Shot"}
+    Sig2Int('WRC4'), 'Weapon (AMDL)- Aim Model Record - Unknown', {both "Aim Model Recoil Arc Degree" and "Aim Model Recoil Min Degree Per Shot"}
     Sig2Int('WRC5'), 'Weapon (AMDL)- Aim Model Recoil - Multiplier (Hip Fire)',
-//    Sig2Int('WRC6'), 'Weapon (AMDL)- ',                                         {both "Aim Model Cone Sneak Multiplier" and "Aim Model Recoil Shots For Runaway"}
-    Sig2Int('WRC8'), 'Weapon (AMDL)- Aim Model Recoil Arc Rotate Degrees',
+    Sig2Int('WRC6'), 'Weapon (AMDL)- Aim Model Cone - Unknown', {both "Aim Model Cone Sneak Multiplier" and "Aim Model Recoil Shots For Runaway"}
+    Sig2Int('WRC8'), 'Weapon (AMDL)- Aim Model Recoil - Arc Rotate Degrees',
     Sig2Int('WAOS'), 'Weapon - Aim Optical Sight Marker',
     Sig2Int('WACV'), 'Weapon - Actor Value',
     Sig2Int('WADL'), 'Weapon - Attack Delay (Seconds)',
@@ -4063,65 +4054,70 @@ begin
   ], cpNormal, False, nil, 3)
   .SetSummaryKeyOnValue([2, 3]);
 
-  var wbAttackData := wbRStructSK([1], 'Attack', [
-    wbStruct(ATKD, 'Attack Data', [
-      wbFloat('Damage Mult'),
-      wbFloat('Attack Chance'),
-      wbFormIDCk('Attack Spell', [SPEL, NULL]),
-      wbInteger('Attack Flags', itU32, wbFlags([
-        {0x00000001} 'Ignore Weapon',
-        {0x00000002} 'Bash Attack',
-        {0x00000004} 'Power Attack',
-        {0x00000008} 'Charge Attack',
-        {0x00000010} 'Rotating Attack',
-        {0x00000020} 'Continuous Attack',
-        {0x00000040} 'Unknown 6',
-        {0x00000080} 'Unknown 7',
-        {0x00000100} 'Unknown 8',
-        {0x00000200} 'Unknown 9',
-        {0x00000400} 'Unknown 10',
-        {0x00000800} 'Unknown 11',
-        {0x00001000} 'Unknown 12',
-        {0x00002000} 'Unknown 13',
-        {0x00004000} 'Unknown 14',
-        {0x00008000} 'Unknown 15',
-        {0x00010000} 'Unknown 16',
-        {0x00020000} 'Unknown 17',
-        {0x00040000} 'Unknown 18',
-        {0x00080000} 'Unknown 19',
-        {0x00100000} 'Unknown 20',
-        {0x00200000} 'Unknown 21',
-        {0x00400000} 'Unknown 22',
-        {0x00800000} 'Unknown 23',
-        {0x01000000} 'Unknown 24',
-        {0x02000000} 'Unknown 25',
-        {0x04000000} 'Unknown 26',
-        {0x08000000} 'Unknown 27',
-        {0x10000000} 'Unknown 28',
-        {0x20000000} 'Unknown 29',
-        {0x40000000} 'Unknown 30',
-        {0x80000000} 'Override Data'
-      ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-      wbFloat('Attack Angle'),
-      wbFloat('Hit Cone'),
-      wbFloat('Stagger'),  // not visible in CK
-      wbFloat('Knockdown'),
-      wbFloat('Recovery Time'),
-      wbFloat('Action Points Mult'),
-      wbInteger('Stagger Offset', itS32, wbEnum([], [
-        -2, '-2',
-        -1, '-1',
-         0, '0',
-         1, '1',
-         2, '2'
-      ])),
-      wbFloat('Strike Angle')
-    ]),
-    wbString(ATKE, 'Attack Event'),
-    wbFormIDCk(ATKW, 'Weapon Slot', [EQUP]),
-    wbFormIDCk(ATKS, 'Required Slot', [EQUP]),
-    wbString(ATKT, 'Description')
-  ]);
+  var wbAttackData :=
+    wbRArrayS('Attacks',
+      wbRStructSK([1], 'Attack', [
+        wbStruct(ATKD, 'Attack Data', [
+          wbFloat('Damage Mult'),
+          wbFloat('Attack Chance'),
+          wbFormIDCk('Attack Spell', [SPEL, NULL]),
+          wbInteger('Attack Flags', itU32,
+            wbFlags([
+            {0} 'Ignore Weapon',
+            {1} 'Bash Attack',
+            {2} 'Power Attack',
+            {3} 'Charge Attack',
+            {4} 'Rotating Attack',
+            {5} 'Continuous Attack',
+            {6} 'Unknown 6',
+            {7} 'Unknown 7',
+            {8} 'Unknown 8',
+            {9} 'Unknown 9',
+            {10} 'Unknown 10',
+            {11} 'Unknown 11',
+            {12} 'Unknown 12',
+            {13} 'Unknown 13',
+            {14} 'Unknown 14',
+            {15} 'Unknown 15',
+            {16} 'Unknown 16',
+            {17} 'Unknown 17',
+            {18} 'Unknown 18',
+            {19} 'Unknown 19',
+            {20} 'Unknown 20',
+            {21} 'Unknown 21',
+            {22} 'Unknown 22',
+            {23} 'Unknown 23',
+            {24} 'Unknown 24',
+            {25} 'Unknown 25',
+            {26} 'Unknown 26',
+            {27} 'Unknown 27',
+            {28} 'Unknown 28',
+            {29} 'Unknown 29',
+            {30} 'Unknown 30',
+            {31} 'Override Data'
+            ])
+          ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+          wbFloat('Attack Angle'),
+          wbFloat('Hit Cone'),
+          wbFloat('Stagger'),  // not visible in CK
+          wbFloat('Knockdown'),
+          wbFloat('Recovery Time'),
+          wbFloat('Action Points Mult'),
+          wbInteger('Stagger Offset', itS32,
+            wbEnum([], [
+            -2, '-2',
+            -1, '-1',
+             0, '0',
+             1, '1',
+             2, '2'
+            ])),
+          wbFloat('Strike Angle')
+        ]),
+        wbString(ATKE, 'Attack Event'),
+        wbFormIDCk(ATKW, 'Weapon Slot', [EQUP]),
+        wbFormIDCk(ATKS, 'Required Slot', [EQUP]),
+        wbString(ATKT, 'Description')
+      ]));
 
   var wbLocationEnum := wbEnum([
     {0} 'Near reference', // string dump: '%s' in '%s' radius %u
@@ -6368,9 +6364,10 @@ begin
           wbStruct(VLMS, 'Unknown', [
             wbArray('Unknown', wbStruct('Unknown', [
               wbInteger('Type', itU32, wbEnum([], [
-                $1, '1',
-                $3, '3',
-                $5, '5'
+                $1,  '1',
+                $3,  '3',
+                $5,  '5',
+                $11, '11'
               ])).SetAfterSet(wbUpdateSameParentUnions),
               wbArray('Matrix', wbStruct('Matrix', [
                 wbFloat,
@@ -7330,8 +7327,8 @@ begin
     wbSNBH,
     wbDEFL,
     wbXALG,
-    wbBaseFormComponents,
     wbPTT2,
+    wbBaseFormComponents,
     wbFULL,
     wbGenericModel(True),
     wbDEST,
@@ -7708,6 +7705,7 @@ begin
       .SetFlagHasDontShow(14, wbFlagPartialFormDontShow),
   [
     wbEDID,
+    wbVMAD,
     wbBaseFormComponents,
     wbFULL,
     wbInteger(DATA, 'Flags', itU32,
@@ -8195,6 +8193,7 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(DIAL, 'Dialog Topic',
     wbFlags(wbFlagsList([
+    10, 'Unknown 10',
     14, 'Partial Form'
     ]), [14]), [
     wbEDID,
@@ -9341,6 +9340,7 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(NAVM, 'Navmesh',
     wbFlags(wbFlagsList([
+      10, 'Unknown 10',
       11, 'Initially Disabled',
       18, 'Compressed',
       26, 'AutoGen',
@@ -11091,7 +11091,10 @@ begin
   ]);
 
   {subrecords checked against Starfield.esm}
-  wbRecord(SCEN, 'Scene', [
+  wbRecord(SCEN, 'Scene',
+    wbFlags(wbFlagsList([
+    10, 'Unknown 10'
+    ])), [
     wbEDID,
     wbVMADFragmentedSCEN,
     wbInteger(FNAM, 'Flags', itU32,
@@ -11786,8 +11789,9 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(INFO, 'Dialog response',
     wbFlags(wbFlagsList([
-    6, 'Info Group',
-    7, 'Exclude From Export',
+    6,  'Info Group',
+    7,  'Exclude From Export',
+    10, 'Unknown 10',
     13, 'Actor Changed'
     ])), [
     wbEDID,
@@ -12783,11 +12787,11 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(NPC_, 'Non-Player Character',
     wbFlags(wbFlagsList([
-      {0x00000400} 10, 'Unknown 10',
-      {0x00040000} 18, 'Compressed',
-      {0x00080000} 19, 'Unknown 19',
-      {0x00400000} 22, 'Unknown 22',
-      {0x20000000} 29, 'Bleedout Override'
+      10, 'Unknown 10',
+      18, 'Compressed',
+      19, 'Unknown 19',
+      22, 'Unknown 22',
+      29, 'Bleedout Override'
     ]), [18]), [
     wbEDID,
     wbVMAD,
@@ -12801,56 +12805,55 @@ begin
     wbXALG,
     wbBaseFormComponents,
     wbStruct(ACBS, 'Configuration', [
-      wbInteger('Flags', itU32, wbFlags([
-        {0x00000001} 'Female',
-        {0x00000002} 'Essential',
-        {0x00000004} 'Is CharGen Face Preset',
-        {0x00000008} 'Respawn',
-        {0x00000010} 'Auto-calc stats',
-        {0x00000020} 'Unique',
-        {0x00000040} 'Doesn''t affect stealth meter',
-        {0x00000080} 'PC Level Mult',
-        {0x00000100} 'Unknown 8',
-        {0x00000200} 'Calc For Each Template',
-        {0x00000400} 'Unknown 10',
-        {0x00000800} 'Protected',
-        {0x00001000} 'Unknown 12',
-        {0x00002000} 'Unknown 13',
-        {0x00004000} 'Summonable',
-        {0x00008000} 'Unknown 15',
-        {0x00010000} 'Doesn''t bleed',
-        {0x00020000} 'Unknown 17',
-        {0x00040000} 'Bleedout Override',
-        {0x00080000} 'Opposite Gender Anims',
-        {0x00100000} 'Simple Actor',
-        {0x00200000} 'Unknown 21',
-        {0x00400000} 'Unknown 22',
-        {0x00800000} 'No Activation/Hellos',
-        {0x01000000} 'Diffuse Alpha Test',
-        {0x02000000} 'Forced Starts Dead',
-        {0x04000000} 'Unknown 26',
-        {0x08000000} 'Unknown 27',
-        {0x10000000} 'Unknown 28',
-        {0x20000000} 'Is Ghost',
-        {0x40000000} 'Ignore Friendly Hits',
-        {0x80000000} 'Invulnerable'
-      ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
-      ,
+      wbInteger('Flags', itU32,
+        wbFlags([
+        {0}  'Female',
+        {1}  'Essential',
+        {2}  'Is CharGen Face Preset',
+        {3}  'Respawn',
+        {4}  'Auto-calc stats',
+        {5}  'Unique',
+        {6}  'Doesn''t affect stealth meter',
+        {7}  'PC Level Mult',
+        {8}  'Unknown 8',
+        {9}  'Calc For Each Template',
+        {10} 'Unknown 10',
+        {11} 'Protected',
+        {12} 'Unknown 12',
+        {13} 'Unknown 13',
+        {14} 'Summonable',
+        {15} 'Unknown 15',
+        {16} 'Doesn''t bleed',
+        {17} 'Unknown 17',
+        {18} 'Bleedout Override',
+        {19} 'Opposite Gender Anims',
+        {20} 'Simple Actor',
+        {21} 'Unknown 21',
+        {22} 'Unknown 22',
+        {23} 'No Activation/Hellos',
+        {24} 'Diffuse Alpha Test',
+        {25} 'Forced Starts Dead',
+        {26} 'Unknown 26',
+        {27} 'Unknown 27',
+        {28} 'Unknown 28',
+        {29} 'Is Ghost',
+        {30} 'Ignore Friendly Hits',
+        {31} 'Invulnerable'
+        ])
+      ).IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbInteger('XP Value Offset', itS16),
       wbUnion('Level', wbACBSLevelDecider, [
         wbInteger('Level', itU16),
-        wbInteger('Level Mult', itU16, wbDiv(1000, 2))
-          .SetAfterLoad(wbACBSLevelMultAfterLoad)
+        wbInteger('Level Mult', itU16, wbDiv(1000, 2)).SetAfterLoad(wbACBSLevelMultAfterLoad)
       ]).SetAfterSet(wbACBSLevelMultAfterSet),
       wbInteger('Calc min level', itU16),
       wbInteger('Calc max level', itU16),
       wbInteger('Disposition Base', itS16),
-      wbInteger('Template Flags', itU16, wbTemplateFlags)
-        .IncludeFlag(dfCollapsed, wbCollapseFlags)
-    ], cpNormal, True)
-      .SetSummaryKeyOnValue([0,6])
+      wbInteger('Template Flags', itU16, wbTemplateFlags).IncludeFlag(dfCollapsed, wbCollapseFlags)
+    ]).SetSummaryKeyOnValue([0,6])
       .SetSummaryPrefixSuffixOnValue(0, '[',']')
-      .SetSummaryPrefixSuffixOnValue(1, '[',']'),
+      .SetSummaryPrefixSuffixOnValue(1, '[',']')
+      .SetRequired,
     wbRArrayS('Factions', wbFaction),
     wbFormIDCk(INAM, 'Death item', [LVLI]),
     wbFormIDCk(VTCK, 'Voice', [VTYP]),
@@ -12880,9 +12883,10 @@ begin
 //    wbSPCT,
     wbSPLOs,
     wbDEST,
-    wbFormIDCk(WNAM, 'Skin', [ARMO], False, cpNormal, False),
+    wbFormIDCk(WNAM, 'Skin', [ARMO]),
 //    wbFormIDCk(ANAM, 'Far away model', [ARMO]),
-    wbFormIDCk(ATKR, 'Attack Race', [RACE], False, cpNormal, False),
+    wbFormIDCk(ATKR, 'Attack Race', [RACE]),
+    wbAttackData,
     wbFormIDCk(SPOR, 'Spectator Override Package List', [FLST]),
     wbFormIDCk(OCOR, 'Observe Dead Body Override Package List', [FLST]),
     wbFormIDCk(GWOR, 'Guard Warn Override Package List', [FLST]),
@@ -12909,67 +12913,67 @@ begin
     wbNTRM,
     wbContainerItems.SetSummaryKey([1]),
     wbAIDT,
-    wbRArray('Packages',
-      wbFormIDCk(PKID, 'Package', [PACK]).SetToStr(wbNPCPackageToStr)
-    ),
+    wbRArray('Packages', wbFormIDCk(PKID, 'Package', [PACK]).SetToStr(wbNPCPackageToStr)),
     wbArray(RDSA, 'Reaction Radius Behavior',
       wbStruct('Entry', [
-        {  0} wbInteger('Reaction Type', itU32, wbEnum([
-          'Warn',
-          'Warn and Attack',
-          'Attack',
-          'Curious',
-          'Flee',
-          'Warn and Alarm'
+        wbInteger('Reaction Type', itU32,
+          wbEnum([
+          {0} 'Warn',
+          {1} 'Warn and Attack',
+          {2} 'Attack',
+          {3} 'Curious',
+          {4} 'Flee',
+          {5} 'Warn and Alarm'
+          ])),
+        wbInteger('Reaction Target', itU32,
+          wbEnum([
+          {0} 'Player',
+          {1} 'Enemies',
+          {2} 'Neutral',
+          {3} 'PlayerNeutralEnemies',
+          {4} 'PlayerNeutral',
+          {5} 'PlayerEnemies',
+          {6} 'Enemies Neutral'
         ])),
-        {  4} wbInteger('Reaction Target', itU32, wbEnum([
-          'Player',
-          'Enemies',
-          'Neutral',
-          'PlayerNeutralEnemies',
-          'PlayerNeutral',
-          'PlayerEnemies',
-          'Enemies Neutral'
-        ])),
-        {  8} wbFormIDCk('Packages', [NULL, FLST]),
-        { 12} wbInteger('Flags', itU32, wbFlags([
-                {0x00000001} { 0} 'Use GLOB Reaction Radius',
-                {0x00000002} { 1} 'Use GLOB Exit Radius',
-                {0x00000004} { 2} 'Use GLOB Max Number Of Times To React',
-                {0x00000008} { 3} 'Use GLOB Max Herd Members To Animate',
-                {0x00000010} { 4} 'Use GLOB Number of Warnings Before Attack',
-                {0x00000020} { 4} 'Reaction Center Override',
-                {0x00000040} { 6} 'Use Linked Reference',
-                {0x00000080} { 7} 'Use Specific Reference',
-                {0x00000100} { 8} 'Number of Warnings Before Attack',
-                {0x00000200} { 9} 'Warn Timer On Warn/Attack',
-                {0x00000400} {10} 'Use GLOB Warn Timer On Warn/Attack',
-                {0x00000800} {11} 'All Reaction Behavior',
-                {0x00001000} {12} 'Avoid Target',
-                {0x00002000} {13} 'Use GLOB Cool Down Timer',
-                {0x00004000} {14} 'Fight Back',
-                {0x00008000} {15} 'Disallow Threat Backdown'
-        ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        { 16} wbFormIDCk('Reaction Radius GLOB', [NULL, GLOB]),
-        { 20} wbFormIDCk('Exit Radius GLOB', [NULL, GLOB]),
-        { 24} wbFormIDCk('Max Number Of Times To React GLOB', [NULL, GLOB]),
-        { 28} wbFormIDCk('Max Herd Members To Animate GLOB', [NULL, GLOB]),
-        { 32} wbFormIDCk('Number of Warnings Before Attack GLOB', [NULL, GLOB]),
-        { 36} wbFloat('Max Number Of Times To React'),
-        { 40} wbFloat('Reaction Radius'),
-        { 44} wbFloat('Exit Radius'),
-        { 48} wbFloat('Max Herd Members To Animate'),
-        { 52} wbFloat('Number of Warnings Before Attack'),
-        { 56} wbFormIDCk('Linked Ref Keyword', [NULL, KYWD]),
-        { 60} wbFormIDCk('Specific Reference', sigReferences),
-        { 64} wbFormIDCk('Warn Timer On Warn/Attack GLOB', [NULL, GLOB]),
-        { 68} wbFloat('Warn Timer On Warn/Attack'),
-        { 72} wbFloat('Cool Down Timer'),
-        { 76} wbFormIDCk('Cool Down Timer GLOB', [NULL, GLOB])
-      ])
-        .SetSummaryKey([14])
-        .IncludeFlag(dfCollapsed, wbCollapseRDSA)
-    ),
+        wbFormIDCk('Packages', [NULL, FLST]),
+        wbInteger('Flags', itU32,
+          wbFlags([
+          {0}  'Use GLOB Reaction Radius',
+          {1}  'Use GLOB Exit Radius',
+          {2}  'Use GLOB Max Number Of Times To React',
+          {3}  'Use GLOB Max Herd Members To Animate',
+          {4}  'Use GLOB Number of Warnings Before Attack',
+          {5}  'Reaction Center Override',
+          {6}  'Use Linked Reference',
+          {7}  'Use Specific Reference',
+          {8}  'Number of Warnings Before Attack',
+          {9}  'Warn Timer On Warn/Attack',
+          {10} 'Use GLOB Warn Timer On Warn/Attack',
+          {11} 'All Reaction Behavior',
+          {12} 'Avoid Target',
+          {13} 'Use GLOB Cool Down Timer',
+          {14} 'Fight Back',
+          {15} 'Disallow Threat Backdown'
+          ])
+        ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+        wbFormIDCk('Reaction Radius GLOB', [NULL, GLOB]),
+        wbFormIDCk('Exit Radius GLOB', [NULL, GLOB]),
+        wbFormIDCk('Max Number Of Times To React GLOB', [NULL, GLOB]),
+        wbFormIDCk('Max Herd Members To Animate GLOB', [NULL, GLOB]),
+        wbFormIDCk('Number of Warnings Before Attack GLOB', [NULL, GLOB]),
+        wbFloat('Max Number Of Times To React'),
+        wbFloat('Reaction Radius'),
+        wbFloat('Exit Radius'),
+        wbFloat('Max Herd Members To Animate'),
+        wbFloat('Number of Warnings Before Attack'),
+        wbFormIDCk('Linked Ref Keyword', [NULL, KYWD]),
+        wbFormIDCk('Specific Reference', sigReferences),
+        wbFormIDCk('Warn Timer On Warn/Attack GLOB', [NULL, GLOB]),
+        wbFloat('Warn Timer On Warn/Attack'),
+        wbFloat('Cool Down Timer'),
+        wbFormIDCk('Cool Down Timer GLOB', [NULL, GLOB])
+      ]).SetSummaryKey([14])
+        .IncludeFlag(dfCollapsed, wbCollapseRDSA)),
     wbStruct(FLEE, 'Flee Settings', [
       wbFormID('Flee Distance GLOB'),
       wbFormID('Safe Timer GLOB'),
@@ -12993,8 +12997,7 @@ begin
       wbInteger('Far Away Model Distance', itU16),
       wbInteger('Geared Up Weapons', itU8),
       wbUnused(1)
-    ])
-      .SetSummaryKeyOnValue([0,1,2,3])
+    ]).SetSummaryKeyOnValue([0,1,2,3])
       .SetSummaryPrefixSuffixOnValue(0, 'Health: ','')
       .SetSummaryPrefixSuffixOnValue(1, 'AP: ','')
       .SetSummaryPrefixSuffixOnValue(2, 'Model Distance: ','')
@@ -13005,16 +13008,15 @@ begin
 //    wbFormIDCk(BCLF, 'Facial Hair Color', [CLFM], False, cpNormal, False),
     wbFormIDCk(ZNAM, 'Combat Style', [CSTY], False, cpNormal, False),
 //    wbFormIDCk(GNAM, 'Gift Filter', [FLST], False, cpNormal, False),
-    wbUnknown(NAM5, cpNormal, True),
-    wbFloat(NAM6, 'Height Min', cpNormal, True),
+    wbUnknown(NAM5).SetRequired,
+    wbFloat(NAM6, 'Height Min').SetRequired,
 //    wbFloat(NAM7, 'Unused', cpNormal, True),
     wbFloat(NAM4, 'Height Max'),
     wbStruct(MWGT, 'Weight', [
        wbFloat('Thin'),
        wbFloat('Muscular'),
        wbFloat('Fat')
-    ])
-      .SetSummaryKeyOnValue([0,1,2])
+    ]).SetSummaryKeyOnValue([0,1,2])
       .SetSummaryPrefixSuffixOnValue(0, 'Thin: ','')
       .SetSummaryPrefixSuffixOnValue(1, 'Muscular: ','')
       .SetSummaryPrefixSuffixOnValue(2, 'Fat: ','')
@@ -13026,22 +13028,21 @@ begin
         wbRStruct('Sound', [
           wbFormIDCk(CS3K, 'ArcheType', [KYWD]),
           wbSoundReference(CS3S)
-        ])
-          .IncludeFlag(dfAllowAnyMember)
-          .IncludeFlag(dfStructFirstNotRequired),
-      cpNormal, True)
-        .SetCountPath(CS3H),
-      wbInteger(CS3F, 'Stop Concious Loop When Unconscious', itU8, wbBoolEnum, cpNormal, True),
+        ]).IncludeFlag(dfAllowAnyMember)
+          .IncludeFlag(dfStructFirstNotRequired)
+      ).SetCountPath(CS3H)
+       .SetRequired,
+      wbInteger(CS3F, 'Stop Concious Loop When Unconscious', itU8, wbBoolEnum).SetRequired,
       wbMarkerReq(CS3E)
     ]),
-    wbFormIDCk(CSCR, 'Inherits Sounds From', [NPC_], False, cpNormal, False),
+    wbFormIDCk(CSCR, 'Inherits Sounds From', [NPC_]),
 //    wbFormIDCk(PFRN, 'Power Armor Stand', [FURN]),
     wbFormIDCk(QSTA, 'Affinity Event Quest', [QUST]),
     wbFormIDCk(BNAM, 'Affinity Event Dialogue', [DLBR]),
-    wbFormIDCk(DOFT, 'Default Outfit', [OTFT], False, cpNormal, False),
-    wbFormIDCk(SOFT, 'Space Outfit', [OTFT], False, cpNormal, False),
-    wbFormIDCk(DPLT, 'Default Package List', [FLST], False, cpNormal, False),
-    wbFormIDCk(CRIF, 'Crime Faction', [FACT], False, cpNormal, False),
+    wbFormIDCk(DOFT, 'Default Outfit', [OTFT]),
+    wbFormIDCk(SOFT, 'Space Outfit', [OTFT]),
+    wbFormIDCk(DPLT, 'Default Package List', [FLST]),
+    wbFormIDCk(CRIF, 'Crime Faction', [FACT]),
     wbFormIDCk(HEFA, 'Formation Faction', [FACT]),
     wbInteger(EDCT, 'Tint Count', itU8, nil, cpBenign).IncludeFlag(dfSkipImplicitEdit),
     wbRArray('AVMD Tints',
@@ -13052,8 +13053,7 @@ begin
         wbString(VNAM, 'Tint Texture').SetRequired,
         wbByteColors(NNAM, 'Tint Color').SetRequired,
         wbInteger(INTV, 'Intensity', itU32).SetRequired       //1-128
-      ])
-        .SetSummaryKey([4,1,2,5,3])
+      ]).SetSummaryKey([4,1,2,5,3])
         .SetSummaryMemberPrefixSuffix(4, '',' for')
         .SetSummaryMemberPrefixSuffix(1, '',':')
         .SetSummaryMemberPrefixSuffix(2, '','')
@@ -13061,7 +13061,6 @@ begin
         .SetSummaryMemberPrefixSuffix(3, 'using "','"')
         .IncludeFlag(dfSummaryMembersNoName)
     ).SetCountPath(EDCT),
-
     wbStruct(MRSV, 'Body Morph Region Values', [
       wbFloat('Head'),
       wbFloat('Upper Torso'),
@@ -13069,348 +13068,20 @@ begin
       wbFloat('Lower Torso'),
       wbFloat('Legs')
     ]).SetSummaryKeyOnValue([0,1,2,3,4]),
-
     wbRArrayS('Face Dial Positions',
       wbRStructSK([0], 'Face Dial Position', [
-        wbInteger(FMSI, 'Index', itU32,
-          function(aFaceDialIndex: Int64; const aElement: IwbElement; aType: TwbCallbackType): string
-          begin
-            var lContainer: IwbContainer;
-            if not Supports(aElement, IwbContainer, lContainer) then
-              Exit;
-
-            case aType of
-              ctToStr, ctToSummary, ctToEditValue: begin
-                Result := aFaceDialIndex.ToString;
-                if aType = ctToStr then
-                  Result := Result + ' <Warning: Could not resolve face dial>';
-              end;
-              ctToSortKey: begin
-                Result := IntToHex64(aFaceDialIndex, 8);
-                Exit;
-              end;
-              ctCheck: begin
-                Result := '<Warning: Could not resolve face dial>';
-              end;
-              ctEditType: begin
-                Result := 'ComboBox';
-                Exit;
-              end;
-              ctEditInfo: Result := '';
-            end;
-
-            var lRace := lContainer.ElementLinksTo['...\RNAM'];
-            var lRaceMainRecord : IwbMainRecord;
-            if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
-              Exit;
-
-            if lRaceMainRecord.Signature <> RACE then begin
-              case aType of
-                ctToStr: Result := aFaceDialIndex.ToString + ' <Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
-                ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
-              end;
-              Exit;
-            end;
-
-            var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
-            var lGender := 'Male';
-            if lIsFemale then
-              lGender := 'Female';
-
-            var lRaceFaceDials := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Dials'];
-
-            var lRaceFaceDialsContainer: IwbContainerElementRef;
-            if not Supports(lRaceFaceDials, IwbContainerElementRef, lRaceFaceDialsContainer) then begin
-              case aType of
-                ctToStr: Result := aFaceDialIndex.ToString + ' <Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Dials>';
-                ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Dials>';
-              end;
-              Exit;
-            end;
-
-            var lEditInfos: TStringList := nil;
-            if aType = ctEditInfo then
-              lEditInfos := TStringList.Create;
-            try
-              for var lRaceFaceDialsIdx := 0 to Pred(lRaceFaceDialsContainer.ElementCount) do begin
-                var lRaceFaceDial := lRaceFaceDialsContainer.Elements[lRaceFaceDialsIdx];
-
-                var lRaceFaceDialContainer: IwbContainerElementRef;
-                if not Supports(lRaceFaceDial, IwbContainerElementRef, lRaceFaceDialContainer) then
-                  Continue;
-
-                var lSkinIndexValue := lRaceFaceDialContainer.ElementNativeValues[FDSI];
-                if not VarIsOrdinal(lSkinIndexValue) then
-                  Continue;
-                var lSkinIndex: Integer := lSkinIndexValue;
-
-                if (lSkinIndex = aFaceDialIndex) or Assigned(lEditInfos) then begin
-                  var lIndexString := IntToStr(lSkinIndex);
-                  while Length(lIndexString) < 3 do
-                    lIndexString := '0' + lIndexString;
-
-                  var lLabel: string;
-                  case aType of
-                    ctToSummary: lLabel := lRaceFaceDialContainer.ElementSummaries[FDSL];
-                    ctToEditValue, ctEditInfo: lLabel := lRaceFaceDialContainer.ElementValues[FDSL];
-                  else
-                    lLabel := lRaceFaceDialContainer.ElementValues[FDSL];
-                  end;
-
-                  if lLabel <> '' then
-                    lIndexString := lIndexString + ' ' + lLabel;
-
-                  if Assigned(lEditInfos) then
-                    lEditInfos.Add(lIndexString)
-                  else if lSkinIndex = aFaceDialIndex then begin
-                    case aType of
-                      ctToStr, ctToSummary, ctToEditValue: Result := lIndexString;
-                      ctCheck: Result := '';
-                    end;
-                    Exit;
-                  end;
-                end;
-              end;
-
-              case aType of
-                ctToStr, ctToSummary: begin
-                  Result := aFaceDialIndex.ToString;
-                  if aType = ctToStr then
-                    Result := Result + ' <Warning: Face Dial [' + aFaceDialIndex.ToString + '] not found in "' + lRaceMainRecord.Name + '">';
-                end;
-                ctCheck: Result := '<Warning: Face Dial [' + aFaceDialIndex.ToString + '] not found in "' + lRaceMainRecord.Name + '">';
-                ctEditInfo: begin
-                  lEditInfos.Sort;
-                  Result := lEditInfos.CommaText;
-                end;
-              end;
-            finally
-              FreeAndNil(lEditInfos);
-            end;
-          end,
-          wbIntPrefixedStrToInt
-        )
-          .SetLinksToCallbackOnValue(
-            function(const aElement: IwbElement): IwbElement
-            begin
-              Result := nil;
-
-              var lContainer: IwbContainer;
-              if not Supports(aElement, IwbContainer, lContainer) then
-                Exit;
-
-              var lFaceDialIndexValue := aElement.NativeValue;
-              if not VarIsOrdinal(lFaceDialIndexValue) then
-                Exit;
-              var lFaceDialIndex: Integer := lFaceDialIndexValue;
-
-              var lRace := lContainer.ElementLinksTo['...\RNAM'];
-              var lRaceMainRecord : IwbMainRecord;
-              if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
-                Exit;
-
-              var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
-              var lGender := 'Male';
-              if lIsFemale then
-                lGender := 'Female';
-
-              var lRaceFaceDials := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Dials'];
-
-              var lRaceFaceDialsContainer: IwbContainerElementRef;
-              if not Supports(lRaceFaceDials, IwbContainerElementRef, lRaceFaceDialsContainer) then
-                Exit;
-
-              for var lRaceFaceDialsIdx := 0 to Pred(lRaceFaceDialsContainer.ElementCount) do begin
-                var lRaceFaceDial := lRaceFaceDialsContainer.Elements[lRaceFaceDialsIdx];
-
-                var lRaceFaceDialContainer: IwbContainerElementRef;
-                if not Supports(lRaceFaceDial, IwbContainerElementRef, lRaceFaceDialContainer) then
-                  Continue;
-
-                var lSkinIndexValue := lRaceFaceDialContainer.ElementNativeValues[FDSI];
-                if not VarIsOrdinal(lSkinIndexValue) then
-                  Continue;
-                var lSkinIndex: Integer := lSkinIndexValue;
-
-                if lSkinIndex = lFaceDialIndex then
-                  Exit(lRaceFaceDial);
-              end;
-            end)
+        wbInteger(FMSI, 'Index', itU32, wbNPCFaceDialToStr, wbIntPrefixedStrToInt)
+          .SetLinksToCallbackOnValue(wbNPCFaceDialLinksTo)
           .SetRequired,
         wbFloat(FMRS, 'Position').SetRequired
       ]).SetSummaryMemberPrefixSuffix(0, '[',']')
         .SetSummaryKey([1])
         .IncludeFlag(dfSummaryNoName)
-        .IncludeFlag(dfCollapsed, wbCollapseOther)
-    ),
-
+        .IncludeFlag(dfCollapsed, wbCollapseOther)),
     wbRArrayS('Face Morphs',
       wbRStructSK([0], 'Face Morph Phenotype', [
-        wbInteger(FMRI, 'Face Morph Index', itU32,
-        function(aFaceMorphIndex: Int64; const aElement: IwbElement; aType: TwbCallbackType): string
-            begin
-              var lContainer: IwbContainer;
-              if not Supports(aElement, IwbContainer, lContainer) then
-                Exit;
-
-              case aType of
-                ctToStr, ctToSummary, ctToEditValue: begin
-                  Result := aFaceMorphIndex.ToString;
-                  if aType = ctToStr then
-                    Result := Result + ' <Warning: Could not resolve face morph phenotype>';
-                end;
-                ctToSortKey: begin
-                  Result := IntToHex64(aFaceMorphIndex, 8);
-                  Exit;
-                end;
-                ctCheck: begin
-                  Result := '<Warning: Could not resolve face morph phenotype>';
-                end;
-                ctEditType: begin
-                  Result := 'ComboBox';
-                  Exit;
-                end;
-                ctEditInfo: Result := '';
-              end;
-
-              var lRace := lContainer.ElementLinksTo['...\RNAM'];
-              var lRaceMainRecord : IwbMainRecord;
-              if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
-                Exit;
-
-              if lRaceMainRecord.Signature <> RACE then begin
-                case aType of
-                  ctToStr: Result := aFaceMorphIndex.ToString + ' <Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
-                  ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
-                end;
-                Exit;
-              end;
-
-              var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
-              var lGender := 'Male';
-              if lIsFemale then
-                lGender := 'Female';
-
-              var lRaceFaceMorphs := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Morph Phenotypes'];
-
-              var lRaceFaceMorphsContainer: IwbContainerElementRef;
-              if not Supports(lRaceFaceMorphs, IwbContainerElementRef, lRaceFaceMorphsContainer) then begin
-                case aType of
-                  ctToStr: Result := aFaceMorphIndex.ToString + ' <Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Morph Phenotype>';
-                  ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Morph Phenotype>';
-                end;
-                Exit;
-              end;
-
-              var lEditInfos: TStringList := nil;
-              if aType = ctEditInfo then
-                lEditInfos := TStringList.Create;
-              try
-                for var lRaceFaceMorphIdx := 0 to Pred(lRaceFaceMorphsContainer.ElementCount) do begin
-                  var lRaceFaceMorph := lRaceFaceMorphsContainer.Elements[lRaceFaceMorphIdx];
-
-                  var lRaceFaceMorphContainer: IwbContainerElementRef;
-                  if not Supports(lRaceFaceMorph, IwbContainerElementRef, lRaceFaceMorphContainer) then
-                    Continue;
-
-                  var lMorphIndexValue := lRaceFaceMorphContainer.ElementNativeValues[FMRI];
-                  if not VarIsOrdinal(lMorphIndexValue) then
-                    Continue;
-                  var lMorphIndex: Integer := lMorphIndexValue;
-
-                  if (lMorphIndex = aFaceMorphIndex) or Assigned(lEditInfos) then begin
-                    var lIndexString := IntToStr(lMorphIndex);
-                    while Length(lIndexString) < 3 do
-                      lIndexString := '0' + lIndexString;
-
-                    var lName: string;
-                    case aType of
-                      ctToSummary: lName := lRaceFaceMorphContainer.ElementSummaries[FMRN];
-                      ctToEditValue, ctEditInfo: lName := lRaceFaceMorphContainer.ElementValues[FMRN];
-                    else
-                      lName := lRaceFaceMorphContainer.ElementValues[FMRN];
-                    end;
-
-                    if lName <> '' then
-                      lIndexString := lIndexString + ' ' + lName;
-
-                    if Assigned(lEditInfos) then
-                      lEditInfos.Add(lIndexString)
-                    else if lMorphIndex = aFaceMorphIndex then begin
-                      case aType of
-                        ctToStr, ctToSummary, ctToEditValue: Result := lIndexString;
-                        ctCheck: Result := '';
-                      end;
-                      Exit;
-                    end;
-                  end;
-                end;
-
-                case aType of
-                  ctToStr, ctToSummary: begin
-                    Result := aFaceMorphIndex.ToString;
-                    if aType = ctToStr then
-                      Result := Result + ' <Warning: Face Morph Phenotype [' + aFaceMorphIndex.ToString + '] not found in "' + lRaceMainRecord.Name + '">';
-                  end;
-                  ctCheck: Result := '<Warning: Face Morph Phenotype [' + aFaceMorphIndex.ToString + '] not found in "' + lRaceMainRecord.Name + '">';
-                  ctEditInfo: begin
-                    lEditInfos.Sort;
-                    Result := lEditInfos.CommaText;
-                  end;
-                end;
-              finally
-                FreeAndNil(lEditInfos);
-              end;
-            end,
-            wbIntPrefixedStrToInt
-
-        )
-        .SetLinksToCallbackOnValue(
-              function(const aElement: IwbElement): IwbElement
-              begin
-                Result := nil;
-
-                var lContainer: IwbContainer;
-                if not Supports(aElement, IwbContainer, lContainer) then
-                  Exit;
-
-                var lFaceMorphIndexValue := aElement.NativeValue;
-                if not VarIsOrdinal(lFaceMorphIndexValue) then
-                  Exit;
-                var lFaceMorphIndex: Integer := lFaceMorphIndexValue;
-
-                var lRace := lContainer.ElementLinksTo['...\RNAM'];
-                var lRaceMainRecord : IwbMainRecord;
-                if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
-                  Exit;
-
-                var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
-                var lGender := 'Male';
-                if lIsFemale then
-                  lGender := 'Female';
-
-                var lRaceFaceMorphs := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Morph Phenotypes'];
-
-                var lRaceFaceMorphsContainer: IwbContainerElementRef;
-                if not Supports(lRaceFaceMorphs, IwbContainerElementRef, lRaceFaceMorphsContainer) then
-                  Exit;
-
-                for var lRaceFaceMorphsIdx := 0 to Pred(lRaceFaceMorphsContainer.ElementCount) do begin
-                  var lRaceFaceMorph := lRaceFaceMorphsContainer.Elements[lRaceFaceMorphsIdx];
-
-                  var lRaceFaceMorphContainer: IwbContainerElementRef;
-                  if not Supports(lRaceFaceMorph, IwbContainerElementRef, lRaceFaceMorphContainer) then
-                    Continue;
-
-                  var lMorphIndexValue := lRaceFaceMorphContainer.ElementNativeValues[FMRI];
-                  if not VarIsOrdinal(lMorphIndexValue) then
-                    Continue;
-                  var lMorphIndex: Integer := lMorphIndexValue;
-
-                  if lMorphIndex = lFaceMorphIndex then
-                    Exit(lRaceFaceMorph);
-                end;
-              end)
+        wbInteger(FMRI, 'Face Morph Index', itU32, wbNPCFaceMorphToStr, wbIntPrefixedStrToInt)
+          .SetLinksToCallbackOnValue(wbNPCFaceMorphLinksTo)
           .SetRequired,
         wbRArrayS('Morph Groups',
           wbRStructSK([0], 'Morph Group',  [
@@ -13418,29 +13089,16 @@ begin
             wbFloat(FMRS, 'Blend Intensity').SetRequired
           ]).SetSummaryMemberPrefixSuffix(0, '[',']')
             .SetSummaryKey([1])
-            .IncludeFlag(dfCollapsed, wbCollapseOther)
-        )
-      ]).SetSummaryKey([1])
-    ),
+            .IncludeFlag(dfCollapsed, wbCollapseOther))
+      ]).SetSummaryKey([1])),
     wbRArrayS('Morph Groups',
       wbRStructSK( [0], 'Morph Blend', [
         wbString(BMPN, 'Blend Name').SetRequired,
         wbFloat(BMPV, 'Intensity').SetRequired
       ]).SetSummaryKey([1])
-        .IncludeFlag(dfCollapsed, wbCollapseOther)
-    ),
+        .IncludeFlag(dfCollapsed, wbCollapseOther)),
     wbATTX,
-    wbInteger(STON, 'Skin Tone Index', itU8, wbEnum([
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9'
-    ])),
+    wbInteger(STON, 'Skin Tone Index', itU8, wbEnum(['1','2','3','4','5','6','7','8','9'])),
     wbString(HCOL, 'Hair Color'),
     wbString(FHCL, 'Facial Hair Color'),
     wbString(BCOL, 'Eyebrow Color'),
@@ -13449,24 +13107,22 @@ begin
     wbString(TETC, 'Teeth Color'),
     wbInteger(PRON, 'Pronoun', itU8, wbPronounEnum),
     wbStruct(ONA2, 'Race Overrides', [
-      wbInteger('Flags', itU32, wbFlags([
-        'Size',
-        'Movement',
-        'Flight',
-        'Unarmed Weapon',
-        'Flag Overrides',
-        'Bleedout',
-        'General',
-        'Electromagnetic'
-      ]))
-        .IncludeFlag(dfCollapsed, wbCollapseFlags)
-        .SetAfterSet(wbUpdateSameParentUnions),
-
+      wbInteger('Flags', itU32,
+        wbFlags([
+        {0} 'Size',
+        {1} 'Movement',
+        {2} 'Flight',
+        {3} 'Unarmed Weapon',
+        {4} 'Flag Overrides',
+        {5} 'Bleedout',
+        {6} 'General',
+        {7} 'Electromagnetic'
+        ])
+      ).IncludeFlag(dfCollapsed, wbCollapseFlags)
+       .SetAfterSet(wbUpdateSameParentUnions),
       wbIsFlag(0, wbStruct('Size', [
-        wbInteger('Size', itS8, wbRaceSizeEnum)
-          .SetDontShow(wbRaceOverrideDontShow(0))
+        wbInteger('Size', itS8, wbRaceSizeEnum).SetDontShow(wbRaceOverrideDontShow(0))
       ])),
-
       wbIsFlag(1, wbStruct('Movement Accel/Decel', [
         wbFloat('Acceleration (m)')
           .IncludeFlag(dfFloatSometimesBroken)
@@ -13480,17 +13136,13 @@ begin
         wbFloat('Angular Tolerance (deg)')
           .SetDontShow(wbRaceOverrideDontShow(4))
       ])),
-
       wbIsFlag(2, wbStruct('Flight', [
         wbFloat('Flight Radius').SetDontShow(wbRaceOverrideDontShow(5))
       ])),
-
       wbIsFlag(3, wbStruct('Unarmed Weapon', [
         wbFloat('Injured Health Pct').SetDontShow(wbRaceOverrideDontShow(7)),
-        wbFormIDCk('Unarmed Weapon', [NULL, WEAP])
-          .SetDontShow(wbRaceOverrideDontShow(6))
+        wbFormIDCk('Unarmed Weapon', [NULL, WEAP]).SetDontShow(wbRaceOverrideDontShow(6))
       ])),
-
       wbIsFlag(4, wbStruct('Flag Overrides', [
         wbInteger('Race Data Flags', itU64, wbRACEDAT2Flags
           .SetDontShowMaskPath('...\Override Active', True))
@@ -13498,7 +13150,6 @@ begin
         wbInteger('Override Active', itU64, wbRACEDAT2Flags)
           .IncludeFlag(dfCollapsed, wbCollapseFlags)
       ])),
-
       wbIsFlag(5, wbStruct('Bleedout Data', [
         wbFloat('Health %').SetDontShow(wbRaceOverrideDontShow(8)),
         wbFloat('Chance').SetDontShow(wbRaceOverrideDontShow(9)),
@@ -13507,10 +13158,8 @@ begin
         wbFloat('Time Max').SetDontShow(wbRaceOverrideDontShow(12)),
         wbFloat('Health Drain Rate').SetDontShow(wbRaceOverrideDontShow(13))
       ])),
-
       wbIsFlag(6, wbStruct('General', [
-        wbFormIDCk('Impact Material Type', [NULL, MATT])
-          .SetDontShow(wbRaceOverrideDontShow(14)),
+        wbFormIDCk('Impact Material Type', [NULL, MATT]).SetDontShow(wbRaceOverrideDontShow(14)),
         wbSoundReference('Sound - Corpse Open').SetDontShow(wbRaceOverrideDontShow(18)),
         wbSoundReference('Sound - Corpse Close').SetDontShow(wbRaceOverrideDontShow(19)),
         wbStruct('OnCripple', [
@@ -13521,42 +13170,43 @@ begin
           wbInteger('Debris Count', itU8),
           wbInteger('Decal Count', itU8)
         ]).SetDontShow(wbRaceOverrideDontShow(22)),
-        wbInteger('Active Overrides', itU32, wbFlags([
-          {0x00000001} { 0} 'Size',
-          {0x00000002} { 1} 'Movement - Acceleration',
-          {0x00000004} { 2} 'Movement - Deceleration',
-          {0x00000008} { 3} 'Movement - Angular Acceleration',
-          {0x00000010} { 4} 'Movement - Angular Tolerance',
-          {0x00000020} { 5} 'Flight Radius',
-          {0x00000040} { 6} 'Unarmed Weapon - Unarmed Weapon',
-          {0x00000080} { 7} 'Unarmed Weapon - Injured Health %',
-          {0x00000100} { 8} 'Bleedout - Health %',
-          {0x00000200} { 9} 'Bleedout - Chance',
-          {0x00000400} {10} 'Bleedout - Recover Chance',
-          {0x00000800} {11} 'Bleedout - Time Min',
-          {0x00001000} {12} 'Bleedout - Time Max',
-          {0x00002000} {13} 'Bleedout - Health Drain Rate',
-          {0x00004000} {14} 'Blood Data - Impact Material Type',
-          {0x00008000} {15} '',
-          {0x00010000} {16} '',
-          {0x00020000} {17} '',
-          {0x00040000} {18} 'Blood Data - Sound Open Corpse',
-          {0x00080000} {19} 'Blood Data - Sound Close Corpse',
-          {0x00100000} {20} '',
-          {0x00200000} {21} '',
-          {0x00400000} {22} 'Blood Data - OnCripple',
-          {0x00800000} {23} 'EM - Support Shocked',
-          {0x01000000} {24} 'EM - Recover Chance',
-          {0x02000000} {25} 'EM - Time Min',
-          {0x04000000} {26} 'EM - Time Max',
-          {0x08000000} {27} 'EM - Recover Chance on Damage',
-          {0x10000000} {28} 'EM - Health Drain Rate',
-          {0x20000000} {29} 'EM - Health After Recovery',
-          {0x40000000} {30} 'EM - Immunity Duration',
-          {0x80000000} {31} ''
-        ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
+        wbInteger('Active Overrides', itU32,
+          wbFlags([
+          {0}  'Size',
+          {1}  'Movement - Acceleration',
+          {2}  'Movement - Deceleration',
+          {3}  'Movement - Angular Acceleration',
+          {4}  'Movement - Angular Tolerance',
+          {5}  'Flight Radius',
+          {6}  'Unarmed Weapon - Unarmed Weapon',
+          {7}  'Unarmed Weapon - Injured Health %',
+          {8}  'Bleedout - Health %',
+          {9}  'Bleedout - Chance',
+          {10} 'Bleedout - Recover Chance',
+          {11} 'Bleedout - Time Min',
+          {12} 'Bleedout - Time Max',
+          {13} 'Bleedout - Health Drain Rate',
+          {14} 'Blood Data - Impact Material Type',
+          {15} '',
+          {16} '',
+          {17} '',
+          {18} 'Blood Data - Sound Open Corpse',
+          {19} 'Blood Data - Sound Close Corpse',
+          {20} '',
+          {21} '',
+          {22} 'Blood Data - OnCripple',
+          {23} 'EM - Support Shocked',
+          {24} 'EM - Recover Chance',
+          {25} 'EM - Time Min',
+          {26} 'EM - Time Max',
+          {27} 'EM - Recover Chance on Damage',
+          {28} 'EM - Health Drain Rate',
+          {29} 'EM - Health After Recovery',
+          {30} 'EM - Immunity Duration',
+          {31} ''
+          ])
+        ).IncludeFlag(dfCollapsed, wbCollapseFlags)
       ])),
-
       wbIsFlag(7, wbStruct('Electromagnetic Shocked Data', [
         wbInteger('Support Electromagnetic Shocked', itU8, wbBoolEnum).SetDontShow(wbRaceOverrideDontShow(23)),
         wbFloat('Recover Chance').SetDontShow(wbRaceOverrideDontShow(24)),
@@ -13820,7 +13470,7 @@ begin
          2, 'Unknown 2',
          3, 'SitLinkedRef',
          4, 'TravelToLinkedRef',
-         //5
+         5, 'Unknown 5',
          6, 'RetreatPackage',
          7, 'Follow NPC',
          8, 'StayAtSelf',
@@ -14117,6 +13767,7 @@ begin
         3,  'Allow Reuse in Quest',
         8,  'Stores Text',
         9,  'Allow Reserved',
+        11, 'Forced by Aliases',
         16, 'Allow Explored',
         20, 'External Alias - Linked',
         23, 'Discard on shutdown if unused',
@@ -14522,7 +14173,7 @@ begin
     wbFloat(PNAM, 'FaceGen - Main clamp', cpNormal, True),
     wbFloat(UNAM, 'FaceGen - Face clamp', cpNormal, True),
 
-    wbRArrayS('Attacks', wbAttackData),
+    wbAttackData,
 
     wbRStruct('Junk Data', [
       wbMarkerReq(NAM1, cpIgnore),
@@ -14752,6 +14403,8 @@ begin
     wbInteger(XBPO, 'Blueprint Part Origin', itU32),
 
     wbFormIDCk(XLYR, 'Layer', [LAYR]),
+
+    wbArray(XLMS, 'Layered Material Swaps', wbFormIDCk('Layered Material Swap', [LMSW])),
 
     wbFloat(XHTW, 'Head-Tracking Weight'),
 
@@ -15350,6 +15003,8 @@ begin
 
     wbEmpty(ONAM, 'Open by Default'),
 
+    wbUnknown(XLTW),
+
     wbVec3PosRot(DATA).SetRequired,
 
     wbString(MNAM, 'Comments')
@@ -15683,7 +15338,7 @@ begin
        wbFloat('Cone of Fire - Iron Sights Mult'),
        wbFloat('Recoil - Base Stability'),
        wbInteger('Cone of Fire Ignores Movement', itU8, wbBoolEnum)
-    ])
+    ], cpNormal, False, nil, 16)
   ]);
 
   {subrecords checked against Starfield.esm}
@@ -18226,6 +17881,7 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(LMSW, 'Layered Material Swap', [
     wbEDID,
+    wbVMAD,
     wbBaseFormComponents,
     wbReflection(REFL)
   ]);

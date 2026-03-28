@@ -136,7 +136,7 @@ function wbWorldWaterIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldClimateIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldImageSpaceIsRemovable(const aElement: IwbElement): Boolean;
 
-{>>> Links To Callbacks <<<} //10
+{>>> Links To Callbacks <<<} //12
 function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
 function wbConditionSummaryLinksTo(const aElement: IwbElement): IwbElement;
 function wbCoverLinksTo(const aElement: IwbElement): IwbElement;
@@ -144,6 +144,8 @@ function wbEdgeLinksTo(aEdge: Integer; const aElement: IwbElement): IwbElement;
 function wbEdgeLinksTo0(const aElement: IwbElement): IwbElement;
 function wbEdgeLinksTo1(const aElement: IwbElement): IwbElement;
 function wbEdgeLinksTo2(const aElement: IwbElement): IwbElement;
+function wbNPCFaceDialLinksTo(const aElement: IwbElement): IwbElement;
+function wbNPCFaceMorphLinksTo(const aElement: IwbElement): IwbElement;
 function wbSCENAliasLinksTo(const aElement: IwbElement): IwbElement;
 function wbTriangleLinksTo(const aElement: IwbElement): IwbElement;
 function wbVertexLinksTo(const aElement: IwbElement): IwbElement;
@@ -156,7 +158,7 @@ function wbTryGetContainingMainRecord(const aElement: IwbElement; out aMainRecor
 function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; const aSignature: string = ''): Boolean;
 function wbTrySetContainer(const aElement: IwbElement; aType: TwbCallbackType; out aContainer: IwbContainerElementRef): Boolean;
 
-{>>> To Integer Callbacks <<<} //18
+{>>> To Integer Callbacks <<<} //19
 function Sig2Int(const aSignature: TwbSignature): Cardinal; inline;
 function wbAliasToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbConditionStringToInt(const aString: string; const aElement: IwbElement): Int64;
@@ -166,6 +168,7 @@ function wbEdgeToInt(aEdge: Integer; const aString: string; const aElement: IwbE
 function wbEdgeToInt0(const aString: string; const aElement: IwbElement): Int64;
 function wbEdgeToInt1(const aString: string; const aElement: IwbElement): Int64;
 function wbEdgeToInt2(const aString: string; const aElement: IwbElement): Int64;
+function wbIntPrefixedStrToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbNVTREdgeToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbScaledInt4ToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbStrToInt(const aString: string; const aElement: IwbElement): Int64;
@@ -176,7 +179,7 @@ function wbVertexToInt2(const aString: string; const aElement: IwbElement): Int6
 function wbWeatherCloudSpeedToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbPackagePSDTMonthValueToInt(const aString: string; const aElement: IwbElement): Int64;
 
-{>>> To String Callback Functions <<<} //27
+{>>> To String Callback Functions <<<} //31
 function wbAliasToStr(aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
 function wbClmtMoonsPhaseLength(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbClmtTime(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
@@ -191,6 +194,8 @@ function wbFileHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbC
 function wbFolderHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbHideFFFF(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbINFOAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbNPCFaceDialToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbNPCFaceMorphToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbNVTREdgeToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbPackageLocationAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbQuestAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
@@ -2206,7 +2211,7 @@ begin
     (aElement.ContainingMainRecord.ElementNativeValues['Parent Worldspace\PNAM'] and $20 = 32);
 end;
 
-{>>> Links To Callbacks <<<} //10
+{>>> Links To Callbacks <<<} //12
 
 function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
 begin
@@ -2388,6 +2393,96 @@ begin
   Result := wbEdgeLinksTo(2, aElement);
 end;
 
+function wbNPCFaceDialLinksTo(const aElement: IwbElement): IwbElement;
+begin
+  Result := nil;
+
+  var lContainer: IwbContainer;
+  if not Supports(aElement, IwbContainer, lContainer) then
+    Exit;
+
+  var lFaceDialIndexValue := aElement.NativeValue;
+  if not VarIsOrdinal(lFaceDialIndexValue) then
+    Exit;
+
+  var lFaceDialIndex: Integer := lFaceDialIndexValue;
+  var lRace := lContainer.ElementLinksTo['...\RNAM'];
+  var lRaceMainRecord : IwbMainRecord;
+  if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
+    Exit;
+
+  var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
+  var lGender := 'Male';
+  if lIsFemale then
+    lGender := 'Female';
+
+  var lRaceFaceDials := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Dials'];
+
+  var lRaceFaceDialsContainer: IwbContainerElementRef;
+  if not Supports(lRaceFaceDials, IwbContainerElementRef, lRaceFaceDialsContainer) then
+    Exit;
+
+  for var lRaceFaceDialsIdx := 0 to Pred(lRaceFaceDialsContainer.ElementCount) do begin
+    var lRaceFaceDial := lRaceFaceDialsContainer.Elements[lRaceFaceDialsIdx];
+
+    var lRaceFaceDialContainer: IwbContainerElementRef;
+    if not Supports(lRaceFaceDial, IwbContainerElementRef, lRaceFaceDialContainer) then
+      Continue;
+
+    var lSkinIndexValue := lRaceFaceDialContainer.ElementNativeValues[FDSI];
+    if not VarIsOrdinal(lSkinIndexValue) then
+      Continue;
+    var lSkinIndex: Integer := lSkinIndexValue;
+
+    if lSkinIndex = lFaceDialIndex then
+      Exit(lRaceFaceDial);
+  end;
+end;
+
+function wbNPCFaceMorphLinksTo(const aElement: IwbElement): IwbElement;
+begin
+  Result := nil;
+
+  var lContainer: IwbContainer;
+  if not Supports(aElement, IwbContainer, lContainer) then
+    Exit;
+
+  var lFaceMorphIndexValue := aElement.NativeValue;
+  if not VarIsOrdinal(lFaceMorphIndexValue) then
+    Exit;
+
+  var lFaceMorphIndex: Integer := lFaceMorphIndexValue;
+  var lRace := lContainer.ElementLinksTo['...\RNAM'];
+  var lRaceMainRecord : IwbMainRecord;
+  if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
+    Exit;
+
+  var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
+  var lGender := 'Male';
+  if lIsFemale then
+    lGender := 'Female';
+
+  var lRaceFaceMorphs := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Morph Phenotypes'];
+  var lRaceFaceMorphsContainer: IwbContainerElementRef;
+  if not Supports(lRaceFaceMorphs, IwbContainerElementRef, lRaceFaceMorphsContainer) then
+    Exit;
+
+  for var lRaceFaceMorphsIdx := 0 to Pred(lRaceFaceMorphsContainer.ElementCount) do begin
+    var lRaceFaceMorph := lRaceFaceMorphsContainer.Elements[lRaceFaceMorphsIdx];
+    var lRaceFaceMorphContainer: IwbContainerElementRef;
+    if not Supports(lRaceFaceMorph, IwbContainerElementRef, lRaceFaceMorphContainer) then
+      Continue;
+
+    var lMorphIndexValue := lRaceFaceMorphContainer.ElementNativeValues[FMRI];
+    if not VarIsOrdinal(lMorphIndexValue) then
+      Continue;
+
+    var lMorphIndex: Integer := lMorphIndexValue;
+    if lMorphIndex = lFaceMorphIndex then
+      Exit(lRaceFaceMorph);
+  end;
+end;
+
 function wbSCENAliasLinksTo(const aElement: IwbElement): IwbElement;
 begin
   Result := nil;
@@ -2558,7 +2653,7 @@ begin
   Result := (aType = ctToSummary) and Supports(aElement, IwbContainerElementRef, aContainer);
 end;
 
-{>>> To Integer Callbacks <<<} //18
+{>>> To Integer Callbacks <<<} //19
 
 function Sig2Int(const aSignature: TwbSignature): Cardinal; inline;
 begin
@@ -2707,6 +2802,20 @@ begin
   Result := wbEdgeToInt(2, aString, aElement);
 end;
 
+function wbIntPrefixedStrToInt(const aString: string; const aElement: IwbElement): Int64;
+var
+  i    : Integer;
+  s    : string;
+begin
+  i := 1;
+  s := Trim(aString);
+  while (i <= Length(s)) and (ANSIChar(s[i]) in ['-', '0'..'9']) do
+    Inc(i);
+  s := Copy(s, 1, Pred(i));
+
+  Result := StrToInt(s);
+end;
+
 function wbNVTREdgeToInt(const aString: string; const aElement: IwbElement): Int64;
 begin
   Result := StrToInt64(aString);
@@ -2784,7 +2893,7 @@ begin
     Result := Succ(Result);
 end;
 
-{>>> To String Callback Functions <<<} //27
+{>>> To String Callback Functions <<<} //31
 
 function wbAliasToStr(aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
 var
@@ -3296,6 +3405,234 @@ begin
       ctToSortKey: Result := IntToHex64(aInt, 8);
       ctToStr, ctToSummary, ctToEditValue: Result := aInt.ToString;
     end;
+  end;
+end;
+
+function wbNPCFaceDialToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+begin
+  var lContainer: IwbContainer;
+  if not Supports(aElement, IwbContainer, lContainer) then
+    Exit;
+
+  var lIntToStr := aInt.ToString;
+
+  case aType of
+    ctToStr, ctToSummary, ctToEditValue: begin
+      Result := lIntToStr;
+      if aType = ctToStr then
+        Result := Result + ' <Warning: Could not resolve face dial>';
+    end;
+    ctToSortKey: Exit(IntToHex64(aInt, 8));
+    ctCheck: Result := '<Warning: Could not resolve face dial>';
+    ctEditType: Exit('ComboBox');
+    ctEditInfo: Result := '';
+  end;
+
+  var lRace := lContainer.ElementLinksTo['...\RNAM'];
+  var lRaceMainRecord : IwbMainRecord;
+  if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
+    Exit;
+
+  if lRaceMainRecord.Signature <> RACE then begin
+    case aType of
+      ctToStr: Result := lIntToStr + ' <Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
+      ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
+    end;
+    Exit;
+  end;
+
+  var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
+  var lGender := 'Male';
+  if lIsFemale then
+    lGender := 'Female';
+
+  var lRaceFaceDials := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Dials'];
+
+  var lRaceFaceDialsContainer: IwbContainerElementRef;
+  if not Supports(lRaceFaceDials, IwbContainerElementRef, lRaceFaceDialsContainer) then begin
+    case aType of
+      ctToStr: Result := lIntToStr + ' <Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Dials>';
+      ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Dials>';
+    end;
+    Exit;
+  end;
+
+  var lEditInfos: TStringList := nil;
+  if aType = ctEditInfo then
+    lEditInfos := TStringList.Create;
+  try
+    for var lRaceFaceDialsIdx := 0 to Pred(lRaceFaceDialsContainer.ElementCount) do begin
+      var lRaceFaceDial := lRaceFaceDialsContainer.Elements[lRaceFaceDialsIdx];
+
+      var lRaceFaceDialContainer: IwbContainerElementRef;
+      if not Supports(lRaceFaceDial, IwbContainerElementRef, lRaceFaceDialContainer) then
+        Continue;
+
+      var lSkinIndexValue := lRaceFaceDialContainer.ElementNativeValues[FDSI];
+      if not VarIsOrdinal(lSkinIndexValue) then
+        Continue;
+
+      var lSkinIndex: Integer := lSkinIndexValue;
+      if (lSkinIndex = aInt) or Assigned(lEditInfos) then begin
+        var lIndexString := IntToStr(lSkinIndex);
+        while Length(lIndexString) < 3 do
+          lIndexString := '0' + lIndexString;
+
+        var lLabel: string;
+        case aType of
+          ctToSummary: lLabel := lRaceFaceDialContainer.ElementSummaries[FDSL];
+          ctToEditValue, ctEditInfo: lLabel := lRaceFaceDialContainer.ElementValues[FDSL];
+        else
+          lLabel := lRaceFaceDialContainer.ElementValues[FDSL];
+        end;
+
+        if lLabel <> '' then
+          lIndexString := lIndexString + ' ' + lLabel;
+
+        if Assigned(lEditInfos) then
+          lEditInfos.Add(lIndexString)
+        else if lSkinIndex = aInt then begin
+          case aType of
+            ctToStr, ctToSummary, ctToEditValue: Result := lIndexString;
+            ctCheck: Result := '';
+          end;
+          Exit;
+        end;
+      end;
+    end;
+
+    case aType of
+      ctToStr, ctToSummary: begin
+        Result := lIntToStr;
+        if aType = ctToStr then
+          Result := Result + ' <Warning: Face Dial [' + lIntToStr + '] not found in "' + lRaceMainRecord.Name + '">';
+      end;
+      ctCheck: Result := '<Warning: Face Dial [' + lIntToStr + '] not found in "' + lRaceMainRecord.Name + '">';
+      ctEditInfo: begin
+        lEditInfos.Sort;
+        Result := lEditInfos.CommaText;
+      end;
+    end;
+  finally
+    FreeAndNil(lEditInfos);
+  end;
+end;
+
+function wbNPCFaceMorphToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+begin
+  var lContainer: IwbContainer;
+  if not Supports(aElement, IwbContainer, lContainer) then
+    Exit;
+
+  var lIntToStr := aInt.ToString;
+
+  case aType of
+    ctToStr, ctToSummary, ctToEditValue: begin
+      Result := lIntToStr;
+      if aType = ctToStr then
+        Result := Result + ' <Warning: Could not resolve face morph phenotype>';
+    end;
+    ctToSortKey: begin
+      Result := IntToHex64(aInt, 8);
+      Exit;
+    end;
+    ctCheck: begin
+      Result := '<Warning: Could not resolve face morph phenotype>';
+    end;
+    ctEditType: begin
+      Result := 'ComboBox';
+      Exit;
+    end;
+    ctEditInfo: Result := '';
+  end;
+
+  var lRace := lContainer.ElementLinksTo['...\RNAM'];
+  var lRaceMainRecord : IwbMainRecord;
+  if not Supports(lRace, IwbMainRecord, lRaceMainRecord) then
+    Exit;
+
+  if lRaceMainRecord.Signature <> RACE then begin
+    case aType of
+      ctToStr: Result := lIntToStr + ' <Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
+      ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" is not a Race record>';
+    end;
+    Exit;
+  end;
+
+  var lIsFemale := lContainer.ElementExists['...\ACBS\Flags\Female'];
+  var lGender := 'Male';
+  if lIsFemale then
+    lGender := 'Female';
+
+  var lRaceFaceMorphs := lRaceMainRecord.ElementByPath['Chargen and Skintones\' + lGender + '\Chargen\Face Morph Phenotypes'];
+
+  var lRaceFaceMorphsContainer: IwbContainerElementRef;
+    if not Supports(lRaceFaceMorphs, IwbContainerElementRef, lRaceFaceMorphsContainer) then begin
+      case aType of
+        ctToStr: Result := lIntToStr + ' <Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Morph Phenotype>';
+        ctCheck: Result := '<Warning: "' + lRaceMainRecord.ShortName + '" does not contain ' + lGender + ' Chargen Face Morph Phenotype>';
+      end;
+      Exit;
+    end;
+
+  var lEditInfos: TStringList := nil;
+  if aType = ctEditInfo then
+    lEditInfos := TStringList.Create;
+  try
+    for var lRaceFaceMorphIdx := 0 to Pred(lRaceFaceMorphsContainer.ElementCount) do begin
+      var lRaceFaceMorph := lRaceFaceMorphsContainer.Elements[lRaceFaceMorphIdx];
+
+      var lRaceFaceMorphContainer: IwbContainerElementRef;
+      if not Supports(lRaceFaceMorph, IwbContainerElementRef, lRaceFaceMorphContainer) then
+        Continue;
+
+      var lMorphIndexValue := lRaceFaceMorphContainer.ElementNativeValues[FMRI];
+      if not VarIsOrdinal(lMorphIndexValue) then
+        Continue;
+
+      var lMorphIndex: Integer := lMorphIndexValue;
+      if (lMorphIndex = aInt) or Assigned(lEditInfos) then begin
+        var lIndexString := IntToStr(lMorphIndex);
+        while Length(lIndexString) < 3 do
+          lIndexString := '0' + lIndexString;
+
+        var lName: string;
+        case aType of
+          ctToSummary: lName := lRaceFaceMorphContainer.ElementSummaries[FMRN];
+          ctToEditValue, ctEditInfo: lName := lRaceFaceMorphContainer.ElementValues[FMRN];
+        else
+          lName := lRaceFaceMorphContainer.ElementValues[FMRN];
+        end;
+
+        if lName <> '' then
+          lIndexString := lIndexString + ' ' + lName;
+
+        if Assigned(lEditInfos) then
+          lEditInfos.Add(lIndexString)
+        else if lMorphIndex = aInt then begin
+          case aType of
+            ctToStr, ctToSummary, ctToEditValue: Result := lIndexString;
+            ctCheck: Result := '';
+          end;
+          Exit;
+        end;
+      end;
+    end;
+
+    case aType of
+      ctToStr, ctToSummary: begin
+        Result := lIntToStr;
+        if aType = ctToStr then
+          Result := Result + ' <Warning: Face Morph Phenotype [' + lIntToStr + '] not found in "' + lRaceMainRecord.Name + '">';
+      end;
+      ctCheck: Result := '<Warning: Face Morph Phenotype [' + lIntToStr + '] not found in "' + lRaceMainRecord.Name + '">';
+      ctEditInfo: begin
+        lEditInfos.Sort;
+        Result := lEditInfos.CommaText;
+      end;
+    end;
+  finally
+    FreeAndNil(lEditInfos);
   end;
 end;
 
