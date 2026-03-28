@@ -13,8 +13,6 @@ unit wbDefinitionsCommon;
 interface
 
 uses
-  System.Variants,
-
   wbInterface;
 
 type
@@ -290,17 +288,17 @@ function IsVR(const aDef1, aDef2: string): string;
 function IsVRESL(const aDef1, aDef2: string): string;
 
 {>>> Game Mode IfThen Defs <<<} //36
-function IsTES3(const aDef1, aDef2: String): string; overload;
+function IsTES3(const aDef1, aDef2: string): string; overload;
 function IsTES3(const aDef1, aDef2: TwbSignature): TwbSignature; overload;
 function IsTES4(const aDef1, aDef2: Integer): Integer; overload;
 function IsTES4(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsTES4(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsTES4(const aDef1, aDef2: String): string; overload;
+function IsTES4(const aDef1, aDef2: string): string; overload;
 function IsTES4(const aDef1, aDef2: TwbSignature): TwbSignature; overload;
 function IsTES4R(const aDef1, aDef2: Integer): Integer; overload;
 function IsTES4R(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsTES4FO3(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsTES4FO3(const aDef1, aDef2: String): string; overload;
+function IsTES4FO3(const aDef1, aDef2: string): string; overload;
 function IsFO3(const aDef1, aDef2: Integer): Integer; overload;
 function IsFO3(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsFO3(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
@@ -308,7 +306,7 @@ function IsFO3(const aDef1, aDef2: string): string; overload;
 function IsFNV(const aDef1, aDef2: string): string; overload;
 function IsFNV(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsFNV(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsTES5(const aDef1, aDef2: String): string; overload;
+function IsTES5(const aDef1, aDef2: string): string; overload;
 function IsTES5(const aDef1, aDef2: Cardinal): Cardinal; overload;
 function IsTES5(const aDef1, aDef2: Integer): Integer; overload;
 function IsTES5(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
@@ -415,7 +413,7 @@ function wbByteColors(const aSignature : TwbSignature;
                       const aDefaultR  : Byte = 0;
                       const aDefaultG  : Byte = 0;
                       const aDefaultB  : Byte = 0)
-                                       : IwbRecordMemberDef; overload
+                                       : IwbRecordMemberDef; overload;
 
 function wbByteColors(const aName     : string = 'Color';
                       const aDefaultR : Byte = 0;
@@ -675,6 +673,7 @@ uses
   System.StrUtils,
   System.SysUtils,
   System.Types,
+  System.Variants,
 
   wbDefinitionsSignatures,
   wbHelpers,
@@ -1080,7 +1079,7 @@ begin
 
     if lMainRecord.ElementExists['SNDD'] then begin
 
-      If not Assigned(lMainRecord.ElementBySignature['SNDX']) then
+      if not Assigned(lMainRecord.ElementBySignature['SNDX']) then
         lMainRecord.Add('SNDX', True);
 
       var lSNDX := lMainRecord.ElementBySignature['SNDX'] as IwbContainerElementRef;
@@ -1093,7 +1092,7 @@ begin
       lMainRecord.RemoveElement('SNDD');
     end;
   finally
-    wbEndInternalEdit
+    wbEndInternalEdit;
   end;
 end;
 
@@ -1432,7 +1431,7 @@ begin
             lContainerElementRef.RemoveElement('Icon')
           else
             lContainerElementRef.RemoveElement(ICON);
-          lContainerElementRef.RemoveElement(MNAM)
+          lContainerElementRef.RemoveElement(MNAM);
         end else
           lContainerElementRef.Add(MNAM);
 
@@ -1456,13 +1455,13 @@ begin
         lContainerElementRef.Add('LOD Data');
         lContainerElementRef.Add(MNAM);
         lContainerElementRef.Add(NAM2);
-        if not wbIsStarfield then        
+        if not wbIsStarfield then
           lContainerElementRef.Add(CNAM);
         if wbIsFallout3 then
           lContainerElementRef.Add(INAM);
       end;
   finally
-    wbEndInternalEdit
+    wbEndInternalEdit;
   end;
 end;
 
@@ -1545,9 +1544,9 @@ begin
     if Assigned(MainRecord) then begin
       Version := MainRecord.Version;
       if Version >= 35 then begin
-        Result := 32
+        Result := 32;
       end else begin
-        Result := 4
+        Result := 4;
       end;
     end;
   end;
@@ -1783,7 +1782,7 @@ begin
   var lFlagsValue := lFlags.NativeValue;
       {Shadow Spotlight}              {Shadow Hemisphere}
   if (((lFlagsValue and $400) = 0) and ((lFlagsValue and $800) = 0)) then
-    if ((wbCS = False) or ((lFlagsValue and $4000) = 0)) then
+    if ((not wbCS) or ((lFlagsValue and $4000) = 0)) then
       Result := True;
 end;
 
@@ -1835,7 +1834,7 @@ begin
   var lFlagsValue := lFlags.NativeValue;
      {Shadow Spotlight}
   if (lFlagsValue and $400) = 0 then
-    if ((wbCS = False) or ((lFlagsValue and $4000) = 0)) then
+    if ((not wbCS) or ((lFlagsValue and $4000) = 0)) then
       Result := True;
 end;
 
@@ -2015,7 +2014,7 @@ begin
     Exit;
 
   if MainRecord.ConflictAll > caNoConflict then
-    aConflictPriority := cpNormal
+    aConflictPriority := cpNormal;
 end;
 
 procedure wbModelInfoGetCP(const aElement: IwbElement; var aConflictPriority: TwbConflictPriority);
@@ -2077,7 +2076,7 @@ begin
       var AliasValue := Alias.Value;
 
       if Supports(FormID.LinksTo, IwbMainRecord, MainRecord) then
-        if MainRecord <> nil then
+        if Assigned(MainRecord) then
           ItemName := MainRecord.ShortName
         else
           ItemName := 'NULL';
@@ -2085,7 +2084,7 @@ begin
       if not (CompareStr(AliasValue, 'None') = 0) and not (Length(AliasValue) = 0) then
         Items.Add(Alias.EditValue + IfThen(Length(ItemName) > 0, ' = ' + ItemName, ''))
       else
-        if MainRecord <> nil then
+        if Assigned(MainRecord) then
           Items.Add(MainRecord.ShortName)
         else
           Items.Add('NULL');
@@ -2134,7 +2133,7 @@ begin
   while Assigned(Container) and (Container.ElementType <> etSubRecord) do
     Container := Container.Container;
 
-  if Container = nil then
+  if not Assigned(Container) then
     Exit;
 
   var ObjFormat := Container.ElementNativeValues['Object Format'];
@@ -2846,7 +2845,7 @@ begin
     s := aString;
 
   try
-    Result := StrToInt64(s)
+    Result := StrToInt64(s);
   except
     Result := 0;
   end;
@@ -3675,7 +3674,7 @@ begin
           Result := ''
         else
           Result := 'NVEX\Edge Link #' + aInt.ToString + ' is missing';
-    end
+    end;
   end else
     case aType of
       ctToStr, ctToSummary: Result := aInt.ToString;
@@ -4373,7 +4372,7 @@ begin
   if not Assigned(aElement) then
     Exit;
 
-  if wbBuildRefs = False then
+  if not wbBuildRefs then
     Exit;
 
   var lMainRecord := aElement.ContainingMainRecord;
@@ -4591,23 +4590,21 @@ end;
 
 procedure wbToStringFromLinksToSummary(var aValue:string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 begin
-  case aType of
-    ctToStr:
-    begin
-      if Assigned(aElement) then begin
-        var lLinksTo := aElement.LinksTo;
-        if Assigned(lLinksTo) then begin
-          var lSummary := lLinksTo.Summary;
-          if lSummary <> '' then begin
-            aValue := lSummary;
-            var lMainRecord: IwbMainRecord;
-            if not Supports(lLinksTo, IwbMainRecord) and
-                   wbTryGetContainingMainRecord(lLinksTo, lMainRecord)
-            then begin
-              var lRecordName := lMainRecord.Name;
-              if lRecordName <> '' then
-                aValue := aValue + ' on ' + lRecordName;
-            end;
+  if aType = ctToStr then
+  begin
+    if Assigned(aElement) then begin
+      var lLinksTo := aElement.LinksTo;
+      if Assigned(lLinksTo) then begin
+        var lSummary := lLinksTo.Summary;
+        if lSummary <> '' then begin
+          aValue := lSummary;
+          var lMainRecord: IwbMainRecord;
+          if not Supports(lLinksTo, IwbMainRecord) and
+                 wbTryGetContainingMainRecord(lLinksTo, lMainRecord)
+          then begin
+            var lRecordName := lMainRecord.Name;
+            if lRecordName <> '' then
+              aValue := aValue + ' on ' + lRecordName;
           end;
         end;
       end;
@@ -4617,29 +4614,27 @@ end;
 
 procedure wbToStringFromLinksToMainRecordName(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 begin
-  case aType of
-    ctToStr:
-    begin
-      if aValue = '' then
-        Exit;
+  if aType = ctToStr then
+  begin
+    if aValue = '' then
+      Exit;
 
-      aValue := '[' + aValue + ']';
+    aValue := '[' + aValue + ']';
 
-      if not Assigned(aElement) then
-        Exit;
+    if not Assigned(aElement) then
+      Exit;
 
-      var lLinksTo := aElement.LinksTo;
-      if not Assigned(lLinksTo) then
-        Exit;
+    var lLinksTo := aElement.LinksTo;
+    if not Assigned(lLinksTo) then
+      Exit;
 
-      var lMainRecord: IwbMainRecord;
-      if not Supports(lLinksTo, IwbMainRecord, lMainRecord) then
-        Exit;
+    var lMainRecord: IwbMainRecord;
+    if not Supports(lLinksTo, IwbMainRecord, lMainRecord) then
+      Exit;
 
-      var lRecordName := lMainRecord.Name;
-      if lRecordName <> '' then
-        aValue := aValue + ' ' + lRecordName;
-    end;
+    var lRecordName := lMainRecord.Name;
+    if lRecordName <> '' then
+      aValue := aValue + ' ' + lRecordName;
   end;
 end;
 
@@ -4880,7 +4875,7 @@ end;
 function wbGMSTUnionDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 begin
   Result := 1; //IntS32 is the most "harmless"
-  if Assigned(aElement) then begin;
+  if Assigned(aElement) then begin
     var lEDID := aElement.Container.RecordBySignature['EDID'];
     if Assigned(lEDID) then begin
       var lEditorID := lEDID.Value;
@@ -4889,14 +4884,14 @@ begin
           's': Result := 0; {String} {>>> Localization Strings <<<}
           'i': Result := 1; {intS32}
           'f': Result := 2; {Float}
-        end;
-        if wbGameMode >= gmTES5 then
-        case lEditorID[1] of
-          'b': Result := 3; {Boolean}
-        end;
-        if (wbGameMode in [gmFO76, gmSF1]) then
-        case lEditorID[1] of
-          'u': Result := 4; {Uint32}
+          else begin
+            if wbGameMode >= gmTES5 then
+              if lEditorID[1] = 'b' then
+                Exit(3);
+            if (wbGameMode in [gmFO76, gmSF1]) then
+              if lEditorID[1] = 'u' then
+                Exit(4);
+          end;
         end;
       end;
     end;
@@ -4920,7 +4915,7 @@ begin
   if Version >= 40 then begin
     if Assigned(aBasePtr) and Assigned(aEndPtr) and ((NativeUInt(aEndPtr)-NativeUInt(aBasePtr)) >= SizeOf(Cardinal)) and (PCardinal(aBasePtr)^ > 8 {arbitary limit of 8 supported headers for now}) then
       Exit(1); // most likely older version format in FormVersion 40+ record
-    Exit(3)
+    Exit(3);
   end else if Version >= 38 then begin
     if Assigned(aBasePtr) and Assigned(aEndPtr) and ((NativeUInt(aEndPtr)-NativeUInt(aBasePtr)) >= SizeOf(Cardinal)) and (PCardinal(aBasePtr)^ <= 8 {arbitary limit of 8 supported headers for now}) then
       Exit(1); // most likely newer version format in FormVersion 38-39 record
@@ -5134,7 +5129,7 @@ var
 begin
   Result := 0;
   if Assigned(aElement) and Supports (aElement, IwbSubRecord, SubRecord) then
-    case Integer(SubRecord.SubRecordHeaderSize) of
+    case SubRecord.SubRecordHeaderSize of
       64, 160: Result := 1;
     end;
 end;
@@ -5142,7 +5137,7 @@ end;
 function wbWwiseKeywordMappingSoundDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 begin
   Result := 0;
-  If not Assigned(aElement) then
+  if not Assigned(aElement) then
     Exit;
   Result := aElement.ContainingMainRecord.ElementNativeValues[WMTI];
 end;
@@ -5301,14 +5296,14 @@ function IsCS(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbCS then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsOBME(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbOBME then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsVR(const aDef1, aDef2: string): string;
@@ -5331,252 +5326,252 @@ function IsTES3(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsMorrowind then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES3(const aDef1, aDef2: TwbSignature): TwbSignature;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4(const aDef1, aDef2: Integer): Integer;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4(const aDef1, aDef2: TwbSignature): TwbSignature;
 begin
   Result := aDef2;
   if wbIsOblivion then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4R(const aDef1, aDef2: Integer): Integer;
 begin
   Result := aDef2;
   if wbIsOblivionR then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4R(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsOblivionR then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4FO3(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsOblivion or wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES4FO3(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsOblivion or wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO3(const aDef1, aDef2: Integer): Integer;
 begin
   Result := aDef2;
   if wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO3(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO3(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO3(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsFallout3 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFNV(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsFalloutNV then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFNV(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsFalloutNV then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFNV(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsFalloutNV then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES5(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsSkyrim then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES5(const aDef1, aDef2: Integer): Integer;
 begin
   Result := aDef2;
   if wbIsSkyrim then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES5(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsSkyrim then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES5(const aDef1, aDef2: Cardinal): Cardinal;
 begin
   Result := aDef2;
   if wbIsSkyrim then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsTES5(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsSkyrim then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSSE(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsSkyrimSE then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSSE(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsSkyrimSE then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSSE(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsSkyrimSE then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO4Plus(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsFallout4 or wbIsFallout76 or wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO4Plus(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsFallout4 or wbIsFallout76 or wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO4Plus(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsFallout4 or wbIsFallout76 or wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO76(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsFallout76 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO76(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsFallout76 then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsFO76SF1(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsFallout76 or wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSF1(const aDef1, aDef2: Integer): Integer;
 begin
   Result := aDef2;
   if wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSF1(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aDef2;
   if wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSF1(const aDef1, aDef2: IwbValueDef): IwbValueDef;
 begin
   Result := aDef2;
   if wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 function IsSF1(const aDef1, aDef2: string): string;
 begin
   Result := aDef2;
   if wbIsStarfield then
-    Result := aDef1
+    Result := aDef1;
 end;
 
 {>>> Size IfThen Defs <<<} //4
@@ -6291,7 +6286,7 @@ begin
       wbFromVersion(152, wbFormIDCk('Curve Table', [CURV, NULL]))
     ]).SetSummaryKey([1])
       .SetSummaryMemberPrefixSuffix(1, '= ','')
-      .IncludeFlag(dfSummaryMembersNoName))
+      .IncludeFlag(dfSummaryMembersNoName));
 end;
 
 function wbEnchantment(aCapacity: Boolean = False): IwbRecordMemberDef;
@@ -6535,7 +6530,7 @@ begin
     wbArray(aName, wbTimeInterpolator)
       .SetSummaryPassthroughMaxCount(10)
       .SetSummaryPassthroughMaxLength(100)
-      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators)
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
 
 end;
 
@@ -6661,9 +6656,8 @@ begin
 	      wbByteColors('Night')
         ]).SetSummaryKey([0,1,2,3]);
 
-  wbWeatherTimeOfDay :=
-    Struct.IncludeFlag(dfSummaryMembersNoName)
-          .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay)
+  Exit(Struct.IncludeFlag(dfSummaryMembersNoName)
+             .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay));
 end;
 
 {>>> NamedIndex Defs <<<} //2
@@ -8936,7 +8930,7 @@ begin
           wbFloat('Max Height').SetDefaultNativeValue(80000),
           wbFloat('Initial Pitch').SetDefaultNativeValue(50)
         ]),
-        Nil)
+        nil)
     ]).SetIsRemovable(wbWorldMapDataIsRemovable);
 end;
 
@@ -8952,7 +8946,7 @@ begin
         wbFloat('Cell Y Offset', cpNormal, True, 0.01),
         wbFloat('Cell Y Offset')),
       IsFO3(
-        Nil,
+        nil,
         IsSF1(
           wbFloat('Cell Z Offset', cpNormal, True, 0.01),
           wbFloat('Cell Z Offset')))
