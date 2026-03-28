@@ -25,8 +25,8 @@ uses
 var
   wbActorValueLabels : array of string;
 
-var // forward type directives
-//  wbChangeTypes    : IwbEnumDef;
+  // forward type directives
+  //wbChangeTypes    : IwbEnumDef;
   wbSaveChapters   : IwbStructDef;
   wbCoSaveChapters : IwbStructDef;
   wbSaveHeader     : IwbStructDef;
@@ -122,7 +122,7 @@ begin
   end;
 end;
 
-function FileLocationTableCountCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function FileLocationTableCountCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
   Element : IwbElement;
   Container: IwbDataContainer;

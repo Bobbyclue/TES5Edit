@@ -832,7 +832,7 @@ begin
       // except for this func when Run On = Quest Alias, then alias is param3 and package is param1
       // [INFO:00020D3C]
       if not ((Container.ElementByName['Run On'].NativeValue = 5) and (Desc.Name = 'GetIsCurrentPackage')) then
-        ParamType := ptAlias    {>>> 'use aliases' is set <<<}
+        ParamType := ptAlias;    {>>> 'use aliases' is set <<<}
       end
       else if ParamFlag and $08 > 0 then
         ParamType := ptPackdata;  {>>> 'use packdata' is set <<<}
@@ -1652,9 +1652,9 @@ begin
   end;
 
   try
-    value := StrToFloat(aString)
+    value := StrToFloat(aString);
   except
-    value := 0.0
+    value := 0.0;
   end;
 
   Result := PInteger(@value)^;
@@ -2907,7 +2907,7 @@ begin
     s := aString;
 
   try
-    Result := StrToInt64('$' + s)
+    Result := StrToInt64('$' + s);
   except
     Result := 0;
   end;
@@ -2915,11 +2915,11 @@ end;
 
 type
   TFaceGenFeature = record
-    RaceID  : String;
+    RaceID  : string;
     Female  : Boolean;
     Entries : array of record
       Index: Cardinal;
-      Name : String;
+      Name : string;
     end;
   end;
   PFaceGenFeature = ^TFaceGenFeature;
@@ -3377,128 +3377,128 @@ procedure wbSCENBehaviorEnumAfterLoad(const aElement: IwbElement);
 begin
   if wbBeginInternalEdit then try
     if aElement.GetNativeValue > $00000003 then
-      aElement.SetNativeValue($00000003)
+      aElement.SetNativeValue($00000003);
   finally
     wbEndInternalEdit;
   end;
 end;
 
 function wbTintTemplateGroups(const aName: string): IwbSubRecordArrayDef;
-  var
-    wbTintTemplateGroup: IwbSubRecordStructDef;
-    wbTintTemplateOption: IwbSubRecordStructDef;
-  begin
-    wbTintTemplateOption :=
-      wbRStruct('Option', [
-        wbStruct(TETI, 'Index', [
-          wbInteger('Slot', itU16, wbEnum([
-            'Forehead Mask',
-            'Eyes Mask',
-            'Nose Mask',
-            'Ears Mask',
-            'Cheeks Mask',
-            'Mouth Mask',
-            'Neck Mask',
-            'Lip Color',
-            'Cheek Color',
-            'Eyeliner',
-            'Eye Socket Upper',
-            'Eye Socket Lower',
-            'Skin Tone',
-            'Paint',
-            'Laugh Lines',
-            'Cheek Color Lower',
-            'Nose',
-            'Chin',
-            'Neck',
-            'Forehead',
-            'Dirt',
-            'Scars',
-            'Face Detail',
-            'Brows',
-            'Wrinkles',
-            'Beards'
-          ])),
-          wbInteger('Index', itU16)
-        ]),
-        wbLString(TTGP, 'Name', 0, cpTranslate),
-        wbInteger(TTEF, 'Flags', itU16, wbFlags([
-          'On/Off only',
-          'Chargen Detail',
-          'Takes Skin Tone'
-        ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbConditions,
-        wbRArray('Textures', wbString(TTET, 'Texture')),
-        wbInteger(TTEB, 'Blend Operation', itU32, wbBlendOperationEnum),
-        wbArray(TTEC, 'Template Colors', wbStruct('Template Color', [
-          wbFormIDCk('Color', [CLFM]),
-          wbFloat('Alpha'),
-          wbInteger('Template Index', itU16),
-          wbInteger('Blend Operation', itU32, wbBlendOperationEnum)
+var
+  wbTintTemplateGroup: IwbSubRecordStructDef;
+  wbTintTemplateOption: IwbSubRecordStructDef;
+begin
+  wbTintTemplateOption :=
+    wbRStruct('Option', [
+      wbStruct(TETI, 'Index', [
+        wbInteger('Slot', itU16, wbEnum([
+          'Forehead Mask',
+          'Eyes Mask',
+          'Nose Mask',
+          'Ears Mask',
+          'Cheeks Mask',
+          'Mouth Mask',
+          'Neck Mask',
+          'Lip Color',
+          'Cheek Color',
+          'Eyeliner',
+          'Eye Socket Upper',
+          'Eye Socket Lower',
+          'Skin Tone',
+          'Paint',
+          'Laugh Lines',
+          'Cheek Color Lower',
+          'Nose',
+          'Chin',
+          'Neck',
+          'Forehead',
+          'Dirt',
+          'Scars',
+          'Face Detail',
+          'Brows',
+          'Wrinkles',
+          'Beards'
         ])),
-        wbFloat(TTED, 'Default')
-      ]);
-
-    wbTintTemplateGroup :=
-      wbRStruct('Group', [
-        wbLString(TTGP, 'Group Name', 0, cpTranslate),
-        wbRArray('Options', wbTintTemplateOption),
-        wbInteger(TTGE, 'Category Index', itU32)
-      ]);
-
-    Result := wbRArray(aName, wbTintTemplateGroup);
-  end;
-
-  function wbMorphGroups(const aName: string): IwbSubRecordArrayDef;
-  begin
-    Result :=
-      wbRArray(aName,
-        wbRStruct('Morph Group', [
-          wbString(MPGN, 'Name'),
-          wbInteger(MPPC, 'Count', itU32, nil, cpBenign),
-          wbRArray('Morph Presets',
-            wbRStruct('Morph Preset', [
-              wbInteger(MPPI, 'Index', itU32, wbIntToHexStr, wbHexStrToInt),
-              wbLString(MPPN, 'Name', 0, cpTranslate),
-              wbString(MPPM, 'Morph'),
-              wbFormIDCk(MPPT, 'Texture', [TXST]),
-              wbInteger(MPPF, 'Playable', itU8, wbBoolEnum)
-            ])).SetCountPath(MPPC),
-          wbInteger(MPPK, 'Mask', itU16, wbEnum ([], [                                                       //Maps to Faceregion tint groups (male and female)
-
-        //Male
-        1171, 'Male Forehead Mask',
-        1172, 'Male Eyes Mask',
-        1173, 'Male Nose Mask',
-        1174, 'Male Ears Mask',
-        1175, 'Male Cheeks Mask',
-        1176, 'Male Mouth Mask',
-        1177, 'Male Neck Mask',
-        //Female
-        1221, 'Female Forehead Mask',
-        1222, 'Female Eyes Mask',
-        1223, 'Female Nose Mask',
-        1224, 'Female Ears Mask',
-        1225, 'Female Cheeks Mask',
-        1226, 'Female Mouth Mask',
-        1227, 'Female Neck Mask',
-        65535, 'None'
+        wbInteger('Index', itU16)
+      ]),
+      wbLString(TTGP, 'Name', 0, cpTranslate),
+      wbInteger(TTEF, 'Flags', itU16, wbFlags([
+        'On/Off only',
+        'Chargen Detail',
+        'Takes Skin Tone'
+      ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
+      wbConditions,
+      wbRArray('Textures', wbString(TTET, 'Texture')),
+      wbInteger(TTEB, 'Blend Operation', itU32, wbBlendOperationEnum),
+      wbArray(TTEC, 'Template Colors', wbStruct('Template Color', [
+        wbFormIDCk('Color', [CLFM]),
+        wbFloat('Alpha'),
+        wbInteger('Template Index', itU16),
+        wbInteger('Blend Operation', itU32, wbBlendOperationEnum)
       ])),
-          wbArray(MPGS, 'Morph Group Sliders', wbInteger('Index', itU32, wbIntToHexStr, wbHexStrToInt))
-        ])
-      );
-  end;
+      wbFloat(TTED, 'Default')
+    ]);
 
-  function wbFaceMorphs(const aName: string): IwbSubRecordArrayDef;
-  begin
-    Result :=
-      wbRArray(aName,
-        wbRStruct('Face Morph', [
-          wbInteger(FMRI, 'Index', itU32, wbIntToHexStr, wbHexStrToInt),
-          wbLString(FMRN, 'Name')
-        ])
-      );
-  end;
+  wbTintTemplateGroup :=
+    wbRStruct('Group', [
+      wbLString(TTGP, 'Group Name', 0, cpTranslate),
+      wbRArray('Options', wbTintTemplateOption),
+      wbInteger(TTGE, 'Category Index', itU32)
+    ]);
+
+  Result := wbRArray(aName, wbTintTemplateGroup);
+end;
+
+function wbMorphGroups(const aName: string): IwbSubRecordArrayDef;
+begin
+  Result :=
+    wbRArray(aName,
+      wbRStruct('Morph Group', [
+        wbString(MPGN, 'Name'),
+        wbInteger(MPPC, 'Count', itU32, nil, cpBenign),
+        wbRArray('Morph Presets',
+          wbRStruct('Morph Preset', [
+            wbInteger(MPPI, 'Index', itU32, wbIntToHexStr, wbHexStrToInt),
+            wbLString(MPPN, 'Name', 0, cpTranslate),
+            wbString(MPPM, 'Morph'),
+            wbFormIDCk(MPPT, 'Texture', [TXST]),
+            wbInteger(MPPF, 'Playable', itU8, wbBoolEnum)
+          ])).SetCountPath(MPPC),
+        wbInteger(MPPK, 'Mask', itU16, wbEnum ([], [                                                       //Maps to Faceregion tint groups (male and female)
+
+      //Male
+      1171, 'Male Forehead Mask',
+      1172, 'Male Eyes Mask',
+      1173, 'Male Nose Mask',
+      1174, 'Male Ears Mask',
+      1175, 'Male Cheeks Mask',
+      1176, 'Male Mouth Mask',
+      1177, 'Male Neck Mask',
+      //Female
+      1221, 'Female Forehead Mask',
+      1222, 'Female Eyes Mask',
+      1223, 'Female Nose Mask',
+      1224, 'Female Ears Mask',
+      1225, 'Female Cheeks Mask',
+      1226, 'Female Mouth Mask',
+      1227, 'Female Neck Mask',
+      65535, 'None'
+    ])),
+        wbArray(MPGS, 'Morph Group Sliders', wbInteger('Index', itU32, wbIntToHexStr, wbHexStrToInt))
+      ])
+    );
+end;
+
+function wbFaceMorphs(const aName: string): IwbSubRecordArrayDef;
+begin
+  Result :=
+    wbRArray(aName,
+      wbRStruct('Face Morph', [
+        wbInteger(FMRI, 'Index', itU32, wbIntToHexStr, wbHexStrToInt),
+        wbLString(FMRN, 'Name')
+      ])
+    );
+end;
 
 function CombineVarRecs(const a, b : array of const)
                                    : TVarRecs;
@@ -3519,73 +3519,72 @@ begin
 end;
 
 
-  procedure ReferenceRecord(const aSignature: TwbSignature; const aName: string);
-  begin
-    wbRefRecord(aSignature, aName,
-      wbFlags(wbFlagsList([
-        {0x00000080}  7, 'Turn Off Fire',
-        {0x00000400} 10, 'Persistent',
-        {0x00000800} 11, 'Initially Disabled',
-        {0x10000000} 28, 'Reflected By Auto Water',
-        {0x20000000} 29, 'Don''t Havok Settle',
-        {0x40000000} 30, 'No Respawn'
-      ], True, True)), [
-      wbEDID,
-      wbVMAD,
-      wbFormIDCk(NAME, 'Projectile', [PROJ, HAZD]),
-      wbFormIDCk(XEZN, 'Encounter Zone', [ECZN]),
-      wbFloat(XHTW, 'Head-Tracking Weight'),
-      wbFloat(XFVC, 'Favor Cost'),
-      wbRArrayS('Reflected/Refracted By',
-        wbStructSK(XPWR, [0], 'Water', [
-          wbFormIDCk('Reference', [ACHR, REFR]),
-          wbInteger('Type', itU32, wbFlags([
-            'Reflection',
-            'Refraction'
-          ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
-        ], cpNormal, False, nil, 1)
-      ),
-      wbRArrayS('Linked References', wbStructSK(XLKR, [0], 'Linked Reference', [
-        wbFormIDCk('Keyword/Ref', [KYWD, PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, NULL]),
-        wbFormIDCk('Ref', sigReferences)
-      ], cpNormal, False, nil, 1)),
-      wbRStruct('Activate Parents', [
-        wbInteger(XAPD, 'Parent Activate Only', itU8, wbBoolEnum),
-        wbRArrayS('Activate Parent Refs',
-          wbStructSK(XAPR, [0], 'Activate Parent Ref', [
-            wbFormIDCk('Reference', sigReferences),
-            wbFloat('Delay')
-          ])
-        )
-      ]),
-
-      wbFormIDCk(XASP, 'Acoustic Parent', [REFR]),
-      wbEmpty(XATP, 'Activation Point'),
-      wbInteger(XAMC, 'Ammo Count', itU32),
-      wbEmpty(XLKT, 'Linked Ref Transient'),
-      wbFormIDCk(XLYR, 'Layer', [LAYR]),
-      wbFormIDCk(XMSP, 'Material Swap', [MSWP]),
-      wbFormIDCk(XRFG, 'Reference Group', [RFGP]),
-      wbStruct(XCVR, 'Water Current Zone Data', [
-        wbFloat('Unknown'),
-        wbFloat('Unknown'),
-        wbFloat('Unknown')
-      ]),
-      wbXESP,
-      wbOwnership,
-      wbRagdoll,
-      wbInteger(XHLT, 'Health %', itU32),
-      wbFormIDCk(XEMI, 'Emittance', [LIGH, REGN]),
-      wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
-      wbEmpty(XIS2, 'Ignored by Sandbox'),
-      wbArray(XLRT, 'Location Ref Type', wbFormIDCk('Ref', [LCRT, NULL])),
-      wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
-      wbXSCL,
-      wbXLOD,
-      wbVec3PosRot(DATA).SetRequired,
-      wbString(MNAM, 'Comments')
-    ], True).SetAddInfo(wbPlacedAddInfo);
-  end;
+procedure ReferenceRecord(const aSignature: TwbSignature; const aName: string);
+begin
+  wbRefRecord(aSignature, aName,
+    wbFlags(wbFlagsList([
+      {0x00000080}  7, 'Turn Off Fire',
+      {0x00000400} 10, 'Persistent',
+      {0x00000800} 11, 'Initially Disabled',
+      {0x10000000} 28, 'Reflected By Auto Water',
+      {0x20000000} 29, 'Don''t Havok Settle',
+      {0x40000000} 30, 'No Respawn'
+    ], True, True)), [
+    wbEDID,
+    wbVMAD,
+    wbFormIDCk(NAME, 'Projectile', [PROJ, HAZD]),
+    wbFormIDCk(XEZN, 'Encounter Zone', [ECZN]),
+    wbFloat(XHTW, 'Head-Tracking Weight'),
+    wbFloat(XFVC, 'Favor Cost'),
+    wbRArrayS('Reflected/Refracted By',
+      wbStructSK(XPWR, [0], 'Water', [
+        wbFormIDCk('Reference', [ACHR, REFR]),
+        wbInteger('Type', itU32, wbFlags([
+          'Reflection',
+          'Refraction'
+        ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
+      ], cpNormal, False, nil, 1)
+    ),
+    wbRArrayS('Linked References', wbStructSK(XLKR, [0], 'Linked Reference', [
+      wbFormIDCk('Keyword/Ref', [KYWD, PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, NULL]),
+      wbFormIDCk('Ref', sigReferences)
+    ], cpNormal, False, nil, 1)),
+    wbRStruct('Activate Parents', [
+      wbInteger(XAPD, 'Parent Activate Only', itU8, wbBoolEnum),
+      wbRArrayS('Activate Parent Refs',
+        wbStructSK(XAPR, [0], 'Activate Parent Ref', [
+          wbFormIDCk('Reference', sigReferences),
+          wbFloat('Delay')
+        ])
+      )
+    ]),
+    wbFormIDCk(XASP, 'Acoustic Parent', [REFR]),
+    wbEmpty(XATP, 'Activation Point'),
+    wbInteger(XAMC, 'Ammo Count', itU32),
+    wbEmpty(XLKT, 'Linked Ref Transient'),
+    wbFormIDCk(XLYR, 'Layer', [LAYR]),
+    wbFormIDCk(XMSP, 'Material Swap', [MSWP]),
+    wbFormIDCk(XRFG, 'Reference Group', [RFGP]),
+    wbStruct(XCVR, 'Water Current Zone Data', [
+      wbFloat('Unknown'),
+      wbFloat('Unknown'),
+      wbFloat('Unknown')
+    ]),
+    wbXESP,
+    wbOwnership,
+    wbRagdoll,
+    wbInteger(XHLT, 'Health %', itU32),
+    wbFormIDCk(XEMI, 'Emittance', [LIGH, REGN]),
+    wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
+    wbEmpty(XIS2, 'Ignored by Sandbox'),
+    wbArray(XLRT, 'Location Ref Type', wbFormIDCk('Ref', [LCRT, NULL])),
+    wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
+    wbXSCL,
+    wbXLOD,
+    wbVec3PosRot(DATA).SetRequired,
+    wbString(MNAM, 'Comments')
+  ], True).SetAddInfo(wbPlacedAddInfo);
+end;
 
 procedure DefineFO4;
 begin

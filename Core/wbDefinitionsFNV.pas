@@ -1010,7 +1010,7 @@ begin
   if Supports(lScript.ElementByName['Local Variables'], IwbContainerElementRef, lLocalVars) then begin
     for var i := 0 to Pred(lLocalVars.ElementCount) do begin
       var lLocalVar : IwbContainerElementRef;
-      if Supports(lLocalVars.Elements[i], IwbContainerElementRef, lLocalVar) then begin
+      if Supports(lLocalVars[i], IwbContainerElementRef, lLocalVar) then begin
         var j := lLocalVar.ElementNativeValues['SLSD\Index'];
         var s := lLocalVar.ElementNativeValues['SCVR'];
         if SameText(s, Trim(aString)) then
@@ -1433,7 +1433,7 @@ begin
   if not wbTryGetContainerFromUnion(aElement, Container) then
     Exit;
 
-  If (Container.ElementNativeValues['Flags'] and $20) = 32 then
+  if (Container.ElementNativeValues['Flags'] and $20) = 32 then
     Exit(1);
 end;
 

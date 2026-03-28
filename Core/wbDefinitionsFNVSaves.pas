@@ -27,7 +27,7 @@ uses
 var
   wbActorValueLabels : array of string;
 
-var // forward type directives
+ // forward type directives
   wbChangeTypes    : IwbEnumDef;
   wbSaveChapters   : IwbStructDef;
   wbCoSaveChapters : IwbStructDef;
@@ -124,7 +124,7 @@ begin
   end;
 end;
 
-function FileLocationTableCountCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function FileLocationTableCountCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
   Element : IwbElement;
   Container: IwbDataContainer;
@@ -248,11 +248,10 @@ begin
     Element := Container.ElementByName['Unknown1000_00000'];
     if Assigned(Element) then begin
       aValue := Element.NativeValue;
-      case aValue of
-        0: Result := 0;
+      if aValue = 0 then
+        Exit(0)
       else
-        Result := 1;
-      end;
+        Exit(1);
     end;
   end;
 end;
@@ -269,7 +268,7 @@ begin
     Result := Element.NativeValue;
 end;
 
-function GlobalDataGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function GlobalDataGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   Element    : IwbElement;
   Container : IwbContainer;
@@ -294,7 +293,7 @@ begin
   Result := CompressedSize;
 end;
 
-function GetRelativeDeciderInteger(anOffset: UInt32; aSize: Integer; const aContainerName, anIntegerName: String;
+function GetRelativeDeciderInteger(anOffset: UInt32; aSize: Integer; const aContainerName, anIntegerName: string;
   aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;
@@ -304,11 +303,11 @@ begin
   if Assigned(aBasePtr) and Assigned(aEndPtr) and (NativeUInt(aBasePtr)<=NativeUInt(aEndPtr)) then begin
     Assert(anOffset>0); // Offset needs to be a positive number
     case aSize of
-      4 : Result := (PCardinal(Cardinal(aBasePtr)-anOffset)^);
+      4 : Result := PCardinal(Cardinal(aBasePtr)-anOffset)^;
       3 : Result := wbReadInteger24(PCardinal(NativeUInt(aBasePtr)-anOffset));
-      2 : Result := (PWord(Cardinal(aBasePtr)-anOffset)^);
+      2 : Result := PWord(Cardinal(aBasePtr)-anOffset)^;
     else
-      Result := (PByte(Cardinal(aBasePtr)-anOffset)^);
+      Result := PByte(Cardinal(aBasePtr)-anOffset)^;
     end;
   end else begin
     Element := wbFindSaveElement(aContainerName, aElement);
@@ -486,7 +485,7 @@ begin
     Result := wbChangedFormOffset + Result;
 end;
 
-function ChangedFormGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function ChangedFormGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   aType : Integer;
 begin
@@ -503,7 +502,7 @@ begin
     Result := IntToStr(aType);
 end;
 
-function ChangedFormGetChapterName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function ChangedFormGetChapterName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   Element : IwbElement;
 begin
@@ -1693,7 +1692,7 @@ begin
     Result := wbBytesToDump div wbBytesToGroup + 1;
 end;
 
-function DataLengthCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -1716,7 +1715,7 @@ begin
   end;
 end;
 
-function DataLengthRemainderCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthRemainderCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -1800,7 +1799,7 @@ end;
 function NVSEChaptersDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;
-  EValue    : String;
+  EValue    : string;
   Container : IwbDataContainer;
 begin
   Result := 0;
@@ -1823,7 +1822,7 @@ begin
   end;
 end;
 
-function wbCoordXYZ(const aName: String): IwbArrayDef;
+function wbCoordXYZ(const aName: string): IwbArrayDef;
 begin
   Result := wbArrayT(aName, wbFloat('Coord'), 3, ['X', 'Y', 'Z'], nil);
 end;

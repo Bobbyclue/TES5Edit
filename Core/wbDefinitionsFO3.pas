@@ -1090,7 +1090,7 @@ begin
   if not wbTryGetContainerFromUnion(aElement, Container) then
     Exit;
 
-  If (Container.ElementNativeValues['Flags'] and $20) = 32 then
+  if (Container.ElementNativeValues['Flags'] and $20) = 32 then
     Exit(1);
 end;
 
@@ -2362,7 +2362,7 @@ begin
 
     if lMainRecord.ElementExists['DATA - Visual Data'] then begin
 
-      If not Assigned(lMainRecord.ElementByName['DNAM - Visual Data']) then
+      if not Assigned(lMainRecord.ElementByName['DNAM - Visual Data']) then
         lMainRecord.Add('DNAM', True);
 
       var lDNAM := lMainRecord.ElementByName['DNAM - Visual Data'] as IwbContainerElementRef;
@@ -2376,7 +2376,7 @@ begin
       lMainRecord.RemoveElement('DATA - Visual Data');
     end;
   finally
-    wbEndInternalEdit
+    wbEndInternalEdit;
   end;
 end;
 

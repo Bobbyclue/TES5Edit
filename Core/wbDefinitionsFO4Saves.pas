@@ -29,7 +29,7 @@ var
   wbCodeTypeEnum     : IwbEnumDef;
   wbRecordFlagsFlags : IwbFlagsDef;
 
-var // forward type directives
+ // forward type directives
   wbChangeTypes    : IwbEnumDef;
   wbQuestFlags     : IwbIntegerDef;
   wbSaveChapters   : IwbStructDef;
@@ -602,7 +602,7 @@ begin
   end;
 end;
 
-function FileLocationTableCountCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function FileLocationTableCountCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
   Element : IwbElement;
   Container: IwbDataContainer;
@@ -984,7 +984,7 @@ begin
       Element := Container.ElementByName['Array Table'];
       if Supports(Element, IwbDataContainer, Container) then
         Result := Container.ElementCount;
-    end
+    end;
   end else
     Result := VMArrayTableCount;
 end;
@@ -1005,7 +1005,7 @@ begin
       Element := Container.ElementByPath['Stacks\Stack Table'];
       if Supports(Element, IwbDataContainer, Container) then
         Result := Container.ElementCount;
-    end
+    end;
   end else
     Result := StackTableCount;
 end;
@@ -1069,11 +1069,10 @@ begin
     Element := Container.ElementByName['Unknown Flags'];
     if Assigned(Element) then begin
       aFlags := Element.NativeValue;
-      case (aFlags and $4) of
-        4: Result := 1;
+      if (aFlags and $4) = 4 then
+        Exit(1)
       else
-        Result := 0;
-      end;
+        Exit(0);
     end;
   end;
 end;
@@ -1226,7 +1225,7 @@ end;
 
 function StackCallBackTypeDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
-  aType     : String;
+  aType     : string;
   Element   : IwbElement;
   Container : IwbDataContainer;
 begin
@@ -1283,7 +1282,7 @@ end;
 
 function wbCallbackTypeDataDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
-  aTypeName : String;
+  aTypeName : string;
   Element   : IwbElement;
   Container : IwbDataContainer;
 begin
@@ -1508,7 +1507,7 @@ begin
     Result := 1;
 end;
 
-function HasUnknownS1Decider(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function HasUnknownS1Decider(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -1569,7 +1568,7 @@ begin
       if Element.NativeValue = 0 then
         Result := 1
       else if Element.NativeValue = 1 then
-        Result := 2
+        Result := 2;
   end;
 end;
 
@@ -1660,11 +1659,10 @@ begin
     Element := Container.ElementByName['Unknown1000_00000'];
     if Assigned(Element) then begin
       aValue := Element.NativeValue;
-      case aValue of
-        0: Result := 0;
+      if aValue = 0 then
+        Exit(0)
       else
-        Result := 1;
-      end;
+        Exit(1);
     end;
   end;
 end;
@@ -1681,7 +1679,7 @@ begin
     Result := Element.NativeValue;
 end;
 
-function GlobalDataGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function GlobalDataGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   Element    : IwbElement;
   Container : IwbContainer;
@@ -1797,7 +1795,7 @@ begin
     Result := wbChangedFormOffset + (Result and $3F);
 end;
 
-function ChangedFormGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function ChangedFormGetChapterTypeName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   aType : Integer;
 begin
@@ -1812,7 +1810,7 @@ begin
     Result := IntToStr(aType);
 end;
 
-function ChangedFormGetChapterName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): String;
+function ChangedFormGetChapterName(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): string;
 var
   Element : IwbElement;
 begin
@@ -2518,7 +2516,7 @@ begin
     Result := wbBytesToDump div wbBytesToGroup + 1;
 end;
 
-function DataLengthCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -2541,7 +2539,7 @@ begin
   end;
 end;
 
-function DataLengthRemainderCounter(const aName: String; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
+function DataLengthRemainderCounter(const aName: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aModifier: Integer = 0): Cardinal;
 var
   Element   : IwbElement;
   Container : IwbDataContainer;
@@ -2628,7 +2626,7 @@ var
 function F4SEChaptersDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
   Element   : IwbElement;
-  EValue    : String;
+  EValue    : string;
   Container : IwbDataContainer;
 begin
   Result := 0;
