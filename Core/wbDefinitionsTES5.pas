@@ -1532,7 +1532,7 @@ begin
   Result := False;
   Element := aElement;
   MainRecord := nil;
-  
+
   while Assigned(Element) and not Supports(Element, IwbMainRecord, MainRecord) do
     Element := Element.Container;
 
@@ -2146,11 +2146,11 @@ end;
 
 type
   TFaceGenFeature = record
-    RaceID  : String;
+    RaceID  : string;
     Female  : Boolean;
     Entries : array of record
       Index: Cardinal;
-      Name : String;
+      Name : string;
     end;
   end;
   PFaceGenFeature = ^TFaceGenFeature;
@@ -2364,59 +2364,57 @@ begin
     Exit(1);
 end;
 
-  procedure ReferenceRecord(const aSignature: TwbSignature; const aName: string);
-  begin
-    wbRefRecord(aSignature, aName,
-      wbFlags(wbFlagsList([
-        7, 'Turn Off Fire',
-       10, 'Persistent',
-       11, 'Initially Disabled',
-       28, 'Reflected By Auto Water',
-       29, 'Don''t Havok Settle',
-       30, 'No Respawn'
-      ], True, True)), [
-      wbEDID,
-      wbVMAD,
-      wbFormIDCk(NAME, 'Projectile', [PROJ, HAZD]),
-      wbFormIDCk(XEZN, 'Encounter Zone', [ECZN]),
-      wbOwnership([XRGD]),
-      wbFloat(XHTW, 'Head-Tracking Weight'),
-      wbFloat(XFVC, 'Favor Cost'),
-      wbRArrayS('Reflected/Refracted By',
-        wbStructSK(XPWR, [0], 'Water', [
-          wbFormIDCk('Reference', [REFR]),
-          wbInteger('Type', itU32, wbFlags([
-            'Reflection',
-            'Refraction'
-          ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
-        ], cpNormal, False, nil, 1)
-      ),
-      wbRArrayS('Linked References', wbStructSK(XLKR, [0], 'Linked Reference', [
-        wbFormIDCk('Keyword/Ref', [KYWD, PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, NULL]),
-        wbFormIDCk('Ref', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA])
-      ], cpNormal, False, nil, 1)),
-      wbRStruct('Activate Parents', [
-        wbInteger(XAPD, 'Flags', itU8, wbFlags([
-          'Parent Activate Only'
-        ], True)).IncludeFlag(dfCollapsed, wbCollapseFlags),
-        wbRArrayS('Activate Parent Refs',
-          wbStructSK(XAPR, [0], 'Activate Parent Ref', [
-            wbFormIDCk('Reference', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA]),
-            wbFloat('Delay')
-          ])
-        )
-      ]),
-      wbXESP,
-      wbFormIDCk(XEMI, 'Emittance', [LIGH, REGN]),
-      wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
-      wbEmpty(XIS2, 'Ignored by Sandbox'),
-      wbArray(XLRT, 'Location Ref Type', wbFormIDCk('Ref', [LCRT, NULL])),
-      wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
-      wbXLOD,
-      wbXSCL,
-      wbVec3PosRot(DATA).SetRequired
-    ], True).SetAddInfo(wbPlacedAddInfo);
-  end;
+procedure ReferenceRecord(const aSignature: TwbSignature; const aName: string);
+begin
+  wbRefRecord(aSignature, aName,
+    wbFlags(wbFlagsList([
+    7,  'Turn Off Fire',
+    10, 'Persistent',
+    11, 'Initially Disabled',
+    28, 'Reflected By Auto Water',
+    29, 'Don''t Havok Settle',
+    30, 'No Respawn'
+    ], True, True)), [
+    wbEDID,
+    wbVMAD,
+    wbFormIDCk(NAME, 'Projectile', [PROJ, HAZD]),
+    wbFormIDCk(XEZN, 'Encounter Zone', [ECZN]),
+    wbOwnership([XRGD]),
+    wbFloat(XHTW, 'Head-Tracking Weight'),
+    wbFloat(XFVC, 'Favor Cost'),
+    wbRArrayS('Reflected/Refracted By',
+      wbStructSK(XPWR, [0], 'Water', [
+        wbFormIDCk('Reference', [REFR]),
+        wbInteger('Type', itU32, wbFlags([
+          'Reflection',
+          'Refraction'
+        ])).IncludeFlag(dfCollapsed, wbCollapseFlags)
+      ], cpNormal, False, nil, 1)
+    ),
+    wbRArrayS('Linked References', wbStructSK(XLKR, [0], 'Linked Reference', [
+      wbFormIDCk('Keyword/Ref', [KYWD, PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA, NULL]),
+      wbFormIDCk('Ref', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA])
+    ], cpNormal, False, nil, 1)),
+    wbRStruct('Activate Parents', [
+      wbInteger(XAPD, 'Parent Activate Only', itU8, wbBoolEnum),
+      wbRArrayS('Activate Parent Refs',
+        wbStructSK(XAPR, [0], 'Activate Parent Ref', [
+          wbFormIDCk('Reference', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA]),
+          wbFloat('Delay')
+        ])
+      )
+    ]),
+    wbXESP,
+    wbFormIDCk(XEMI, 'Emittance', [LIGH, REGN]),
+    wbFormIDCk(XMBR, 'MultiBound Reference', [REFR]),
+    wbEmpty(XIS2, 'Ignored by Sandbox'),
+    wbArray(XLRT, 'Location Ref Type', wbFormIDCk('Ref', [LCRT, NULL])),
+    wbFormIDCk(XLRL, 'Location Reference', [LCRT, LCTN, NULL], False, cpBenignIfAdded),
+    wbXLOD,
+    wbXSCL,
+    wbVec3PosRot(DATA).SetRequired
+  ], True).SetAddInfo(wbPlacedAddInfo);
+end;
 
 procedure DefineTES5;
 begin
@@ -3395,9 +3393,7 @@ begin
 
     {--- Activate Parents ---}
     wbRStruct('Activate Parents', [
-      wbInteger(XAPD, 'Flags', itU8, wbFlags([
-        'Parent Activate Only'
-      ], True)).IncludeFlag(dfCollapsed, wbCollapseFlags),
+      wbInteger(XAPD, 'Parent Activate Only', itU8, wbBoolEnum),
       wbRArrayS('Activate Parent Refs',
         wbStructSK(XAPR, [0], 'Activate Parent Ref', [
           wbFormIDCk('Reference', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA]),
@@ -6363,7 +6359,7 @@ begin
 
               var lContainer := aElement.Container;
               // only worry about the root array node where the INAM index is 0 and the PNAM is NULL
-              Result := (lContainer.Container.Elements[0].Equals(lContainer)) and (lContainer.ElementByPath['PNAM'].NativeValue = 0) and (lContainer.ElementByPath['INAM'].NativeValue = 0);
+              Result := lContainer.Container.Elements[0].Equals(lContainer) and (lContainer.ElementByPath['PNAM'].NativeValue = 0) and (lContainer.ElementByPath['INAM'].NativeValue = 0);
             end),
         wbInteger(XNAM, 'Perk-Grid X', itU32, nil, cpNormal, True),
         wbInteger(YNAM, 'Perk-Grid Y', itU32, nil, cpNormal, True),
@@ -10000,9 +9996,7 @@ begin
 
     {--- Activate Parents ---}
     wbRStruct('Activate Parents', [
-      wbInteger(XAPD, 'Flags', itU8, wbFlags([
-        'Parent Activate Only'
-      ], True)).IncludeFlag(dfCollapsed, wbCollapseFlags),
+      wbInteger(XAPD, 'Parent Activate Only', itU8, wbBoolEnum),
       wbRArrayS('Activate Parent Refs',
         wbStructSK(XAPR, [0], 'Activate Parent Ref', [
           wbFormIDCk('Reference', [PLYR, ACHR, REFR, PGRE, PHZD, PMIS, PARW, PBAR, PBEA, PCON, PFLA]),
