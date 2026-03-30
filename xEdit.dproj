@@ -2,10 +2,10 @@
     <PropertyGroup>
         <Base>True</Base>
         <AppType>Application</AppType>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">LiteDebug</Config>
         <FrameworkType>VCL</FrameworkType>
         <MainSource>xEdit.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectGuid>{BB5B51E2-CC9A-4404-A582-958449C5049E}</ProjectGuid>
         <ProjectName Condition="'$(ProjectName)'==''">xEdit</ProjectName>
         <ProjectVersion>20.3</ProjectVersion>
@@ -126,7 +126,17 @@
         <DCC_Define>LiteVersion;$(DCC_Define)</DCC_Define>
         <DCC_UseMSBuildExternally>false</DCC_UseMSBuildExternally>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''"/>
+    <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''">
+        <DCC_DynamicBase>true</DCC_DynamicBase>
+        <DCC_HighEntropyVa>true</DCC_HighEntropyVa>
+        <DCC_Inlining>auto</DCC_Inlining>
+        <DCC_MaxStackSize>16777216</DCC_MaxStackSize>
+        <DCC_MinStackSize>4096</DCC_MinStackSize>
+        <DCC_MinimumEnumSize>4</DCC_MinimumEnumSize>
+        <DCC_OutputDRCFile>true</DCC_OutputDRCFile>
+        <DCC_OutputDependencies>true</DCC_OutputDependencies>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_5)'!=''">
         <Icon_MainIcon>xEdit\xEdit_SF_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
