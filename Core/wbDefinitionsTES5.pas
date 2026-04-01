@@ -5107,7 +5107,7 @@ begin
       wbFloat('Fill/Texture Effect - Alpha Fade In Time'),
       wbFloat('Fill/Texture Effect - Full Alpha Time'),
       wbFloat('Fill/Texture Effect - Alpha Fade Out Time'),
-      wbFloat('Fill/Texture Effect - Presistent Alpha Ratio'),
+      wbFloat('Fill/Texture Effect - Persistent Alpha Ratio'),
       wbFloat('Fill/Texture Effect - Alpha Pulse Amplitude'),
       wbFloat('Fill/Texture Effect - Alpha Pulse Frequency'),
       wbFloat('Fill/Texture Effect - Texture Animation Speed (U)'),
