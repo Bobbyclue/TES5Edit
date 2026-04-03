@@ -7768,8 +7768,8 @@ begin
     wbFloat(PNAM, 'Priority')
       .SetDefaultNativeValue(50)
       .SetRequired,
-    wbFormIDCkNoReach(BNAM, 'Branch', [DLBR]),
-    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]),
+    wbFormIDCk(BNAM, 'Branch', [DLBR]),
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetToStr(wbDIALQuestToStr),
     wbFormIDCk(KNAM, 'Keyword', [KYWD]),
     wbFormIDCk(ANAM, 'Affinity Event', [AFFE]),
     wbStruct(DATA, 'Data', [
@@ -10551,18 +10551,22 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(DLBR, 'Dialog Branch', [
     wbEDID,
-    wbFormIDCk(QNAM, 'Quest', [QUST], False, cpNormal, True)
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST])
+      .SetRequired
       .IncludeFlag(dfUnmappedFormID, wbStarfieldIsABugInfestedHellhole),
-    wbInteger(TNAM, 'Category', itU32, wbEnum([
-        {0} 'Player',
-        {1} 'Command'
-    ])),
-    wbInteger(DNAM, 'Flags', itU32, wbFlags([
-      {0x01} 'Top-Level',
-      {0x02} 'Blocking',
-      {0x04} 'Exclusive'
-    ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbFormIDCk(SNAM, 'Starting Topic', [DIAL], False, cpNormal, True)
+    wbInteger(TNAM, 'Category', itU32,
+      wbEnum([
+      {0} 'Player',
+      {1} 'Command'
+      ])),
+    wbInteger(DNAM, 'Flags', itU32,
+      wbFlags([
+      {0} 'Top-Level',
+      {1} 'Blocking',
+      {2} 'Exclusive'
+      ])
+    ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbFormIDCk(SNAM, 'Starting Topic', [DIAL]).SetRequired
   ]).SetAddInfo(wbDLBRAddInfo);
 
   {subrecords checked against Starfield.esm}

@@ -4910,13 +4910,13 @@ begin
     wbFloat(PNAM, 'Priority')
       .SetDefaultNativeValue(50)
       .SetRequired,
-    wbFormIDCk(BNAM, 'Branch', [DLBR,NULL]),
-    wbFormIDCkNoReach(QNAM, 'Quest', [QUST,NULL]),
+    wbFormIDCk(BNAM, 'Branch', [DLBR]),
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetToStr(wbDIALQuestToStr),
     wbStruct(DATA, 'Data', [
       wbInteger('Do All Before Repeating', itU8, wbBoolEnum),
       wbInteger('Category', itU8,
         wbEnum([
-        {0} 'Topic',
+        {0} 'Player',
         {1} 'Favor',
         {2} 'Scene',
         {3} 'Combat',
@@ -7332,17 +7332,20 @@ begin
 
   wbRecord(DLBR, 'Dialog Branch', [
     wbEDID,
-    wbFormIDCkNoReach(QNAM, 'Quest', [QUST], False, cpNormal, True),
-    wbInteger(TNAM, 'Category', itU32, wbEnum([
-        {0} 'Player',
-        {1} 'Command'
-    ])),
-    wbInteger(DNAM, 'Flags', itU32, wbFlags([
-      {0x01} 'Top-Level',
-      {0x02} 'Blocking',
-      {0x04} 'Exclusive'
-    ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbFormIDCk(SNAM, 'Starting Topic', [DIAL], False, cpNormal, True)
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetRequired,
+    wbInteger(TNAM, 'Category', itU32,
+      wbEnum([
+      {0} 'Player',
+      {1} 'Favor'
+      ])),
+    wbInteger(DNAM, 'Flags', itU32,
+      wbFlags([
+      {0} 'Top-Level',
+      {1} 'Blocking',
+      {2} 'Exclusive'
+      ])
+    ).IncludeFlag(dfCollapsed, wbCollapseFlags),
+    wbFormIDCk(SNAM, 'Starting Topic', [DIAL]).SetRequired
   ]).SetAddInfo(wbDLBRAddInfo);
 
   wbRecord(MUST, 'Music Track', [
@@ -7369,26 +7372,21 @@ begin
 
   wbRecord(DLVW, 'Dialog View', [
     wbEDID,
-    wbFormIDCk(QNAM, 'Quest', [QUST], False, cpNormal, True),
-    wbRArray('Branches',
-      wbFormIDCk(BNAM, 'Branch', [DLBR])
-    ),
-    wbRArray('Topics',
-      wbFormIDCK(TNAM, 'Topic', [DIAL])
-    ),
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetRequired,
+    wbRArray('Branches', wbFormIDCkNoReach(BNAM, 'Branch', [DLBR])),
+    wbRArray('Topics', wbFormIDCKNoReach(TNAM, 'Topic', [DIAL])),
     wbInteger(ENAM, 'Topic Type', itU32,
-      wbEnum([], [
-        0, 'Player Dialogue',
-        1, 'Favor Dialogue',
-        2, 'Custom',
-        3, 'Combat',
-        4, 'Favors',
-        5, 'Detection',
-        6, 'Service',
-        7, 'Misc'
+      wbEnum([
+      {0} 'Player',
+      {1} 'Favor',
+      {2} 'Scene',
+      {3} 'Combat',
+      {4} 'Favors',
+      {5} 'Detection',
+      {6} 'Service',
+      {7} 'Misc'
       ])).SetRequired,
-    wbInteger(DNAM, 'Show All Text', itU8, wbBoolEnum)
-      .SetRequired
+    wbInteger(DNAM, 'Show All Text', itU8, wbBoolEnum).SetRequired
   ]);
 
   wbRecord(SHOU, 'Shout',

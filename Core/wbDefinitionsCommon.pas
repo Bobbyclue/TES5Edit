@@ -210,12 +210,13 @@ function wbVTXTPosition(aInt: Int64; const aElement: IwbElement; aType: TwbCallb
 function wbWeatherCloudSpeedToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbPackagePSDTMonthValueToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 
-{>>> To String Callback Procedures <<<} //17
+{>>> To String Callback Procedures <<<} //18
 procedure wbABGRToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbBGRAToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbConditionToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbConditionOwnerToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbCrowdPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbDIALQuestToStr(var aValue: string; aBasePtr, aEndPtr: Pointer; const aElement : IwbElement; aType : TwbCallbackType);
 procedure wbFactionRelationToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbItemToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbNPCPackageToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
@@ -3985,7 +3986,7 @@ begin
   end;
 end;
 
-{>>> To String Callback Procedures <<<} //17
+{>>> To String Callback Procedures <<<} //18
 
 procedure wbABGRToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 var
@@ -4163,6 +4164,40 @@ begin
     Exit;
 
   aValue := aValue + ' {Curve Table: ' + MainRecord.ShortName + '}';
+end;
+
+procedure wbDIALQuestToStr(var aValue: string; aBasePtr, aEndPtr: Pointer; const aElement : IwbElement; aType : TwbCallbackType);
+begin
+  if (aType <> ctCheck) and (aType <> ctToStr) then
+    Exit;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  var lBNAM := aElement.ContainingMainRecord.ElementBySignature[BNAM];
+  if not Assigned(lBNAM) then
+    Exit;
+
+  var lBranch := lBNAM.LinksTo as IwbMainRecord;
+  if not Assigned(lBranch) then
+    Exit;
+
+  var lBranchQuest := lBranch.ElementBySignature[QNAM].LinksTo as IwbMainRecord;
+  lBranchQuest := lBranchQuest.MasterOrSelf;
+
+  var lElementQuest := aElement.LinksTo as IwbMainRecord;
+  if not Assigned(lElementQuest) then
+    Exit;
+
+  lElementQuest := lElementQuest.MasterOrSelf;
+
+  if lElementQuest = lBranchQuest then
+    Exit;
+
+  case aType of
+    ctCheck : aValue := '<Warning: does not match Quest assigned on Branch>';
+    ctToStr : aValue := aValue + ' <Warning: does not match Quest assigned on Branch>';
+  end;
 end;
 
 procedure wbFactionRelationToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);

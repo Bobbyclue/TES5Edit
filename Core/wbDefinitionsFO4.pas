@@ -6593,8 +6593,8 @@ begin
     wbFloat(PNAM, 'Priority')
       .SetDefaultNativeValue(50)
       .SetRequired,
-    wbFormIDCkNoReach(BNAM, 'Branch', [DLBR]),
-    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]),
+    wbFormIDCk(BNAM, 'Branch', [DLBR]),
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetToStr(wbDIALQuestToStr),
     wbFormIDCk(KNAM, 'Keyword', [KYWD]),
     wbStruct(DATA, 'Data', [
       // this should not be named Flags since TwbFile.BuildReachable
@@ -9053,17 +9053,19 @@ begin
 
   wbRecord(DLBR, 'Dialog Branch', [
     wbEDID,
-    wbFormIDCk(QNAM, 'Quest', [QUST], False, cpNormal, True),
-    wbInteger(TNAM, 'Category', itU32, wbEnum([
-        {0} 'Player',
-        {1} 'Command'
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]).SetRequired,
+    wbInteger(TNAM, 'Category', itU32,
+      wbEnum([
+      {0} 'Player',
+      {1} 'Command'
     ])),
-    wbInteger(DNAM, 'Flags', itU32, wbFlags([
-      {0x01} 'Top-Level',
-      {0x02} 'Blocking',
-      {0x04} 'Exclusive'
+    wbInteger(DNAM, 'Flags', itU32,
+      wbFlags([
+      {1} 'Top-Level',
+      {2} 'Blocking',
+      {3} 'Exclusive'
     ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-    wbFormIDCk(SNAM, 'Starting Topic', [DIAL], False, cpNormal, True)
+    wbFormIDCk(SNAM, 'Starting Topic', [DIAL]).SetRequired
   ]).SetAddInfo(wbDLBRAddInfo);
 
   wbRecord(MUST, 'Music Track', [
@@ -9092,8 +9094,8 @@ begin
 
   wbRecord(DLVW, 'Dialog View', [
     wbEDID,
-    wbFormIDCk(QNAM, 'Quest', [QUST]),
-    wbFormIDCk(BNAM, 'Branch', [DLBR]),
+    wbFormIDCkNoReach(QNAM, 'Quest', [QUST]),
+    wbFormIDCkNoReach(BNAM, 'Branch', [DLBR]),
     wbUnused(ENAM),
     wbUnused(DNAM)
   ]);
