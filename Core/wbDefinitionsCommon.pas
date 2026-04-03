@@ -9086,7 +9086,9 @@ function wbWorldOffsetData: IwbRecordMemberDef;
 begin
   Result :=
     IfThen(wbSimpleRecords,
-      wbByteArray(OFST, 'Offsets', 0, cpIgnore).SetDontShow(wbNeverShow),
+      wbByteArray(OFST, 'Offsets', 0, cpIgnore)
+        .SetDontShow(wbNeverShow)
+        .IncludeFlag(dfNoCopyAsOverride),
       wbArray(OFST, 'Offsets',
         wbArray('Row',
           wbInteger('Cell', itU32, nil, cpIgnore),
