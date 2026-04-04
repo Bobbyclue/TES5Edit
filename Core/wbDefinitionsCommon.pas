@@ -50,7 +50,7 @@ procedure wbScrollTypeAfterLoad(const aElement: IwbElement);
 procedure wbSOUNAfterLoad(const aElement: IwbElement);
 procedure wbWorldAfterLoad(const aElement: IwbElement);
 
-{>>> After Set Callbacks <<<} //13
+{>>> After Set Callbacks <<<} //15
 procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionRunOnAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
@@ -61,13 +61,18 @@ procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewVa
 procedure wbPACKDateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbPERKPRKETypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbSceneActionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbScriptFragmentsQuestScriptNameAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbScriptPropertyTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbUpdateSameParentUnions(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbWorldAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbWwiseKeywordMappingTemplateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 
-{>>> Count Callbacks <<<} //5
+{>>> Count Callbacks <<<} //8
 function wbMHDTColumnsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbNavmeshGridCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbScriptFragmentsInfoCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbScriptFragmentsPackCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbScriptFragmentsSceneCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbWeatherCloudColorsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbWorldColumnsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbWorldRowsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
@@ -134,7 +139,7 @@ function wbWorldWaterIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldClimateIsRemovable(const aElement: IwbElement): Boolean;
 function wbWorldImageSpaceIsRemovable(const aElement: IwbElement): Boolean;
 
-{>>> Links To Callbacks <<<} //12
+{>>> Links To Callbacks <<<} //13
 function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
 function wbConditionSummaryLinksTo(const aElement: IwbElement): IwbElement;
 function wbCoverLinksTo(const aElement: IwbElement): IwbElement;
@@ -145,6 +150,7 @@ function wbEdgeLinksTo2(const aElement: IwbElement): IwbElement;
 function wbNPCFaceDialLinksTo(const aElement: IwbElement): IwbElement;
 function wbNPCFaceMorphLinksTo(const aElement: IwbElement): IwbElement;
 function wbSCENAliasLinksTo(const aElement: IwbElement): IwbElement;
+function wbScriptObjectAliasLinksTo(const aElement: IwbElement): IwbElement;
 function wbTriangleLinksTo(const aElement: IwbElement): IwbElement;
 function wbVertexLinksTo(const aElement: IwbElement): IwbElement;
 
@@ -237,7 +243,7 @@ procedure wbVec3ToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; c
 function wbSceneActionTypeDecider(const aContainer: IwbContainerElementRef): Integer;
 function wbSceneTimelineTypeDecider(const aContainer: IwbContainerElementRef): Integer;
 
-{>>> Union Deciders <<<} //23
+{>>> Union Deciders <<<} //24
 function wbACBSLevelDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbCOEDOwnerDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbConditionCompValueDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
@@ -258,6 +264,7 @@ function wbPxDTLocationDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aEleme
 function wbRecordSizeDecider(aSize: Integer): TwbUnionDecider; overload;
 function wbRecordSizeDecider(aMinSize, aMaxSize: Integer): TwbUnionDecider; overload;
 function wbRecordSizeDecider(const aSizes: array of Integer): TwbUnionDecider; overload;
+function wbScriptFragmentsEmptyScriptDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbScriptObjFormatDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbWeatherTimeOfDayDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbWwiseKeywordMappingSoundDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
@@ -1139,7 +1146,7 @@ begin
   end;
 end;
 
-{>>> After Set Callbacks <<<} //13
+{>>> After Set Callbacks <<<} //15
 
 procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 begin
@@ -1369,6 +1376,25 @@ begin
     lDataElement.Remove;
 end;
 
+procedure wbScriptFragmentsQuestScriptNameAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+begin
+  if aOldValue <> aNewValue then
+    if (aOldValue = '') <> (aNewValue = '') then begin
+      var lContainer : IwbContainerElementRef;
+      if Supports(aElement.Container, IwbContainerElementRef, lContainer) then
+        lContainer.ElementByName['Script'].SetToDefault;
+    end;
+end;
+
+procedure wbScriptPropertyTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+begin
+  if aOldValue <> aNewValue then begin
+    var lContainer : IwbContainerElementRef;
+    if Supports(aElement.Container, IwbContainerElementRef, lContainer) then
+      lContainer.ElementByName['Value'].SetToDefault;
+  end;
+end;
+
 procedure wbUpdateSameParentUnions(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 begin
   if not Assigned(aElement) then
@@ -1483,7 +1509,7 @@ begin
   end;
 end;
 
-{>>> Count Callbacks <<<} //5
+{>>> Count Callbacks <<<} //8
 
 function wbMHDTColumnsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
@@ -1533,6 +1559,65 @@ begin
   Result := lGridSize * lGridSize;
 end;
 
+function wbScriptFragmentsInfoCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+begin
+  Result := 0;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  var lContainer := aElement.Container;
+  if not Assigned(lContainer) then
+     Exit;
+
+  var lFlagValue := lContainer.ElementByName['Flags'].NativeValue;
+  for var i := 0 to 1 do begin
+    if (lFlagValue and 1) = 1 then
+      Inc(Result);
+
+    lFlagValue := lFlagValue shr 1;
+  end;
+end;
+
+function wbScriptFragmentsPackCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+begin
+  Result := 0;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  var lContainer := aElement.Container;
+  if not Assigned(lContainer) then
+    Exit;
+
+  var lFlagsValue := lContainer.ElementByName['Flags'].NativeValue;
+  for var i := 0 to 2 do begin
+    if (lFlagsValue and 1) = 1 then
+      Inc(Result);
+
+    lFlagsValue := lFlagsValue shr 1;
+  end;
+end;
+
+function wbScriptFragmentsSceneCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+begin
+  Result := 0;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  var lContainer := aElement.Container;
+  if not Assigned(lContainer) then
+    Exit;
+
+  var lFlagsValue := lContainer.ElementByName['Flags'].NativeValue;
+  for var i := 0 to 1 do begin
+    if (lFlagsValue and 1) = 1 then
+      Inc(Result);
+
+    lFlagsValue := lFlagsValue shr 1;
+  end;
+end;
 
 function wbWeatherCloudColorsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 var
@@ -2211,7 +2296,7 @@ begin
     (aElement.ContainingMainRecord.ElementNativeValues['Parent Worldspace\PNAM'] and $20 = 32);
 end;
 
-{>>> Links To Callbacks <<<} //12
+{>>> Links To Callbacks <<<} //13
 
 function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
 begin
@@ -2498,6 +2583,28 @@ begin
     Exit;
 
   Result := wbAliasLinksTo(lAlias, lMainRecord.ElementBySignature['PNAM']);
+end;
+
+function wbScriptObjectAliasLinksTo(const aElement: IwbElement): IwbElement;
+var
+  Container  : IwbContainerElementRef;
+begin
+  Result := nil;
+
+  if not wbResolveAlias then
+    Exit;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  if not wbTryGetContainerRefFromUnionOrValue(aElement, Container) then
+    Exit;
+
+  var lAlias := aElement.NativeValue;
+  if not VarIsOrdinal(lAlias) then
+    Exit;
+
+  Result := wbAliasLinksTo(lAlias, Container.ElementByName['FormID']);
 end;
 
 function wbTriangleLinksTo(const aElement: IwbElement): IwbElement;
@@ -4722,7 +4829,7 @@ begin
   end;
 end;
 
-{>>> Union Deciders <<<} //23
+{>>> Union Deciders <<<} //24
 
 function wbACBSLevelDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 var
@@ -5151,6 +5258,18 @@ begin
 
       Exit(Length(Sizes));
     end;
+end;
+
+function wbScriptFragmentsEmptyScriptDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+begin
+  Result := 0;
+
+  var lContainer : IwbContainer;
+  if not wbTryGetContainerFromUnion(aElement, lContainer) then
+    Exit;
+
+  if lContainer.ElementEditValues['ScriptName'] = '' then
+    Result := 1;
 end;
 
 function wbScriptObjFormatDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
