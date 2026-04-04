@@ -1291,11 +1291,6 @@ begin
     Container.RemoveElement('FormIDs');
 end;
 
-procedure wbAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-begin
-  Exit;
-end;
-
 {>>> Needs revision for Skyrim <<<}
 //function wbIdleAnam(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 //begin

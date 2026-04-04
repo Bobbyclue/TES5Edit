@@ -1953,11 +1953,6 @@ begin
     Container.RemoveElement('FormIDs');
 end;
 
-procedure wbAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-begin
-  Exit;
-end;
-
 {procedure wbLVLOAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 var
   MainRecord: IwbMainRecord;
