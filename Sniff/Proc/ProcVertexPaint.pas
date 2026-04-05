@@ -213,11 +213,7 @@ begin
   fAllWhite := Frame.chkAllWhite.Checked;
   fAddIfMissing := Frame.chkAddIfMissing.Checked;
   fAdjustMod := Frame.cbAdjustMod.ItemIndex;
-
-  if fAdjustMod = 0 then
-    fAdjustDefault := 1
-  else
-    fAdjustDefault := 0;
+  if fAdjustMod = 0 then fAdjustDefault := 1 else fAdjustDefault := 0;
 
   if fSkip then try
     fSkipColor := StrToInt('$' + Frame.edSkipColor.Text);
@@ -226,13 +222,13 @@ begin
   end;
 
   if fMode in [0, 2, 3] then try
-    fColor := StrToInt('$' + Frame.edColor.Text);
+    fColor := StrToInt64('$' + Frame.edColor.Text);
   except
     raise Exception.Create('Color is not a valid hex number');
   end;
 
   if fMode = 3 then try
-    fColor2 := StrToInt('$' + Frame.edColor2.Text);
+    fColor2 := StrToInt64('$' + Frame.edColor2.Text);
   except
     raise Exception.Create('Replacement color is not a valid hex number');
   end;
@@ -469,7 +465,7 @@ begin
           if Nif.NifVersion in [nfTES5, nfSSE] then begin
             var Shader := Block.PropertyByType('BSShaderProperty', True);
             if not Assigned(Shader) then
-              Exit;
+              Continue;
 
             if Shader.BlockType = 'BSLightingShaderProperty' then begin
               if Shader.EditValues['Shader Type'] = 'Parallax' then
