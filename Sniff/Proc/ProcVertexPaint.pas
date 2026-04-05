@@ -585,7 +585,7 @@ begin
           if Nif.NifVersion = nfSSE then begin
             var Shader := Block.PropertyByType('BSShaderProperty', True);
             if not Assigned(Shader) then
-              Exit;
+              Continue;
 
             if Shader.BlockType = 'BSLightingShaderProperty' then begin
               if Shader.EditValues['Shader Type'] = 'Parallax' then
