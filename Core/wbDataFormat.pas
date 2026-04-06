@@ -1188,7 +1188,7 @@ begin
   {
   with TFileStream.Create(aFileName, fmOpenRead or fmShareDenyNone) do try
     SetLength(Buffer, Size);
-    ReadBuffer(Buffer[0], Length(Buffer));
+    ReadBuffer(Buffer, Length(Buffer));
   finally
     Free;
   end;
@@ -1291,7 +1291,7 @@ end;
 procedure TdfElement.SaveToData(var aData: TBytes);
 begin
   SetLength(aData, DataSize);
-  Serialize(@aData[0], @aData[Length(aData)]);
+  Serialize(aData, PByte(aData) + Length(aData));
 end;
 
 procedure TdfElement.SaveToFile(const aFileName: string);
@@ -1300,7 +1300,7 @@ var
 begin
   SaveToData(Buffer);
   with TFileStream.Create(aFileName, fmCreate) do try
-    WriteBuffer(Buffer[0], Length(Buffer));
+    WriteBuffer(Buffer, Length(Buffer));
   finally
     Free;
   end;
@@ -2825,7 +2825,8 @@ var
 begin
   Bytes := aValue;
   SetLength(Bytes, GetDefaultDataSize);
-  Move(Bytes[0], aDataStart^, Length(Bytes));
+  if Length(Bytes) > 0 then
+    Move(Bytes[0], aDataStart^, Length(Bytes));
 end;
 
 procedure TdfMergeDef.GetElementEditValue(const aElement: TdfElement; aDataStart, aDataEnd: PByte; var aValue: string);
