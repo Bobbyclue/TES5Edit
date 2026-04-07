@@ -15794,6 +15794,7 @@ begin
   {subrecords checked against Starfield.esm}
   wbRecord(RFGP, 'Reference Group', @wbKnownSubRecordSignaturesRFGP, [
     wbEDID,
+    wbVMAD,
     wbBaseFormComponents,
     wbString(NNAM, 'Name'),
     wbFormIDCk(RNAM, 'Reference', sigReferences),
