@@ -623,6 +623,7 @@ const
   GPOF : TwbSignature = 'GPOF'; { New To Starfield }
   GPOG : TwbSignature = 'GPOG'; { New To Starfield }
   GRPH : TwbSignature = 'GRPH'; { New To Starfield }
+  GWED : TwbSignature = 'GWED'; { New To Starfield }
   GWOR : TwbSignature = 'GWOR'; { New to Skyrim }
   H0TX : TwbSignature = 'H0TX';
   HACK : TwbSignature = 'HACK';
@@ -1211,6 +1212,7 @@ const
   QUAL : TwbSignature = 'QUAL'; { New To Skyrim }
   QUCF : TwbSignature = 'QUCF'; { New To Fallout 76 }
   QUIM : TwbSignature = 'QUIM'; { New To Fallout 76 }
+  QUPA : TwbSignature = 'QUPA'; { New To Starfield }
   QUST : TwbSignature = 'QUST';
   RABG : TwbSignature = 'RABG'; { New To Starfield }
   RACE : TwbSignature = 'RACE';
@@ -1428,6 +1430,7 @@ const
   TCLT : TwbSignature = 'TCLT';
   TCMP : TwbSignature = 'TCMP'; { New To Starfield }
   TDAT : TwbSignature = 'TDAT'; { New To Fallout 76 }
+  TDED : TwbSignature = 'TDED'; { New To Starfield }
   TDUM : TwbSignature = 'TDUM';
   TEMP : TwbSignature = 'TEMP'; { New To Starfield }
   TEND : TwbSignature = 'TEND'; { New to Fallout 4 }
