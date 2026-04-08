@@ -1193,12 +1193,12 @@ end;
 function wbhkConstraintType(const aName, aDefaultValue: string; const aEvents: array of const): TdfDef;
 begin
   Result := dfEnum(aName, dtU32, [
-    0, 'BallAndSocket',
+    0, 'Ball And Socket',
     1, 'Hinge',
     2, 'Limited Hinge',
     6, 'Prismatic',
     7, 'Ragdoll',
-    8, 'StiffSpring',
+    8, 'Stiff Spring',
     13, 'Malleable'
   ], aDefaultValue, aEvents);
 end;
@@ -2460,7 +2460,7 @@ begin
     dfInteger('Block Index', dtS32),
     dfInteger('Channel Offset', dtS32),
     dfInteger('Unknown Byte 1', dtU8, '2')
-  ])
+  ]);
 end;
 
 function AdditionalDataBlock_EnData(const e: TdfElement): Boolean; begin Result := e.NativeValues['..\Has Data'] <> 0; end;

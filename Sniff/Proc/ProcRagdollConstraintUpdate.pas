@@ -23,18 +23,19 @@ uses
 type
   TFrameRagdollConstraintUpdate = class(TFrame)
     StaticText1: TStaticText;
-  private
-    { Private declarations }
-  public
-    { Public declarations }
+    chkConvertToMalleable: TCheckBox;
   end;
 
   TProcRagdollConstraintUpdate = class(TProcBase)
   private
     Frame: TFrameRagdollConstraintUpdate;
+    fConvert: Boolean;
   public
     constructor Create(aManager: TProcManager); override;
     function GetFrame(aOwner: TComponent): TFrame; override;
+    procedure OnShow; override;
+    procedure OnHide; override;
+    procedure OnStart; override;
 
     function ProcessFile(aFile: TProcFileObject): TBytes; override;
   end;
@@ -63,6 +64,21 @@ function TProcRagdollConstraintUpdate.GetFrame(aOwner: TComponent): TFrame;
 begin
   Frame := TFrameRagdollConstraintUpdate.Create(aOwner);
   Result := Frame;
+end;
+
+procedure TProcRagdollConstraintUpdate.OnShow;
+begin
+  Frame.chkConvertToMalleable.Checked := StorageGetBool('bConvert', Frame.chkConvertToMalleable.Checked);
+end;
+
+procedure TProcRagdollConstraintUpdate.OnHide;
+begin
+  StorageSetBool('bConvert', Frame.chkConvertToMalleable.Checked);
+end;
+
+procedure TProcRagdollConstraintUpdate.OnStart;
+begin
+  fConvert := Frame.chkConvertToMalleable.Checked;
 end;
 
 function TProcRagdollConstraintUpdate.ProcessFile(aFile: TProcFileObject): TBytes;
@@ -107,6 +123,19 @@ begin
     for i := 0 to Pred(nif.BlocksCount) do begin
       Constraint := nif.Blocks[i];
 
+      if fConvert and (
+        (Constraint.BlockType = 'bhkBallAndSocketConstraint') or
+        (Constraint.BlockType = 'bhkHingeConstraint') or
+        (Constraint.BlockType = 'bhkLimitedHingeConstraint') or
+        (Constraint.BlockType = 'bhkPrismaticConstraint') or
+        (Constraint.BlockType = 'bhkRagdollConstraint') or
+        (Constraint.BlockType = 'bhkStiffSpringConstraint')
+      ) then begin
+        nif.ConvertBlock(i, 'bhkMalleableConstraint');
+        Constraint := nif.Blocks[i];
+        bChanged := True;
+      end;
+
       if Constraint.BlockType = 'bhkRagdollConstraint' then
         ragdoll := Constraint.Elements['Ragdoll']
       else if (Constraint.BlockType = 'bhkMalleableConstraint') and (Constraint.EditValues['Hinge\Type'] = 'Ragdoll') then
@@ -125,17 +154,13 @@ begin
         ragdoll.Elements['Plane B'],
         ragdoll.Elements['Motor B']
       ) or bChanged;
-
     end;
 
     if bChanged then
       nif.SaveToData(Result);
-
   finally
     nif.Free;
   end;
-
 end;
-
 
 end.
