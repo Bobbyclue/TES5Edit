@@ -15685,7 +15685,7 @@ begin
       wbConditions,
       wbActivityTracker,
       wbDESC.SetRequired,
-      wbInteger(PRUC, 'Quantum Essence Upgrade Cost', itU32),
+      wbInteger(PRUC, 'Quantum Essence Upgrade Cost', itU32).SetAfterSet(wbPERKPRUCAfterSet),
       wbEmpty(PRRF, 'End Marker').SetRequired
     ], [], cpNormal, True),
     wbRArray('Bonus Perks', wbFormIDCk(RNAM, 'Perk', [PERK]))
