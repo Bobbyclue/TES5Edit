@@ -3218,12 +3218,25 @@ begin
     'No dismember or explode'
   ]);
 
-  var wbLGDIStarSlot := wbEnum([
-    'First Star Slot',
-    'Second Star Slot',
-    'Third Star Slot',
-    'Fourth Star Slot',
-    'Fifth Star Slot'
+  var wbLGDIRankSlotEnum := wbEnum([
+    'Rank 1',
+    'Rank 2',
+    'Rank 3',
+    'Rank 4',
+    'Rank 5'
+  ]);
+
+  var wbLGDIQualityTierEnum := wbEnum([
+    'Tier 1',
+    'Tier 2',
+    'Tier 3',
+    'Tier 4',
+    'Tier 5',
+    'Tier 6',
+    'Tier 7',
+    'Tier 8',
+    'Tier 9',
+    'Tier 10'
   ]);
 
   var wbPronounEnum := wbEnum([
@@ -5537,17 +5550,17 @@ begin
         ]),
         //BGSAdaptiveTriggerData_Component
         wbRStruct('Component Data - Adaptive Trigger', [
-          wbStruct(WFIR, 'ADS Effect', [
-            wbUnused(2),
-            wbInteger('ADS Effect Start Poisiton', itU8),
-            wbInteger('ADS Effect End Poisiton', itU8),
-            wbInteger('ADS Effect Strength', itU8)
+          wbStruct(WFIR, 'Fire Effect', [
+            wbUnused(1),
+            wbInteger('Start Position', itU8),
+            wbInteger('End Position', itU8),
+            wbInteger('Strength', itU8)
           ]),
-          wbStruct(WAIM, 'Fire Effect', [
-            wbUnused(2),
-            wbInteger('Fire Effect Start Poisiton', itU8),
-            wbInteger('Fire Effect End Poisiton', itU8),
-            wbInteger('Fire Effect Strength', itU8)
+          wbStruct(WAIM, 'ADS Effect', [
+            wbUnused(1),
+            wbInteger('Start Position', itU8),
+            wbInteger('End Position', itU8),
+            wbInteger('Strength', itU8)
           ])
         ]),
         //BGSAddToInventoryOnDestroy_Component
@@ -5680,9 +5693,7 @@ begin
         ]),
         //BGSQualityUpgrade_Component
         wbRStruct('Component Data - Quality Upgrade', [
-          wbArray(QUPA, 'Item Specific Mod',
-            wbFormIDCK('Item Specific Mod', [OMOD])
-          )
+          wbArray(QUPA, 'Quality Upgrades', wbFormIDCk('Mod', [OMOD]))
         ]),
         //BGSSoundTag_Component
         wbRStructSK([0], 'Component Data - Sound Tag', [
@@ -7956,29 +7967,35 @@ begin
     {12} 'Mounted'
   ]);
 
-  var wbStarSlot :=
-    wbInteger('Star Slot', itU32, wbLGDIStarSlot)
-    .SetSetToDefault(function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean
-      begin
-        var lContainer: IwbContainerElementRef;
+  var wbLGDISlotDef :=
+    function (const aName: string; aEnumDef: IwbEnumDef): IwbValueDef
+    begin
+    Result := wbInteger(aName, itU32, aEnumDef)
+      .SetSetToDefault(function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean
+        begin
+          var lContainer: IwbContainerElementRef;
 
-        if not Assigned(aBasePtr) or
-           not Assigned(aEndPtr) or
-           ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
-           not Assigned(aElement) or
-           not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
-           not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
-           not (lContainer.ElementType = etArray) or
-           (lContainer.MemoryOrder < 0) or
-           (lContainer.MemoryOrder > Pred(wbLGDIStarSlot.NameCount))
-        then
-          Exit(False);
+          if not Assigned(aBasePtr) or
+             not Assigned(aEndPtr) or
+             ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
+             not Assigned(aElement) or
+             not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
+             not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
+             not (lContainer.ElementType = etArray) or
+             (lContainer.MemoryOrder < 0) or
+             (lContainer.MemoryOrder > Pred(aEnumDef.NameCount))
+          then
+            Exit(False);
 
-        PInteger(aBasePtr)^ := lContainer.MemoryOrder;
-        Result := True;
-      end)
-    .SetDontShow(wbNeverShow)
-    .IncludeFlag(dfInternalEditOnly);
+          PInteger(aBasePtr)^ := lContainer.MemoryOrder;
+          Result := True;
+        end)
+      .SetDontShow(wbNeverShow)
+      .IncludeFlag(dfInternalEditOnly);
+    end;
+
+  var wbLGDIRankSlot := wbLGDISlotDef('Rank', wbLGDIRankSlotEnum);
+  var wbLGDIQualityTier := wbLGDISlotDef('Tier', wbLGDIQualityTierEnum);
 
   var wbArrayShouldIncludeStarSlotMatchesMemoryOrder: TwbShouldIncludeCallback :=
     function(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean
@@ -7993,8 +8010,8 @@ begin
         Result := PInteger(aBasePtr)^ = aArray.MemoryOrder;
       end;
 
-  var wbLGDIStarSlotArray :=
-    function(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean): IwbRecordMemberDef
+  var wbLGDIRankSlotArray :=
+    function(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef
     begin
       var lInnerArray: IwbArrayDef;
       if aSorted then
@@ -8017,8 +8034,37 @@ begin
       Result :=
         wbArray(aSignature, lPluralName, lElementDef)
         .SetSummaryPassthroughMaxCountOnValue(5)
-        .SetCountFromEnumOnValue(wbLGDIStarSlot)
-        .SetSummaryName('Star Slots')
+        .SetCountFromEnumOnValue(aSlotEnum)
+        .SetSummaryName('Slots')
+        .IncludeFlag(dfNoMove);
+    end;
+
+  var wbLGDICostsArray :=
+    function(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef
+    begin
+      var lInnerArray: IwbArrayDef;
+      if aSorted then
+        lInnerArray := wbArrayS('', aElement)
+      else
+        lInnerArray := wbArray('', aElement);
+
+      var lPluralName: string := aName + 's';
+
+      var lElementDef := lInnerArray
+        .SetShouldInclude(wbArrayShouldIncludeStarSlotMatchesMemoryOrder)
+        .IncludeFlag(dfArrayCanBeEmpty)
+        .SetSummaryName(lPluralName);
+
+      if not aSorted then
+        lElementDef := lElementDef
+          .IncludeFlag(dfNoMove)
+          .IncludeFlag(dfRemoveLastOnly);
+
+      Result :=
+        wbArray(aSignature, aName, lElementDef)
+        .SetSummaryPassthroughMaxCountOnValue(5)
+        .SetCountFromEnumOnValue(aSlotEnum)
+        .SetSummaryName('Items')
         .IncludeFlag(dfNoMove);
     end;
 
@@ -8056,8 +8102,21 @@ begin
 
       var lMainRecord := aElement.ContainingMainRecord;
 
-      var lStarSlots: IwbContainerElementRef;
-      if not Supports(lMainRecord.ElementBySignature[BNAM], IwbContainerElementRef, lStarSlots) then
+      var lBase: IwbHasSignature;
+      if not Supports(aElement.Container.Container, IwbHasSignature, lBase) then
+        if not Supports(aElement.Container.Container.Container, IwbHasSignature, lBase) then
+          Exit;
+
+      var lMrSignature: TwbSignature;
+      if ((lBase.Signature = CNAM) or (lBase.Signature = DNAM) or (lBase.Signature = LNAM)) then
+        lMrSignature := BNAM
+      else if ((lBase.Signature = INAM) or (lBase.Signature = HNAM)) then
+        lMrSignature := GNAM
+      else
+        Exit;
+
+      var lRankSlots: IwbContainerElementRef;
+      if not Supports(lMainRecord.ElementBySignature[lMrSignature], IwbContainerElementRef, lRankSlots) then
         Exit;
 
       var lStarSlotValue := lFilter.Elements[0].NativeValue;
@@ -8065,11 +8124,11 @@ begin
         Exit;
       var lStarSlotIndex: Integer := lStarSlotValue;
 
-      if (lStarSlotIndex < 0) or (lStarSlotIndex >= lStarSlots.ElementCount) then
+      if (lStarSlotIndex < 0) or (lStarSlotIndex >= lRankSlots.ElementCount) then
         Exit;
 
       var lStarSlot: IwbContainerElementRef;
-      if not Supports(lStarSlots.Elements[lStarSlotIndex], IwbContainerElementRef, lStarSlot) then
+      if not Supports(lRankSlots.Elements[lStarSlotIndex], IwbContainerElementRef, lStarSlot) then
         Exit;
 
       if aType = ctEditInfo then
@@ -8121,7 +8180,6 @@ begin
       Result := Result + ' ' + lModName;
     end;
 
-
   var wbStrToLGDIFilter: TwbStrToIntCallback :=
     function(const aString: string; const aElement: IwbElement): Int64
     var
@@ -8138,12 +8196,12 @@ begin
     end;
 
   var wbLGDIFilter :=
-    function(aSignature: TwbSignature; const aName: string): IwbRecordMemberDef
+    function(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef
     begin
       Result :=
-        wbLGDIStarSlotArray(aSignature,
+        wbLGDIRankSlotArray(aSignature,
           wbStructExSK([1], [2], aName, [
-            wbStarSlot,
+            aRankSlotDef,
             wbInteger('Referenced Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter{).SetLinksToCallback(wbLGDIFiltersLinksTo}),
             wbFormIDCk('Keyword', [KYWD])
           ])//.SetSummaryKey([1, 2])
@@ -8153,7 +8211,7 @@ begin
             .IncludeFlag(dfSummaryMembersNoName)
             //.IncludeFlag(dfSummaryNoSortKey)
             .IncludeFlag(dfCollapsed, wbCollapseItems)
-        , True);
+        , True, aRankSlotEnumDef);
     end;
 
   var wbStaticPart :=
@@ -13548,9 +13606,9 @@ begin
     wbEmpty(DATA).SetRequired,
     wbFormIDCk(ANAM, 'Base Object List', [LVLI]),
     wbFormIDCk(ENAM, 'Rank Template', [LGDI]),
-    wbLGDIStarSlotArray(BNAM,
+    wbLGDIRankSlotArray(BNAM,
       wbStruct('Mod', [
-        wbStarSlot,
+        wbLGDIRankSlot,
         wbFormIDCk('Object Modification', [OMOD])
       ]).SetSummaryKey([1])
         .SetSummaryMemberPrefixSuffix(1, '', '')
@@ -13558,21 +13616,77 @@ begin
         .IncludeFlag(dfSummaryMembersNoName)
         .IncludeFlag(dfSummaryNoSortKey)
         .IncludeFlag(dfCollapsed, wbCollapseItems),
-    False),
-    wbUnknown(LNAM),
-    wbRArray('',
-      wbRStruct('', [
+    False, wbLGDIRankSlotEnum),
+    wbArray(LNAM, 'Condition Index Map',
+      wbStruct('Index', [
+        wbInteger('Rank', itU32, wbLGDIRankSlotEnum),
+        wbInteger('Reference Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter)
+      ]).SetSummaryKey([0, 1])
+        .SetSummaryMemberPrefixSuffix(0, '', ':')
+        .SetSummaryMemberPrefixSuffix(1, '', '')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseConditions)
+    ).IncludeFlag(dfCollapsed, wbCollapseConditions),
+    wbRArray('Ranked Mod Conditions',
+      wbRStruct('Condition', [
         wbCITCReq,
         wbConditions
-      ])),
-    wbLGDIFilter(CNAM, 'Include Filter'),
-    wbLGDIFilter(DNAM, 'Exclude Filter'),
-    wbUnknown(FNAM),
-    wbUnknown(KNAM),
-    wbUnknown(MNAM),
-    wbUnknown(GNAM),
-    wbUnknown(HNAM),
-    wbUnknown(JNAM)
+      ]).SetSummaryKey([1])
+        .IncludeFlag(dfCollapsed, wbCollapseConditions)
+    ).IncludeFlag(dfCollapsed, wbCollapseConditions),
+    wbLGDIFilter(CNAM, 'Rank Allowed Keyword', wbLGDIRankSlot, wbLGDIRankSlotEnum),
+    wbLGDIFilter(DNAM, 'Rank Disallowed Keyword', wbLGDIRankSlot, wbLGDIRankSlotEnum),
+    wbLGDICostsArray(FNAM, 'Re-Roll Cost',
+      wbStructSK([2], 'Item', [
+        wbLGDIRankSlot,
+        wbInteger('Count', itU32),
+        wbFormIDCk('Item', sigBaseObjects)
+      ]).SetSummaryKey([1, 2])
+        .SetSummaryMemberPrefixSuffix(1, '', 'x')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryMembersNoName)
+        .IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseItems),
+    True, wbLGDIRankSlotEnum),
+    wbLGDICostsArray(KNAM, 'Pick Costs',
+      wbStructSK([2], 'Item', [
+        wbLGDIRankSlot,
+        wbInteger('Count', itU32),
+        wbFormIDCk('Item', sigBaseObjects)
+      ]).SetSummaryKey([1, 2])
+        .SetSummaryMemberPrefixSuffix(1, '', 'x')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryMembersNoName)
+        .IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseItems),
+    True, wbLGDIRankSlotEnum),
+    wbFormIDCk(MNAM, 'Add Into Legendary', [LGDI]),
+    wbLGDIRankSlotArray(GNAM,
+      wbStruct('Quality Mod', [
+        wbLGDIQualityTier,
+        wbFormIDCk('Object Modification', [OMOD])
+      ]).SetSummaryKey([1])
+        .SetSummaryMemberPrefixSuffix(1, '', '')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryMembersNoName)
+        .IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseItems),
+    False, wbLGDIQualityTierEnum),
+    wbLGDIFilter(HNAM, 'Quality Allowed Keyword', wbLGDIQualityTier, wbLGDIQualityTierEnum),
+    wbLGDIFilter(INAM, 'Quality Disallowed Keyword', wbLGDIQualityTier, wbLGDIQualityTierEnum),
+    wbLGDICostsArray(JNAM, 'Quality Upgrade Costs',
+      wbStructSK([2], 'Item', [
+        wbLGDIQualityTier,
+        wbInteger('Count', itU32),
+        wbFormIDCk('Item', sigBaseObjects)
+      ]).SetSummaryKey([1, 2])
+        .SetSummaryMemberPrefixSuffix(1, '', 'x')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryMembersNoName)
+        .IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseItems),
+    True, wbLGDIQualityTierEnum)
   ]);
 
   {subrecords checked against Starfield.esm}
