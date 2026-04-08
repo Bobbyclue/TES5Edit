@@ -7831,7 +7831,7 @@ begin
       {0} wbRStruct('Specific Location', [
             wbFormIDCk(ALFL, 'Location', [LCTN])
           ]),
-      {1} wbRStruct('Alias Location', [
+      {1} wbRStruct('Reference Alias Location', [
             wbInteger(ALFA, 'Alias', itS32, wbQuestAliasToStr, wbAliasToInt)
               .SetLinksToCallbackOnValue(wbSameQuestAliasLinksTo),
             wbFormIDCk(KNAM, 'Keyword', [KYWD])
