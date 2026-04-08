@@ -60,6 +60,7 @@ procedure wbIdleMarkerQNAMAfterSet(const aElement: IwbElement; const aOldValue, 
 procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbPACKDateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbPERKPRKETypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbPERKPRUCAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbSceneActionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbScriptFragmentsQuestScriptNameAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbScriptPropertyTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
@@ -1351,6 +1352,19 @@ begin
 
     lContainerElementRef.Add('EPFT', True);
     lContainerElementRef.ElementNativeValues['DATA\Entry Point\Function'] := 2;
+  finally
+    wbEndInternalEdit;
+  end;
+end;
+
+procedure wbPERKPRUCAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if wbBeginInternalEdit then try
+    if aElement.NativeValue > 255 then
+      aElement.NativeValue := 255;
   finally
     wbEndInternalEdit;
   end;
