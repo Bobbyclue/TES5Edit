@@ -148,7 +148,7 @@ type
   end;
 
 const
-  wbConditionFunctions : array[0..609] of TConditionFunction = (
+  wbConditionFunctions : array[0..610] of TConditionFunction = (
     (Index:   0; Name: 'GetWantBlocking'),                                                                                                                  //   0
     (Index:   1; Name: 'GetDistance'; ParamType1: ptReference),                                                                                       //   1
     (Index:   5; Name: 'GetLocked'),                                                                                                                        //   2
@@ -757,8 +757,9 @@ const
     (Index: 958; Name: 'ShipReactorHasClassKeyword'; ParamType1: ptKeyword; Desc: 'Check if the reactor of the supplied ship has the provided reactor class keyword (keywords in ShipClassOrder form list)'),                                                                                //   605
     (Index: 960; Name: 'EPIsResistanceActorValue'; ParamType1: ptActorValue; Desc: 'Is a specific resistance actor value passed into this check?'),                                                                                //   606
     (Index: 961; Name: 'GetGamePlayOptionCurrentValue'; ParamType1: ptGamePlayOption; Desc: 'Gets the current value of a Gameplay Option form.'),                                                                                //   607
-    (Index: 965; Name: 'IsInVehicle';),
-    (Index: 966; Name: 'AreVehiclesUnlocked';)
+    (Index: 965; Name: 'IsInVehicle'; Desc: 'Is this ref in a vehicle?'),
+    (Index: 966; Name: 'AreVehiclesUnlocked'; Desc: 'Has the player unlocked vehicles?'),
+    (Index: 967; Name: 'IsLevelGreaterThanGameplayOption'; ParamType1: ptGamePlayOption; Desc: 'Is level of Refr greater than passed gameplay option value?')
   );
 
 function wbConditionDescFromIndex(aIndex: Integer): PConditionFunction;
@@ -1674,6 +1675,8 @@ begin
     40: Result := 4; // Spawn Hazard
     45: Result := 9; // Damage Type
     46: Result := 6; // Immunity
+    54: Result := 10; // TrackDamage
+    55: Result := 11; // GravWielder
   end;
 end;
 
@@ -3096,7 +3099,8 @@ begin
     {250} 'Mod Armor Resistance',
     {251} 'Mod Ship Linear Acceleration',
     {252} 'Mod Final Player Ground Combat Damage',
-    {253} 'Mod Final Player Ship Combat Damage'
+    {253} 'Mod Final Player Ship Combat Damage',
+    {254} 'Mod Richochet Chance Spaceship'
   ]);
 
   var wbEquipType := wbFlags([
@@ -5611,7 +5615,7 @@ begin
           wbArray(DCSD, 'Display Case Slot Snap Templates', // DO NOT SORT. The later DCED exclusivity uses the same order as here
             wbStruct('Template Slot', [
               wbFormIDCk('Display Filter', [FLST]),
-              wbFormIDCk('Exclusion Filter Keyword', [NULL, KYWD]),
+              wbFormIDCk('Exclusion Filter Keyword', [NULL, FLST, KYWD]),
               wbInteger('Display Slot', itU32),
               wbInteger('Number', itU32)
             ]).SetSummaryKey([0,2,1,3])
@@ -6731,7 +6735,8 @@ begin
            {13} 'Multiply Actor Value Mult', // EPFT=2
            {14} 'Multiply 1 + Actor Value Mult', // EPFT=2
            {15} 'Set Text', // EPFT=7
-           {16} 'Legendary Magic Effect Event' // EPFT=9
+           {16} 'Legendary Magic Effect Event', // EPFT=9
+           {17} 'Select Aimed Spell' // EPFT=5
           ])),
           wbInteger('Perk Condition Tab Count', itU8, nil, cpIgnore)
         ])
@@ -7335,7 +7340,9 @@ begin
     {50} 'Capacity Value Modifier',
     {51} 'Reset Flora',
     {52} 'Drop Resources',
-    {53} 'Antigravity'
+    {53} 'Antigravity',
+    {54} 'Track Damage',
+    {55} 'Gravity Wielder'
   ])).SetAfterSet(wbMGEFArchtypeAfterSet);
 
   var wbMGEFData :=
@@ -7350,7 +7357,9 @@ begin
               wbFormIDCk('Assoc. Item 1', [DMGT, NULL]),        // immunity
               wbFormIDCk('Assoc. Item 1', [ENCH, NULL]),        // enhance weapon
               wbFormIDCk('Assoc. Item 2', [KYWD, NULL]),        // peak modifier
-              wbFormIDCk('Assoc. Item 1', [DMGT, NULL])         // damage type
+              wbFormIDCk('Assoc. Item 1', [DMGT, NULL]),        // damage type
+              wbFormIDCk('Assoc. Item 1', [TDED, NULL]),        // track damage
+              wbFormIDCk('Assoc. Item 1', [GWED, NULL])         // gravity wielder
             ]),
       {  4} wbActorValue('Magic Skill'),
       {  8} wbFormIDCk('Casting Art', [NULL, ARTO]),
@@ -8232,7 +8241,9 @@ begin
       5, 'Slayton Aerospace',
       6, 'United Colonies',
       7, 'Crimson Fleet',
-      9, 'House Varuun'
+      8, 'House Varuun',
+      9, 'Ship Upgrade',
+      10, 'Terran Armada'
     ]);
 
   var wbBIOMMaskNameStringEnum := wbStringEnum([
@@ -8823,8 +8834,9 @@ begin
           7, 'Allow Grav Jump',
           9, 'Suppress Discovery',
          10, 'Use Accurate Z-Height',
-         11, 'Limit Map Visibility To Compass Range'
-        ], False, 12))
+         11, 'Limit Map Visibility To Compass Range',
+         12, 'Must Cruise to First'
+        ], False, 13))
       ).SetRequired
        .IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbFULLReq,
@@ -12426,8 +12438,26 @@ begin
     ], cpNormal, True)
   ]);
 
-  wbRecord(GWED, 'Gravity Welder Effect Data', [
+  wbRecord(GWED, 'Gravity Wielder Effect Data',
+    wbFlags(wbFlagsList([
+    2,  'Non-Playable',
+    4,  'Ground Piece',
+    9,  'Hidden From Local Map',
+    11, 'Used As Platform',
+    19, 'Has Currents',
+    26, 'Navmesh - Filter',
+    27, 'Navmesh - Bounding Box',
+    28, 'Navmesh - Only Cut',
+    29, 'Navmesh - Ignore Erosion/Child Can Use',
+    30, 'Navmesh - Ground'
+    ])).SetFlagHasDontShow(26, wbFlagNavmeshFilterDontShow)
+       .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
+       .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
+       .SetFlagHasDontShow(29, wbFlagNavmeshIgnoreErosionDontShow)
+       .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
+    wbVMAD,
+    wbBaseFormComponents,
     wbReflection(REFL)
   ]);
 
@@ -15448,7 +15478,10 @@ begin
         //61-65
         66, 'RangingWithPlayer',
         67, 'FollowPlayer',
-        //68-80
+        //68-73
+        74, 'Find',
+        75, 'Acquire',
+        //76-80
         81, 'DefaultCombatMasterTemplate',
        134, 'Master_ShootTarget',
        145, 'ShootTarget'
@@ -17874,7 +17907,23 @@ begin
     wbFormIDCk(VNAM, 'Voice Type', [VTYP])
   ]);
 
-  wbRecord(TDED, 'Track Damage Effect Data', [
+  wbRecord(TDED, 'Track Damage Effect Data',
+    wbFlags(wbFlagsList([
+      2,  'Non-Playable',
+      4,  'Ground Piece',
+      9,  'Hidden From Local Map',
+      11, 'Used As Platform',
+      19, 'Has Currents',
+      26, 'Navmesh - Filter',
+      27, 'Navmesh - Bounding Box',
+      28, 'Navmesh - Only Cut',
+      29, 'Navmesh - Ignore Erosion/Child Can Use',
+      30, 'Navmesh - Ground'
+      ])).SetFlagHasDontShow(26, wbFlagNavmeshFilterDontShow)
+         .SetFlagHasDontShow(27, wbFlagNavmeshBoundingBoxDontShow)
+         .SetFlagHasDontShow(28, wbFlagNavmeshOnlyCutDontShow)
+         .SetFlagHasDontShow(29, wbFlagNavmeshIgnoreErosionDontShow)
+         .SetFlagHasDontShow(30, wbFlagNavmeshGroundDontShow), [
     wbEDID,
     wbReflection(REFL)
   ]);
