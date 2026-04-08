@@ -117,6 +117,7 @@ function wbWorldXWEMDontShow(const aElement: IwbElement): Boolean;
 function wbNormalizeToRange(aMin, aMax: Extended): TwbFloatNormalizer;
 
 {>>> Get Functions <<<} //4
+function wbArrayShouldIncludeStarSlotMatchesMemoryOrder(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
 function wbGetItemStr(const aContainer: IwbContainerElementRef): string;
 function wbGetPropertyValueArrayItems(const aContainer: IwbContainerElementRef): string;
 function wbGetREGNType(aElement: IwbElement): Integer;
@@ -177,6 +178,7 @@ function wbIntPrefixedStrToInt(const aString: string; const aElement: IwbElement
 function wbNVTREdgeToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbScaledInt4ToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbStrToInt(const aString: string; const aElement: IwbElement): Int64;
+function wbStrToLGDIFilter(const aString: string; const aElement: IwbElement): Int64;
 function wbVertexToInt(aVertex: Integer; const aString: string; const aElement: IwbElement): Int64;
 function wbVertexToInt0(const aString: string; const aElement: IwbElement): Int64;
 function wbVertexToInt1(const aString: string; const aElement: IwbElement): Int64;
@@ -199,6 +201,7 @@ function wbFileHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbC
 function wbFolderHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbHideFFFF(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbINFOAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbLGDIFiltersToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbNPCFaceDialToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbNPCFaceMorphToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbNVTREdgeToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
@@ -518,6 +521,12 @@ function wbOBND(aRequired: Boolean = False): IwbRecordMemberDef;
 function wbDamageTypeArray(const aItemName: string): IwbRecordMemberDef;
 function wbEnchantment(aCapacity: Boolean = False): IwbRecordMemberDef;
 function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
+function wbLGDIFilter(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef;
+function wbLGDIQualityTier: IwbValueDef;
+function wbLGDIRankSlot: IwbValueDef;
+function wbLGDIRankSlotArray(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef; overload;
+function wbLGDIRankSlotArray(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef; overload;
+function wbLGDISlotDef(const aName: string; aEnumDef: IwbEnumDef): IwbValueDef;
 function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
 function wbTexturedModel(const aSubRecordName     : string;
                          const aSignatures        : TwbSignatures;
@@ -578,6 +587,8 @@ function wbCrimeTypeEnum: IwbEnumDef;
 function wbCreatureTypeEnum: IwbEnumDef;
 function wbEffectTypeEnum: IwbEnumDef;
 function wbEquipTypeEnum: IwbEnumDef;
+function wbLGDIRankSlotEnum: IwbEnumDef;
+function wbLGDIQualityTierEnum: IwbEnumDef;
 function wbMenuModeEnum: IwbEnumDef;
 function wbMoodEnum: IwbEnumDef;
 function wbMoralityEnum: IwbEnumDef;
@@ -2138,6 +2149,18 @@ end;
 
 {>>> Get Functions <<<} //4
 
+function wbArrayShouldIncludeStarSlotMatchesMemoryOrder(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
+begin
+  if not Assigned(aArray) or
+     not Assigned(aBasePtr) or
+     not Assigned(aEndPtr) or
+     ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer))
+  then
+    Exit(False);
+
+  Result := PInteger(aBasePtr)^ = aArray.MemoryOrder;
+end;
+
 /// <summary>Generates "{Count}x {FormID}" string for item. Supports single and double structs.</summary>
 /// <param name="aContainer">The Item element</param>
 /// <returns>string</return>
@@ -2973,6 +2996,20 @@ begin
   end;
 end;
 
+function wbStrToLGDIFilter(const aString: string; const aElement: IwbElement): Int64;
+var
+  i    : Integer;
+  s    : string;
+begin
+  i := 1;
+  s := Trim(aString);
+  while (i <= Length(s)) and (ANSIChar(s[i]) in ['0'..'9']) do
+    Inc(i);
+  s := Copy(s, 1, Pred(i));
+
+  Result := StrToIntDef(s, 0);
+end;
+
 function wbVertexToInt(aVertex: Integer; const aString: string; const aElement: IwbElement): Int64;
 begin
   Result := StrToIntDef(aString, 0);
@@ -3527,6 +3564,117 @@ begin
       ctToStr, ctToSummary, ctToEditValue: Result := aInt.ToString;
     end;
   end;
+end;
+
+function wbLGDIFiltersToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+begin
+  Result := '';
+  case aType of
+    ctToStr, ctToSummary: begin
+      Result := aInt.ToString;
+      if aType = ctToStr then
+        Result := Result + ' <Warning: Could not resolve mod index>';
+    end;
+    ctToEditValue:
+      Result := aInt.ToString;
+    ctToSortKey: begin
+      Result := IntToHex64(aInt, 8);
+      Exit;
+    end;
+    ctCheck:
+      Result := '<Warning: Could not resolve mod index>';
+    ctEditType: Exit('ComboBox');
+    ctEditInfo: ;
+  else
+    Exit;
+  end;
+
+  if not Assigned(aElement) then
+    Exit;
+
+  var lFilter: IwbContainerElementRef;
+
+  if not Supports(aElement.Container, IwbContainerElementRef, lFilter) then
+    Exit;
+
+  var lMainRecord := aElement.ContainingMainRecord;
+
+  var lBase: IwbHasSignature;
+  if not Supports(aElement.Container.Container, IwbHasSignature, lBase) then
+    if not Supports(aElement.Container.Container.Container, IwbHasSignature, lBase) then
+      Exit;
+
+  var lMrSignature: TwbSignature;
+  if ((lBase.Signature = CNAM) or (lBase.Signature = DNAM) or (lBase.Signature = LNAM)) then
+    lMrSignature := BNAM
+  else if ((lBase.Signature = INAM) or (lBase.Signature = HNAM)) then
+    lMrSignature := GNAM
+  else
+    Exit;
+
+  var lRankSlots: IwbContainerElementRef;
+  if not Supports(lMainRecord.ElementBySignature[lMrSignature], IwbContainerElementRef, lRankSlots) then
+    Exit;
+
+  var lStarSlotValue := lFilter.Elements[0].NativeValue;
+  if not VarIsOrdinal(lStarSlotValue) then
+    Exit;
+  var lStarSlotIndex: Integer := lStarSlotValue;
+
+  if (lStarSlotIndex < 0) or (lStarSlotIndex >= lRankSlots.ElementCount) then
+    Exit;
+
+  var lStarSlot: IwbContainerElementRef;
+  if not Supports(lRankSlots.Elements[lStarSlotIndex], IwbContainerElementRef, lStarSlot) then
+    Exit;
+
+  if aType = ctEditInfo then
+    with TwbFastStringListIC.Create do try
+      for var lModIdx := 0 to Pred(lStarSlot.ElementCount) do begin
+        var lInfoMod := lStarSlot.Elements[lModIdx] as IwbContainerElementRef;
+        var lIndexString := IntToStr(lModIdx);
+        while Length(lIndexString) < 2 do
+          lIndexString := '0' + lIndexString;
+        Add(lIndexString + ' ' + lInfoMod[1].EditValue);
+      end;
+      Sort;
+      Exit(CommaText);
+    finally
+      Free;
+    end;
+
+  var lModIndexValue := aElement.NativeValue;
+  if not VarIsOrdinal(lModIndexValue) then
+    Exit;
+  var lModIndex: Integer := lModIndexValue;
+
+  if (lModIndex < 0) or (lModIndex >= lStarSlot.ElementCount) then
+    Exit;
+
+  var lMod := lStarSlot.Elements[lModIndex] as IwbContainerElementRef;
+  var lModName := lMod[1].EditValue;
+  if lModName = '' then
+    Exit;
+
+  case aType of
+    ctCheck: Exit('');
+    ctToSummary: begin
+      var lOMOD: IwbMainRecord;
+      if Supports(lMod.Elements[1].LinksTo, IwbMainRecord, lOMOD) then begin
+        lModName := lOMOD.EditorID;
+        if lModName = '' then
+          lModName := lOMOD.ShortName;
+        Exit(lModName);
+      end else
+        Exit('');
+    end;
+    else
+      Result := IntToStr(lModIndex);
+      while Length(Result) < 2 do
+        Result := '0' + Result;
+  end;
+
+  Result := Result + ' ' + lModName;
 end;
 
 function wbNPCFaceDialToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
@@ -6497,6 +6645,94 @@ begin
     .IncludeFlag(dfCollapsed, wbCollapseLeveledItems);
 end;
 
+function wbLGDIFilter(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef;
+begin
+  Result :=
+    wbLGDIRankSlotArray(aSignature,
+      wbStructExSK([1], [2], aName, [
+        aRankSlotDef,
+        wbInteger('Referenced Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter),
+        wbFormIDCk('Keyword', [KYWD])
+      ])//.SetSummaryKey([1, 2])
+        .SetSummaryMemberPrefixSuffix(1, '<', '>')
+        .SetSummaryMemberPrefixSuffix(2, '', '')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfSummaryMembersNoName)
+        //.IncludeFlag(dfSummaryNoSortKey)
+        .IncludeFlag(dfCollapsed, wbCollapseItems)
+    , True, aRankSlotEnumDef);
+end;
+
+function wbLGDIQualityTier: IwbValueDef;
+begin
+  Result := wbLGDISlotDef('Tier', wbLGDIQualityTierEnum);
+end;
+
+function wbLGDIRankSlotArray(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
+begin
+  var lInnerArray: IwbArrayDef;
+  if aSorted then
+    lInnerArray := wbArrayS('', aElement)
+  else
+    lInnerArray := wbArray('', aElement);
+
+  var lPluralName: string := aName + 's';
+
+  var lElementDef := lInnerArray
+    .SetShouldInclude(wbArrayShouldIncludeStarSlotMatchesMemoryOrder)
+    .IncludeFlag(dfArrayCanBeEmpty)
+    .SetSummaryName(lPluralName);
+
+  if not aSorted then
+    lElementDef := lElementDef
+      .IncludeFlag(dfNoMove)
+      .IncludeFlag(dfRemoveLastOnly);
+
+  Result :=
+    wbArray(aSignature, aName, lElementDef)
+    .SetSummaryPassthroughMaxCountOnValue(5)
+    .SetCountFromEnumOnValue(aSlotEnum)
+    .SetSummaryName('Rank Slots')
+    .IncludeFlag(dfNoMove);
+end;
+
+function wbLGDIRankSlotArray(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
+begin
+  var lPluralName: string := aElement.Name + 's';
+  Result := wbLGDIRankSlotArray(aSignature, lPluralName, aElement, aSorted, aSlotEnum);
+end;
+
+function wbLGDIRankSlot: IwbValueDef;
+begin
+  Result := wbLGDISlotDef('Rank', wbLGDIRankSlotEnum);
+end;
+
+function wbLGDISlotDef(const aName: string; aEnumDef: IwbEnumDef): IwbValueDef;
+begin
+Result := wbInteger(aName, itU32, aEnumDef)
+  .SetSetToDefault(function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean
+    begin
+      var lContainer: IwbContainerElementRef;
+
+      if not Assigned(aBasePtr) or
+         not Assigned(aEndPtr) or
+         ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
+         not Assigned(aElement) or
+         not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
+         not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
+         not (lContainer.ElementType = etArray) or
+         (lContainer.MemoryOrder < 0) or
+         (lContainer.MemoryOrder > Pred(aEnumDef.NameCount))
+      then
+        Exit(False);
+
+      PInteger(aBasePtr)^ := lContainer.MemoryOrder;
+      Result := True;
+    end)
+  .SetDontShow(wbNeverShow)
+  .IncludeFlag(dfInternalEditOnly);
+end;
+
 function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
 begin
   Result :=
@@ -7443,6 +7679,35 @@ begin
       {13} 'Alcohol'
     ], [
       -1, 'None'
+    ]);
+end;
+
+function wbLGDIRankSlotEnum: IwbEnumDef;
+begin
+   Result :=
+    wbEnum([
+      'Rank 1',
+      'Rank 2',
+      'Rank 3',
+      'Rank 4',
+      'Rank 5'
+    ]);
+end;
+
+function wbLGDIQualityTierEnum: IwbEnumDef;
+begin
+  Result :=
+    wbEnum([
+      'Tier 1',
+      'Tier 2',
+      'Tier 3',
+      'Tier 4',
+      'Tier 5',
+      'Tier 6',
+      'Tier 7',
+      'Tier 8',
+      'Tier 9',
+      'Tier 10'
     ]);
 end;
 

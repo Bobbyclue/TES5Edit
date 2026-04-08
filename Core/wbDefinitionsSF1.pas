@@ -1175,57 +1175,6 @@ begin
   Result := StrToIntDef(aString, 0);
 end;
 
-function wbLGDIFiltersLinksTo(const aElement: IwbElement): IwbElement;
-var
-  LegendaryIndex : Integer;
-  Filter         : IwbContainerElementRef;
-  MainRecord     : IwbMainRecord;
-  LegendaryMods  : IwbContainerElementRef;
-  LegendaryMod   : IwbContainerElementRef;
-  BaseStarSlot   : Integer;
-  ModIndex       : Integer;
-begin
-  Result := nil;
-  if not Assigned(aElement) then
-    Exit;
-
-  Filter := aElement.Container as IwbContainerElementRef;
-  if not Assigned(Filter) then
-    Exit;
-
-  MainRecord := aElement.ContainingMainRecord;
-  if not Assigned(MainRecord) then
-    Exit;
-
-  if not Supports(MainRecord.ElementBySignature[BNAM], IwbContainerElementRef, LegendaryMods) then
-    Exit;
-
-  BaseStarSlot := Filter.Elements[0].NativeValue;
-  ModIndex := aElement.NativeValue;
-
-  LegendaryIndex := -1;
-
-  var iStarIndex := -1;
-  for var i := 0 to Pred(LegendaryMods.ElementCount) do
-  begin
-    LegendaryMod := LegendaryMods.Elements[i] as IwbContainerElementRef;
-    if LegendaryMod[0].NativeValue = BaseStarSlot then
-    begin
-      Inc(iStarIndex);
-      if ModIndex = iStarIndex then
-      begin
-        LegendaryIndex := i;
-        Break;
-      end;
-    end;
-  end;
-
-  if LegendaryIndex = -1 then
-    Exit;
-
-  Result := LegendaryMod.Elements[1].LinksTo;
-end;
-
 function wbQuestAliasExternalAliasLinksTo(const aElement: IwbElement): IwbElement;
 var
   Container  : IwbContainer;
@@ -3216,27 +3165,6 @@ begin
     'Dismember only',
     'Explode only',
     'No dismember or explode'
-  ]);
-
-  var wbLGDIRankSlotEnum := wbEnum([
-    'Rank 1',
-    'Rank 2',
-    'Rank 3',
-    'Rank 4',
-    'Rank 5'
-  ]);
-
-  var wbLGDIQualityTierEnum := wbEnum([
-    'Tier 1',
-    'Tier 2',
-    'Tier 3',
-    'Tier 4',
-    'Tier 5',
-    'Tier 6',
-    'Tier 7',
-    'Tier 8',
-    'Tier 9',
-    'Tier 10'
   ]);
 
   var wbPronounEnum := wbEnum([
@@ -7966,253 +7894,6 @@ begin
     {11} 'Mine',
     {12} 'Mounted'
   ]);
-
-  var wbLGDISlotDef :=
-    function (const aName: string; aEnumDef: IwbEnumDef): IwbValueDef
-    begin
-    Result := wbInteger(aName, itU32, aEnumDef)
-      .SetSetToDefault(function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean
-        begin
-          var lContainer: IwbContainerElementRef;
-
-          if not Assigned(aBasePtr) or
-             not Assigned(aEndPtr) or
-             ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
-             not Assigned(aElement) or
-             not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
-             not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
-             not (lContainer.ElementType = etArray) or
-             (lContainer.MemoryOrder < 0) or
-             (lContainer.MemoryOrder > Pred(aEnumDef.NameCount))
-          then
-            Exit(False);
-
-          PInteger(aBasePtr)^ := lContainer.MemoryOrder;
-          Result := True;
-        end)
-      .SetDontShow(wbNeverShow)
-      .IncludeFlag(dfInternalEditOnly);
-    end;
-
-  var wbLGDIRankSlot := wbLGDISlotDef('Rank', wbLGDIRankSlotEnum);
-  var wbLGDIQualityTier := wbLGDISlotDef('Tier', wbLGDIQualityTierEnum);
-
-  var wbArrayShouldIncludeStarSlotMatchesMemoryOrder: TwbShouldIncludeCallback :=
-    function(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean
-      begin
-        if not Assigned(aArray) or
-           not Assigned(aBasePtr) or
-           not Assigned(aEndPtr) or
-           ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer))
-        then
-          Exit(False);
-
-        Result := PInteger(aBasePtr)^ = aArray.MemoryOrder;
-      end;
-
-  var wbLGDIRankSlotArray :=
-    function(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef
-    begin
-      var lInnerArray: IwbArrayDef;
-      if aSorted then
-        lInnerArray := wbArrayS('', aElement)
-      else
-        lInnerArray := wbArray('', aElement);
-
-      var lPluralName: string := aElement.Name + 's';
-
-      var lElementDef := lInnerArray
-        .SetShouldInclude(wbArrayShouldIncludeStarSlotMatchesMemoryOrder)
-        .IncludeFlag(dfArrayCanBeEmpty)
-        .SetSummaryName(lPluralName);
-
-      if not aSorted then
-        lElementDef := lElementDef
-          .IncludeFlag(dfNoMove)
-          .IncludeFlag(dfRemoveLastOnly);
-
-      Result :=
-        wbArray(aSignature, lPluralName, lElementDef)
-        .SetSummaryPassthroughMaxCountOnValue(5)
-        .SetCountFromEnumOnValue(aSlotEnum)
-        .SetSummaryName('Slots')
-        .IncludeFlag(dfNoMove);
-    end;
-
-  var wbLGDICostsArray :=
-    function(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef
-    begin
-      var lInnerArray: IwbArrayDef;
-      if aSorted then
-        lInnerArray := wbArrayS('', aElement)
-      else
-        lInnerArray := wbArray('', aElement);
-
-      var lPluralName: string := aName + 's';
-
-      var lElementDef := lInnerArray
-        .SetShouldInclude(wbArrayShouldIncludeStarSlotMatchesMemoryOrder)
-        .IncludeFlag(dfArrayCanBeEmpty)
-        .SetSummaryName(lPluralName);
-
-      if not aSorted then
-        lElementDef := lElementDef
-          .IncludeFlag(dfNoMove)
-          .IncludeFlag(dfRemoveLastOnly);
-
-      Result :=
-        wbArray(aSignature, aName, lElementDef)
-        .SetSummaryPassthroughMaxCountOnValue(5)
-        .SetCountFromEnumOnValue(aSlotEnum)
-        .SetSummaryName('Items')
-        .IncludeFlag(dfNoMove);
-    end;
-
-  var wbLGDIFiltersToStr: TwbIntToStrCallback :=
-    function(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string
-    begin
-      Result := '';
-      case aType of
-        ctToStr, ctToSummary: begin
-          Result := aInt.ToString;
-          if aType = ctToStr then
-            Result := Result + ' <Warning: Could not resolve mod index>';
-        end;
-        ctToEditValue:
-          Result := aInt.ToString;
-        ctToSortKey: begin
-          Result := IntToHex64(aInt, 8);
-          Exit;
-        end;
-        ctCheck:
-          Result := '<Warning: Could not resolve mod index>';
-        ctEditType: Exit('ComboBox');
-        ctEditInfo: ;
-      else
-        Exit;
-      end;
-
-      if not Assigned(aElement) then
-        Exit;
-
-      var lFilter: IwbContainerElementRef;
-
-      if not Supports(aElement.Container, IwbContainerElementRef, lFilter) then
-        Exit;
-
-      var lMainRecord := aElement.ContainingMainRecord;
-
-      var lBase: IwbHasSignature;
-      if not Supports(aElement.Container.Container, IwbHasSignature, lBase) then
-        if not Supports(aElement.Container.Container.Container, IwbHasSignature, lBase) then
-          Exit;
-
-      var lMrSignature: TwbSignature;
-      if ((lBase.Signature = CNAM) or (lBase.Signature = DNAM) or (lBase.Signature = LNAM)) then
-        lMrSignature := BNAM
-      else if ((lBase.Signature = INAM) or (lBase.Signature = HNAM)) then
-        lMrSignature := GNAM
-      else
-        Exit;
-
-      var lRankSlots: IwbContainerElementRef;
-      if not Supports(lMainRecord.ElementBySignature[lMrSignature], IwbContainerElementRef, lRankSlots) then
-        Exit;
-
-      var lStarSlotValue := lFilter.Elements[0].NativeValue;
-      if not VarIsOrdinal(lStarSlotValue) then
-        Exit;
-      var lStarSlotIndex: Integer := lStarSlotValue;
-
-      if (lStarSlotIndex < 0) or (lStarSlotIndex >= lRankSlots.ElementCount) then
-        Exit;
-
-      var lStarSlot: IwbContainerElementRef;
-      if not Supports(lRankSlots.Elements[lStarSlotIndex], IwbContainerElementRef, lStarSlot) then
-        Exit;
-
-      if aType = ctEditInfo then
-        with TwbFastStringListIC.Create do try
-          for var lModIdx := 0 to Pred(lStarSlot.ElementCount) do begin
-            var lInfoMod := lStarSlot.Elements[lModIdx] as IwbContainerElementRef;
-            var lIndexString := IntToStr(lModIdx);
-            while Length(lIndexString) < 2 do
-              lIndexString := '0' + lIndexString;
-            Add(lIndexString + ' ' + lInfoMod[1].EditValue);
-          end;
-          Sort;
-          Exit(CommaText);
-        finally
-          Free;
-        end;
-
-      var lModIndexValue := aElement.NativeValue;
-      if not VarIsOrdinal(lModIndexValue) then
-        Exit;
-      var lModIndex: Integer := lModIndexValue;
-
-      if (lModIndex < 0) or (lModIndex >= lStarSlot.ElementCount) then
-        Exit;
-
-      var lMod := lStarSlot.Elements[lModIndex] as IwbContainerElementRef;
-      var lModName := lMod[1].EditValue;
-      if lModName = '' then
-        Exit;
-
-      case aType of
-        ctCheck: Exit('');
-        ctToSummary: begin
-          var lOMOD: IwbMainRecord;
-          if Supports(lMod.Elements[1].LinksTo, IwbMainRecord, lOMOD) then begin
-            lModName := lOMOD.EditorID;
-            if lModName = '' then
-              lModName := lOMOD.ShortName;
-            Exit(lModName);
-          end else
-            Exit('');
-        end;
-        else
-          Result := IntToStr(lModIndex);
-          while Length(Result) < 2 do
-            Result := '0' + Result;
-      end;
-
-      Result := Result + ' ' + lModName;
-    end;
-
-  var wbStrToLGDIFilter: TwbStrToIntCallback :=
-    function(const aString: string; const aElement: IwbElement): Int64
-    var
-      i    : Integer;
-      s    : string;
-    begin
-      i := 1;
-      s := Trim(aString);
-      while (i <= Length(s)) and (ANSIChar(s[i]) in ['0'..'9']) do
-        Inc(i);
-      s := Copy(s, 1, Pred(i));
-
-      Result := StrToIntDef(s, 0);
-    end;
-
-  var wbLGDIFilter :=
-    function(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef
-    begin
-      Result :=
-        wbLGDIRankSlotArray(aSignature,
-          wbStructExSK([1], [2], aName, [
-            aRankSlotDef,
-            wbInteger('Referenced Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter{).SetLinksToCallback(wbLGDIFiltersLinksTo}),
-            wbFormIDCk('Keyword', [KYWD])
-          ])//.SetSummaryKey([1, 2])
-            .SetSummaryMemberPrefixSuffix(1, '<', '>')
-            .SetSummaryMemberPrefixSuffix(2, '', '')
-            .SetSummaryDelimiter(' ')
-            .IncludeFlag(dfSummaryMembersNoName)
-            //.IncludeFlag(dfSummaryNoSortKey)
-            .IncludeFlag(dfCollapsed, wbCollapseItems)
-        , True, aRankSlotEnumDef);
-    end;
 
   var wbStaticPart :=
     wbRStructSK([0], 'Part', [
@@ -13637,7 +13318,7 @@ begin
     ).IncludeFlag(dfCollapsed, wbCollapseConditions),
     wbLGDIFilter(CNAM, 'Rank Allowed Keyword', wbLGDIRankSlot, wbLGDIRankSlotEnum),
     wbLGDIFilter(DNAM, 'Rank Disallowed Keyword', wbLGDIRankSlot, wbLGDIRankSlotEnum),
-    wbLGDICostsArray(FNAM, 'Re-Roll Cost',
+    wbLGDIRankSlotArray(FNAM, 'Re-Roll Cost',
       wbStructSK([2], 'Item', [
         wbLGDIRankSlot,
         wbInteger('Count', itU32),
@@ -13649,7 +13330,7 @@ begin
         .IncludeFlag(dfSummaryNoSortKey)
         .IncludeFlag(dfCollapsed, wbCollapseItems),
     True, wbLGDIRankSlotEnum),
-    wbLGDICostsArray(KNAM, 'Pick Costs',
+    wbLGDIRankSlotArray(KNAM, 'Pick Costs',
       wbStructSK([2], 'Item', [
         wbLGDIRankSlot,
         wbInteger('Count', itU32),
@@ -13675,7 +13356,7 @@ begin
     False, wbLGDIQualityTierEnum),
     wbLGDIFilter(HNAM, 'Quality Allowed Keyword', wbLGDIQualityTier, wbLGDIQualityTierEnum),
     wbLGDIFilter(INAM, 'Quality Disallowed Keyword', wbLGDIQualityTier, wbLGDIQualityTierEnum),
-    wbLGDICostsArray(JNAM, 'Quality Upgrade Costs',
+    wbLGDIRankSlotArray(JNAM, 'Quality Upgrade Costs',
       wbStructSK([2], 'Item', [
         wbLGDIQualityTier,
         wbInteger('Count', itU32),
