@@ -24,254 +24,260 @@ var
   _RecordSizeDeciders : array of TwbUnionDecider;
 
 {>>> Add Info Callbacks <<<} //10
-function wbCellAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbDIALAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbDLBRAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbINFOAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbLANDAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbNAVMAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbPGRDAddInfo(const aMainRecord: IwbMainRecord): string;
+function wbCellAddInfo(  const aMainRecord: IwbMainRecord): string;
+function wbDIALAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbDLBRAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbINFOAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbLANDAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbNAVMAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbPGRDAddInfo  (const aMainRecord: IwbMainRecord): string;
 function wbPlacedAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbROADAddInfo(const aMainRecord: IwbMainRecord): string;
-function wbSCENAddInfo(const aMainRecord: IwbMainRecord): string;
+function wbROADAddInfo  (const aMainRecord: IwbMainRecord): string;
+function wbSCENAddInfo  (const aMainRecord: IwbMainRecord): string;
 
 {>>> After Load Callbacks <<<} //13
-procedure wbACBSLevelMultAfterLoad(const aElement: IwbElement);
-procedure wbAVIFSkillAfterLoad(const aElement: IwbElement);
-procedure wbDialogueTextAfterLoad(const aElement: IwbElement);
-procedure wbDOBJObjectsAfterLoad(const aElement: IwbElement);
-procedure wbMESGAfterLoad(const aElement: IwbElement);
-procedure wbPACKDateAfterLoad(const aElement: IwbElement);
-procedure wbPNDTAfterLoad(const aElement: IwbElement);
+procedure wbACBSLevelMultAfterLoad     (const aElement: IwbElement);
+procedure wbAVIFSkillAfterLoad         (const aElement: IwbElement);
+procedure wbDialogueTextAfterLoad      (const aElement: IwbElement);
+procedure wbDOBJObjectsAfterLoad       (const aElement: IwbElement);
+procedure wbMESGAfterLoad              (const aElement: IwbElement);
+procedure wbPACKDateAfterLoad          (const aElement: IwbElement);
+procedure wbPNDTAfterLoad              (const aElement: IwbElement);
 procedure wbRecipeCategoryDataAfterLoad(const aElement: IwbElement);
-procedure wbRPLDAfterLoad(const aElement: IwbElement);
-procedure wbScrollCastAfterLoad(const aElement: IwbElement);
-procedure wbScrollTypeAfterLoad(const aElement: IwbElement);
-procedure wbSOUNAfterLoad(const aElement: IwbElement);
-procedure wbWorldAfterLoad(const aElement: IwbElement);
+procedure wbRPLDAfterLoad              (const aElement: IwbElement);
+procedure wbScrollCastAfterLoad        (const aElement: IwbElement);
+procedure wbScrollTypeAfterLoad        (const aElement: IwbElement);
+procedure wbSOUNAfterLoad              (const aElement: IwbElement);
+procedure wbWorldAfterLoad             (const aElement: IwbElement);
 
 {>>> After Set Callbacks <<<} //15
-procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbConditionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbConditionRunOnAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbDialogueTextAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbIdleMarkerPNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbIdleMarkerQNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbMESGDNAMAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbPACKDateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbPERKPRKETypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbPERKPRUCAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbSceneActionTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbACBSLevelMultAfterSet                 (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbConditionTypeAfterSet                 (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbConditionRunOnAfterSet                (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbDialogueTextAfterSet                  (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbIdleMarkerPNAMAfterSet                (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbIdleMarkerQNAMAfterSet                (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbMESGDNAMAfterSet                      (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbPACKDateAfterSet                      (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbPERKPRKETypeAfterSet                  (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbPERKPRUCAfterSet                      (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbSceneActionTypeAfterSet               (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbScriptFragmentsQuestScriptNameAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbScriptPropertyTypeAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbUpdateSameParentUnions(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbWorldAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
-procedure wbWwiseKeywordMappingTemplateAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbScriptPropertyTypeAfterSet            (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbUpdateSameParentUnions                (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbWorldAfterSet                         (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbWwiseKeywordMappingTemplateAfterSet   (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 
 {>>> Count Callbacks <<<} //8
-function wbMHDTColumnsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbNavmeshGridCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbScriptFragmentsInfoCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbScriptFragmentsPackCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbMHDTColumnsCounter         (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbNavmeshGridCounter         (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbScriptFragmentsInfoCounter (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbScriptFragmentsPackCounter (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbScriptFragmentsSceneCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbWeatherCloudColorsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbWorldColumnsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
-function wbWorldRowsCounter(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbWeatherCloudColorsCounter  (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbWorldColumnsCounter        (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
+function wbWorldRowsCounter           (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 
 {>>> Flag Don't Show Callbacks <<<} //7
-function wbFlagREFRInteriorDontShow(const aElement: IwbElement): Boolean;
-function wbFlagNavmeshFilterDontSHow(const aElement: IwbElement): Boolean;
-function wbFlagNavmeshBoundingBoxDontSHow(const aElement: IwbElement): Boolean;
-function wbFlagNavmeshOnlyCutDontSHow(const aElement: IwbElement): Boolean;
+function wbFlagREFRInteriorDontShow        (const aElement: IwbElement): Boolean;
+function wbFlagNavmeshFilterDontSHow       (const aElement: IwbElement): Boolean;
+function wbFlagNavmeshBoundingBoxDontSHow  (const aElement: IwbElement): Boolean;
+function wbFlagNavmeshOnlyCutDontSHow      (const aElement: IwbElement): Boolean;
 function wbFlagNavmeshIgnoreErosionDontSHow(const aElement: IwbElement): Boolean;
-function wbFlagNavmeshGroundDontSHow(const aElement: IwbElement): Boolean;
-function wbFlagPartialFormDontShow(const aElement: IwbElement): Boolean;
-function wbFlagREFRSkyMarkerDontShow(const aElement: IwbElement): Boolean;
+function wbFlagNavmeshGroundDontSHow       (const aElement: IwbElement): Boolean;
+function wbFlagPartialFormDontShow         (const aElement: IwbElement): Boolean;
+function wbFlagREFRSkyMarkerDontShow       (const aElement: IwbElement): Boolean;
 
 {>>> Don't Show Callbacks <<<} //23
-function wbAlwaysDontShow(const aElement: IwbElement): Boolean;
-function wbCellInteriorDontShow(const aElement: IwbElement): Boolean;
-function wbCellExteriorDontShow(const aElement: IwbElement): Boolean;
+function wbAlwaysDontShow        (const aElement: IwbElement): Boolean;
+function wbCellInteriorDontShow  (const aElement: IwbElement): Boolean;
+function wbCellExteriorDontShow  (const aElement: IwbElement): Boolean;
 function wbIdleMarkerPNAMDontShow(const aElement: IwbElement): Boolean;
 function wbIdleMarkerQNAMDontShow(const aElement: IwbElement): Boolean;
-function wbLIGHCarryDontShow(const aElement: IwbElement): Boolean;
-function wbLIGHFalloffDontShow(const aElement: IwbElement): Boolean;
-function wbLIGHFlickerDontShow(const aElement: IwbElement): Boolean;
+function wbLIGHCarryDontShow     (const aElement: IwbElement): Boolean;
+function wbLIGHFalloffDontShow   (const aElement: IwbElement): Boolean;
+function wbLIGHFlickerDontShow   (const aElement: IwbElement): Boolean;
 function wbLIGHShadowSpotDontShow(const aElement: IwbElement): Boolean;
-function wbMESGTNAMDontShow(const aElement: IwbElement): Boolean;
-function wbModelInfoDontShow(const aElement: IwbElement): Boolean;
-function wbLCTNCellDontShow(const aElement: IwbElement): Boolean;
-function wbPACKTemplateDontShow(const aElement: IwbElement): Boolean;
-function wbREGNGrassDontShow(const aElement: IwbElement): Boolean;
-function wbREGNImposterDontShow(const aElement: IwbElement): Boolean;
-function wbREGNLandDontShow(const aElement: IwbElement): Boolean;
-function wbREGNMapDontShow(const aElement: IwbElement): Boolean;
-function wbREGNObjectsDontShow(const aElement: IwbElement): Boolean;
-function wbREGNSoundDontShow(const aElement: IwbElement): Boolean;
-function wbREGNWeatherDontShow(const aElement: IwbElement): Boolean;
-function wbTemplateActorDontShow(const aElement: IwbElement): Boolean;
+function wbMESGTNAMDontShow      (const aElement: IwbElement): Boolean;
+function wbModelInfoDontShow     (const aElement: IwbElement): Boolean;
+function wbLCTNCellDontShow      (const aElement: IwbElement): Boolean;
+function wbPACKTemplateDontShow  (const aElement: IwbElement): Boolean;
+function wbREGNGrassDontShow     (const aElement: IwbElement): Boolean;
+function wbREGNImposterDontShow  (const aElement: IwbElement): Boolean;
+function wbREGNLandDontShow      (const aElement: IwbElement): Boolean;
+function wbREGNMapDontShow       (const aElement: IwbElement): Boolean;
+function wbREGNObjectsDontShow   (const aElement: IwbElement): Boolean;
+function wbREGNSoundDontShow     (const aElement: IwbElement): Boolean;
+function wbREGNWeatherDontShow   (const aElement: IwbElement): Boolean;
+function wbTemplateActorDontShow (const aElement: IwbElement): Boolean;
 function wbTemplateActorsDontShow(const aElement: IwbElement): Boolean;
-function wbWorldXWEMDontShow(const aElement: IwbElement): Boolean;
+function wbWorldXWEMDontShow     (const aElement: IwbElement): Boolean;
 
 {>>> Float Normalizers <<<} //1
 function wbNormalizeToRange(aMin, aMax: Extended): TwbFloatNormalizer;
 
 {>>> Get Functions <<<} //4
-function wbArrayShouldIncludeStarSlotMatchesMemoryOrder(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
-function wbGetItemStr(const aContainer: IwbContainerElementRef): string;
+function wbGetItemStr                (const aContainer: IwbContainerElementRef): string;
 function wbGetPropertyValueArrayItems(const aContainer: IwbContainerElementRef): string;
-function wbGetREGNType(aElement: IwbElement): Integer;
-function wbGetScriptObjFormat(const aElement: IwbElement): Integer;
+function wbGetREGNType               (const aElement: IwbElement): Integer;
+function wbGetScriptObjFormat        (const aElement: IwbElement): Integer;
 
 {>>> Get Conflict Priority Callbacks <<<} //2
 procedure wbLandNormalsGetCP(const aElement: IwbElement; var aConflictPriority: TwbConflictPriority);
-procedure wbModelInfoGetCP(const aElement: IwbElement; var aConflictPriority: TwbConflictPriority);
+procedure wbModelInfoGetCP  (const aElement: IwbElement; var aConflictPriority: TwbConflictPriority);
 
 {>>> Integer Formaters <<<} //1
 function wbBoolEnumSummary(const aTrueSummary: string; const aFalseSummary: string = ''): IwbEnumDef;
 
 {>>> Is Removable Callbacks <<<} //9
-function wbCellGridIsRemovable(const aElement: IwbElement): Boolean;
-function wbCellLightingIsRemovable(const aElement: IwbElement): Boolean;
-function wbMessageTNAMIsRemovable(const aElement: IwbElement): Boolean;
-function wbWorldLandDataIsRemovable(const aElement: IwbElement): Boolean;
-function wbWorldLODDataIsRemovable(const aElement: IwbElement): Boolean;
-function wbWorldMapDataIsRemovable(const aElement: IwbElement): Boolean;
-function wbWorldWaterIsRemovable(const aElement: IwbElement): Boolean;
-function wbWorldClimateIsRemovable(const aElement: IwbElement): Boolean;
+function wbCellGridIsRemovable       (const aElement: IwbElement): Boolean;
+function wbCellLightingIsRemovable   (const aElement: IwbElement): Boolean;
+function wbMessageTNAMIsRemovable    (const aElement: IwbElement): Boolean;
+function wbWorldLandDataIsRemovable  (const aElement: IwbElement): Boolean;
+function wbWorldLODDataIsRemovable   (const aElement: IwbElement): Boolean;
+function wbWorldMapDataIsRemovable   (const aElement: IwbElement): Boolean;
+function wbWorldWaterIsRemovable     (const aElement: IwbElement): Boolean;
+function wbWorldClimateIsRemovable   (const aElement: IwbElement): Boolean;
 function wbWorldImageSpaceIsRemovable(const aElement: IwbElement): Boolean;
 
 {>>> Links To Callbacks <<<} //13
-function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
-function wbConditionSummaryLinksTo(const aElement: IwbElement): IwbElement;
-function wbCoverLinksTo(const aElement: IwbElement): IwbElement;
-function wbEdgeLinksTo(aEdge: Integer; const aElement: IwbElement): IwbElement;
-function wbEdgeLinksTo0(const aElement: IwbElement): IwbElement;
-function wbEdgeLinksTo1(const aElement: IwbElement): IwbElement;
-function wbEdgeLinksTo2(const aElement: IwbElement): IwbElement;
-function wbNPCFaceDialLinksTo(const aElement: IwbElement): IwbElement;
-function wbNPCFaceMorphLinksTo(const aElement: IwbElement): IwbElement;
-function wbSCENAliasLinksTo(const aElement: IwbElement): IwbElement;
+function wbAliasLinksTo(const aInt: Int64; const aQuestRef: IwbElement): IwbElement;
+function wbEdgeLinksTo(const aEdge: Integer; const aElement: IwbElement): IwbElement;
+
+function wbConditionSummaryLinksTo (const aElement: IwbElement): IwbElement;
+function wbCoverLinksTo            (const aElement: IwbElement): IwbElement;
+function wbEdgeLinksTo0            (const aElement: IwbElement): IwbElement;
+function wbEdgeLinksTo1            (const aElement: IwbElement): IwbElement;
+function wbEdgeLinksTo2            (const aElement: IwbElement): IwbElement;
+function wbNPCFaceDialLinksTo      (const aElement: IwbElement): IwbElement;
+function wbNPCFaceMorphLinksTo     (const aElement: IwbElement): IwbElement;
+function wbSCENAliasLinksTo        (const aElement: IwbElement): IwbElement;
 function wbScriptObjectAliasLinksTo(const aElement: IwbElement): IwbElement;
-function wbTriangleLinksTo(const aElement: IwbElement): IwbElement;
-function wbVertexLinksTo(const aElement: IwbElement): IwbElement;
+function wbTriangleLinksTo         (const aElement: IwbElement): IwbElement;
+function wbVertexLinksTo           (const aElement: IwbElement): IwbElement;
 
 {>>> Try Functions <<<} //6
-function wbTryGetContainerFromUnion(const aElement: IwbElement; out aContainer: IwbContainer): Boolean;
+function wbTryGetContainerFromUnion          (const aElement: IwbElement; out aContainer: IwbContainer): Boolean;
 function wbTryGetContainerRefFromUnionOrValue(const aElement: IwbElement; out aContainer: IwbContainerElementRef): Boolean;
 function wbTryGetContainerWithValidMainRecord(const aElement: IwbElement; out aContainer: IwbContainerElementRef; out aMainRecord: IwbMainRecord): Boolean;
-function wbTryGetContainingMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord): Boolean;
-function wbTryGetMainRecord(const aElement: IwbElement; out aMainRecord: IwbMainRecord; const aSignature: string = ''): Boolean;
-function wbTrySetContainer(const aElement: IwbElement; aType: TwbCallbackType; out aContainer: IwbContainerElementRef): Boolean;
+function wbTryGetContainingMainRecord        (const aElement: IwbElement; out aMainRecord: IwbMainRecord): Boolean;
+function wbTryGetMainRecord                  (const aElement: IwbElement; out aMainRecord: IwbMainRecord; const aSignature: string = ''): Boolean;
+function wbTrySetContainer                   (const aElement: IwbElement; aType: TwbCallbackType; out aContainer: IwbContainerElementRef): Boolean;
+
+{>>> Should Include Callbacks <<<} //1
+function wbLGDIRankSlotArrayShouldInclude(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
 
 {>>> To Integer Callbacks <<<} //19
 function Sig2Int(const aSignature: TwbSignature): Cardinal; inline;
-function wbAliasToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbConditionStringToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbConditionTypeToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbQuestStageToInt(const aString: string; const aElement: IwbElement): Int64;
 function wbEdgeToInt(aEdge: Integer; const aString: string; const aElement: IwbElement): Int64;
-function wbEdgeToInt0(const aString: string; const aElement: IwbElement): Int64;
-function wbEdgeToInt1(const aString: string; const aElement: IwbElement): Int64;
-function wbEdgeToInt2(const aString: string; const aElement: IwbElement): Int64;
-function wbIntPrefixedStrToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbNVTREdgeToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbScaledInt4ToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbStrToInt(const aString: string; const aElement: IwbElement): Int64;
-function wbStrToLGDIFilter(const aString: string; const aElement: IwbElement): Int64;
 function wbVertexToInt(aVertex: Integer; const aString: string; const aElement: IwbElement): Int64;
-function wbVertexToInt0(const aString: string; const aElement: IwbElement): Int64;
-function wbVertexToInt1(const aString: string; const aElement: IwbElement): Int64;
-function wbVertexToInt2(const aString: string; const aElement: IwbElement): Int64;
-function wbWeatherCloudSpeedToInt(const aString: string; const aElement: IwbElement): Int64;
+
+function wbAliasToInt                (const aString: string; const aElement: IwbElement): Int64;
+function wbConditionStringToInt      (const aString: string; const aElement: IwbElement): Int64;
+function wbConditionTypeToInt        (const aString: string; const aElement: IwbElement): Int64;
+function wbQuestStageToInt           (const aString: string; const aElement: IwbElement): Int64;
+function wbEdgeToInt0                (const aString: string; const aElement: IwbElement): Int64;
+function wbEdgeToInt1                (const aString: string; const aElement: IwbElement): Int64;
+function wbEdgeToInt2                (const aString: string; const aElement: IwbElement): Int64;
+function wbIntPrefixedStrToInt       (const aString: string; const aElement: IwbElement): Int64;
+function wbNVTREdgeToInt             (const aString: string; const aElement: IwbElement): Int64;
+function wbScaledInt4ToInt           (const aString: string; const aElement: IwbElement): Int64;
+function wbStrToInt                  (const aString: string; const aElement: IwbElement): Int64;
+function wbStrToLGDIFilter           (const aString: string; const aElement: IwbElement): Int64;
+function wbVertexToInt0              (const aString: string; const aElement: IwbElement): Int64;
+function wbVertexToInt1              (const aString: string; const aElement: IwbElement): Int64;
+function wbVertexToInt2              (const aString: string; const aElement: IwbElement): Int64;
+function wbWeatherCloudSpeedToInt    (const aString: string; const aElement: IwbElement): Int64;
 function wbPackagePSDTMonthValueToInt(const aString: string; const aElement: IwbElement): Int64;
 
 {>>> To String Callback Functions <<<} //31
-function wbAliasToStr(aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
-function wbClmtMoonsPhaseLength(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbClmtTime(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbConditionAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbConditionStringToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbConditionTypeToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbEdgeToStr(aEdge: Integer; aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbEdgeToStr0(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbEdgeToStr1(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbEdgeToStr2(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbFileHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbFolderHashCallback(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbHideFFFF(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbINFOAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbLGDIFiltersToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbNPCFaceDialToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbNPCFaceMorphToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbNVTREdgeToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbPackageLocationAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbQuestAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbQuestExternalAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbREFRNavmeshTriangleToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbScaledInt4ToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbSceneAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbScriptObjectAliasToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbVertexToStr(aVertex: Integer; aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbVertexToStr0(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbVertexToStr1(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbVertexToStr2(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbVTXTPosition(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-function wbWeatherCloudSpeedToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+
+function wbAliasToStr                (aInt: Int64; const aQuestRef: IwbElement; aType: TwbCallbackType): string;
+function wbClmtMoonsPhaseLength      (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbClmtTime                  (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbConditionAliasToStr       (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbConditionStringToStr      (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbConditionTypeToStr        (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbEdgeToStr0                (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbEdgeToStr1                (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbEdgeToStr2                (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbFileHashCallback          (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbFolderHashCallback        (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbHideFFFF                  (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbINFOAliasToStr            (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbLGDIFiltersToStr          (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbNPCFaceDialToStr          (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbNPCFaceMorphToStr         (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbNVTREdgeToStr             (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbPackageLocationAliasToStr (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbQuestAliasToStr           (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbQuestExternalAliasToStr   (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbREFRNavmeshTriangleToStr  (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbScaledInt4ToStr           (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbSceneAliasToStr           (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbScriptObjectAliasToStr    (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbVertexToStr0              (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbVertexToStr1              (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbVertexToStr2              (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbVTXTPosition              (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
+function wbWeatherCloudSpeedToStr    (aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 function wbPackagePSDTMonthValueToStr(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
 
 {>>> To String Callback Procedures <<<} //18
-procedure wbABGRToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbBGRAToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbConditionToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbConditionOwnerToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbCrowdPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbDIALQuestToStr(var aValue: string; aBasePtr, aEndPtr: Pointer; const aElement : IwbElement; aType : TwbCallbackType);
-procedure wbFactionRelationToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbItemToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbNPCPackageToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbObjectPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbQUSTAliasToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbQUSTEventToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbRGBAToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbScriptToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbScriptPropertyToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbScriptPropertyArrayToStr(const aContainer: IwbContainerElementRef; var PropertyType: string; var PropertyValue: string);
 procedure wbScriptPropertyObjectToStr(const aContainer: IwbContainerElementRef; var PropertyName: string; var PropertyType: string; var PropertyValue: string);
-procedure wbToStringFromLinksToSummary(var aValue:string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+
+procedure wbABGRToStr                        (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbBGRAToStr                        (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbConditionToStr                   (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbConditionOwnerToStr              (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbCrowdPropertyToStr               (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbDIALQuestToStr                   (var aValue: string; aBasePtr, aEndPtr: Pointer; const aElement : IwbElement; aType : TwbCallbackType);
+procedure wbFactionRelationToStr             (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbItemToStr                        (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbNPCPackageToStr                  (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbObjectPropertyToStr              (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbQUSTAliasToStr                   (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbQUSTEventToStr                   (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbRGBAToStr                        (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbScriptToStr                      (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbScriptPropertyToStr              (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbToStringFromLinksToSummary       (var aValue:string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 procedure wbToStringFromLinksToMainRecordName(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
-procedure wbVec3ToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
+procedure wbVec3ToStr                        (var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 
 {>>> RUnion Deciders <<<} //2
-
-function wbSceneActionTypeDecider(const aContainer: IwbContainerElementRef): Integer;
+function wbSceneActionTypeDecider  (const aContainer: IwbContainerElementRef): Integer;
 function wbSceneTimelineTypeDecider(const aContainer: IwbContainerElementRef): Integer;
 
 {>>> Union Deciders <<<} //24
-function wbACBSLevelDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbCOEDOwnerDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbConditionCompValueDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbConditionParam3Decider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbConditionReferenceDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbFlagDecider(aFlag: Byte): TwbUnionDecider;
 function wbFormVersionDecider(aVersion: Integer): TwbUnionDecider; overload;
 function wbFormVersionDecider(aMinVersion, aMaxVersion: Integer): TwbUnionDecider; overload;
 function wbFormVersionDecider(const aVersions: array of Integer): TwbUnionDecider; overload;
-function wbGMSTUnionDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbModelInfoDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbNoFlagsDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbNoteTypeDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbNAVIIslandDataDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbNAVIParentDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbNVNMParentDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbPxDTLocationDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbRecordSizeDecider(aSize: Integer): TwbUnionDecider; overload;
 function wbRecordSizeDecider(aMinSize, aMaxSize: Integer): TwbUnionDecider; overload;
 function wbRecordSizeDecider(const aSizes: array of Integer): TwbUnionDecider; overload;
+
+function wbACBSLevelDecider                 (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbCOEDOwnerDecider                 (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbConditionCompValueDecider        (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbConditionParam3Decider           (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbConditionReferenceDecider        (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbGMSTUnionDecider                 (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbModelInfoDecider                 (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbNoFlagsDecider                   (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbNoteTypeDecider                  (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbNAVIIslandDataDecider            (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbNAVIParentDecider                (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbNVNMParentDecider                (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbPxDTLocationDecider              (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 function wbScriptFragmentsEmptyScriptDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbScriptObjFormatDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbWeatherTimeOfDayDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-function wbWwiseKeywordMappingSoundDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbScriptObjFormatDecider           (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbWeatherTimeOfDayDecider          (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
+function wbWwiseKeywordMappingSoundDecider  (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
 
 {>>> VarRecs <<<} //2
 function wbCombineVarRecs(const a, b : array of const): TwbVarRecs;
@@ -280,74 +286,74 @@ function wbMakeVarRecs(const a : array of const): TwbVarRecs;
 {>>> Common Function Definitions <<<}
 
 {>>> IfThens Defs <<<} //4
-function IfThen(aBoolean: Boolean; const aTrue: IwbRecordMemberDef; const aFalse: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IfThen(aBoolean: Boolean; const aTrue: IwbValueDef; const aFalse: IwbValueDef): IwbValueDef; overload;
-function IfThen(aBoolean: Boolean; const aTrue: TwbSignature; const aFalse: TwbSignature): TwbSignature; overload;
-function IfThen(aBoolean: Boolean; const aTrue: TwbToStrCallback; const aFalse: TwbToStrCallback): TwbToStrCallback; overload;
+function IfThen(const aBoolean: Boolean; const aTrue: IwbRecordMemberDef; const aFalse: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IfThen(const aBoolean: Boolean; const aTrue: IwbValueDef; const aFalse: IwbValueDef): IwbValueDef; overload;
+function IfThen(const aBoolean: Boolean; const aTrue: TwbSignature; const aFalse: TwbSignature): TwbSignature; overload;
+function IfThen(const aBoolean: Boolean; const aTrue: TwbToStrCallback; const aFalse: TwbToStrCallback): TwbToStrCallback; overload;
 
 {>>> Flag IfThen Defs <<<} //6
-function wbHasNoFlags(const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
-function wbHasNoFlags(const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
-function wbIsFlag(aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
-function wbIsFlag(aFlag: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
-function wbIsNotFlag(aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
-function wbIsNotFlag(aFlag: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
+function wbHasNoFlags(const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
+function wbHasNoFlags(const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef; overload;
+function wbIsFlag(const aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
+function wbIsFlag(const aFlag: Integer; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef; overload;
+function wbIsNotFlag(const aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
+function wbIsNotFlag(const aFlag: Integer; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef; overload;
 
 {>>> DLL Mode IfThen Defs <<<} //4
-function IsCS(const aDef1, aDef2: string): string;
-function IsOBME(const aDef1, aDef2: string): string;
-function IsVR(const aDef1, aDef2: string): string;
+function IsCS   (const aDef1, aDef2: string): string;
+function IsOBME (const aDef1, aDef2: string): string;
+function IsVR   (const aDef1, aDef2: string): string;
 function IsVRESL(const aDef1, aDef2: string): string;
 
 {>>> Game Mode IfThen Defs <<<} //36
-function IsTES3(const aDef1, aDef2: string): string; overload;
-function IsTES3(const aDef1, aDef2: TwbSignature): TwbSignature; overload;
-function IsTES4(const aDef1, aDef2: Integer): Integer; overload;
-function IsTES4(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsTES4(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsTES4(const aDef1, aDef2: string): string; overload;
-function IsTES4(const aDef1, aDef2: TwbSignature): TwbSignature; overload;
-function IsTES4R(const aDef1, aDef2: Integer): Integer; overload;
-function IsTES4R(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsTES3   (const aDef1, aDef2: string): string; overload;
+function IsTES3   (const aDef1, aDef2: TwbSignature): TwbSignature; overload;
+function IsTES4   (const aDef1, aDef2: Integer): Integer; overload;
+function IsTES4   (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsTES4   (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsTES4   (const aDef1, aDef2: string): string; overload;
+function IsTES4   (const aDef1, aDef2: TwbSignature): TwbSignature; overload;
+function IsTES4R  (const aDef1, aDef2: Integer): Integer; overload;
+function IsTES4R  (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsTES4FO3(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
 function IsTES4FO3(const aDef1, aDef2: string): string; overload;
-function IsFO3(const aDef1, aDef2: Integer): Integer; overload;
-function IsFO3(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsFO3(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsFO3(const aDef1, aDef2: string): string; overload;
-function IsFNV(const aDef1, aDef2: string): string; overload;
-function IsFNV(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsFNV(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsTES5(const aDef1, aDef2: string): string; overload;
-function IsTES5(const aDef1, aDef2: Cardinal): Cardinal; overload;
-function IsTES5(const aDef1, aDef2: Integer): Integer; overload;
-function IsTES5(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsTES5(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsSSE(const aDef1, aDef2: string): string; overload;
-function IsSSE(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsSSE(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsFO3    (const aDef1, aDef2: Integer): Integer; overload;
+function IsFO3    (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsFO3    (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsFO3    (const aDef1, aDef2: string): string; overload;
+function IsFNV    (const aDef1, aDef2: string): string; overload;
+function IsFNV    (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsFNV    (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsTES5   (const aDef1, aDef2: string): string; overload;
+function IsTES5   (const aDef1, aDef2: Cardinal): Cardinal; overload;
+function IsTES5   (const aDef1, aDef2: Integer): Integer; overload;
+function IsTES5   (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsTES5   (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsSSE    (const aDef1, aDef2: string): string; overload;
+function IsSSE    (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsSSE    (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
 function IsFO4Plus(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
 function IsFO4Plus(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
 function IsFO4Plus(const aDef1, aDef2: string): string; overload;
-function IsFO76(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsFO76(const aDef1, aDef2: string): string; overload;
+function IsFO76   (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsFO76   (const aDef1, aDef2: string): string; overload;
 function IsFO76SF1(const aDef1, aDef2: string): string;
-function IsSF1(const aDef1, aDef2: Integer): Integer; overload;
-function IsSF1(const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
-function IsSF1(const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
-function IsSF1(const aDef1, aDef2: string): string; overload;
+function IsSF1    (const aDef1, aDef2: Integer): Integer; overload;
+function IsSF1    (const aDef1, aDef2: IwbRecordMemberDef): IwbRecordMemberDef; overload;
+function IsSF1    (const aDef1, aDef2: IwbValueDef): IwbValueDef; overload;
+function IsSF1    (const aDef1, aDef2: string): string; overload;
 
 {>>> Size IfThen Defs <<<} //4
 function wbBelowSize(aSize: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
 function wbBelowSize(aSize: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
-function wbFromSize(aSize: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
-function wbFromSize(aSize: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
+function wbFromSize (aSize: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef; overload;
+function wbFromSize (aSize: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef; overload;
 
 {>>> Version IfThen Defs <<<} //4
 function wbBelowVersion(aVersion: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef): IwbRecordMemberDef; overload;
 function wbBelowVersion(aVersion: Integer; const aValue: IwbValueDef): IwbValueDef; overload;
-function wbFromVersion(aVersion: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef): IwbRecordMemberDef; overload;
-function wbFromVersion(aVersion: Integer; const aValue: IwbValueDef): IwbValueDef; overload;
+function wbFromVersion (aVersion: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef): IwbRecordMemberDef; overload;
+function wbFromVersion (aVersion: Integer; const aValue: IwbValueDef): IwbValueDef; overload;
 
 {>>> Vec3 Defs <<<} //11
 function wbVec3(const aName   : string = 'Unknown';
@@ -384,13 +390,13 @@ function wbVec3PosRot(const aCombinedName : string = 'Position/Rotation';
                       const aRotPrefix    : string = 'Rot')
                                           : IwbValueDef; overload;
 
-function wbVec3PosRot(const aSignature   : TwbSignature;
+function wbVec3PosRot(const aSignature    : TwbSignature;
                       const aCombinedName : string = 'Position/Rotation';
                       const aPosName      : string = 'Position';
                       const aRotName      : string = 'Rotation';
                       const aPosPrefix    : string = 'Pos';
                       const aRotPrefix    : string = 'Rot')
-                                         : IwbRecordMemberDef; overload;
+                                          : IwbRecordMemberDef; overload;
 
 function wbVec3PosRotDegrees(const aCombinedName : string = 'Position/Rotation';
                              const aPosName      : string = 'Position';
@@ -413,9 +419,9 @@ function wbSizePosRot(const aSignature : TwbSignature;
                                        : IwbSubRecordDef; overload;
 
 {>>> Color Defs <<<} //16
-function wbAmbientColors(const aSignature: TwbSignature;
-                         const aName     : string = 'Directional Ambient Lighting Colors')
-                                         : IwbSubRecordDef; overload;
+function wbAmbientColors(const aSignature : TwbSignature;
+                         const aName      : string = 'Directional Ambient Lighting Colors')
+                                          : IwbSubRecordDef; overload;
 
 function wbAmbientColors(const aName : string = 'Directional Ambient Lighting Colors')
                                      : IwbStructDef; overload;
@@ -441,12 +447,12 @@ function wbByteABGR(const aSignature : TwbSignature;
                     const aDefaultR  : Byte = 0)
                                      : IwbRecordMemberDef; overload;
 
-function wbByteABGR(const aName      : string = 'Color';
-                    const aDefaultA  : Byte = 0;
-                    const aDefaultB  : Byte = 0;
-                    const aDefaultG  : Byte = 0;
-                    const aDefaultR  : Byte = 0)
-                                     : IwbValueDef; overload;
+function wbByteABGR(const aName     : string = 'Color';
+                    const aDefaultA : Byte = 0;
+                    const aDefaultB : Byte = 0;
+                    const aDefaultG : Byte = 0;
+                    const aDefaultR : Byte = 0)
+                                    : IwbValueDef; overload;
 
 function wbByteRGBA(const aSignature : TwbSignature;
                     const aName      : string = 'Color';
@@ -456,12 +462,12 @@ function wbByteRGBA(const aSignature : TwbSignature;
                     const aDefaultA  : Byte = 0)
                                      : IwbRecordMemberDef; overload;
 
-function wbByteRGBA(const aName      : string = 'Color';
-                    const aDefaultR  : Byte = 0;
-                    const aDefaultG  : Byte = 0;
-                    const aDefaultB  : Byte = 0;
-                    const aDefaultA  : Byte = 0)
-                                : IwbValueDef; overload;
+function wbByteRGBA(const aName     : string = 'Color';
+                    const aDefaultR : Byte = 0;
+                    const aDefaultG : Byte = 0;
+                    const aDefaultB : Byte = 0;
+                    const aDefaultA : Byte = 0)
+                                    : IwbValueDef; overload;
 
 function wbByteBGRA(const aSignature : TwbSignature;
                     const aName      : string = 'Color';
@@ -471,12 +477,12 @@ function wbByteBGRA(const aSignature : TwbSignature;
                     const aDefaultA  : Byte = 0)
                                      : IwbRecordMemberDef; overload;
 
-function wbByteBGRA(const aName      : string = 'Color';
-                    const aDefaultB  : Byte = 0;
-                    const aDefaultG  : Byte = 0;
-                    const aDefaultR  : Byte = 0;
-                    const aDefaultA  : Byte = 0)
-                                     : IwbValueDef; overload;
+function wbByteBGRA(const aName     : string = 'Color';
+                    const aDefaultB : Byte = 0;
+                    const aDefaultG : Byte = 0;
+                    const aDefaultR : Byte = 0;
+                    const aDefaultA : Byte = 0)
+                                    : IwbValueDef; overload;
 
 function wbFloatColors(const aSignature : TwbSignature;
                        const aName      : string = 'Color';
@@ -513,176 +519,219 @@ function wbFloatRGBA(const aName     : string = 'Color';
                      const aDefaultA : Single = 0)
                                      : IwbValueDef; overload;
 
-{>>> Many Record Defs <<<} //2
-function wbModelInfo(const aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
-function wbOBND(aRequired: Boolean = False): IwbRecordMemberDef;
+{>>> NamedIndex Defs <<<} //2
+function wbIdxAddonNode      : TwbNamedIndex;
+function wbIdxCollisionLayer : TwbNamedIndex;
 
-{>>> Multiple Record Defs <<<} //4
-function wbDamageTypeArray(const aItemName: string): IwbRecordMemberDef;
-function wbEnchantment(aCapacity: Boolean = False): IwbRecordMemberDef;
-function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
-function wbLGDIFilter(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef;
-function wbLGDIQualityTier: IwbValueDef;
-function wbLGDIRankSlot: IwbValueDef;
-function wbLGDIRankSlotArray(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef; overload;
-function wbLGDIRankSlotArray(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef; overload;
-function wbLGDISlotDef(const aName: string; aEnumDef: IwbEnumDef): IwbValueDef;
-function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
+{>>> Enum Defs <<<} //39
+function wbActorImpactMaterialEnum       : IwbEnumDef;
+function wbAggressionEnum                : IwbEnumDef;
+function wbAlignmentEnum                 : IwbEnumDef;
+function wbArchtypeEnum                  : IwbEnumDef;
+function wbAssistanceEnum                : IwbEnumDef;
+function wbAttackAnimationEnum           : IwbEnumDef;
+function wbAxisEnum                      : IwbEnumDef;
+function wbBlendModeEnum                 : IwbEnumDef;
+function wbBlendOpEnum                   : IwbEnumDef;
+function wbBodyLocationEnum              : IwbEnumDef;
+function wbBodyPartIndexEnum             : IwbEnumDef;
+function wbBoolEnum                      : IwbEnumDef;
+function wbConfidenceEnum                : IwbEnumDef;
+function wbCRCValuesEnum                 : IwbEnumDef;
+function wbCriticalStageEnum             : IwbEnumDef;
+function wbCrimeTypeEnum                 : IwbEnumDef;
+function wbCreatureTypeEnum              : IwbEnumDef;
+function wbEffectTypeEnum                : IwbEnumDef;
+function wbEquipTypeEnum                 : IwbEnumDef;
+function wbLGDIRankSlotEnum              : IwbEnumDef;
+function wbLGDIQualityTierEnum           : IwbEnumDef;
+function wbMenuModeEnum                  : IwbEnumDef;
+function wbMoodEnum                      : IwbEnumDef;
+function wbMoralityEnum                  : IwbEnumDef;
+function wbMusicEnum                     : IwbEnumDef;
+function wbNavmeshEdgeLinkEnum           : IwbEnumDef;
+function wbPackageScheduleDayOfMonthEnum : IwbEnumDef;
+function wbPackageScheduleDayOfWeekEnum  : IwbEnumDef;
+function wbPackageScheduleHoursEnum      : IwbEnumDef;
+function wbPackageScheduleMinutesEnum    : IwbEnumDef;
+function wbPackageScheduleMonthEnum      : IwbEnumDef;
+function wbPackageTypeEnum               : IwbEnumDef;
+function wbQuadrantEnum                  : IwbEnumDef;
+function wbQuestEventEnum                : IwbEnumDef;
+function wbSexEnum                       : IwbEnumDef;
+function wbSoulGemEnum                   : IwbEnumDef;
+function wbWorldImpactMaterialEnum       : IwbEnumDef;
+function wbZoomOverlayEnum               : IwbEnumDef;
+function wbZTestFuncEnum                 : IwbEnumDef;
+
+{>>> Flags Defs <<<} //7
+function wbFurnitureEntryTypeFlags : IwbFlagsDef;
+function wbLandFlags               : IwbFlagsDef;
+function wbNavmeshTriangleFlags    : IwbFlagsDef;
+function wbNavmeshCoverFlags       : IwbFlagsDef;
+function wbPackageFlags            : IwbFlagsDef;
+function wbServiceFlags            : IwbFlagsDef;
+function wbTemplateFlags           : IwbFlagsDef;
+
+{>>> Value Defs <<<} //14
+function wbAlternateTexture      : IwbValueDef;
+function wbColorInterpolator     : IwbValueDef;
+function wbLGDIQualityTier       : IwbValueDef;
+function wbLGDIRankSlot          : IwbValueDef;
+function wbNextSpeaker           : IwbValueDef;
+function wbTimeInterpolator      : IwbValueDef;
+function wbWeatherLightningColor : IwbValueDef;
+
+function wbIMADMultAddCount(const aName : string)
+                                        : IwbValueDef;
+
+function wbLGDISlotDef(const aName    : string;
+                       const aEnumDef : IwbEnumDef)
+                                      : IwbValueDef;
+
+function wbNPCTemplateActorEntry(const aName : string)
+                                             : IwbValueDef;
+
+function wbPerkEffectType(const aAfterSetCallback : TwbAfterSetCallback)
+                                                  : IwbValueDef;
+
+function wbRecordHeader(const aRecordFlags : IwbIntegerDef)
+                                           : IwbValueDef;
+
+function wbTimeInterpolators(const aName : string)
+                                         : IwbValueDef; overload;
+
+function wbWeatherTimeOfDay(const aName : string)
+                                        : IwbValueDef;
+
+{>>> RecordMember Defs <<<} //74
+function wbActionFlag                 : IwbRecordMemberDef;
+function wbActorSounds                : IwbRecordMemberDef;
+function wbCellGrid                   : IwbRecordMemberDef;
+function wbFaceGen                    : IwbRecordMemberDef;
+function wbFaction                    : IwbRecordMemberDef;
+function wbFactionRelations           : IwbRecordMemberDef;
+function wbHEDR                       : IwbRecordMemberDef;
+function wbINOA                       : IwbRecordMemberDef;
+function wbINOM                       : IwbRecordMemberDef;
+function wbIdleAnimation              : IwbRecordMemberDef;
+function wbKWDAs                      : IwbRecordMemberDef;
+function wbKeywords                   : IwbRecordMemberDef;
+function wbLandColors                 : IwbRecordMemberDef;
+function wbLandHeights                : IwbRecordMemberDef;
+function wbLandLayers                 : IwbRecordMemberDef;
+function wbLandNormals                : IwbRecordMemberDef;
+function wbLoadScreenLocations        : IwbRecordMemberDef;
+function wbMagicEffectSounds          : IwbRecordMemberDef;
+function wbMDOB                       : IwbRecordMemberDef;
+function wbMHDTCELL                   : IwbRecordMemberDef;
+function wbQSTI                       : IwbRecordMemberDef;
+function wbQSTR                       : IwbRecordMemberDef;
+function wbRagdoll                    : IwbRecordMemberDef;
+function wbRegionAreas                : IwbRecordMemberDef;
+function wbRegionSounds               : IwbRecordMemberDef;
+function wbSeasons                    : IwbRecordMemberDef;
+function wbSoundDescriptorSounds      : IwbRecordMemberDef;
+function wbSoundTypeSounds            : IwbRecordMemberDef;
+function wbStaticPartPlacements       : IwbRecordMemberDef;
+function wbWeatherCloudAlphas         : IwbRecordMemberDef;
+function wbWeatherCloudColors         : IwbRecordMemberDef;
+function wbWeatherCloudSpeed          : IwbRecordMemberDef;
+function wbWeatherCloudTextures       : IwbRecordMemberDef;
+function wbWeatherColors              : IwbRecordMemberDef;
+function wbWeatherDirectionalLighting : IwbRecordMemberDef;
+function wbWeatherDisabledLayers      : IwbRecordMemberDef;
+function wbWeatherFogDistance         : IwbRecordMemberDef;
+function wbWeatherGodRays             : IwbRecordMemberDef;
+function wbWeatherImageSpaces         : IwbRecordMemberDef;
+function wbWeatherMagic               : IwbRecordMemberDef;
+function wbWeatherSounds              : IwbRecordMemberDef;
+function wbWeatherVolumetricLighting  : IwbRecordMemberDef;
+function wbWorldCellSizeData          : IwbRecordMemberDef;
+function wbWorldFixedCenter           : IwbRecordMemberDef;
+function wbWorldLODData               : IwbRecordMemberDef;
+function wbWorldLandData              : IwbRecordMemberDef;
+function wbWorldLargeRefs             : IwbRecordMemberDef;
+function wbWorldLevelData             : IwbRecordMemberDef;
+function wbWorldMapData               : IwbRecordMemberDef;
+function wbWorldMapOffset             : IwbRecordMemberDef;
+function wbWorldMaxHeight             : IwbRecordMemberDef;
+function wbWorldObjectBounds          : IwbRecordMemberDef;
+function wbWorldOffsetData            : IwbRecordMemberDef;
+function wbWorldRegionEditorMap       : IwbRecordMemberDef;
+function wbWorldSwapsImpactData       : IwbRecordMemberDef;
+function wbWorldVisibleCellsData      : IwbRecordMemberDef;
+function wbWorldWaterHeightData       : IwbRecordMemberDef;
+function wbXLOD                       : IwbRecordMemberDef;
+
+function wbClimateTiming(const aTimeCallback, aPhaseCallback : TwbIntToStrCallback)
+                                                             : IwbRecordMemberDef;
+
+function wbDamageTypeArray(const aItemName : string)
+                                           : IwbRecordMemberDef;
+
+function wbDebrisModel(const aTextureFileHashes : IwbRecordMemberDef)
+                                                : IwbRecordMemberDef;
+
+function wbEnchantment(const aCapacity : Boolean = False)
+                                       : IwbRecordMemberDef;
+
+function wbHeadPart(const aHeadPartIndexEnum : IwbEnumDef = nil;
+                    const aModel             : IwbRecordMemberDef = nil;
+                    const aHeadPartsAfterSet : TwbAfterSetCallback = nil)
+                                             : IwbRecordMemberDef;
+
+function wbLeveledListEntry(const aObjectName : string;
+                            const aSigs       : TwbSignatures)
+                                              : IwbRecordMemberDef;
+
+function wbLGDIFilter(const aSignature       : TwbSignature;
+                      const aName            : string;
+                      const aRankSlotDef     : IwbValueDef;
+                      const aRankSlotEnumDef : IwbEnumDef)
+                                             : IwbRecordMemberDef;
+
+function wbLGDIRankSlotArray(const aSignature : TwbSignature;
+                             const aName      : string;
+                             const aElement   : IwbValueDef;
+                             const aSorted    : Boolean;
+                             const aSlotEnum  : IwbEnumDef)
+                                              : IwbRecordMemberDef; overload;
+
+function wbLGDIRankSlotArray(const aSignature : TwbSignature;
+                             const aElement   : IwbValueDef;
+                             const aSorted    : Boolean;
+                             const aSlotEnum  : IwbEnumDef)
+                                              : IwbRecordMemberDef; overload;
+
+function wbModelInfo(const aSignature : TwbSignature;
+                           aName      : string = '')
+                                      : IwbRecordMemberDef;
+
+function wbModelInfos(const aSignature : TwbSignature;
+                            aName      : string = '';
+                      const aDontShow  : TwbDontShowCallback = nil)
+                                       : IwbRecordMemberDef;
+
+function wbOBND(const aRequired : Boolean = False)
+                                : IwbRecordMemberDef;
+
+function wbOwnership(const aSkipSigs : TwbSignatures = nil)
+                                     : IwbRecordMemberDef;
+
 function wbTexturedModel(const aSubRecordName     : string;
                          const aSignatures        : TwbSignatures;
                          const aTextureSubRecords : array of IwbRecordMemberDef)
                                                   : IwbRecordMemberDef;
 
-{>>> Record Header Def <<<} //1
-function wbRecordHeader(aRecordFlags: IwbIntegerDef): IwbValueDef;
+function wbTimeInterpolators(const aSignature : TwbSignature;
+                             const aName      : string)
+                                              : IwbRecordMemberDef; overload;
 
-{>>> Climate Function Defs <<<} //1
-function wbClimateTiming(aTimeCallback: TwbIntToStrCallback; aPhaseCallback: TwbIntToStrCallback): IwbRecordMemberDef;
-
-{>>> Creature Function Defs <<<} //1
-function wbModelInfos(const aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
-
-{>>> Debris Function Defs <<<} //1
-function wbDebrisModel(aTextureFileHashes: IwbRecordMemberDef): IwbRecordMemberDef;
-
-{>>> Image Space Adapater Defs <<<} //4
-function wbIMADMultAddCount(const aName: string): IwbValueDef;
-function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef; overload;
-function wbTimeInterpolators(const aName: string): IwbValueDef; overload;
-function wbTimeInterpolatorsMultAdd(const aSignatureMult, aSignatureAdd: TwbSignature; const aName: string): IwbRecordMemberDef;
-
-{>>> NPC Defs <<<} //1
-function wbNPCTemplateActorEntry(const aName: string): IwbValueDef;
-
-{>>> Perk Defs <<<} //1
-function wbPerkEffectType(aAfterSetCallback: TwbAfterSetCallback): IwbValueDef;
-
-{>>> Race Defs <<<} //1
-function wbHeadPart(aHeadPartIndexEnum: IwbEnumDef = nil; aModel: IwbRecordMemberDef = nil; aHeadPartsAfterSet: TwbAfterSetCallback = nil): IwbRecordMemberDef;
-
-{>>> Weather Defs <<<} //1
-function wbWeatherTimeOfDay(const aName: string): IwbValueDef;
-
-{>>> NamedIndex Defs <<<} //2
-function wbIdxAddonNode : TwbNamedIndex;
-function wbIdxCollisionLayer : TwbNamedIndex;
-
-{>>> Enum Defs <<<} //37
-function wbActorImpactMaterialEnum: IwbEnumDef;
-function wbAggressionEnum: IwbEnumDef;
-function wbAlignmentEnum: IwbEnumDef;
-function wbArchtypeEnum: IwbEnumDef;
-function wbAssistanceEnum: IwbEnumDef;
-function wbAttackAnimationEnum: IwbEnumDef;
-function wbAxisEnum: IwbEnumDef;
-function wbBlendModeEnum: IwbEnumDef;
-function wbBlendOpEnum: IwbEnumDef;
-function wbBodyLocationEnum: IwbEnumDef;
-function wbBodyPartIndexEnum: IwbEnumDef;
-function wbBoolEnum: IwbEnumDef;
-function wbConfidenceEnum: IwbEnumDef;
-function wbCRCValuesEnum: IwbEnumDef;
-function wbCriticalStageEnum: IwbEnumDef;
-function wbCrimeTypeEnum: IwbEnumDef;
-function wbCreatureTypeEnum: IwbEnumDef;
-function wbEffectTypeEnum: IwbEnumDef;
-function wbEquipTypeEnum: IwbEnumDef;
-function wbLGDIRankSlotEnum: IwbEnumDef;
-function wbLGDIQualityTierEnum: IwbEnumDef;
-function wbMenuModeEnum: IwbEnumDef;
-function wbMoodEnum: IwbEnumDef;
-function wbMoralityEnum: IwbEnumDef;
-function wbMusicEnum: IwbEnumDef;
-function wbNavmeshEdgeLinkEnum: IwbEnumDef;
-function wbPackageScheduleDayOfMonthEnum: IwbEnumDef;
-function wbPackageScheduleDayOfWeekEnum: IwbEnumDef;
-function wbPackageScheduleHoursEnum: IwbEnumDef;
-function wbPackageScheduleMinutesEnum: IwbEnumDef;
-function wbPackageScheduleMonthEnum: IwbEnumDef;
-function wbPackageTypeEnum: IwbEnumDef;
-function wbQuadrantEnum: IwbEnumDef;
-function wbQuestEventEnum: IwbEnumDef;
-function wbSexEnum: IwbEnumDef;
-function wbSoulGemEnum: IwbEnumDef;
-function wbWorldImpactMaterialEnum: IwbEnumDef;
-function wbZoomOverlayEnum: IwbEnumDef;
-function wbZTestFuncEnum: IwbEnumDef;
-
-{>>> Flags Defs <<<} //7
-function wbFurnitureEntryTypeFlags: IwbFlagsDef;
-function wbLandFlags: IwbFlagsDef;
-function wbNavmeshTriangleFlags: IwbFlagsDef;
-function wbNavmeshCoverFlags: IwbFlagsDef;
-function wbPackageFlags: IwbFlagsDef;
-function wbServiceFlags: IwbFlagsDef;
-function wbTemplateFlags: IwbFlagsDef;
-
-{>>> Value Defs <<<} //4
-function wbAlternateTexture: IwbValueDef;
-function wbColorInterpolator: IwbValueDef;
-function wbNextSpeaker: IwbValueDef;
-function wbTimeInterpolator: IwbValueDef;
-
-{>>> RecordMember Defs <<<} //59
-function wbActionFlag: IwbRecordMemberDef;
-function wbActorSounds: IwbRecordMemberDef;
-function wbCellGrid: IwbRecordMemberDef;
-function wbFaceGen: IwbRecordMemberDef;
-function wbFaction: IwbRecordMemberDef;
-function wbFactionRelations: IwbRecordMemberDef;
-function wbHEDR: IwbRecordMemberDef;
-function wbINOA: IwbRecordMemberDef;
-function wbINOM: IwbRecordMemberDef;
-function wbIdleAnimation: IwbRecordMemberDef;
-function wbKWDAs: IwbRecordMemberDef;
-function wbKeywords :IwbRecordMemberDef;
-function wbLandColors: IwbRecordMemberDef;
-function wbLandHeights: IwbRecordMemberDef;
-function wbLandLayers: IwbRecordMemberDef;
-function wbLandNormals: IwbRecordMemberDef;
-function wbLoadScreenLocations: IwbRecordMemberDef;
-function wbMDOB: IwbRecordMemberDef;
-function wbMHDTCELL: IwbRecordMemberDef;
-function wbMagicEffectSounds: IwbRecordMemberDef;
-function wbQSTI: IwbRecordMemberDef;
-function wbQSTR: IwbRecordMemberDef;
-function wbRagdoll: IwbRecordMemberDef;
-function wbRegionAreas: IwbRecordMemberDef;
-function wbRegionSounds: IwbRecordMemberDef;
-function wbSeasons: IwbRecordMemberDef;
-function wbSoundDescriptorSounds: IwbRecordMemberDef;
-function wbSoundTypeSounds: IwbRecordMemberDef;
-function wbStaticPartPlacements: IwbRecordMemberDef;
-function wbWeatherCloudAlphas: IwbRecordMemberDef;
-function wbWeatherCloudColors: IwbRecordMemberDef;
-function wbWeatherCloudSpeed: IwbRecordMemberDef;
-function wbWeatherCloudTextures: IwbRecordMemberDef;
-function wbWeatherColors: IwbRecordMemberDef;
-function wbWeatherDirectionalLighting: IwbRecordMemberDef;
-function wbWeatherDisabledLayers: IwbRecordMemberDef;
-function wbWeatherFogDistance: IwbRecordMemberDef;
-function wbWeatherGodRays: IwbRecordMemberDef;
-function wbWeatherImageSpaces: IwbRecordMemberDef;
-function wbWeatherLightningColor: IwbValueDef;
-function wbWeatherMagic: IwbRecordMemberDef;
-function wbWeatherSounds: IwbRecordMemberDef;
-function wbWeatherVolumetricLighting: IwbRecordMemberDef;
-function wbWorldCellSizeData: IwbRecordMemberDef;
-function wbWorldFixedCenter: IwbRecordMemberDef;
-function wbWorldLODData: IwbRecordMemberDef;
-function wbWorldLandData: IwbRecordMemberDef;
-function wbWorldLargeRefs: IwbRecordMemberDef;
-function wbWorldLevelData: IwbRecordMemberDef;
-function wbWorldMapData: IwbRecordMemberDef;
-function wbWorldMapOffset: IwbRecordMemberDef;
-function wbWorldMaxHeight: IwbRecordMemberDef;
-function wbWorldObjectBounds: IwbRecordMemberDef;
-function wbWorldOffsetData: IwbRecordMemberDef;
-function wbWorldRegionEditorMap: IwbRecordMemberDef;
-function wbWorldSwapsImpactData: IwbRecordMemberDef;
-function wbWorldVisibleCellsData: IwbRecordMemberDef;
-function wbWorldWaterHeightData: IwbRecordMemberDef;
-function wbXLOD: IwbRecordMemberDef;
+function wbTimeInterpolatorsMultAdd(const aSignatureMult : TwbSignature;
+                                    const aSignatureAdd  : TwbSignature;
+                                    const aName          : string)
+                                                         : IwbRecordMemberDef;
 
 implementation
 
@@ -696,9 +745,7 @@ uses
   System.Variants,
 
   wbDefinitionsSignatures,
-  wbHelpers,
-
-  xeMainForm;
+  wbHelpers;
 
 {>>> Add Info Callbacks <<<} //10
 
@@ -2149,18 +2196,6 @@ end;
 
 {>>> Get Functions <<<} //4
 
-function wbArrayShouldIncludeStarSlotMatchesMemoryOrder(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
-begin
-  if not Assigned(aArray) or
-     not Assigned(aBasePtr) or
-     not Assigned(aEndPtr) or
-     ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer))
-  then
-    Exit(False);
-
-  Result := PInteger(aBasePtr)^ = aArray.MemoryOrder;
-end;
-
 /// <summary>Generates "{Count}x {FormID}" string for item. Supports single and double structs.</summary>
 /// <param name="aContainer">The Item element</param>
 /// <returns>string</return>
@@ -2220,24 +2255,17 @@ begin
   Items.Free;
 end;
 
-function wbGetREGNType(aElement: IwbElement): Integer;
-var
-  Container: IwbContainerElementRef;
+function wbGetREGNType(const aElement: IwbElement): Integer;
 begin
   Result := -1;
   if not Assigned(aElement) then
     Exit;
 
-  while aElement.Name <> 'Region Data Entry' do begin
-    aElement := aElement.Container;
-    if not Assigned(aElement) then
-      Exit;
-  end;
-
-  if not Supports(aElement, IwbContainerElementRef, Container) then
+  var lContainer := aElement.Container;
+  if not Assigned(lContainer) then
     Exit;
 
-  Result := Container.ElementNativeValues['RDAT\Type'];
+  Result := lContainer.ElementNativeValues['RDAT\Type'];
 end;
 
 /// <summary>Returns Object Format version of Object Union. Corresponds to index of wbStructSK in Object Union array.</summary>
@@ -2335,7 +2363,7 @@ end;
 
 {>>> Links To Callbacks <<<} //13
 
-function wbAliasLinksTo(aInt: Int64; const aQuestRef: IwbElement): IwbElement;
+function wbAliasLinksTo(const aInt: Int64; const aQuestRef: IwbElement): IwbElement;
 begin
   Result := nil;
 
@@ -2442,7 +2470,7 @@ begin
   Result := Cover;
 end;
 
-function wbEdgeLinksTo(aEdge: Integer; const aElement: IwbElement): IwbElement;
+function wbEdgeLinksTo(const aEdge: Integer; const aElement: IwbElement): IwbElement;
 var
   aInt       : Int64;
   Triangle   : IwbContainerElementRef;
@@ -2795,6 +2823,20 @@ end;
 function wbTrySetContainer(const aElement: IwbElement; aType: TwbCallbackType; out aContainer: IwbContainerElementRef): Boolean;
 begin
   Result := (aType = ctToSummary) and Supports(aElement, IwbContainerElementRef, aContainer);
+end;
+
+{>>> Should Include Callbacks <<<} //1
+
+function wbLGDIRankSlotArrayShouldInclude(aBasePtr: Pointer; aEndPtr: Pointer; const aArray: IwbElement): Boolean;
+begin
+  if not Assigned(aArray) or
+     not Assigned(aBasePtr) or
+     not Assigned(aEndPtr) or
+     ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer))
+  then
+    Exit(False);
+
+  Result := PInteger(aBasePtr)^ = aArray.MemoryOrder;
 end;
 
 {>>> To Integer Callbacks <<<} //19
@@ -3575,14 +3617,9 @@ begin
       if aType = ctToStr then
         Result := Result + ' <Warning: Could not resolve mod index>';
     end;
-    ctToEditValue:
-      Result := aInt.ToString;
-    ctToSortKey: begin
-      Result := IntToHex64(aInt, 8);
-      Exit;
-    end;
-    ctCheck:
-      Result := '<Warning: Could not resolve mod index>';
+    ctToEditValue: Result := aInt.ToString;
+    ctToSortKey: Exit(IntToHex64(aInt, 8));
+    ctCheck: Result := '<Warning: Could not resolve mod index>';
     ctEditType: Exit('ComboBox');
     ctEditInfo: ;
   else
@@ -3593,7 +3630,6 @@ begin
     Exit;
 
   var lFilter: IwbContainerElementRef;
-
   if not Supports(aElement.Container, IwbContainerElementRef, lFilter) then
     Exit;
 
@@ -4518,9 +4554,6 @@ begin
   aValue := ItemString;
 end;
 
-var
-  wbLANDDefaultTexture : string;
-
 procedure wbLANDTextureToStr(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType);
 begin
   if not Assigned(aElement) then
@@ -4537,32 +4570,8 @@ begin
      gmFO4,  gmFO4VR         : lDefaultTexture := 'LCWDefault01Grass01';
   end;
 
-  if wbLANDDefaultTexture = '' then begin
-    for var lFile in frmMain.Files do begin
-      var lIniFile : string;
-      var lFileName := lFile.FileName;
-      if SameText(lFileName, wbGameMasterEsm) then
-        lIniFile := wbTheGameIniFileName
-      else if SameText(lFileName, wbGameExeName) then
-        lIniFile := wbCustomIniFileName
-      else
-        lIniFile := wbDataPath + ChangeFileExt(lFileName, '.ini');
-      if FileExists(lIniFile) then begin
-        with TMemIniFile.Create(lIniFile) do try
-          if ValueExists('Landscape', 'sDefaultLandDiffuseTexture') then
-            wbLANDDefaultTexture := ReadString('Landscape', 'sDefaultLandDiffuseTexture', lDefaultTexture);
-        finally
-          Free;
-        end;
-      end;
-    end;
-  end;
-
-  if wbLANDDefaultTexture = '' then
-    wbLANDDefaultTexture := lDefaultTexture;
-
   case aType of
-    ctToStr, ctToSummary : aValue := wbLANDDefaultTexture + ' [LTEX:00000000]';
+    ctToStr, ctToSummary : aValue := lDefaultTexture + ' [LTEX:00000000]';
   end;
 end;
 
@@ -5480,28 +5489,28 @@ end;
 
 {>>> IfThen Defs <<<} //4
 
-function IfThen(aBoolean: Boolean; const aTrue: IwbRecordMemberDef; const aFalse: IwbRecordMemberDef): IwbRecordMemberDef;
+function IfThen(const aBoolean: Boolean; const aTrue: IwbRecordMemberDef; const aFalse: IwbRecordMemberDef): IwbRecordMemberDef;
 begin
   Result := aFalse;
   if aBoolean then
     Result := aTrue;
 end;
 
-function IfThen(aBoolean: Boolean; const aTrue: IwbValueDef; const aFalse: IwbValueDef): IwbValueDef;
+function IfThen(const aBoolean: Boolean; const aTrue: IwbValueDef; const aFalse: IwbValueDef): IwbValueDef;
 begin
   Result := aFalse;
   if aBoolean then
     Result := aTrue;
 end;
 
-function IfThen(aBoolean: Boolean; const aTrue: TwbSignature; const aFalse: TwbSignature): TwbSignature;
+function IfThen(const aBoolean: Boolean; const aTrue: TwbSignature; const aFalse: TwbSignature): TwbSignature;
 begin
   Result := aFalse;
   if aBoolean then
     Result := aTrue;
 end;
 
-function IfThen(aBoolean: Boolean; const aTrue: TwbToStrCallback; const aFalse: TwbToStrCallback): TwbToStrCallback;
+function IfThen(const aBoolean: Boolean; const aTrue: TwbToStrCallback; const aFalse: TwbToStrCallback): TwbToStrCallback;
 begin
   Result := aFalse;
   if aBoolean then
@@ -5510,7 +5519,7 @@ end;
 
 {>>> Flags IfThen Defs <<<} //6
 
-function wbHasNoFlags(const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef;
+function wbHasNoFlags(const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef;
 begin
   if aIsUnused then
     Result :=
@@ -5526,7 +5535,7 @@ begin
       ]).IncludeFlagOnValue(dfMustBeUnion);
 end;
 
-function wbHasNoFlags(const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef;
+function wbHasNoFlags(const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef;
 begin
   if aIsUnused then
     Result :=
@@ -5542,7 +5551,7 @@ begin
       ]).IncludeFlag(dfMustBeUnion);
 end;
 
-function wbIsFlag(aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef;
+function wbIsFlag(const aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef;
 begin
   if aIsUnused then
     Result :=
@@ -5558,7 +5567,7 @@ begin
       ]).IncludeFlagOnValue(dfMustBeUnion);
 end;
 
-function wbIsFlag(aFlag: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef;
+function wbIsFlag(const aFlag: Integer; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef;
 begin
   if aIsUnused then
     Result :=
@@ -5574,7 +5583,7 @@ begin
       ]).IncludeFlag(dfMustBeUnion);
 end;
 
-function wbIsNotFlag(aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbRecordMemberDef;
+function wbIsNotFlag(const aFlag: Integer; const aSignature: TwbSignature; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbRecordMemberDef;
 begin
   if aIsUnused then
     Result :=
@@ -5590,7 +5599,7 @@ begin
       ]).IncludeFlagOnValue(dfMustBeUnion);
 end;
 
-function wbIsNotFlag(aFlag: Integer; const aValue: IwbValueDef; aIsUnused: Boolean = True): IwbValueDef;
+function wbIsNotFlag(const aFlag: Integer; const aValue: IwbValueDef; const aIsUnused: Boolean = True): IwbValueDef;
 begin
   if aIsUnused then
     Result :=
@@ -6443,627 +6452,6 @@ begin
     .IncludeFlag(dfCollapsed, wbCollapseRGBA);
 end;
 
-{>>> Many Record Defs <<<} //2
-
-function wbModelInfo(const aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
-begin
-  if wbGameMode < gmTES5 then begin
-    if aName = '' then
-      aName := 'Textures';
-
-    if not wbDecodeTextureHashes then
-      Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
-
-    var TextureFile := wbStruct('Texture', [
-      wbInteger('File Hash (PC)', itU64, wbFileHashCallback),
-      wbInteger('File Hash (Console)', itU64, wbFileHashCallback),
-      wbInteger('Folder Hash', itU64, wbFolderHashCallback)
-    ]).SetSummaryKey([2,0])
-      .SetSummaryDelimiter('')
-      .SetSummaryMemberPrefixSuffix(0, '', '')
-      .SetSummaryMemberPrefixSuffix(2, '', '\')
-      .IncludeFlag(dfSummaryMembersNoName)
-      .IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
-
-    Result := wbArray(aSignature, aName, TextureFile).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures);
-  end else begin
-    if aName = '' then
-      aName := 'Model Information';
-
-    if not wbDecodeTextureHashes then
-      Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
-
-    var CreateFileEntry := function(const aName: string): IwbValueDef begin
-      Result := wbStruct(aName, [
-        wbInteger('File Hash', itU32, wbFileHashCallback),
-        wbString('Extension', 4),
-        wbInteger('Folder Hash', itU32, wbFolderHashCallback)
-      ]).SetSummaryKey([2,0,1])
-        .SetSummaryDelimiter('')
-        .SetSummaryMemberPrefixSuffix(0, '', '')
-        .SetSummaryMemberPrefixSuffix(1, '.', '')
-        .SetSummaryMemberPrefixSuffix(2, '', '\')
-        .IncludeFlag(dfSummaryMembersNoName);
-    end;
-
-    var TextureFile := CreateFileEntry('Texture').IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
-    var MaterialFile := CreateFileEntry('Material').IncludeFlag(dfCollapsed, wbCollapseModelInfoMaterial);
-
-    var NewModelInfo :=
-      wbStruct('', [
-        IsTES5(
-          wbArray('Counters',
-            wbInteger('Counter', itU32, nil, nil, cpIgnore),
-          -1, ['Textures', 'Addon Nodes'], cpIgnore)
-            .IncludeFlag(dfCollapsed, wbCollapseModelInfoHeader)
-            .IncludeFlag(dfNotAlignable),
-          wbArray('Counters',
-            wbIntegeR('Counter', itU32, nil, nil, cpIgnore),
-          -1, ['Textures', 'Addon Nodes', 'SRGB', 'Materials'], cpIgnore)
-            .IncludeFlag(dfCollapsed, wbCollapseModelInfoHeader)
-            .IncludeFlag(dfNotAlignable)
-        ),
-        wbArray('Textures', TextureFile)
-          .SetCountPath('Counters\[0]', True)
-          .SetSummaryPassthroughMaxLength(80)
-          .SetSummaryPassthroughMaxDepth(1)
-          .IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures),
-        wbArray('Addon Nodes',
-          wbInteger('Addon Node', itU32)
-            .SetLinksToCallback(function(const aElement: IwbElement): IwbElement
-            begin
-              Result := nil;
-              if not Assigned(aElement) then
-                Exit;
-
-              var lAddonNodeIndex := aElement.NativeValue;
-              if not VarIsOrdinal(lAddonNodeIndex) then
-                Exit;
-
-              var lFile := aElement._File;
-              if not Assigned(lFile) then
-                Exit;
-
-              Result := lFile.RecordFromIndexByKey[wbIdxAddonNode, lAddonNodeIndex];
-            end)
-           .SetToStr(wbToStringFromLinksToMainRecordName)
-        ).SetCountPath('Counters\[1]', True)
-         .SetSummaryPassthroughMaxLength(80)
-         .SetSummaryPassthroughMaxDepth(1)
-         .IncludeFlag(dfCollapsed, wbCollapseModelInfoAddons),
-        IsTES5(
-          nil,
-          wbArray('Materials', MaterialFile)
-            .SetCountPath('Counters\[3]', True)
-            .SetSummaryPassthroughMaxLength(80)
-            .SetSummaryPassthroughMaxDepth(1)
-            .IncludeFlag(dfCollapsed, wbCollapseModelInfoMaterials)
-        )
-      ]).SetSummaryKey([1, 2, 3])
-        .IncludeFlag(dfSummaryMembersNoName);
-
-    Result := wbUnion(aSignature, aName, wbModelInfoDecider, [
-      wbStruct('', [
-        wbEmpty('Unused'),
-        wbByteArray('Unused'),
-        wbEmpty('Unused'),
-        wbEmpty('Unused')
-      ], cpIgnore),
-      wbStruct('', [
-        wbEmpty('Unused'),
-        wbByteArray('ERROR').SetToStr(procedure(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType) begin
-          if aType = ctCheck then
-            aValue := 'SubRecord has invalid format for the Form Version of this record';
-        end),
-        wbEmpty('Unused'),
-        wbEmpty('Unused')
-      ], cpCritical),
-      wbStruct('', [
-        wbEmpty('Unused'),
-        wbArray('Textures', TextureFile).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures),
-        wbEmpty('Unused'),
-        wbEmpty('Unused')
-      ]).SetSummaryKey([1]),
-      NewModelInfo
-    ], cpNormal, False, wbModelInfoDontShow, wbModelInfoGetCP).IncludeFlag(dfCollapsed, wbCollapseModelInfo);
-  end;
-
-end;
-
-function wbOBND(aRequired: Boolean = False): IwbRecordMemberDef;
-begin
-  Result :=
-    wbStruct(OBND, 'Object Bounds', [
-      wbInteger('X1', itS16),
-      wbInteger('Y1', itS16),
-      wbInteger('Z1', itS16),
-      wbInteger('X2', itS16),
-      wbInteger('Y2', itS16),
-      wbInteger('Z2', itS16)
-    ]).SetSummaryKeyOnValue([0, 1, 2, 3, 4, 5])
-      .SetSummaryPrefixSuffixOnValue(0, '(', '')
-      .SetSummaryPrefixSuffixOnValue(2, '', ')')
-      .SetSummaryPrefixSuffixOnValue(3, '(', '')
-      .SetSummaryPrefixSuffixOnValue(5, '', ')')
-      .SetSummaryDelimiterOnValue(', ')
-      .IncludeFlagOnValue(dfSummaryMembersNoName)
-      .SetRequired(aRequired)
-      .IncludeFlag(dfCollapsed, wbCollapseObjectBounds);
-end;
-
-{>>> Multiple Record Defs <<<} //4
-
-function wbDamageTypeArray(const aItemName: string): IwbRecordMemberDef;
-begin
-  Result := wbArrayS(DAMA, aItemName + 's',
-    wbStructSK([0], aItemName, [
-      wbFormIDCk('Type', [DMGT]),
-      wbInteger('Amount', itU32),
-      wbFromVersion(152, wbFormIDCk('Curve Table', [CURV, NULL]))
-    ]).SetSummaryKey([1])
-      .SetSummaryMemberPrefixSuffix(1, '= ','')
-      .IncludeFlag(dfSummaryMembersNoName));
-end;
-
-function wbEnchantment(aCapacity: Boolean = False): IwbRecordMemberDef;
-begin
-  var aName := IsFO3('Object Effect', 'Enchantment');
-  var aSig1 := IsTES4(ENAM, EITM);
-  var aSig2 := IsTES4(ANAM, EAMT);
-
-  Result := wbFormIDCk(aSig1, aName, [ENCH]);
-  if aCapacity then
-    Result :=
-      wbRStruct(aName, [
-        wbFormIDCk(aSig1, 'Effect', [ENCH]),
-        wbInteger(aSig2, 'Capacity', itU16)
-      ]).IncludeFlag(dfAllowAnyMember)
-        .IncludeFlag(dfStructFirstNotRequired);
-end;
-
-function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
-begin
-  Result :=
-    wbStructExSK(LVLO, [0, 2], [3], IsTES4('Leveled List Entry', 'Base Data'), [
-      wbInteger('Level', itU16),
-      wbUnused(2),
-      wbFormIDCk(aObjectName, aSigs),
-      wbInteger('Count', itU16).SetDefaultNativeValue(1),
-      IsFO4Plus(
-        wbInteger('Chance None', itU8),
-        wbUnused(2)),
-      IsFO4Plus(
-        wbUnused(1),
-        nil)
-    ], cpNormal, False, nil, 3)
-    .SetSummaryKeyOnValue([0, 3, 2])
-    .SetSummaryPrefixSuffixOnValue(0, '[Level: ', ']')
-    .SetSummaryPrefixSuffixOnValue(3, '', ' x')
-    .SetSummaryDelimiterOnValue(' ')
-    .IncludeFlagOnValue(dfSummaryMembersNoName)
-    .IncludeFlagOnValue(dfSummaryNoSortKey)
-    .IncludeFlag(dfCollapsed, wbCollapseLeveledItems);
-end;
-
-function wbLGDIFilter(aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef;
-begin
-  Result :=
-    wbLGDIRankSlotArray(aSignature,
-      wbStructExSK([1], [2], aName, [
-        aRankSlotDef,
-        wbInteger('Referenced Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter),
-        wbFormIDCk('Keyword', [KYWD])
-      ])//.SetSummaryKey([1, 2])
-        .SetSummaryMemberPrefixSuffix(1, '<', '>')
-        .SetSummaryMemberPrefixSuffix(2, '', '')
-        .SetSummaryDelimiter(' ')
-        .IncludeFlag(dfSummaryMembersNoName)
-        //.IncludeFlag(dfSummaryNoSortKey)
-        .IncludeFlag(dfCollapsed, wbCollapseItems)
-    , True, aRankSlotEnumDef);
-end;
-
-function wbLGDIQualityTier: IwbValueDef;
-begin
-  Result := wbLGDISlotDef('Tier', wbLGDIQualityTierEnum);
-end;
-
-function wbLGDIRankSlotArray(aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
-begin
-  var lInnerArray: IwbArrayDef;
-  if aSorted then
-    lInnerArray := wbArrayS('', aElement)
-  else
-    lInnerArray := wbArray('', aElement);
-
-  var lPluralName: string := aName + 's';
-
-  var lElementDef := lInnerArray
-    .SetShouldInclude(wbArrayShouldIncludeStarSlotMatchesMemoryOrder)
-    .IncludeFlag(dfArrayCanBeEmpty)
-    .SetSummaryName(lPluralName);
-
-  if not aSorted then
-    lElementDef := lElementDef
-      .IncludeFlag(dfNoMove)
-      .IncludeFlag(dfRemoveLastOnly);
-
-  Result :=
-    wbArray(aSignature, aName, lElementDef)
-    .SetSummaryPassthroughMaxCountOnValue(5)
-    .SetCountFromEnumOnValue(aSlotEnum)
-    .SetSummaryName('Rank Slots')
-    .IncludeFlag(dfNoMove);
-end;
-
-function wbLGDIRankSlotArray(aSignature: TwbSignature; const aElement: IwbValueDef; aSorted: Boolean; aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
-begin
-  var lPluralName: string := aElement.Name + 's';
-  Result := wbLGDIRankSlotArray(aSignature, lPluralName, aElement, aSorted, aSlotEnum);
-end;
-
-function wbLGDIRankSlot: IwbValueDef;
-begin
-  Result := wbLGDISlotDef('Rank', wbLGDIRankSlotEnum);
-end;
-
-function wbLGDISlotDef(const aName: string; aEnumDef: IwbEnumDef): IwbValueDef;
-begin
-Result := wbInteger(aName, itU32, aEnumDef)
-  .SetSetToDefault(function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean
-    begin
-      var lContainer: IwbContainerElementRef;
-
-      if not Assigned(aBasePtr) or
-         not Assigned(aEndPtr) or
-         ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
-         not Assigned(aElement) or
-         not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
-         not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
-         not (lContainer.ElementType = etArray) or
-         (lContainer.MemoryOrder < 0) or
-         (lContainer.MemoryOrder > Pred(aEnumDef.NameCount))
-      then
-        Exit(False);
-
-      PInteger(aBasePtr)^ := lContainer.MemoryOrder;
-      Result := True;
-    end)
-  .SetDontShow(wbNeverShow)
-  .IncludeFlag(dfInternalEditOnly);
-end;
-
-function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
-begin
-  Result :=
-    wbRStruct('Ownership', [
-      IsFO4Plus(
-        wbStruct(XOWN, 'Owner', [
-          wbFormIDCkNoReach('Owner', [FACT, NPC_]),
-          wbUnused(4),
-          wbInteger('No Crime', itU8, wbBoolEnum),
-          wbUnused(3)
-        ]).SetSummaryKeyOnValue([0]),
-        wbFormIDCkNoReach(XOWN, 'Owner', [FACT, NPC_])),
-      wbInteger(XRNK, 'Faction rank', itS32),
-      IsTES4(
-        wbFormIDCk(XGLB, 'Global', [GLOB]),
-        nil)
-    ], aSkipSigs, cpNormal, False, nil, True)
-      .SetSummaryKey([0, 1])
-      .SetSummaryMemberPrefixSuffix(1, '[Rank: ', ']')
-      .SetSummaryDelimiter(' ')
-      .IncludeFlag(dfCollapsed, wbCollapseOwnership)
-      .IncludeFlag(dfSummaryMembersNoName)
-      .IncludeFlag(dfSummaryNoSortKey);
-end;
-
-function wbTexturedModel(const aSubRecordName     : string;
-                         const aSignatures        : TwbSignatures;
-                         const aTextureSubRecords : array of IwbRecordMemberDef)
-                                                  : IwbRecordMemberDef;
-var
-  Members : array of IwbRecordMemberDef;
-begin
-
-  SetLength(Members,
-    Length(aTextureSubRecords) +
-    1 +
-    IsTES4(1, 0) +
-    IsSF1(0, 1)
-  );
-
-    Members[0] := wbString(aSignatures[0], 'Model Filename');
-    if wbIsOblivion then begin
-      Members[1] := wbFloat(aSignatures[1], 'Bound Radius', cpBenign);
-      Members[2] := wbModelInfo(aSignatures[2]);
-    end else if not wbIsStarfield then
-      Members[1] := wbModelInfo(aSignatures[1]);
-
-    for var i := Low(aTextureSubRecords) to High(aTextureSubRecords) do
-      Members[Length(Members) - Length(aTextureSubRecords) + i] := aTextureSubRecords[i];
-
-  Result :=
-    wbRStruct(aSubRecordName, Members, nil, cpNormal, False, nil, True)
-      .SetSummaryKey([0])
-      .IncludeFlag(dfSummaryMembersNoName)
-      .IncludeFlag(dfSummaryNoSortKey)
-      .IncludeFlag(dfAllowAnyMember)
-      .IncludeFlag(dfCollapsed, wbCollapseModels)
-      .IncludeFlag(dfStructFirstNotRequired);
-end;
-
-{>>> Record Header Def <<<} //1
-
-function wbRecordHeader(aRecordFlags: IwbIntegerDef): IwbValueDef;
-begin
-  Result := wbStruct('Record Header', [
-    wbString('Signature', 4, cpCritical),
-    wbInteger('Data Size', itU32, nil, cpIgnore),
-    aRecordFlags.IncludeFlag(dfIsRecordFlags),
-    wbFormID('FormID', cpFormID).IncludeFlag(dfSummarySelfAsShortName),
-    wbUnion('Version Control Info 1', wbFormVersionDecider(44), [
-      wbByteArray('Version Control Info 1', 4, cpIgnore).SetToStr(wbVCI1ToStrBeforeFO4),
-      wbByteArray('Version Control Info 1', 4, cpIgnore).SetToStr(wbVCI1ToStrAfterFO4)
-    ]),
-    wbInteger('Form Version', itU16, nil, cpIgnore).IncludeFlag(dfSummaryShowIgnore),
-    wbByteArray('Version Control Info 2', 2, cpIgnore)
-  ]).SetSummaryKey([5, 3, 2])
-    .SetSummaryMemberPrefixSuffix(5, '[v', ']')
-    .SetSummaryMemberPrefixSuffix(2, '{', '}')
-    .SetSummaryDelimiter(' ')
-    .IncludeFlag(dfSummaryMembersNoName)
-    .IncludeFlag(dfCollapsed, wbCollapseRecordHeader);
-end;
-
-{>>> Climate Defs <<<} //1
-
-function wbClimateTiming(aTimeCallback: TwbIntToStrCallback; aPhaseCallback: TwbIntToStrCallback): IwbRecordMemberDef;
-var
-  lMoonPhase: IwbValueDef;
-begin
-  if Assigned(aPhaseCallback) then
-    lMoonPhase := wbInteger('Moons / Phase Length', itU8, aPhaseCallback).SetDefaultNativeValue(3)
-  else
-    lMoonPhase := nil;
-
-  Result :=
-    wbStruct(TNAM, 'Timing', [
-      wbStruct('Sunrise', [
-        wbInteger('Begin', itU8, aTimeCallback),
-        wbInteger('End', itU8, aTimeCallback)
-      ]),
-      wbStruct('Sunset', [
-        wbInteger('Begin', itU8, aTimeCallback),
-        wbInteger('End', itU8, aTimeCallback)
-      ]),
-      wbInteger('Volatility', itU8),
-      lMoonPhase
-    ]).SetRequired;
-end;
-
-{>>> Creature Defs <<<} //1
-
-function wbModelInfos(const aSignature: TwbSignature; aName: string = ''; aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
-begin
-  if wbGameMode >= gmTES5 then
-    raise Exception.Create('Not Supported');
-
-  if aName = '' then
-    aName := 'Model List Textures';
-
-  if not wbDecodeTextureHashes then
-    Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
-
-  var TextureFile := wbStruct('Texture', [
-    wbInteger('File Hash (PC)', itU64, wbFileHashCallback),
-    wbInteger('File Hash (Console)', itU64, wbFileHashCallback),
-    wbInteger('Folder Hash', itU64, wbFolderHashCallback)
-  ]).SetSummaryKey([2,0])
-    .SetSummaryDelimiter('')
-    .SetSummaryMemberPrefixSuffix(0, '', '')
-    .SetSummaryMemberPrefixSuffix(2, '', '\')
-    .IncludeFlag(dfSummaryMembersNoName)
-    .IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
-
-  Result :=
-    wbArray(aSignature, aName,
-      wbStruct('Model', [
-        wbArray('Textures', TextureFile, arcU8).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures)
-      ]).SetSummaryKey([0]),
-    -1).SetDontShow(aDontShow)
-    .IncludeFlag(dfCollapsed, wbCollapseModelInfo);
-end;
-
-{>>> Debris Defs <<<} //1
-
-function wbDebrisModel(aTextureFileHashes: IwbRecordMemberDef): IwbRecordMemberDef;
-begin
-  Result :=
-    wbRStruct('Model', [
-      wbStruct(DATA, 'Data', [
-        wbInteger('Percentage', itU8),
-        wbString('Model FileName'),
-        wbInteger('Has Collision', itU8, wbBoolEnum)
-      ]).SetSummaryKeyOnValue([0, 1, 2])
-        .SetSummaryPrefixSuffixOnValue(0, '[', '%]')
-        .SetSummaryPrefixSuffixOnValue(2, '{', '}')
-        .SetSummaryMemberMaxDepthOnValue(0, 1)
-        .IncludeFlagOnValue(dfSummaryMembersNoName)
-        .SetRequired,
-      aTextureFileHashes
-    ]).SetSummaryKey([0])
-      .SetRequired
-      .IncludeFlag(dfCollapsed, wbCollapseModels);
-end;
-
-{>>> Image Space Adapter Defs <<<} //3
-
-function wbIMADMultAddCount(const aName: string): IwbValueDef;
-begin
-  var lPriority : TwbConflictPriority;
-  if aName = 'Unused' then
-    lPriority := cpIgnore
-  else
-    lPriority := cpNormal;
-
-  Result :=
-    wbStruct(aName, [
-      wbInteger('Mult Count', itU32),
-      wbIntegeR('Add Count', itU32)
-    ], lPriority)
-      .SetSummaryKey([0, 1])
-      .SetSummaryMemberPrefixSuffix(0, 'Mult: ', ',')
-      .SetSummaryMemberPrefixSuffix(1, 'Add: ', '')
-      .IncludeFlag(dfCollapsed);
-end;
-
-function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef;
-begin
-  Result :=
-    wbArray(aSignature, aName, wbTimeInterpolator)
-      .SetSummaryPassthroughMaxCountOnValue(10)
-      .SetSummaryPassthroughMaxLengthOnValue(100)
-      .SetRequired
-      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
-end;
-
-function wbTimeInterpolators(const aName: string): IwbValueDef;
-begin
-  Result :=
-    wbArray(aName, wbTimeInterpolator)
-      .SetSummaryPassthroughMaxCount(10)
-      .SetSummaryPassthroughMaxLength(100)
-      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
-
-end;
-
-function wbTimeInterpolatorsMultAdd(const aSignatureMult, aSignatureAdd: TwbSignature; const aName: string): IwbRecordMemberDef;
-begin
-  var sMult := 'Mult';
-  var sAdd := 'Add';
-  if SameText(aName, 'Unused') then begin
-    sMult := aName;
-    sAdd := aName;
-  end;
-
-  Result :=
-    wbRStruct(aName, [
-      wbTimeInterpolators(aSignatureMult, sMult),
-      wbTimeInterpolators(aSignatureAdd, sAdd)
-    ]).SetSummaryKey([0, 1])
-      .SetRequired
-      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolatorsMultAdd);
-end;
-
-{>>> NPC Defs <<<} //1
-
-function wbNPCTemplateActorEntry(const aName: string): IwbValueDef;
-begin
-  Result :=
-    wbFormIDCk(aName, [BMMO,LVLN,NPC_,NULL], False, cpNormalIgnoreEmpty).SetDontShow(wbTemplateActorDontShow);
-end;
-
-{>>> Perk Defs <<<} //1
-
-function wbPerkEffectType(aAfterSetCallback: TwbAfterSetCallback): IwbValueDef;
-begin
-  Result :=
-    wbInteger('Type', itU8,
-      wbEnum([
-        {0} 'Quest + Stage',
-        {1} 'Ability',
-        {2} 'Entry Point'
-    ])).SetAfterSet(aAfterSetCallback);
-end;
-
-{>>> Race Defs <<<} //1
-
-function wbHeadPart(aHeadPartIndexEnum: IwbEnumDef = nil; aModel: IwbRecordMemberDef = nil; aHeadPartsAfterSet: TwbAfterSetCallback = nil): IwbRecordMemberDef;
-begin
-  var wbICON: IwbRecordMemberDef := nil;
-
-  if wbIsOblivion then
-    wbICON := wbString(ICON, 'Icon FileName')
-  else if wbGameMode = gmFNV then
-    wbICON :=
-      wbRStruct('Icon', [
-        wbString(ICON, 'Large Icon FileName').SetRequired,
-        wbString(MICO, 'Small Icon FileName')
-      ], [], cpNormal, False, nil, True)
-  else if wbGameMode = gmFO3 then
-    wbICON :=
-      wbRStruct('Icon', [
-        wbString(ICON, 'Large Icon FileName'),
-        wbString(MICO, 'Small Icon FileName')
-      ]);
-
-  Result :=
-    wbRStructSK([0], IfThen(wbIsOblivion or wbIsFallout3, 'Part', 'Head Part'), [
-      wbInteger(INDX, IfThen(wbIsOblivion or wbIsFallout3, 'Index', 'Head Part Number'), itU32, aHeadPartIndexEnum),
-      IfThen(wbIsOblivion or wbIsFallout3, aModel, nil),
-      IfThen(wbIsOblivion or wbIsFallout3, nil, wbFormIDCk(HEAD, 'Head', [HDPT, NULL])),
-      IfThen(wbIsOblivion or wbIsFallout3, wbICON, nil)
-    ]).SetSummaryKey([0, 1])
-      .SetSummaryMemberPrefixSuffix(0, '[', ']')
-      .SetSummaryDelimiter(' ')
-      .SetAfterSet(aHeadPartsAfterSet)
-      .IncludeFlag(dfSummaryMembersNoName)
-      .IncludeFlag(dfSummaryNoSortKey)
-      .IncludeFlag(dfCollapsed, wbCollapseHeadParts);
-end;
-
-{>>> Weather Defs <<<} //1
-
-function wbWeatherTimeOfDay(const aName: string): IwbValueDef;
-var
-  Struct : IwbValueDef;
-begin
-  if wbIsFalloutNV then
-    Struct :=
-      wbUnion('', wbWeatherTimeOfDayDecider, [
-        wbStruct(aName, [
-          wbByteColors('Sunrise'),
-	        wbByteColors('Day'),
-	        wbByteColors('Sunset'),
-	        wbByteColors('Night'),
-          wbByteColors('High Noon'),
-          wbByteColors('Midnight')
-        ]).SetSummaryKey([0,1,2,3,4,5])
-          .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay),
-        wbStruct(aName, [
-          wbByteColors('Sunrise'),
-	        wbByteColors('Day'),
-	        wbByteColors('Sunset'),
-	        wbByteColors('Night')
-        ]).SetSummaryKey([0,1,2,3])
-          .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay)
-      ]).IncludeFlag(dfUnionStaticResolve)
-  else if wbIsFallout4 or wbIsFallout76 or wbIsStarfield then
-    Struct :=
-      wbStruct(aName, [
-        wbByteColors('Sunrise'),
-	      wbByteColors('Day'),
-	      wbByteColors('Sunset'),
-	      wbByteColors('Night'),
-        wbFromVersion(111, wbByteColors('Early Sunrise')),
-	      wbFromVersion(111, wbByteColors('Late Sunrise')),
-	      wbFromVersion(111, wbByteColors('Early Sunset')),
-	      wbFromVersion(111, wbByteColors('Late Sunset'))
-      ]).SetSummaryKey([0,1,2,3,4,5,6,7])
-  else
-    Struct :=
-      wbStruct(aName, [
-        wbByteColors('Sunrise'),
-	      wbByteColors('Day'),
-	      wbByteColors('Sunset'),
-	      wbByteColors('Night')
-        ]).SetSummaryKey([0,1,2,3]);
-
-  Exit(Struct.IncludeFlag(dfSummaryMembersNoName)
-             .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay));
-end;
-
 {>>> NamedIndex Defs <<<} //2
 
 function wbIdxAddonNode : TwbNamedIndex;
@@ -7076,7 +6464,7 @@ begin
   Result := wbNamedIndex('CollisionLayer', True);
 end;
 
-{>>> Enum Defs <<<} //37
+{>>> Enum Defs <<<} //39
 
 function wbActorImpactMaterialEnum: IwbEnumDef;
 begin
@@ -8305,7 +7693,7 @@ begin
     ]);
 end;
 
-{>>> Value Defs <<<} //5
+{>>> Value Defs <<<} //14
 
 function wbAlternateTexture: IwbValueDef;
 begin
@@ -8332,6 +7720,61 @@ begin
     ]);
 end;
 
+function wbIMADMultAddCount(const aName: string): IwbValueDef;
+begin
+  var lPriority : TwbConflictPriority;
+  if aName = 'Unused' then
+    lPriority := cpIgnore
+  else
+    lPriority := cpNormal;
+
+  Result :=
+    wbStruct(aName, [
+      wbInteger('Mult Count', itU32),
+      wbIntegeR('Add Count', itU32)
+    ], lPriority)
+      .SetSummaryKey([0, 1])
+      .SetSummaryMemberPrefixSuffix(0, 'Mult: ', ',')
+      .SetSummaryMemberPrefixSuffix(1, 'Add: ', '')
+      .IncludeFlag(dfCollapsed);
+end;
+
+function wbLGDIQualityTier: IwbValueDef;
+begin
+  Result := wbLGDISlotDef('Tier', wbLGDIQualityTierEnum);
+end;
+
+function wbLGDIRankSlot: IwbValueDef;
+begin
+  Result := wbLGDISlotDef('Rank', wbLGDIRankSlotEnum);
+end;
+
+function wbLGDISlotDef(const aName: string; const aEnumDef: IwbEnumDef): IwbValueDef;
+begin
+  Result :=
+    wbInteger(aName, itU32, aEnumDef)
+      .SetDontShow(wbNeverShow)
+      .SetSetToDefault(function(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Boolean
+        begin
+          var lContainer: IwbContainerElementRef;
+          if not Assigned(aBasePtr) or
+             not Assigned(aEndPtr) or
+             ((IntPtr(aEndPtr) - IntPtr(aBasePtr)) < SizeOf(Integer)) or
+             not Assigned(aElement) or
+             not Supports(aElement.Container, IwbContainerElementRef, lContainer) or
+             not Supports(lContainer.Container, IwbContainerElementRef, lContainer) or
+             not (lContainer.ElementType = etArray) or
+             (lContainer.MemoryOrder < 0) or
+             (lContainer.MemoryOrder > Pred(aEnumDef.NameCount))
+          then
+            Exit(False);
+
+          PInteger(aBasePtr)^ := lContainer.MemoryOrder;
+          Result := True;
+        end)
+      .IncludeFlag(dfInternalEditOnly);
+end;
+
 function wbNextSpeaker: IwbValueDef;
 begin
   Result :=
@@ -8341,6 +7784,44 @@ begin
         {1} 'Self',
         {2} 'Either'
       ]));
+end;
+
+function wbNPCTemplateActorEntry(const aName: string): IwbValueDef;
+begin
+  Result :=
+    wbFormIDCk(aName, [BMMO,LVLN,NPC_,NULL], False, cpNormalIgnoreEmpty).SetDontShow(wbTemplateActorDontShow);
+end;
+
+function wbPerkEffectType(const aAfterSetCallback: TwbAfterSetCallback): IwbValueDef;
+begin
+  Result :=
+    wbInteger('Type', itU8,
+      wbEnum([
+        {0} 'Quest + Stage',
+        {1} 'Ability',
+        {2} 'Entry Point'
+    ])).SetAfterSet(aAfterSetCallback);
+end;
+
+function wbRecordHeader(const aRecordFlags: IwbIntegerDef): IwbValueDef;
+begin
+  Result := wbStruct('Record Header', [
+    wbString('Signature', 4, cpCritical),
+    wbInteger('Data Size', itU32, nil, cpIgnore),
+    aRecordFlags.IncludeFlag(dfIsRecordFlags),
+    wbFormID('FormID', cpFormID).IncludeFlag(dfSummarySelfAsShortName),
+    wbUnion('Version Control Info 1', wbFormVersionDecider(44), [
+      wbByteArray('Version Control Info 1', 4, cpIgnore).SetToStr(wbVCI1ToStrBeforeFO4),
+      wbByteArray('Version Control Info 1', 4, cpIgnore).SetToStr(wbVCI1ToStrAfterFO4)
+    ]),
+    wbInteger('Form Version', itU16, nil, cpIgnore).IncludeFlag(dfSummaryShowIgnore),
+    wbByteArray('Version Control Info 2', 2, cpIgnore)
+  ]).SetSummaryKey([5, 3, 2])
+    .SetSummaryMemberPrefixSuffix(5, '[v', ']')
+    .SetSummaryMemberPrefixSuffix(2, '{', '}')
+    .SetSummaryDelimiter(' ')
+    .IncludeFlag(dfSummaryMembersNoName)
+    .IncludeFlag(dfCollapsed, wbCollapseRecordHeader);
 end;
 
 function wbTimeInterpolator: IwbValueDef;
@@ -8357,18 +7838,77 @@ begin
       .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolator);
 end;
 
-{>>> RecordMember Defs <<<} //59
+function wbTimeInterpolators(const aName: string): IwbValueDef;
+begin
+  Result :=
+    wbArray(aName, wbTimeInterpolator)
+      .SetSummaryPassthroughMaxCount(10)
+      .SetSummaryPassthroughMaxLength(100)
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
+end;
+
+function wbWeatherTimeOfDay(const aName: string): IwbValueDef;
+var
+  Struct : IwbValueDef;
+begin
+  if wbIsFalloutNV then
+    Struct :=
+      wbUnion('', wbWeatherTimeOfDayDecider, [
+        wbStruct(aName, [
+          wbByteColors('Sunrise'),
+	        wbByteColors('Day'),
+	        wbByteColors('Sunset'),
+	        wbByteColors('Night'),
+          wbByteColors('High Noon'),
+          wbByteColors('Midnight')
+        ]).SetSummaryKey([0,1,2,3,4,5])
+          .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay),
+        wbStruct(aName, [
+          wbByteColors('Sunrise'),
+	        wbByteColors('Day'),
+	        wbByteColors('Sunset'),
+	        wbByteColors('Night')
+        ]).SetSummaryKey([0,1,2,3])
+          .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay)
+      ]).IncludeFlag(dfUnionStaticResolve)
+  else if wbIsFallout4 or wbIsFallout76 or wbIsStarfield then
+    Struct :=
+      wbStruct(aName, [
+        wbByteColors('Sunrise'),
+	      wbByteColors('Day'),
+	      wbByteColors('Sunset'),
+	      wbByteColors('Night'),
+        wbFromVersion(111, wbByteColors('Early Sunrise')),
+	      wbFromVersion(111, wbByteColors('Late Sunrise')),
+	      wbFromVersion(111, wbByteColors('Early Sunset')),
+	      wbFromVersion(111, wbByteColors('Late Sunset'))
+      ]).SetSummaryKey([0,1,2,3,4,5,6,7])
+  else
+    Struct :=
+      wbStruct(aName, [
+        wbByteColors('Sunrise'),
+	      wbByteColors('Day'),
+	      wbByteColors('Sunset'),
+	      wbByteColors('Night')
+        ]).SetSummaryKey([0,1,2,3]);
+
+  Exit(Struct.IncludeFlag(dfSummaryMembersNoName)
+             .IncludeFlag(dfCollapsed, wbCollapseWeatherTimeOfDay));
+end;
+
+{>>> RecordMember Defs <<<} //74
 
 function wbActionFlag: IwbRecordMemberDef;
 begin
   Result :=
     wbInteger(XACT, 'Action Flag', itU32,
       wbFlags([
-        {0} 'Use Default',
-        {1} 'Activate',
-        {2} 'Open',
-        {3} 'Open by Default'
-      ])).IncludeFlag(dfCollapsed, wbCollapseFlags);
+      {0} 'Use Default',
+      {1} 'Activate',
+      {2} 'Open',
+      {3} 'Open by Default'
+      ])
+    ).IncludeFlag(dfCollapsed, wbCollapseFlags);
 end;
 
 function wbActorSounds: IwbRecordMemberDef;
@@ -8379,9 +7919,9 @@ begin
         wbFormIDCk(CS2K, 'Keyword', [KYWD]),
         wbFormIDCk(CS2D, 'Sound', [SNDR]).SetRequired
       ], [], cpNormal, False, nil, True)
+        .SetSummaryDelimiter(' ')
         .SetSummaryKey([1, 0])
         .SetSummaryMemberPrefixSuffix(0, '{', '}')
-        .SetSummaryDelimiter(' ')
         .IncludeFlag(dfCollapsed, wbCollapseSounds)
         .IncludeFlag(dfSummaryMembersNoName)
         .IncludeFlag(dfSummaryNoSortKey)
@@ -8397,14 +7937,81 @@ begin
       wbInteger('Land Flags', itU8, wbLandFlags).IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbUnused(3)
     ], cpNormal, False, nil, 2)
-    .SetSummaryKeyOnValue([0, 1, 2])
-    .SetSummaryPrefixSuffixOnValue(0, '(', '')
-    .SetSummaryPrefixSuffixOnValue(1, '', ')')
-    .SetSummaryPrefixSuffixOnValue(2, ' {Land: ', '}')
-    .IncludeFlagOnValue(dfSummaryMembersNoName)
-    .SetDontShow(wbCellInteriorDontShow)
-    .SetIsRemovable(wbCellGridIsRemovable)
-    .IncludeFlag(dfCollapsed, wbCollapseOther);
+      .SetSummaryKeyOnValue([0, 1, 2])
+      .SetSummaryPrefixSuffixOnValue(0, '(', '')
+      .SetSummaryPrefixSuffixOnValue(1, '', ')')
+      .SetSummaryPrefixSuffixOnValue(2, ' {Land: ', '}')
+      .IncludeFlagOnValue(dfSummaryMembersNoName)
+      .SetDontShow(wbCellInteriorDontShow)
+      .SetIsRemovable(wbCellGridIsRemovable)
+      .IncludeFlag(dfCollapsed, wbCollapseOther);
+end;
+
+function wbClimateTiming(const aTimeCallback, aPhaseCallback: TwbIntToStrCallback): IwbRecordMemberDef;
+begin
+  Result :=
+    wbStruct(TNAM, 'Timing', [
+      wbStruct('Sunrise', [
+        wbInteger('Begin', itU8, aTimeCallback),
+        wbInteger('End', itU8, aTimeCallback)
+      ]),
+      wbStruct('Sunset', [
+        wbInteger('Begin', itU8, aTimeCallback),
+        wbInteger('End', itU8, aTimeCallback)
+      ]),
+      wbInteger('Volatility', itU8),
+      IfThen(Assigned(aPhaseCallback),
+        wbInteger('Moons / Phase Length', itU8, aPhaseCallback).SetDefaultNativeValue(3),
+        nil)
+    ]).SetRequired;
+end;
+
+function wbDamageTypeArray(const aItemName: string): IwbRecordMemberDef;
+begin
+  Result := wbArrayS(DAMA, aItemName + 's',
+    wbStructSK([0], aItemName, [
+      wbFormIDCk('Type', [DMGT]),
+      wbInteger('Amount', itU32),
+      wbFromVersion(152, wbFormIDCk('Curve Table', [CURV, NULL]))
+    ]).SetSummaryKey([1])
+      .SetSummaryMemberPrefixSuffix(1, '= ','')
+      .IncludeFlag(dfSummaryMembersNoName));
+end;
+
+function wbDebrisModel(const aTextureFileHashes: IwbRecordMemberDef): IwbRecordMemberDef;
+begin
+  Result :=
+    wbRStruct('Model', [
+      wbStruct(DATA, 'Data', [
+        wbInteger('Percentage', itU8),
+        wbString('Model FileName'),
+        wbInteger('Has Collision', itU8, wbBoolEnum)
+      ]).SetSummaryKeyOnValue([0, 1, 2])
+        .SetSummaryPrefixSuffixOnValue(0, '[', '%]')
+        .SetSummaryPrefixSuffixOnValue(2, '{', '}')
+        .SetSummaryMemberMaxDepthOnValue(0, 1)
+        .IncludeFlagOnValue(dfSummaryMembersNoName)
+        .SetRequired,
+      aTextureFileHashes
+    ]).SetSummaryKey([0])
+      .SetRequired
+      .IncludeFlag(dfCollapsed, wbCollapseModels);
+end;
+
+function wbEnchantment(const aCapacity: Boolean = False): IwbRecordMemberDef;
+begin
+  var aName := IsFO3('Object Effect', 'Enchantment');
+  var aSig1 := IsTES4(ENAM, EITM);
+  var aSig2 := IsTES4(ANAM, EAMT);
+
+  Result := wbFormIDCk(aSig1, aName, [ENCH]);
+  if aCapacity then
+    Result :=
+      wbRStruct(aName, [
+        wbFormIDCk(aSig1, 'Effect', [ENCH]),
+        wbInteger(aSig2, 'Capacity', itU16)
+      ]).IncludeFlag(dfAllowAnyMember)
+        .IncludeFlag(dfStructFirstNotRequired);
 end;
 
 function wbFaceGen: IwbRecordMemberDef;
@@ -8456,13 +8063,47 @@ begin
           nil,
           wbInteger('Group Combat Reaction', itU32,
             wbEnum([
-              {0} 'Neutral',
-              {1} 'Enemy',
-              {2} 'Ally',
-              {3} 'Friend'
+            {0} 'Neutral',
+            {1} 'Enemy',
+            {2} 'Ally',
+            {3} 'Friend'
             ])))
       ]).SetToStr(wbFactionRelationToStr)
         .IncludeFlag(dfCollapsed, wbCollapseFactionRelations));
+end;
+
+function wbHeadPart(const aHeadPartIndexEnum: IwbEnumDef = nil; const aModel: IwbRecordMemberDef = nil; const aHeadPartsAfterSet: TwbAfterSetCallback = nil): IwbRecordMemberDef;
+begin
+  var wbICON: IwbRecordMemberDef := nil;
+
+  if wbIsOblivion then
+    wbICON := wbString(ICON, 'Icon FileName')
+  else if wbGameMode = gmFNV then
+    wbICON :=
+      wbRStruct('Icon', [
+        wbString(ICON, 'Large Icon FileName').SetRequired,
+        wbString(MICO, 'Small Icon FileName')
+      ], [], cpNormal, False, nil, True)
+  else if wbGameMode = gmFO3 then
+    wbICON :=
+      wbRStruct('Icon', [
+        wbString(ICON, 'Large Icon FileName'),
+        wbString(MICO, 'Small Icon FileName')
+      ]);
+
+  Result :=
+    wbRStructSK([0], IfThen(wbIsOblivion or wbIsFallout3, 'Part', 'Head Part'), [
+      wbInteger(INDX, IfThen(wbIsOblivion or wbIsFallout3, 'Index', 'Head Part Number'), itU32, aHeadPartIndexEnum),
+      IfThen(wbIsOblivion or wbIsFallout3, aModel, nil),
+      IfThen(wbIsOblivion or wbIsFallout3, nil, wbFormIDCk(HEAD, 'Head', [HDPT, NULL])),
+      IfThen(wbIsOblivion or wbIsFallout3, wbICON, nil)
+    ]).SetSummaryKey([0, 1])
+      .SetSummaryMemberPrefixSuffix(0, '[', ']')
+      .SetSummaryDelimiter(' ')
+      .SetAfterSet(aHeadPartsAfterSet)
+      .IncludeFlag(dfSummaryMembersNoName)
+      .IncludeFlag(dfSummaryNoSortKey)
+      .IncludeFlag(dfCollapsed, wbCollapseHeadParts);
 end;
 
 function wbHEDR: IwbRecordMemberDef;
@@ -8481,9 +8122,9 @@ begin
     wbArray(INOA, 'INFO Order (All previous modules)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
     ).IncludeFlag(dfCollapsed)
-     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
-     .IncludeFlag(dfDontAssign);
+     .IncludeFlag(dfDontAssign)
+     .IncludeFlag(dfInternalEditOnly);
 end;
 
 function wbINOM: IwbRecordMemberDef;
@@ -8492,9 +8133,9 @@ begin
     wbArray(INOM, 'INFO Order (Masters only)',
       wbFormIDCk('INFO', [INFO], False, cpBenign).IncludeFlag(dfUseLoadOrder)
     ).IncludeFlag(dfCollapsed)
-     .IncludeFlag(dfInternalEditOnly)
      .IncludeFlag(dfDontSave)
-     .IncludeFlag(dfDontAssign);
+     .IncludeFlag(dfDontAssign)
+     .IncludeFlag(dfInternalEditOnly);
 end;
 
 function wbIdleAnimation: IwbRecordMemberDef;
@@ -8661,6 +8302,77 @@ begin
          .IncludeFlag(dfCollapsed, wbCollapseVertices));
 end;
 
+function wbLeveledListEntry(const aObjectName: string; const aSigs: TwbSignatures): IwbRecordMemberDef;
+begin
+  Result :=
+    wbStructExSK(LVLO, [0, 2], [3], IsTES4('Leveled List Entry', 'Base Data'), [
+      wbInteger('Level', itU16),
+      wbUnused(2),
+      wbFormIDCk(aObjectName, aSigs),
+      wbInteger('Count', itU16).SetDefaultNativeValue(1),
+      IsFO4Plus(
+        wbInteger('Chance None', itU8),
+        wbUnused(2)),
+      IsFO4Plus(
+        wbUnused(1),
+        nil)
+    ], cpNormal, False, nil, 3)
+      .SetSummaryDelimiterOnValue(' ')
+      .SetSummaryKeyOnValue([0, 3, 2])
+      .SetSummaryPrefixSuffixOnValue(0, '[Level: ', ']')
+      .SetSummaryPrefixSuffixOnValue(3, '', ' x')
+      .IncludeFlagOnValue(dfSummaryMembersNoName)
+      .IncludeFlagOnValue(dfSummaryNoSortKey)
+      .IncludeFlag(dfCollapsed, wbCollapseLeveledItems);
+end;
+
+function wbLGDIFilter(const aSignature: TwbSignature; const aName: string; const aRankSlotDef: IwbValueDef; const aRankSlotEnumDef: IwbEnumDef): IwbRecordMemberDef;
+begin
+  Result :=
+    wbLGDIRankSlotArray(aSignature,
+      wbStructExSK([1], [2], aName, [
+        aRankSlotDef,
+        wbInteger('Referenced Mod', itU32, wbLGDIFiltersToStr, wbStrToLGDIFilter),
+        wbFormIDCk('Keyword', [KYWD])
+      ]).SetSummaryMemberPrefixSuffix(1, '<', '>')
+        .SetSummaryMemberPrefixSuffix(2, '', '')
+        .SetSummaryDelimiter(' ')
+        .IncludeFlag(dfCollapsed, wbCollapseItems)
+        .IncludeFlag(dfSummaryMembersNoName),
+    True, aRankSlotEnumDef);
+end;
+
+function wbLGDIRankSlotArray(const aSignature: TwbSignature; const aName: string; const aElement: IwbValueDef; const aSorted: Boolean; const aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
+begin
+  var lInnerArray: IwbArrayDef;
+  if aSorted then
+    lInnerArray := wbArrayS('', aElement)
+  else
+    lInnerArray := wbArray('', aElement);
+
+  var lElementDef := lInnerArray
+    .SetShouldInclude(wbLGDIRankSlotArrayShouldInclude)
+    .SetSummaryName(aName + 's')
+    .IncludeFlag(dfArrayCanBeEmpty);
+
+  if not aSorted then
+    lElementDef := lElementDef
+      .IncludeFlag(dfNoMove)
+      .IncludeFlag(dfRemoveLastOnly);
+
+  Result :=
+    wbArray(aSignature, aName, lElementDef)
+      .SetCountFromEnumOnValue(aSlotEnum)
+      .SetSummaryPassthroughMaxCountOnValue(5)
+      .SetSummaryName('Rank Slots')
+      .IncludeFlag(dfNoMove);
+end;
+
+function wbLGDIRankSlotArray(const aSignature: TwbSignature; const aElement: IwbValueDef; const aSorted: Boolean; const aSlotEnum: IwbEnumDef): IwbRecordMemberDef;
+begin
+  Result := wbLGDIRankSlotArray(aSignature, aElement.Name + 's', aElement, aSorted, aSlotEnum);
+end;
+
 function wbLoadScreenLocations: IwbRecordMemberDef;
 begin
   Result :=
@@ -8720,6 +8432,206 @@ begin
         .IncludeFlag(dfCollapsed, wbCollapseSounds));
 end;
 
+function wbModelInfo(const aSignature: TwbSignature; aName: string = ''): IwbRecordMemberDef;
+begin
+  if wbGameMode < gmTES5 then begin
+    if aName = '' then
+      aName := 'Textures';
+
+    if not wbDecodeTextureHashes then
+      Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
+
+    var TextureFile := wbStruct('Texture', [
+      wbInteger('File Hash (PC)', itU64, wbFileHashCallback),
+      wbInteger('File Hash (Console)', itU64, wbFileHashCallback),
+      wbInteger('Folder Hash', itU64, wbFolderHashCallback)
+    ]).SetSummaryKey([2,0])
+      .SetSummaryDelimiter('')
+      .SetSummaryMemberPrefixSuffix(0, '', '')
+      .SetSummaryMemberPrefixSuffix(2, '', '\')
+      .IncludeFlag(dfSummaryMembersNoName)
+      .IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
+
+    Result := wbArray(aSignature, aName, TextureFile).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures);
+  end else begin
+    if aName = '' then
+      aName := 'Model Information';
+
+    if not wbDecodeTextureHashes then
+      Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
+
+    var CreateFileEntry := function(const aName: string): IwbValueDef begin
+      Result := wbStruct(aName, [
+        wbInteger('File Hash', itU32, wbFileHashCallback),
+        wbString('Extension', 4),
+        wbInteger('Folder Hash', itU32, wbFolderHashCallback)
+      ]).SetSummaryKey([2,0,1])
+        .SetSummaryDelimiter('')
+        .SetSummaryMemberPrefixSuffix(0, '', '')
+        .SetSummaryMemberPrefixSuffix(1, '.', '')
+        .SetSummaryMemberPrefixSuffix(2, '', '\')
+        .IncludeFlag(dfSummaryMembersNoName);
+    end;
+
+    var TextureFile := CreateFileEntry('Texture').IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
+    var MaterialFile := CreateFileEntry('Material').IncludeFlag(dfCollapsed, wbCollapseModelInfoMaterial);
+
+    var NewModelInfo :=
+      wbStruct('', [
+        IsTES5(
+          wbArray('Counters',
+            wbInteger('Counter', itU32, nil, nil, cpIgnore),
+          -1, ['Textures', 'Addon Nodes'], cpIgnore)
+            .IncludeFlag(dfCollapsed, wbCollapseModelInfoHeader)
+            .IncludeFlag(dfNotAlignable),
+          wbArray('Counters',
+            wbIntegeR('Counter', itU32, nil, nil, cpIgnore),
+          -1, ['Textures', 'Addon Nodes', 'SRGB', 'Materials'], cpIgnore)
+            .IncludeFlag(dfCollapsed, wbCollapseModelInfoHeader)
+            .IncludeFlag(dfNotAlignable)
+        ),
+        wbArray('Textures', TextureFile)
+          .SetCountPath('Counters\[0]', True)
+          .SetSummaryPassthroughMaxLength(80)
+          .SetSummaryPassthroughMaxDepth(1)
+          .IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures),
+        wbArray('Addon Nodes',
+          wbInteger('Addon Node', itU32)
+            .SetLinksToCallback(function(const aElement: IwbElement): IwbElement
+            begin
+              Result := nil;
+              if not Assigned(aElement) then
+                Exit;
+
+              var lAddonNodeIndex := aElement.NativeValue;
+              if not VarIsOrdinal(lAddonNodeIndex) then
+                Exit;
+
+              var lFile := aElement._File;
+              if not Assigned(lFile) then
+                Exit;
+
+              Result := lFile.RecordFromIndexByKey[wbIdxAddonNode, lAddonNodeIndex];
+            end)
+           .SetToStr(wbToStringFromLinksToMainRecordName)
+        ).SetCountPath('Counters\[1]', True)
+         .SetSummaryPassthroughMaxLength(80)
+         .SetSummaryPassthroughMaxDepth(1)
+         .IncludeFlag(dfCollapsed, wbCollapseModelInfoAddons),
+        IsTES5(
+          nil,
+          wbArray('Materials', MaterialFile)
+            .SetCountPath('Counters\[3]', True)
+            .SetSummaryPassthroughMaxLength(80)
+            .SetSummaryPassthroughMaxDepth(1)
+            .IncludeFlag(dfCollapsed, wbCollapseModelInfoMaterials))
+      ]).SetSummaryKey([1, 2, 3])
+        .IncludeFlag(dfSummaryMembersNoName);
+
+    Result := wbUnion(aSignature, aName, wbModelInfoDecider, [
+      wbStruct('', [
+        wbEmpty('Unused'),
+        wbByteArray('Unused'),
+        wbEmpty('Unused'),
+        wbEmpty('Unused')
+      ], cpIgnore),
+      wbStruct('', [
+        wbEmpty('Unused'),
+        wbByteArray('ERROR').SetToStr(procedure(var aValue: string; aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement; aType: TwbCallbackType) begin
+          if aType = ctCheck then
+            aValue := 'SubRecord has invalid format for the Form Version of this record';
+        end),
+        wbEmpty('Unused'),
+        wbEmpty('Unused')
+      ], cpCritical),
+      wbStruct('', [
+        wbEmpty('Unused'),
+        wbArray('Textures', TextureFile).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures),
+        wbEmpty('Unused'),
+        wbEmpty('Unused')
+      ]).SetSummaryKey([1]),
+      NewModelInfo
+    ], cpNormal, False, wbModelInfoDontShow, wbModelInfoGetCP).IncludeFlag(dfCollapsed, wbCollapseModelInfo);
+  end;
+end;
+
+function wbModelInfos(const aSignature: TwbSignature; aName: string = ''; const aDontShow  : TwbDontShowCallback = nil): IwbRecordMemberDef;
+begin
+  if wbGameMode >= gmTES5 then
+    raise Exception.Create('Not Supported');
+
+  if aName = '' then
+    aName := 'Model List Textures';
+
+  if not wbDecodeTextureHashes then
+    Exit(wbByteArray(aSignature, aName, 0, cpIgnore).SetDontShow(wbNeverShow));
+
+  var TextureFile := wbStruct('Texture', [
+    wbInteger('File Hash (PC)', itU64, wbFileHashCallback),
+    wbInteger('File Hash (Console)', itU64, wbFileHashCallback),
+    wbInteger('Folder Hash', itU64, wbFolderHashCallback)
+  ]).SetSummaryKey([2,0])
+    .SetSummaryDelimiter('')
+    .SetSummaryMemberPrefixSuffix(0, '', '')
+    .SetSummaryMemberPrefixSuffix(2, '', '\')
+    .IncludeFlag(dfSummaryMembersNoName)
+    .IncludeFlag(dfCollapsed, wbCollapseModelInfoTexture);
+
+  Result :=
+    wbArray(aSignature, aName,
+      wbStruct('Model', [
+        wbArray('Textures', TextureFile, arcU8).IncludeFlag(dfCollapsed, wbCollapseModelInfoTextures)
+      ]).SetSummaryKey([0]),
+    -1).SetDontShow(aDontShow)
+    .IncludeFlag(dfCollapsed, wbCollapseModelInfo);
+end;
+
+function wbOBND(const aRequired: Boolean = False): IwbRecordMemberDef;
+begin
+  Result :=
+    wbStruct(OBND, 'Object Bounds', [
+      wbInteger('X1', itS16),
+      wbInteger('Y1', itS16),
+      wbInteger('Z1', itS16),
+      wbInteger('X2', itS16),
+      wbInteger('Y2', itS16),
+      wbInteger('Z2', itS16)
+    ]).SetSummaryKeyOnValue([0, 1, 2, 3, 4, 5])
+      .SetSummaryPrefixSuffixOnValue(0, '(', '')
+      .SetSummaryPrefixSuffixOnValue(2, '', ')')
+      .SetSummaryPrefixSuffixOnValue(3, '(', '')
+      .SetSummaryPrefixSuffixOnValue(5, '', ')')
+      .SetSummaryDelimiterOnValue(', ')
+      .IncludeFlagOnValue(dfSummaryMembersNoName)
+      .SetRequired(aRequired)
+      .IncludeFlag(dfCollapsed, wbCollapseObjectBounds);
+end;
+
+function wbOwnership(const aSkipSigs: TwbSignatures = nil): IwbRecordMemberDef;
+begin
+  Result :=
+    wbRStruct('Ownership', [
+      IsFO4Plus(
+        wbStruct(XOWN, 'Owner', [
+          wbFormIDCkNoReach('Owner', [FACT, NPC_]),
+          wbUnused(4),
+          wbInteger('No Crime', itU8, wbBoolEnum),
+          wbUnused(3)
+        ]).SetSummaryKeyOnValue([0]),
+        wbFormIDCkNoReach(XOWN, 'Owner', [FACT, NPC_])),
+      wbInteger(XRNK, 'Faction rank', itS32),
+      IsTES4(
+        wbFormIDCk(XGLB, 'Global', [GLOB]),
+        nil)
+    ], aSkipSigs, cpNormal, False, nil, True)
+      .SetSummaryKey([0, 1])
+      .SetSummaryMemberPrefixSuffix(1, '[Rank: ', ']')
+      .SetSummaryDelimiter(' ')
+      .IncludeFlag(dfCollapsed, wbCollapseOwnership)
+      .IncludeFlag(dfSummaryMembersNoName)
+      .IncludeFlag(dfSummaryNoSortKey);
+end;
+
 function wbQSTI: IwbRecordMemberDef;
 begin
   Result :=
@@ -8777,11 +8689,12 @@ begin
         wbFormIDCk('Sound', [SNDR, SOUN, NULL]),
         wbInteger('Flags', itU32,
           wbFlags([
-            {0} 'Pleasant',
-            {1} 'Cloudy',
-            {2} 'Rainy',
-            {3} 'Snowy'
-          ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
+          {0} 'Pleasant',
+          {1} 'Cloudy',
+          {2} 'Rainy',
+          {3} 'Snowy'
+          ])
+        ).IncludeFlag(dfCollapsed, wbCollapseFlags),
         IsTES4FO3(
           wbInteger('Chance', itU32, wbScaledInt4ToStr, wbScaledInt4ToInt),
           wbFloat('Chance'))
@@ -8802,9 +8715,7 @@ end;
 
 function wbSoundDescriptorSounds: IwbRecordMemberDef;
 begin
-  Result :=
-    wbRArray('Sounds',
-      wbString(ANAM, 'Sound'));
+  Result := wbRArray('Sounds', wbString(ANAM, 'Sound'));
 end;
 
 function wbSoundTypeSounds: IwbRecordMemberDef;
@@ -8838,6 +8749,70 @@ begin
         .IncludeFlag(dfSummaryMembersNoName)
         .IncludeFlag(dfCollapsed, wbCollapsePlacement)
     ).SetRequired;
+end;
+
+function wbTexturedModel(const aSubRecordName     : string;
+                         const aSignatures        : TwbSignatures;
+                         const aTextureSubRecords : array of IwbRecordMemberDef)
+                                                  : IwbRecordMemberDef;
+begin
+  var lMembers : array of IwbRecordMemberDef;
+  SetLength(lMembers,
+    Length(aTextureSubRecords) +
+    1 +
+    IsTES4(1, 0) +
+    IsSF1(0, 1)
+  );
+
+  lMembers[0] := wbString(aSignatures[0], 'Model Filename');
+  if wbIsOblivion then begin
+    lMembers[1] := wbFloat(aSignatures[1], 'Bound Radius', cpBenign);
+    lMembers[2] := wbModelInfo(aSignatures[2]);
+  end else if not wbIsStarfield then
+    lMembers[1] := wbModelInfo(aSignatures[1]);
+
+  for var I := Low(aTextureSubRecords) to High(aTextureSubRecords) do
+    lMembers[Length(lMembers) - Length(aTextureSubRecords) + I] := aTextureSubRecords[I];
+
+  Result :=
+    wbRStruct(aSubRecordName, lMembers, nil, cpNormal, False, nil, True)
+      .SetSummaryKey([0])
+      .IncludeFlag(dfAllowAnyMember)
+      .IncludeFlag(dfCollapsed, wbCollapseModels)
+      .IncludeFlag(dfStructFirstNotRequired)
+      .IncludeFlag(dfSummaryMembersNoName)
+      .IncludeFlag(dfSummaryNoSortKey);
+end;
+
+function wbTimeInterpolators(const aSignature: TwbSignature; const aName: string): IwbRecordMemberDef;
+begin
+  Result :=
+    wbArray(aSignature, aName, wbTimeInterpolator)
+      .SetSummaryPassthroughMaxCountOnValue(10)
+      .SetSummaryPassthroughMaxLengthOnValue(100)
+      .SetRequired
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolators);
+end;
+
+function wbTimeInterpolatorsMultAdd(const aSignatureMult : TwbSignature;
+                                    const aSignatureAdd  : TwbSignature;
+                                    const aName          : string)
+                                                         : IwbRecordMemberDef;
+begin
+  var sMult := 'Mult';
+  var sAdd := 'Add';
+  if SameText(aName, 'Unused') then begin
+    sMult := aName;
+    sAdd := aName;
+  end;
+
+  Result :=
+    wbRStruct(aName, [
+      wbTimeInterpolators(aSignatureMult, sMult),
+      wbTimeInterpolators(aSignatureAdd, sAdd)
+    ]).SetSummaryKey([0, 1])
+      .SetRequired
+      .IncludeFlag(dfCollapsed, wbCollapseTimeInterpolatorsMultAdd);
 end;
 
 function wbWeatherCloudAlphas: IwbRecordMemberDef;
