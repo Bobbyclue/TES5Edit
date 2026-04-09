@@ -7914,17 +7914,17 @@ begin
 
   if not Assigned(wbTerminalArtThemeEnum) then
     wbTerminalArtThemeEnum := wbEnum([], [
-      0, 'Constellation',
-      1, 'Freestar Collective',
-      2, 'Generic',
-      3, 'NASA',
-      4, 'Ryujin Industries',
-      5, 'Slayton Aerospace',
-      6, 'United Colonies',
-      7, 'Crimson Fleet',
-      8, 'House Varuun',
-      9, 'Ship Upgrade',
-      10, 'Terran Armada'
+      0,  'Constellation',
+      1,  'Freestar Collective',
+      2,  'Generic',
+      3,  'NASA',
+      4,  'Ryujin Industries',
+      5,  'Slayton Aerospace',
+      6,  'United Colonies',
+      7,  'Crimson Fleet',
+      8,  'House Varuun',
+      9,  'Ship Upgrade',
+      11, 'Terran Armada'
     ]);
 
   var wbBIOMMaskNameStringEnum := wbStringEnum([
