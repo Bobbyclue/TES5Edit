@@ -4666,8 +4666,8 @@ begin
   end;
 
   case aType of
-    ctCheck: aValue := '<Warning: ' + lAlias.Summary + ' is non-optional and Forced to NONE.  This quest cannot start.';
-    ctToStr: aValue := lAlias.Summary + '<Warning: Alias is non-optional and Forced to NONE.  This quest cannot start.';
+    ctCheck: aValue := '<Warning: ' + lAlias.Summary + ' is non-optional and Forced to NONE>';
+    ctToStr: aValue := lAlias.Summary + ' <Warning: Alias is non-optional and Forced to NONE>';
   end;
 end;
 
