@@ -2233,7 +2233,7 @@ begin
   Result := CmpI32(MemoryOrder1, MemoryOrder2);
 end;
 
-function CompareLoadOrder(Item1, Item2: Pointer): Integer;
+function CompareLoadOrder(Item1, Item2: Pointer): Integer; overload;
 var
   LoadOrder1: Integer;
   LoadOrder2: Integer;
@@ -2250,6 +2250,19 @@ begin
   if Result = 0 then
     Result := CmpPtr(IwbFile(Item1).ElementID, IwbFile(Item2).ElementID);
 end;
+
+function CompareLoadOrder(List: TStringList; Index1, Index2: Integer): Integer; overload;
+begin
+  if Index1 = Index2 then begin
+    Result := 0;
+    Exit;
+  end;
+
+  Result := CmpI32(
+    IwbFile(Pointer(List.Objects[Index1])).LoadOrder,
+    IwbFile(Pointer(List.Objects[Index2])).LoadOrder);
+end;
+
 
 { TwbFile }
 
@@ -2500,9 +2513,7 @@ begin
   Masters := TStringList.Create;
   try
     Masters.Add(aMaster);
-    AddMasters(Masters, aSilent);
-    if aSortMasters then
-      SortMasters;
+    AddMastersIfMissing(Masters, aSortMasters, aSilent);
   finally
     Masters.Free;
   end;
@@ -2510,16 +2521,41 @@ end;
 
 procedure TwbFile.AddMastersIfMissing(const aMasters: TStrings; aSortMasters: Boolean = True; aSilent: Boolean = False);
 var
-  i       : Integer;
+  i, j    : Integer;
   Masters : TStringList;
 begin
   Masters := TStringList.Create;
+  Masters.Sorted := True;
+  Masters.Duplicates := dupIgnore;
   try
     for i := 0  to Pred(aMasters.Count) do
       if not HasMaster(aMasters[i]) then
-        Masters.Add(aMasters[i]);
+      begin
+        // add masters of masters
+        var lFile : IwbFile;
+        for var _file in Files do
+        if SameText(_file.FileName, aMasters[i]) then
+          lFile := _file;
+        if not Assigned(lFile) then
+          continue;
+
+        var lFileMasters := lFile.AllMasters;
+        for j := low(lFileMasters) to High(lFileMasters) do
+          Masters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+
+        Masters.AddObject(lFile.FileName, Pointer(lFile));
+      end;
+
+    for i := 0 to Pred(GetMasterCount(True)) do
+      if Masters.Find(GetMaster(i, True).FileName, j) then
+        Masters.Delete(j);
+    if Masters.Find(GetFileName, j) then
+      Masters.Delete(j);
 
     if Masters.Count = 0 then Exit;
+
+    Masters.Sorted := False;
+    Masters.CustomSort(CompareLoadOrder);
 
     AddMasters(Masters, aSilent);
     if aSortMasters then
@@ -2580,7 +2616,12 @@ var
 
     if wbBeginInternalEdit(True) then try
       for i := 0 to Pred(lMasters.Count) do begin
-        var lFile := wbFile(lMasters[i]);
+        var lFile: IwbFile;
+        for var _file in Files do
+          if SameText(_file.FileName, lMasters[i]) then
+            lFile := _file;
+        if not Assigned(lFile) then // file is not loaded
+          continue;
         var lIsLightFile := lFile.IsLight;
         var lIsMediumFile := lFile.IsMedium;
         var lIsFullFile := lFile.GetIsFull;
@@ -19106,7 +19147,7 @@ begin
       sl.Sorted := False;
       sl.CustomSort(CompareLoadOrderSL);
 
-      aTargetFile.AddMasters(sl);
+      aTargetFile.AddMastersIfMissing(sl);
     end;
   finally
     sl.Free;
