@@ -1079,6 +1079,7 @@ begin
     end;
     gmSF1: begin
       wbComplexFileFileID   := True;
+      wbEnforceAllMasters   := True;
       wbVWDInTemporary      := True;
       wbVWDAsQuestChildren  := True;
       wbLoadBSAs            := True;  // localization won't work otherwise

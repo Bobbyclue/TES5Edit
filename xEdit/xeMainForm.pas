@@ -1949,6 +1949,18 @@ begin
   try
     sl.AddStrings(aMasters);
 
+    // add masters of masters
+    // only for games that need it
+    if wbEnforceAllMasters then
+      for i := 0 to Pred(aMasters.Count) do
+      begin
+        var lFile := Files.Find(aMasters[i]);
+        var lFileMasters := lFile.AllMasters;
+        lFileMasters.SortByReverseLoadOrder;
+        for j := low(lFileMasters) to High(lFileMasters) do
+          sl.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+      end;
+
     for i := 0 to Pred(aTargetFile.MasterCount[True]) do
       if sl.Find(aTargetFile.Masters[i, True].FileName, j) then
         sl.Delete(j);
@@ -1984,7 +1996,7 @@ begin
             wbCurrentAction := 'Adding '+sl.Count.ToString+' new masters to ' + aTargetFile.Name;
           AddMessage('[' + wbFormatElapsedTime( Now - wbStartTime) + '] ' + wbCurrentAction);
           DoProcessMessages;
-          aTargetFile.AddMasters(sl);
+          aTargetFile.AddMastersIfMissing(sl);
           wbCurrentAction := 'Sorting masters for ' + aTargetFile.Name;
           DoProcessMessages;
           aTargetFile.SortMasters;
@@ -2005,6 +2017,8 @@ begin
 end;
 
 function TfrmMain.AddRequiredMasters(const aSourceElement: IwbElement; const aTargetFile: IwbFile; aAsNew: Boolean; aSilent: Boolean = False): Boolean;
+var
+  i, j : Integer;
 begin
   var lRequiredMasters := TStringList.Create;
   try
@@ -2015,7 +2029,24 @@ begin
     try
       aSourceElement.ReportRequiredMasters(lMasters, aAsNew);
       for var lFile in lMasters do
+      begin
+        // add masters of masters
+        // only for games that need it
+        if wbEnforceAllMasters then
+        begin
+          var lFileMasters := lFile.AllMasters;
+          for j := low(lFileMasters) to High(lFileMasters) do
+            lRequiredMasters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+        end;
+
         lRequiredMasters.AddObject(lFile.FileName, Pointer(lFile));
+      end;
+
+      for i := 0 to Pred(aTargetFile.MasterCount[True]) do
+        if lRequiredMasters.Find(aTargetFile.Masters[i, True].FileName, j) then
+          lRequiredMasters.Delete(j);
+      if lRequiredMasters.Find(aTargetFile.FileName, j) then
+        lRequiredMasters.Delete(j);
     finally
       lMasters.Free;
     end;
@@ -2041,7 +2072,7 @@ begin
       lRequiredMasters.CustomSort(CompareLoadOrder);
 
       if Result then
-        aTargetFile.AddMasters(lRequiredMasters);
+        aTargetFile.AddMastersIfMissing(lRequiredMasters);
     end else
       Result := True;
   finally
@@ -8333,7 +8364,7 @@ begin
         else
           s := 'Add '+sl.Count.ToString+' new masters to ' + _File.Name;
         PerformLongAction(s, '', procedure begin
-          _File.AddMasters(sl);
+          _File.AddMastersIfMissing(sl);
         end);
       end;
     finally
