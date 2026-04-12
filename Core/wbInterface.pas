@@ -388,7 +388,7 @@ var
   wbMOProfile                        : string;
   wbMOHookFile                       : string;
 
-  wbStarfieldIsABugInfestedHellhole  : Boolean    = True;
+  wbStarfieldIsABugInfestedHellhole  : Boolean    = False;
   wbRedPill                          : Boolean    = False;
   wbAlwaysLoadGameMaster             : Boolean    = True;
 
@@ -1033,7 +1033,8 @@ type
     Light  : SmallInt;
     Medium : Byte;
 
-    class function Create(aMasters : TwbFiles): TwbSlotCounts; static;
+    class operator Initialize(out aDest: TwbSlotCounts);
+    class function Create(const aMasters : TwbFiles): TwbSlotCounts; static;
     function Total: SmallInt; inline;
   end;
 
@@ -23199,11 +23200,13 @@ end;
 
 { TwbSlotCounts }
 
-class function TwbSlotCounts.Create(aMasters : TwbFiles): TwbSlotCounts;
+class operator TwbSlotCounts.Initialize(out aDest: TwbSlotCounts);
 begin
-  Result.Full := 0;
-  Result.Medium := 0;
-  Result.Light := 0;
+  FillChar(aDest, SizeOf(aDest), 0);
+end;
+
+class function TwbSlotCounts.Create(const aMasters : TwbFiles): TwbSlotCounts;
+begin
   if wbComplexFileFileID then
   begin
     // need to build counts per type

@@ -8336,6 +8336,8 @@ begin
               Result := a._File.LoadOrder < _File.LoadOrder;
               if Result then
                 Result := sl.IndexOf(a._File.FileName) < 0;
+              if Result then
+                Result := not (wbIsStarfield and SameText(ExtractFileExt(a._File.FileName), '.esp'));
             end;
           end);
         if Length(AllModules) < 1 then
