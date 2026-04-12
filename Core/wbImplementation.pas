@@ -253,7 +253,7 @@ type
     procedure SetInternalModified(aValue: Boolean);
     function GetCountedRecordCount: Cardinal;
     procedure PrepareSave;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
     procedure FindUsedMasters(aMasters: PwbUsedMasters);
     procedure InvalidateStorage;
     function Reached: Boolean;
@@ -316,7 +316,7 @@ type
     function IwbElementInternal._Release = InternalRelease;
     function GetCountedRecordCount: Cardinal; virtual;
     procedure PrepareSave; virtual;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; virtual;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; virtual;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); virtual;
     procedure InvalidateStorage; virtual;
     procedure InvalidateParentStorage; virtual;
@@ -560,7 +560,7 @@ type
     function IwbContainerElementRef._Release = ElementRelease;
     function GetCountedRecordCount: Cardinal; override;
     procedure PrepareSave; override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
 
     procedure ResetMemoryOrder(aFrom: Integer = 0; aTo: Integer = High(Integer)); virtual;
@@ -790,7 +790,7 @@ type
     function FindInjectedID(const aFormID: TwbFormID; var Index: Integer): Boolean;
     function GetMasterRecordByFormID(aFormID: TwbFormID; aAllowInjected, aNewMasters: Boolean): IwbMainRecord;
 
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
 
     function GetAddList: TDynStrings; override;
     function Add(const aName: string; aSilent: Boolean): IwbElement; override;
@@ -1249,7 +1249,7 @@ type
     function CanElementReset: Boolean; override;
     procedure Remove; override;
     procedure PrepareSave; override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
     function GetReferenceFile: IwbFile; override;
     procedure ReportRequiredMasters(aMasters: TwbFilesSet; aAsNew: Boolean; Recursive: Boolean = True; Initial: Boolean = false); override;
@@ -1554,7 +1554,7 @@ type
     procedure SetNativeValue(const aValue: Variant); override;
     procedure BuildRef; override;
     function CompareExchangeFormID(aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean; override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
     procedure MergeStorageInternal(var aBasePtr: Pointer; aEndPtr: Pointer); override;
     procedure InformStorage(var aBasePtr: Pointer; aEndPtr: Pointer); override;
@@ -1746,7 +1746,7 @@ type
     function GetResolvedValueDef: IwbValueDef; override;
 
     function GetElementType: TwbElementType; override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
 
     {---IwbUnion---}
@@ -1771,7 +1771,7 @@ type
   protected
     function GetValue: string; override;
     function CompareExchangeFormID(aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean; override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
     function AddIfMissingInternal(const aElement: IwbElement; aAsNew, aDeepCopy : Boolean; const aPrefixRemove, aSuffixRemove, aPrefix, aSuffix: string; aAllowOverwrite: Boolean): IwbElement; override;
 
@@ -1953,7 +1953,7 @@ type
 
     procedure PrepareSave; override;
     procedure WriteToStreamInternal(aStream: TStream; aResetModified: TwbResetModified); override;
-    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean; override;
+    function MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aMasters: PwbUsedMasters); override;
 
     function AddIfMissingInternal(const aElement: IwbElement; aAsNew, aDeepCopy : Boolean; const aPrefixRemove, aSuffixRemove, aPrefix, aSuffix: string; aAllowOverwrite: Boolean): IwbElement; override;
@@ -2543,7 +2543,7 @@ begin
 
         // add masters of masters
         // only for games that need it
-        if wbComplexFileFileID or wbEnforceAllMasters then
+        if wbEnforceAllMasters then
         begin
           var lFileMasters := lFile.AllMasters;
           for j := low(lFileMasters) to High(lFileMasters) do
@@ -2694,7 +2694,18 @@ begin;
 
     if wbGameMode >= gmTES4 then
       if Length(flOldMasters) <> Length(flMasters) then begin
-        MastersUpdated([], [], Length(flOldMasters), Length(flMasters));
+        var lOldCount, lNewCount : TwbSlotCounts;
+        if wbComplexFileFileID then
+        begin
+          lOldCount := TwbSlotCounts.Create(flOldMasters);
+          lNewCount := TwbSlotCounts.Create(flMasters);
+        end
+        else begin
+          lOldCount.Full := Length(flOldMasters);
+          lNewCount.Full := Length(flMasters);
+        end;
+
+        MastersUpdated([], [], lOldCount, lNewCount);
         SortRecords;
       end;
 
@@ -3230,7 +3241,20 @@ begin
         end;
 
         if wbGameMode >= gmTES4 then
-          MastersUpdated(Old, New, k, j);
+        begin
+          var lOldCount, lNewCount : TwbSlotCounts;
+          if wbComplexFileFileID then
+          begin
+            lOldCount := TwbSlotCounts.Create(flOldMasters);
+            lNewCount := TwbSlotCounts.Create(flMasters);
+          end
+          else begin
+            lOldCount.Full := Length(flOldMasters);
+            lNewCount.Full := Length(flMasters);
+          end;
+
+          MastersUpdated(Old, New, lOldCount, lNewCount);
+        end;
         SortRecords;
       end;
       flProgress(Format('Removed %d unused masters.', [lRemovedCount]));
@@ -5134,7 +5158,7 @@ begin
   (Header as IwbElementInternal).SetModified(True);
 end;
 
-function TwbFile.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbFile.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   i: Integer;
 begin
@@ -6469,7 +6493,20 @@ begin
           end else
             Assert(False);
           if wbGameMode >= gmTES4 then
-            MastersUpdated(Old, New, Length(flOldMasters), Length(flMasters));
+          begin
+            var lOldCount, lNewCount : TwbSlotCounts;
+            if wbComplexFileFileID then
+            begin
+              lOldCount := TwbSlotCounts.Create(flOldMasters);
+              lNewCount := TwbSlotCounts.Create(flMasters);
+            end
+            else begin
+              lOldCount.Full := Length(flOldMasters);
+              lNewCount.Full := Length(flMasters);
+            end;
+
+            MastersUpdated(Old, New, lOldCount, lNewCount);
+          end;
           SetModified(True);
         end;
       finally
@@ -7957,7 +7994,7 @@ begin
   end;
 end;
 
-function TwbContainer.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbContainer.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   i       : Integer;
   SelfRef : IwbContainerElementRef;
@@ -13079,7 +13116,7 @@ begin
 end;
 
 
-function TwbMainRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbMainRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   KAR: IwbKeepAliveRoot;
 
@@ -16221,7 +16258,7 @@ begin
   Result := srsIsFlags in srStates;
 end;
 
-function TwbSubRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbSubRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   SelfRef     : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
@@ -18072,7 +18109,7 @@ begin
   end;
 end;
 
-function TwbGroupRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbGroupRecord.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   SelfPtr     : IwbContainerElementRef;
   OldFormID   : TwbFormID;
@@ -20050,7 +20087,7 @@ begin
   end;
 end;
 
-function TwbElement.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbElement.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 begin
   Result := False;
   Assert( Length(aOld) = Length(aNew) );
@@ -22814,7 +22851,7 @@ begin
   UnionDoInit(vbValueDef, Self, BasePtr, dcDataEndPtr, unResolvedDef);
 end;
 
-function TwbUnion.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbUnion.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   SelfRef     : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
@@ -23067,7 +23104,7 @@ begin
   Result := vIsFlags;
 end;
 
-function TwbValue.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: SmallInt): Boolean;
+function TwbValue.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   SelfRef    : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;

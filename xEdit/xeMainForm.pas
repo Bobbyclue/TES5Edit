@@ -1951,7 +1951,7 @@ begin
 
     // add masters of masters
     // only for games that need it
-    if wbComplexFileFileID or wbEnforceAllMasters then
+    if wbEnforceAllMasters then
       for i := 0 to Pred(aMasters.Count) do
       begin
         var lFile := Files.Find(aMasters[i]);
@@ -2032,7 +2032,7 @@ begin
       begin
         // add masters of masters
         // only for games that need it
-        if wbComplexFileFileID or wbEnforceAllMasters then
+        if wbEnforceAllMasters then
         begin
           var lFileMasters := lFile.AllMasters;
           for j := low(lFileMasters) to High(lFileMasters) do
