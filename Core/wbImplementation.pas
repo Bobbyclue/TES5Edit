@@ -2683,6 +2683,8 @@ begin;
       for i := 0 to Pred(aMasters.Count) do begin
         s := Trim(aMasters[i]);
         t := ExtractFileExt(s);
+        if SameText(t, '.esp') and wbIsStarfield then
+          raise Exception.CreateFmt('[AddMasters] You cannot add a .esp to a master in %s.', [wbGameName]);
         if SameText(t, '.esm') or SameText(t, '.esp') or (wbIsLightSupported and SameText(t, '.esl')) then
           lMasters.Add(s);
       end;
@@ -2694,16 +2696,8 @@ begin;
 
     if wbGameMode >= gmTES4 then
       if Length(flOldMasters) <> Length(flMasters) then begin
-        var lOldCount, lNewCount : TwbSlotCounts;
-        if wbComplexFileFileID then
-        begin
-          lOldCount := TwbSlotCounts.Create(flOldMasters);
-          lNewCount := TwbSlotCounts.Create(flMasters);
-        end
-        else begin
-          lOldCount.Full := Length(flOldMasters);
-          lNewCount.Full := Length(flMasters);
-        end;
+        var lOldCount := TwbSlotCounts.Create(flOldMasters);
+        var lNewCount := TwbSlotCounts.Create(flMasters);
 
         MastersUpdated([], [], lOldCount, lNewCount);
         SortRecords;
@@ -3125,16 +3119,17 @@ begin
       KeepMasters.Sorted := True;
       KeepMasters.Duplicates := dupIgnore;
       try
-        for i := Low(flMasters) to High(flMasters) do
-        begin
-          if not UsedMasters[i] then
-            continue;
+        if wbEnforceAllMasters then
+          for i := Low(flMasters) to High(flMasters) do
+          begin
+            if not UsedMasters[i] then
+              continue;
 
-          var lFile := flMasters[i];
-          var lFileMasters := lFile.AllMasters;
-          for j := low(lFileMasters) to High(lFileMasters) do
-            KeepMasters.Add(lFileMasters[j].FileName);
-        end;
+            var lFile := flMasters[i];
+            var lFileMasters := lFile.AllMasters;
+            for j := low(lFileMasters) to High(lFileMasters) do
+              KeepMasters.Add(lFileMasters[j].FileName);
+          end;
 
         Old := nil;
         New := nil;
@@ -3242,16 +3237,8 @@ begin
 
         if wbGameMode >= gmTES4 then
         begin
-          var lOldCount, lNewCount : TwbSlotCounts;
-          if wbComplexFileFileID then
-          begin
-            lOldCount := TwbSlotCounts.Create(flOldMasters);
-            lNewCount := TwbSlotCounts.Create(flMasters);
-          end
-          else begin
-            lOldCount.Full := Length(flOldMasters);
-            lNewCount.Full := Length(flMasters);
-          end;
+          var lOldCount := TwbSlotCounts.Create(flOldMasters);
+          var lNewCount := TwbSlotCounts.Create(flMasters);
 
           MastersUpdated(Old, New, lOldCount, lNewCount);
         end;
@@ -5330,8 +5317,6 @@ begin
         else begin
           if GetIsLight or GetIsMedium then
             raise Exception.Create('".esp" modules must not be small or medium.');
-          if GetIsBlueprint then
-
         end;
       end;
 
@@ -6494,16 +6479,8 @@ begin
             Assert(False);
           if wbGameMode >= gmTES4 then
           begin
-            var lOldCount, lNewCount : TwbSlotCounts;
-            if wbComplexFileFileID then
-            begin
-              lOldCount := TwbSlotCounts.Create(flOldMasters);
-              lNewCount := TwbSlotCounts.Create(flMasters);
-            end
-            else begin
-              lOldCount.Full := Length(flOldMasters);
-              lNewCount.Full := Length(flMasters);
-            end;
+            var lOldCount := TwbSlotCounts.Create(flOldMasters);
+            var lNewCount := TwbSlotCounts.Create(flMasters);
 
             MastersUpdated(Old, New, lOldCount, lNewCount);
           end;
