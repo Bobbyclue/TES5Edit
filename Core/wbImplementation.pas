@@ -2612,24 +2612,22 @@ var
 
     var MaxMasterCount := Succ(TwbFileID.MaxFullSlot);
     var MaxLightMasterCount := Succ(TwbFileID.MaxLightSlot);
-    var MaxMediumMasterCount := Succ(TwbFileID.MaxLightSlot);
+    var MaxMediumMasterCount := Succ(TwbFileID.MaxMediumSlot);
 
     if wbBeginInternalEdit(True) then try
       for i := 0 to Pred(lMasters.Count) do begin
-        var lFile: IwbFile;
-        for var _file in Files do
-          if SameText(_file.FileName, lMasters[i]) then
-            lFile := _file;
-        if not Assigned(lFile) then // file is not loaded
-          continue;
+        var lFile := GetLoadedFileByName(lMasters[i]);
+        if not Assigned(lFile) then
+          raise Exception.CreateFmt('[AddMasters] Requested file to add is not loaded: "%s"', [lMasters[i]]);
+
         var lIsLightFile := lFile.IsLight;
         var lIsMediumFile := lFile.IsMedium;
         var lIsFullFile := lFile.GetIsFull;
 
-        if (((not wbIsStarfield) and (GetMasterCount(True) >= MaxMasterCount)) or
-            (wbIsStarfield and (
-              (lIsLightFile and (GetLightMasterCount(True) >= MaxLightMasterCount)) or
-              (lIsMediumFile and (GetMediumMasterCount(True) >= MaxMediumMasterCount)) or
+        if (((not wbComplexFileFileID) and (GetMasterCount(True) >= MaxMasterCount)) or
+            (wbComplexFileFileID and (
+              (lIsLightFile and (GetLightMasterCount(True) >= MaxLightMasterCount - 1)) or // -1 for safety in case module is converted later
+              (lIsMediumFile and (GetMediumMasterCount(True) >= MaxMediumMasterCount - 1)) or
               (lIsFullFile and (GetFullMasterCount(True) >= MaxMasterCount))
             ))) then begin
           NotAllAdded := True;
