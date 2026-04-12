@@ -950,8 +950,7 @@ begin
     ToolSources        := [tsPlugins];
     wbLightName        := 'Small';
 
-    if    wbStarfieldIsABugInfestedHellhole
-      and FindCmdLineSwitch('ItJustWorksTM')
+    if    FindCmdLineSwitch('ItJustWorksTM')
       and FindCmdLineSwitch('ThisIsFine')
       and FindCmdLineSwitch('GiveMeTheRedPill')
     then begin
@@ -1379,9 +1378,8 @@ begin
   if FindCmdLineSwitch('MoreInfoForIndex') then
     wbMoreInfoForIndex := true;
 
-  if not (wbIsStarfield and wbStarfieldIsABugInfestedHellhole) then
-    if wbIKnowWhatImDoing and FindCmdLineSwitch('IKnowIllBreakMyGameWithThis') then
-      wbAllowEditGameMaster := True;
+  if wbIKnowWhatImDoing and FindCmdLineSwitch('IKnowIllBreakMyGameWithThis') then
+    wbAllowEditGameMaster := True;
 
   if FindCmdLineSwitch('TrackAllEditorID') then
     wbTrackAllEditorID := True;

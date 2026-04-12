@@ -2494,17 +2494,6 @@ end;
 
 procedure TwbFile.AddMaster(const aFile: IwbFile);
 begin
-  if not (fsScanning in flStates) then
-    if wbStarfieldIsABugInfestedHellhole and wbComplexFileFileID then begin
-      if GetModuleType <> mtFull then
-        raise Exception.Create('Only full modules can add masters in ' + wbAppName + wbToolName);
-      if aFile.ModuleType <> mtFull then
-        raise Exception.Create('Only Full modules can be added as masters of other modules in ' + wbAppName + wbToolName);
-      for var lMaster in flMasters do
-        if lMaster.ModuleType <> mtFull then
-          raise Exception.Create('Only modules where all existing masters are Full modules can add masters in ' + wbAppName + wbToolName);
-    end;
-
   SetLength(flMasters, Succ(Length(flMasters)));
   flMasters[High(flMasters)] := aFile;
   UpdateModuleMasters;
@@ -3448,7 +3437,7 @@ begin
     end;
   end;
 
-  if wbStarfieldIsABugInfestedHellhole and wbIsStarfield then
+  if wbIsStarfield then
     AddMasters(['Starfield.esm'{, 'BlueprintShips-Starfield.esm'}]);
 
   BuildOrLoadRef(False);
@@ -3554,7 +3543,7 @@ begin
           if Assigned(miFile) then
             AddMaster(_File);
 
-  if wbStarfieldIsABugInfestedHellhole and wbIsStarfield then
+  if wbIsStarfield then
     AddMasters(['Starfield.esm'{, 'BlueprintShips-Starfield.esm'}]);
 
   BuildOrLoadRef(False);
@@ -4374,10 +4363,6 @@ end;
 
 function TwbFile.GetIsEditable: Boolean;
 begin
-  if wbIsStarfield and Assigned(flModule) then
-   if (flModule.miExtension = meESP) and not wbRedPill then
-     Exit(False);
-
   Result :=
     wbIsInternalEdit or
     (
@@ -4387,7 +4372,7 @@ begin
       ((not (fsIsCompareLoad in flStates)) or (fsIsDeltaPatch in flStates))
     );
 
-  if wbIsStarfield and wbStarfieldIsABugInfestedHellhole then
+  if wbIsStarfield and not wbRedPill then
     if [fsIsGameMaster, fsIsHardcoded, fsIsOfficial] * flStates <> [] then
       Exit(False);
 end;
@@ -5311,14 +5296,9 @@ begin
       if GetIsUpdateDirect and (GetIsLightDirect or GetIsMediumDirect) then
           SetIsUpdate(False);
 
-      if flModule.miExtension = meESP then begin
-        if not wbRedPill then
-          raise Exception.Create('".esp" modules can not be saved in ' + wbAppName + wbToolName)
-        else begin
-          if GetIsLight or GetIsMedium then
-            raise Exception.Create('".esp" modules must not be small or medium.');
-        end;
-      end;
+      if flModule.miExtension = meESP then
+        if GetIsLight or GetIsMedium then
+          raise Exception.Create('".esp" modules must not be small or medium.');
 
       if GetIsLight and GetIsMedium then
         raise Exception.Create('Small or medium flags are mutually exclusive. Modules cannot be both.');
@@ -5490,12 +5470,12 @@ begin
 
     if wbComplexFileFileID then begin
 
-      if wbStarfieldIsABugInfestedHellhole then begin
+      if not wbRedPill then begin
 
         for var lMasterIdx := 0 to Pred(GetMasterCount(True)) do begin
           var lMaster := GetMaster(lMasterIdx, True);
-          if lMaster.GetIsLightDirect or lMaster.GetIsMediumDirect or lMaster.GetIsUpdateDirect or (PwbModuleInfo(lMaster.ModuleInfo).miFlags * [mfHasLightFlag, mfHasMediumFlag, mfHasUpdateFlag] <> []) then
-            raise Exception.Create('Modules with Small, Medium, or Update flagged modules as masters can''t be saved in ' + wbAppName + wbToolName);
+          if lMaster.GetIsUpdateDirect or (PwbModuleInfo(lMaster.ModuleInfo).miFlags * [mfHasUpdateFlag] <> []) then
+            raise Exception.Create('Modules with Update flagged modules as masters can''t be saved in ' + wbAppName + wbToolName);
         end;
 
         if FileHeader.IsLight <> (mfHasLightFlag in flModule.miFlags) then
@@ -5507,10 +5487,6 @@ begin
         if FileHeader.IsUpdate <> (mfHasUpdateFlag in flModule.miFlags) then
           raise Exception.Create('Update flag can''t be added or removed from existing files in ' + wbAppName + wbToolName);
 
-        if FileHeader.IsLight then
-          raise Exception.Create('Small flagged files can''t be saved in ' + wbAppName + wbToolName);
-        if FileHeader.IsMedium then
-          raise Exception.Create('Medium flagged files can''t be saved in ' + wbAppName + wbToolName);
         if FileHeader.IsUpdate then
           raise Exception.Create('Update flagged files can''t be saved in ' + wbAppName + wbToolName);
 
@@ -9293,16 +9269,6 @@ var
 begin
   Result := nil;
 
-  if wbIsStarfield and wbStarfieldIsABugInfestedHellhole then
-    if (aIndex = wbAssignThis) and (GetSignature = 'PKIN') then begin
-      var lMainRecord: IwbMainRecord;
-      if Supports(aElement, IwbMainRecord, lMainRecord) then begin
-        if lMainRecord.LoadOrderFormID = GetLoadOrderFormID then
-          Exit;
-      end else
-        Exit;
-    end;
-
   if not wbIsInternalEdit then
     if not wbEditAllowed then
       raise Exception.Create(GetName + ' can not be assigned.');
@@ -9887,16 +9853,6 @@ end;
 
 function TwbMainRecord.CanAssignInternal(aIndex: Integer; const aElement: IwbElement; aCheckDontShow: Boolean): Boolean;
 begin
-  if wbIsStarfield and wbStarfieldIsABugInfestedHellhole then
-    if (aIndex = wbAssignThis) and (GetSignature = 'PKIN') then begin
-      var lMainRecord: IwbMainRecord;
-      if Supports(aElement, IwbMainRecord, lMainRecord) then begin
-        if lMainRecord.LoadOrderFormID = GetLoadOrderFormID then
-          Exit(False);
-      end else
-        Exit(False);
-    end;
-
   Result := False;
 
   if not wbIsInternalEdit then begin

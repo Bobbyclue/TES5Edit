@@ -388,7 +388,7 @@ var
   wbMOProfile                        : string;
   wbMOHookFile                       : string;
 
-  wbStarfieldIsABugInfestedHellhole  : Boolean    = True;
+  wbStarfieldIsABugInfestedHellhole  : Boolean    = False;
   wbRedPill                          : Boolean    = False;
   wbAlwaysLoadGameMaster             : Boolean    = True;
 

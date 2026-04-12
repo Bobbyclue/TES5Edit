@@ -559,68 +559,62 @@ begin
   for i := Low(_ModulesLoadOrder) to High(_ModulesLoadOrder) do
     _ModulesLoadOrder[i].miCombinedIndex := i;
 
-  if (not wbIsStarfield)
-    or wbRedPill
-  then begin
-    TwbModuleInfo.AddNewModule('<new file>.esp', True);
-    if not wbIsStarfield  then
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
-        Include(miFlags, mfHasESMFlag);
-        Include(miFlags, mfIsESM);
-      end;
-    if wbIsLightSupported and not wbIsStarfield then begin
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
-        Include(miFlags, mfHasLightFlag);
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
-        Include(miFlags, mfHasESMFlag);
-        Include(miFlags, mfHasLightFlag);
-        Include(miFlags, mfIsESM);
-      end;
+  TwbModuleInfo.AddNewModule('<new file>.esp', True);
+  if not wbIsStarfield  then
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
+      Include(miFlags, mfHasESMFlag);
+      Include(miFlags, mfIsESM);
     end;
-    if wbIsMediumSupported and not wbIsStarfield then begin
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
-        Include(miFlags, mfHasMediumFlag);
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
-        Include(miFlags, mfHasESMFlag);
-        Include(miFlags, mfHasMediumFlag);
-        Include(miFlags, mfIsESM);
-      end;
+  if wbIsLightSupported and not wbIsStarfield then begin
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
+      Include(miFlags, mfHasLightFlag);
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
+      Include(miFlags, mfHasESMFlag);
+      Include(miFlags, mfHasLightFlag);
+      Include(miFlags, mfIsESM);
     end;
-    if wbIsUpdateSupported and not wbIsStarfield then begin
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
-        Include(miFlags, mfHasUpdateFlag);
-      with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
-        Include(miFlags, mfHasESMFlag);
-        Include(miFlags, mfHasUpdateFlag);
-        Include(miFlags, mfIsESM);
-      end;
+  end;
+  if wbIsMediumSupported and not wbIsStarfield then begin
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
+      Include(miFlags, mfHasMediumFlag);
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
+      Include(miFlags, mfHasESMFlag);
+      Include(miFlags, mfHasMediumFlag);
+      Include(miFlags, mfIsESM);
+    end;
+  end;
+  if wbIsUpdateSupported and not wbIsStarfield then begin
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do
+      Include(miFlags, mfHasUpdateFlag);
+    with TwbModuleInfo.AddNewModule('<new file>.esp', True)^ do begin
+      Include(miFlags, mfHasESMFlag);
+      Include(miFlags, mfHasUpdateFlag);
+      Include(miFlags, mfIsESM);
     end;
   end;
 
   with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
     Include(miFlags, mfHasESMFlag);
     Include(miFlags, mfIsESM);
-    if not (wbStarfieldIsABugInfestedHellhole and wbIsStarfield) then begin
-      if wbIsLightSupported then begin
-        with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
-          Include(miFlags, mfHasLightFlag);
-          Include(miFlags, mfHasESMFlag);
-          Include(miFlags, mfIsESM);
-        end;
+    if wbIsLightSupported then begin
+      with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
+        Include(miFlags, mfHasLightFlag);
+        Include(miFlags, mfHasESMFlag);
+        Include(miFlags, mfIsESM);
       end;
-      if wbIsMediumSupported then begin
-        with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
-          Include(miFlags, mfHasMediumFlag);
-          Include(miFlags, mfHasESMFlag);
-          Include(miFlags, mfIsESM);
-        end;
+    end;
+    if wbIsMediumSupported then begin
+      with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
+        Include(miFlags, mfHasMediumFlag);
+        Include(miFlags, mfHasESMFlag);
+        Include(miFlags, mfIsESM);
       end;
-      if wbIsUpdateSupported and not wbIsStarfield then begin
-        with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
-          Include(miFlags, mfHasUpdateFlag);
-          Include(miFlags, mfHasESMFlag);
-          Include(miFlags, mfIsESM);
-        end;
+    end;
+    if wbIsUpdateSupported and not wbIsStarfield then begin
+      with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
+        Include(miFlags, mfHasUpdateFlag);
+        Include(miFlags, mfHasESMFlag);
+        Include(miFlags, mfIsESM);
       end;
     end;
   end;
