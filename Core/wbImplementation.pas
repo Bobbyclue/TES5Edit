@@ -2263,6 +2263,12 @@ begin
     IwbFile(Pointer(List.Objects[Index2])).LoadOrder);
 end;
 
+function GetLoadedFileByName(const aName: string): IwbFile;
+begin
+  for var lFile in Files do
+    if SameText(lFile.FileName, aName) then
+      Exit(lFile);
+end;
 
 { TwbFile }
 
@@ -2531,17 +2537,18 @@ begin
     for i := 0  to Pred(aMasters.Count) do
       if not HasMaster(aMasters[i]) then
       begin
-        // add masters of masters
-        var lFile : IwbFile;
-        for var _file in Files do
-        if SameText(_file.FileName, aMasters[i]) then
-          lFile := _file;
+        var lFile := GetLoadedFileByName(aMasters[i]);
         if not Assigned(lFile) then
-          continue;
+          raise Exception.CreateFmt('[AddMAddMastersIfMissingasters] Requested file to add is not loaded: "%s"', [aMasters[i]]);
 
-        var lFileMasters := lFile.AllMasters;
-        for j := low(lFileMasters) to High(lFileMasters) do
-          Masters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+        // add masters of masters
+        // only for games that need it
+        if wbComplexFileFileID or wbEnforceAllMasters then
+        begin
+          var lFileMasters := lFile.AllMasters;
+          for j := low(lFileMasters) to High(lFileMasters) do
+            Masters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+        end;
 
         Masters.AddObject(lFile.FileName, Pointer(lFile));
       end;

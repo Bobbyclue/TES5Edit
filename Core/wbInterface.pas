@@ -284,6 +284,7 @@ var
   wbCompareRawData                   : Boolean    = False;
   wbDisableFormIDCheck               : Boolean    = False;
   wbComplexFileFileID                : Boolean    = False;
+  wbEnforceAllMasters                : Boolean    = False;  // adds all masters of masters when adding a master and prevents cleaning them
 
   wbCS                               : Boolean    = False;
   wbOBME                             : Boolean    = False;

@@ -1948,15 +1948,18 @@ begin
   sl.Duplicates := dupIgnore;
   try
     sl.AddStrings(aMasters);
+
     // add masters of masters
-    for i := 0 to Pred(aMasters.Count) do
-    begin
-      var lFile := Files.Find(aMasters[i]);
-      var lFileMasters := lFile.AllMasters;
-      lFileMasters.SortByReverseLoadOrder;
-      for j := low(lFileMasters) to High(lFileMasters) do
-        sl.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
-    end;
+    // only for games that need it
+    if wbComplexFileFileID or wbEnforceAllMasters then
+      for i := 0 to Pred(aMasters.Count) do
+      begin
+        var lFile := Files.Find(aMasters[i]);
+        var lFileMasters := lFile.AllMasters;
+        lFileMasters.SortByReverseLoadOrder;
+        for j := low(lFileMasters) to High(lFileMasters) do
+          sl.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+      end;
 
     for i := 0 to Pred(aTargetFile.MasterCount[True]) do
       if sl.Find(aTargetFile.Masters[i, True].FileName, j) then
@@ -2028,9 +2031,13 @@ begin
       for var lFile in lMasters do
       begin
         // add masters of masters
-        var lFileMasters := lFile.AllMasters;
-        for j := low(lFileMasters) to High(lFileMasters) do
-          lRequiredMasters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+        // only for games that need it
+        if wbComplexFileFileID or wbEnforceAllMasters then
+        begin
+          var lFileMasters := lFile.AllMasters;
+          for j := low(lFileMasters) to High(lFileMasters) do
+            lRequiredMasters.AddObject(lFileMasters[j].FileName, Pointer(lFileMasters[j]));
+        end;
 
         lRequiredMasters.AddObject(lFile.FileName, Pointer(lFile));
       end;
