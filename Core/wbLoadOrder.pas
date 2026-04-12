@@ -615,7 +615,7 @@ begin
           Include(miFlags, mfIsESM);
         end;
       end;
-      if wbIsUpdateSupported then begin
+      if wbIsUpdateSupported and not wbIsStarfield then begin
         with TwbModuleInfo.AddNewModule('<new file>.esm', True)^ do begin
           Include(miFlags, mfHasUpdateFlag);
           Include(miFlags, mfHasESMFlag);

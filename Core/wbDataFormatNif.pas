@@ -2372,6 +2372,9 @@ var
   Entries: TdfElement;
 begin
   Block := Blocks[Index];
+  if Block.BlockType = aBlockType then
+    Exit;
+
   NewBlock := TwbNifBlock(wbNiObjectDef(aBlockType).CreateElement(Self));
   NewBlock.SetToDefault;
 
@@ -2381,6 +2384,21 @@ begin
 
   try
     NewBlock.Assign(Block);
+
+    if NewBlock.BlockType = 'bhkMalleableConstraint' then begin
+      var tname := '';
+      if Block.BlockType = 'bhkBallAndSocketConstraint' then tname := 'Ball and Socket' else
+      if Block.BlockType = 'bhkHingeConstraint'         then tname := 'Hinge' else
+      if Block.BlockType = 'bhkLimitedHingeConstraint'  then tname := 'Limited Hinge' else
+      if Block.BlockType = 'bhkPrismaticConstraint'     then tname := 'Prismatic' else
+      if Block.BlockType = 'bhkRagdollConstraint'       then tname := 'Ragdoll' else
+      if Block.BlockType = 'bhkStiffSpringConstraint'   then tname := 'Stiff Spring';
+      if tname <> '' then begin
+        NewBlock.EditValues['Hinge\Type'] := tname;
+        NewBlock.Elements['Hinge'].Assign(Block); // copy of Entities and Priority
+        NewBlock.Elements['Hinge\' + tname].Assign(Block.Elements[tname]);
+      end;
+    end;
   except
     NewBlock.Free;
     DoException('Incompatible block type: ' + aBlockType);
@@ -4198,7 +4216,7 @@ begin
     wbStiffSpringDescriptor('Stiff Spring', [DF_OnGetEnabled, @wbMalleableDescriptor_EnType8]),
     dfFloat('Tau', [DF_OnGetEnabled, @EnBefore20005]),
     dfFloat('Damping', [DF_OnGetEnabled, @EnBefore20005]),
-    dfFloat('Strength', [DF_OnGetEnabled, @EnSince20207])
+    dfFloat('Strength', '1.0', [DF_OnGetEnabled, @EnSince20207])
   ], aEvents);
 end;
 
@@ -6184,7 +6202,7 @@ function NiSkinPartition_EnVertexData(const e: TdfElement): Boolean;
 begin
   Result := enSSE(e) and (e.NativeValues['..\Data Size'] > 0);
   if Result then e.UserData := e.NativeValues['..\VertexDesc\VF']; // cache VF
- end;
+end;
 
 procedure NiSkinPartition_GetCountVertexData(const e: TdfElement; var aCount: Integer);
 begin

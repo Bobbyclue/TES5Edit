@@ -2556,7 +2556,6 @@ var
     IsNew          : Boolean;
     rec            : IwbRecord;
     i, j           : Integer;
-    MaxMasterCount : Integer;
   begin
     if not IsElementEditable(nil) then
       raise Exception.Create('File "' + GetFileName + '" is not editable');
@@ -2575,11 +2574,23 @@ var
       IsNew := True;
     end;
 
-    MaxMasterCount := Succ(TwbFileID.MaxFullSlot);
+    var MaxMasterCount := Succ(TwbFileID.MaxFullSlot);
+    var MaxLightMasterCount := Succ(TwbFileID.MaxLightSlot);
+    var MaxMediumMasterCount := Succ(TwbFileID.MaxLightSlot);
 
     if wbBeginInternalEdit(True) then try
       for i := 0 to Pred(lMasters.Count) do begin
-        if GetMasterCount(True) >= MaxMasterCount then begin
+        var lFile := wbFile(lMasters[i]);
+        var lIsLightFile := lFile.IsLight;
+        var lIsMediumFile := lFile.IsMedium;
+        var lIsFullFile := lFile.GetIsFull;
+
+        if (((not wbIsStarfield) and (GetMasterCount(True) >= MaxMasterCount)) or
+            (wbIsStarfield and (
+              (lIsLightFile and (GetLightMasterCount(True) >= MaxLightMasterCount)) or
+              (lIsMediumFile and (GetMediumMasterCount(True) >= MaxMediumMasterCount)) or
+              (lIsFullFile and (GetFullMasterCount(True) >= MaxMasterCount))
+            ))) then begin
           NotAllAdded := True;
           Break;
         end;
@@ -3295,7 +3306,7 @@ begin
         if (wbIsUpdateSupported or wbPseudoUpdate) and Header.IsUpdate and not wbIgnoreUpdate then begin
           flLoadOrderFileID := TwbFileID.Invalid;
         end else begin
-          if _NextFullSlot >= TwbFileID.MaxFullSlot then
+          if _NextFullSlot > TwbFileID.MaxFullSlot then
             raise Exception.Create('Too many full modules');
           flLoadOrderFileID := TwbFileID.CreateFull(_NextFullSlot);
           Inc(_NextFullSlot);
@@ -9944,7 +9955,7 @@ var
 
     if wbGameMode >= gmFO3 then begin
       case wbGameMode of
-        gmSF1                        : BasePtr.mrsVersion^ := 581;
+        gmSF1                        : BasePtr.mrsVersion^ := 582;
         gmFO76                       : BasePtr.mrsVersion^ := 208;
         gmFO4, gmFO4VR               : BasePtr.mrsVersion^ := 131;
         gmSSE, gmTES5VR, gmEnderalSE : BasePtr.mrsVersion^ := 44;
@@ -10758,7 +10769,7 @@ begin
       Exclude(mrStates, mrsBaseRecordChecked);
 
   if not (mrsBaseRecordChecked in mrStates) then begin
-    if mrDef.ContainsKnownSubRecord[ksrBaseRecord] then begin
+    if Assigned(mrDef) and mrDef.ContainsKnownSubRecord[ksrBaseRecord] then begin
       SelfRef := Self as IwbContainerElementRef;
       if not ((mrsQuickInitDone in mrStates) or (csInitOnce in cntStates)) then begin
         Assert(not (csInit in cntStates));
