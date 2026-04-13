@@ -350,6 +350,10 @@ object frmMain: TfrmMain
               item
                 AutoSize = True
                 Caption = 'File'
+              end
+              item
+                Caption = 'FormID'
+                Width = 0
               end>
             GridLines = True
             MultiSelect = True
