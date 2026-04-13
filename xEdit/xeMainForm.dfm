@@ -127,6 +127,7 @@ object frmMain: TfrmMain
             OnDragDrop = vstViewDragDrop
             OnEditing = vstViewEditing
             OnExpanded = vstViewExpanded
+            OnExpanding = vstViewExpanding
             OnFocusChanged = vstViewFocusChanged
             OnFocusChanging = vstViewFocusChanging
             OnFreeNode = vstViewFreeNode

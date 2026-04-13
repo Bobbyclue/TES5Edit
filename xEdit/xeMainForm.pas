@@ -724,6 +724,8 @@ type
     procedure btnCancelClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure cbRegExFilterClick(Sender: TObject);
+    procedure vstViewExpanding(Sender: TBaseVirtualTree; Node: PVirtualNode;
+      var Allowed: Boolean);
   protected
     OverrideViewFocusedNode: PVirtualNode;
     function GetViewFocusedNode: PVirtualNode;
@@ -18522,6 +18524,12 @@ begin
         UpdateColumnWidths;
       end;
     end;
+end;
+
+procedure TfrmMain.vstViewExpanding(Sender: TBaseVirtualTree; Node: PVirtualNode; var Allowed: Boolean);
+begin
+   if (GetKeyState(VK_MENU) < 0) then
+    Sender.FullExpand(Node);
 end;
 
 procedure TfrmMain.vstViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
