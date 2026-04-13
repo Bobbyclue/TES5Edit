@@ -1063,6 +1063,7 @@ type
                          const aValidCRCs : TDynCardinalArray;
                            out aFileCRC   : Cardinal)
                                           : Boolean;
+    function GenerateSEQFileForFile(aFile: IwbFile): Boolean;
 
     procedure UpdateActions; override;
 
@@ -4210,6 +4211,63 @@ begin
   end;
 end;
 
+function TfrmMain.GenerateSEQFileForFile(aFile: IwbFile): Boolean;
+var
+  Group          : IwbGroupRecord;
+  QustFlags      : IwbElement;
+  FormIDs        : TwbFormIDs;
+  FileStream     : TBufferedFileStream;
+  MainRecord     : IwbMainRecord;
+  p, s           : string;
+  n, j           : Integer;
+begin
+      Result := False;
+
+      if aFile.LoadOrder = 0 then
+        Exit;
+
+      Group := aFile.GroupBySignature['QUST'];
+
+      if Assigned(Group) then begin
+        for n := 0 to Pred(Group.ElementCount) do
+          if Supports(Group.Elements[n], IwbMainRecord, MainRecord) then begin
+            QustFlags := MainRecord.ElementByPath['DNAM - General\Flags'];
+            // include SGE (start game enabled) quests which are new or set SGE flag on master quest
+            if Assigned(QustFlags) and (QustFlags.NativeValue and 1 > 0) then
+              if not Assigned(MainRecord.Master) or (MainRecord.Master.ElementNativeValues['DNAM\Flags'] and 1 = 0) then begin
+                SetLength(FormIDs, Succ(Length(FormIDs)));
+                FormIDs[High(FormIDs)] := MainRecord.FixedFormID;
+              end;
+          end;
+      end;
+
+      if Length(FormIDs) = 0 then
+        PostAddMessage('Skipped: ' + aFile.FileName + ' doesn''t need sequence file')
+      else try
+        try
+          p := wbDataPath + 'Seq\';
+          if not DirectoryExists(p) then
+            if not ForceDirectories(p) then
+              raise Exception.Create('Unable to create SEQ directory in game''s Data');
+          s := p + ChangeFileExt(aFile.FileName, '.seq');
+          FileStream := TBufferedFileStream.Create(s, fmCreate);
+          FileStream.WriteBuffer(FormIDs[0], Length(FormIDs)*SizeOf(Cardinal));
+          PostAddMessage('Created: ' + s);
+          Inc(j);
+        finally
+          if Assigned(FileStream) then
+            FreeAndNil(FileStream);
+        end;
+      except
+        on e: Exception do begin
+          PostAddMessage('Error: Can''t create ' + s + ', ' + E.Message);
+          Exit;
+        end;
+      end;
+
+      Result := True;
+end;
+
 procedure TfrmMain.mniNavCreateSEQFileClick(Sender: TObject);
 var
   SelectedNodes  : TNodeArray;
@@ -4242,44 +4300,8 @@ begin
       if _File.LoadOrder = 0 then
         Continue;
 
-      Group := _File.GroupBySignature['QUST'];
-
-      if Assigned(Group) then begin
-        for n := 0 to Pred(Group.ElementCount) do
-          if Supports(Group.Elements[n], IwbMainRecord, MainRecord) then begin
-            QustFlags := MainRecord.ElementByPath['DNAM - General\Flags'];
-            // include SGE (start game enabled) quests which are new or set SGE flag on master quest
-            if Assigned(QustFlags) and (QustFlags.NativeValue and 1 > 0) then
-              if not Assigned(MainRecord.Master) or (MainRecord.Master.ElementNativeValues['DNAM\Flags'] and 1 = 0) then begin
-                SetLength(FormIDs, Succ(Length(FormIDs)));
-                FormIDs[High(FormIDs)] := MainRecord.FixedFormID;
-              end;
-          end;
-      end;
-
-      if Length(FormIDs) = 0 then
-        PostAddMessage('Skipped: ' + _File.FileName + ' doesn''t need sequence file')
-      else try
-        try
-          p := wbDataPath + 'Seq\';
-          if not DirectoryExists(p) then
-            if not ForceDirectories(p) then
-              raise Exception.Create('Unable to create SEQ directory in game''s Data');
-          s := p + ChangeFileExt(_File.FileName, '.seq');
-          FileStream := TBufferedFileStream.Create(s, fmCreate);
-          FileStream.WriteBuffer(FormIDs[0], Length(FormIDs)*SizeOf(Cardinal));
-          PostAddMessage('Created: ' + s);
-          Inc(j);
-        finally
-          if Assigned(FileStream) then
-            FreeAndNil(FileStream);
-        end;
-      except
-        on e: Exception do begin
-          PostAddMessage('Error: Can''t create ' + s + ', ' + E.Message);
-          Exit;
-        end;
-      end;
+      if not GenerateSEQFileForFile(_File) then
+        Continue;
 
       Inc(Count);
     end;
@@ -5308,7 +5330,7 @@ begin
           end;
         end;
 
-        if ((wbToolMode in wbPluginModes) or xeQuickClean or xeQuickEdit) and not wbIsMorrowind then begin
+        if ((wbToolMode in wbPluginModes) or xeQuickClean or xeQuickEdit or xeQuickSEQ) and not wbIsMorrowind then begin
           Modules.DeactivateAll;
 
           if (xePluginToUse <> '') or not xeQuickClean then
@@ -5496,7 +5518,7 @@ begin
         AddMessage('The SHIFT key is pressed, skip building references for all plugins!');
       end;
 
-      if xeQuickClean or xeQuickShowConflicts then
+      if xeQuickClean or xeQuickShowConflicts or xeQuickSEQ then
         wbBuildRefs := False;
 
       CleanupRefCache;
@@ -20948,6 +20970,16 @@ begin
             wbProgress('Auto GameLink mode activated.');
           end else
             wbProgress('Auto GameLink mode could not be activated.');
+        end;
+
+        if xeQuickSEQ then begin
+          for i := High(Files) downto Low(Files) do
+            if SameText(Files[i].FileName, xePluginToUse) then begin
+              GenerateSEQFileForFile(Files[i]);
+              if xeAutoExit then
+                tmrShutdown.Enabled := True;
+              break;
+            end;
         end;
       finally
         Dec(wbShowStartTime);

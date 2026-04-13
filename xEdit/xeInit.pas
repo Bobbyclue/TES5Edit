@@ -33,6 +33,7 @@ var
   xeQuickClean             : Boolean;
   xeQuickEdit              : Boolean;
   xeQuickCleanAutoSave     : Boolean;
+  xeQuickSEQ               : Boolean;
   xeAutoLoad               : Boolean;
   xeAutoExit               : Boolean;
   xeAutoGameLink           : Boolean;
@@ -1420,6 +1421,11 @@ begin
       ShowMessage(wbToolName+' is incompatible with quickedit request!')
     else
       xeQuickEdit := True;
+  end;
+
+  if wbFindCmdLineParam('generateseq', xePluginToUse) then begin
+    xeAutoLoad := True;
+    xeQuickSEQ := True;
   end;
 
   if wbToolMode in wbPluginModes then // look for the file name
