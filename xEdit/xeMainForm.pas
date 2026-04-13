@@ -6721,7 +6721,7 @@ begin
       Exit;
     if not Assigned(vstNav) then
       Exit;
-    if pgMain.ActivePage <> tbsView then
+    if not ((pgMain.ActivePage = tbsView) or (pgMain.ActivePage = tbsReferencedBy)) then
       Exit;
     if Assigned(vstView.EditLink) then
       Exit;
@@ -7961,6 +7961,10 @@ begin
 
   if ssCtrl in Shift then begin
     case Key of
+      Ord('A'): begin
+        Key := 0;
+        lvReferencedBy.SelectAll;
+      end;
       Ord('C'): begin
         Key := 0;
         s := '';
