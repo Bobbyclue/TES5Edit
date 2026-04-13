@@ -726,6 +726,8 @@ type
     procedure cbRegExFilterClick(Sender: TObject);
     procedure vstViewExpanding(Sender: TBaseVirtualTree; Node: PVirtualNode;
       var Allowed: Boolean);
+    procedure lvReferencedByOnSelect(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
   protected
     OverrideViewFocusedNode: PVirtualNode;
     function GetViewFocusedNode: PVirtualNode;
@@ -7981,6 +7983,12 @@ begin
       Exit;
     end;
   end;
+end;
+
+procedure TfrmMain.lvReferencedByOnSelect(Sender: TObject; Item: TListItem;
+  Selected: Boolean);
+begin
+  tbsReferencedBy.Caption := Format('Referenced by (%d) (S: %d)', [lvReferencedBy.Items.Count, lvReferencedBy.SelCount]);
 end;
 
 procedure TfrmMain.mniViewAddClick(Sender: TObject);
