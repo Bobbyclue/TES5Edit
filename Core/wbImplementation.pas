@@ -2616,6 +2616,9 @@ var
         if not Assigned(lFile) then
           raise Exception.CreateFmt('[AddMasters] Requested file to add is not loaded: "%s"', [lMasters[i]]);
 
+        if lFile.IsBlueprint and wbIsStarfield then
+          raise Exception.CreateFmt('[AddMasters] File [%s] not added. %s does not support blueprint files as masters to other modules.', [lMasters[i], wbGameName]);
+
         var lIsLightFile := lFile.IsLight;
         var lIsMediumFile := lFile.IsMedium;
         var lIsFullFile := lFile.GetIsFull;
