@@ -127,6 +127,7 @@ object frmMain: TfrmMain
             OnDragDrop = vstViewDragDrop
             OnEditing = vstViewEditing
             OnExpanded = vstViewExpanded
+            OnExpanding = vstViewExpanding
             OnFocusChanged = vstViewFocusChanged
             OnFocusChanging = vstViewFocusChanging
             OnFreeNode = vstViewFreeNode
@@ -361,6 +362,7 @@ object frmMain: TfrmMain
             OnCompare = lvReferencedByCompare
             OnDblClick = lvReferencedByDblClick
             OnKeyDown = lvReferencedByKeyDown
+            OnSelectItem = lvReferencedByOnSelect
           end
         end
         object tbsMessages: TTabSheet
