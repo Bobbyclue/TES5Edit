@@ -4227,12 +4227,14 @@ var
   FileStream     : TBufferedFileStream;
   MainRecord     : IwbMainRecord;
   p, s           : string;
-  n, j           : Integer;
+  n              : Integer;
 begin
       Result := False;
 
       if aFile.LoadOrder = 0 then
         Exit;
+
+      SetLength(FormIDs, 0);
 
       Group := aFile.GroupBySignature['QUST'];
 
@@ -4261,7 +4263,6 @@ begin
           FileStream := TBufferedFileStream.Create(s, fmCreate);
           FileStream.WriteBuffer(FormIDs[0], Length(FormIDs)*SizeOf(Cardinal));
           PostAddMessage('Created: ' + s);
-          Inc(j);
         finally
           if Assigned(FileStream) then
             FreeAndNil(FileStream);
@@ -4281,26 +4282,18 @@ var
   SelectedNodes  : TNodeArray;
   NodeData       : PNavNodeData;
   _File          : IwbFile;
-  Group          : IwbGroupRecord;
-  i, n, j, Count : Integer;
-  MainRecord     : IwbMainRecord;
-  QustFlags      : IwbElement;
-  FormIDs        : TwbFormIDs;
-  FileStream     : TBufferedFileStream;
-  p, s           : string;
+  i, Count       : Integer;
 begin
   SelectedNodes := vstNav.GetSortedSelection(True);
   if Length(SelectedNodes) < 1 then
     Exit;
 
   Count := 0;
-  j := 0;
 
   for i := Low(SelectedNodes) to High(SelectedNodes) do begin
     NodeData := vstNav.GetNodeData(SelectedNodes[i]);
 
     if Assigned(NodeData.Element) and (NodeData.Element.ElementType = etFile) then begin
-      SetLength(FormIDs, 0);
 
       if not Supports(NodeData.Element, IwbFile, _File) then
         Continue;
@@ -4314,7 +4307,7 @@ begin
       Inc(Count);
     end;
   end;
-  PostAddMessage('[Create SEQ file done] Processed Plugins: ' + IntToStr(Count) + ', SEQ Files Created: ' + IntToStr(j));
+  PostAddMessage('[Create SEQ file done] Processed Plugins: ' + IntToStr(Count) + ', SEQ Files Created: ' + IntToStr(Count));
 end;
 
 procedure TfrmMain.mniNavDeleteModGroupsClick(Sender: TObject);
