@@ -2955,6 +2955,9 @@ begin
                   Exit;
               end
               else begin
+                // skip asking for changes if holding shift
+                if AsNew and (GetKeyState(VK_SHIFT) < 0) then
+                  Break;
                 if not InputQuery('EditorID', 'Please change the EditorID', EditorID) then
                   Exit;
               end;
@@ -2978,6 +2981,9 @@ begin
 
           if AsNew or AsWrapper then
             repeat
+              // skip asking for changes if holding shift
+              if AsNew and (GetKeyState(VK_SHIFT) < 0) then
+                Break;
               if not InputQuery('EditorID Prefix', 'Please enter the prefix that should be removed from the EditorIDs if present', EditorIDPrefixRemove) then
                 Exit;
               if not InputQuery('EditorID Suffix', 'Please enter the suffix that should be removed from the EditorIDs if present', EditorIDSuffixRemove) then
