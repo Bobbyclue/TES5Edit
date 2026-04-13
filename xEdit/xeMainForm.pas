@@ -7917,7 +7917,11 @@ end;
 
 procedure TfrmMain.lvReferencedByColumnClick(Sender: TObject; Column: TListColumn);
 begin
-  ReferencedBySortColumn := Column;
+  if (ReferencedBySortColumn = Column) and (Column = lvReferencedBy.Columns[0]) then
+    ReferencedBySortColumn := lvReferencedBy.Columns[3]
+  else
+    ReferencedBySortColumn := Column;
+
   lvReferencedBy.AlphaSort;
 end;
 
@@ -14993,9 +14997,12 @@ begin
                 Caption := ActiveMaster.ReferencedBy[i].Name;
                 SubItems.Add(ActiveMaster.ReferencedBy[i].Signature);
                 SubItems.Add(ActiveMaster.ReferencedBy[i]._File.Name);
+                SubItems.Add(ActiveMaster.ReferencedBy[i].LoadOrderFormID.ToString(True));
                 Data := Pointer(ActiveMaster.ReferencedBy[i]);
               end;
           end;
+          if Assigned(ReferencedBySortColumn) then
+            lvReferencedBy.AlphaSort;
         end else
           lvReferencedBy.Tag := 0;
       finally
@@ -16899,8 +16906,11 @@ begin
             Caption := ActiveMaster.ReferencedBy[i].Name;
             SubItems.Add(ActiveMaster.ReferencedBy[i].Signature);
             SubItems.Add(ActiveMaster.ReferencedBy[i]._File.Name);
+            SubItems.Add(ActiveMaster.ReferencedBy[i].LoadOrderFormID.ToString(True));
             Data := Pointer(ActiveMaster.ReferencedBy[i]);
           end;
+        if Assigned(ReferencedBySortColumn) then
+          lvReferencedBy.AlphaSort;
       end;
     end else
       lvReferencedBy.Tag := 0;
