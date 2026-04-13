@@ -15362,6 +15362,7 @@ begin
 
   if Length(Selected) > 1 then begin
     mniRefByCompareSelected.Visible := True;
+    mniRefByCompareSelected.Caption := 'Compare Selected ('+Length(Selected).ToString+')';
     sig := Selected[Low(Selected)].Signature;
     for i := Succ(Low(Selected)) to High(Selected) do begin
       Rec := Selected[i];
