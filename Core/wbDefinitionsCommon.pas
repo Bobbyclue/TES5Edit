@@ -50,8 +50,9 @@ procedure wbScrollTypeAfterLoad        (const aElement: IwbElement);
 procedure wbSOUNAfterLoad              (const aElement: IwbElement);
 procedure wbWorldAfterLoad             (const aElement: IwbElement);
 
-{>>> After Set Callbacks <<<} //15
+{>>> After Set Callbacks <<<} //16
 procedure wbACBSLevelMultAfterSet                 (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+procedure wbBOOKDataFlagsAfterSet                 (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionTypeAfterSet                 (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbConditionRunOnAfterSet                (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 procedure wbDialogueTextAfterSet                  (const aElement: IwbElement; const aOldValue, aNewValue: Variant);
@@ -78,7 +79,9 @@ function wbWeatherCloudColorsCounter  (aBasePtr: Pointer; aEndPtr: Pointer; cons
 function wbWorldColumnsCounter        (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbWorldRowsCounter           (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 
-{>>> Flag Don't Show Callbacks <<<} //7
+{>>> Flag Don't Show Callbacks <<<} //10
+function wbFlagBOOKTeachesSkillDontSHow    (const aElement: IwbElement): Boolean;
+function wbFlagBOOKTeachesSpellDontShow    (const aElement: IwbElement): Boolean;
 function wbFlagREFRInteriorDontShow        (const aElement: IwbElement): Boolean;
 function wbFlagNavmeshFilterDontSHow       (const aElement: IwbElement): Boolean;
 function wbFlagNavmeshBoundingBoxDontSHow  (const aElement: IwbElement): Boolean;
@@ -88,8 +91,9 @@ function wbFlagNavmeshGroundDontSHow       (const aElement: IwbElement): Boolean
 function wbFlagPartialFormDontShow         (const aElement: IwbElement): Boolean;
 function wbFlagREFRSkyMarkerDontShow       (const aElement: IwbElement): Boolean;
 
-{>>> Don't Show Callbacks <<<} //23
+{>>> Don't Show Callbacks <<<} //24
 function wbAlwaysDontShow        (const aElement: IwbElement): Boolean;
+function wbBookTeachesDontSHow   (const aElement: IwbElement): Boolean;
 function wbCellInteriorDontShow  (const aElement: IwbElement): Boolean;
 function wbCellExteriorDontShow  (const aElement: IwbElement): Boolean;
 function wbIdleMarkerPNAMDontShow(const aElement: IwbElement): Boolean;
@@ -1205,7 +1209,7 @@ begin
   end;
 end;
 
-{>>> After Set Callbacks <<<} //15
+{>>> After Set Callbacks <<<} //16
 
 procedure wbACBSLevelMultAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 begin
@@ -1223,6 +1227,26 @@ begin
       if aNewValue < 100 then
         aElement.NativeValue := 100;
     end;
+  finally
+    wbEndInternalEdit;
+  end;
+end;
+
+procedure wbBOOKDataFlagsAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
+begin
+  if not Assigned(aElement) then
+    Exit;
+
+  if VarSameValue(aOldValue, aNewValue) then
+    Exit;
+
+  if wbBeginInternalEdit then try
+    var lNativeValue := aElement.NativeValue;
+    if ((aOldValue and $1) = 0) and ((aNewValue and $1) <> 0) then
+      aElement.NativeValue := lNativeValue xor $4;
+
+    if ((aOldValue and $4) = 0) and ((aNewValue and $4) <> 0) then
+      aElement.NativeValue := lNativeValue xor $1;
   finally
     wbEndInternalEdit;
   end;
@@ -1778,7 +1802,17 @@ begin
   Result := Round(MaxY) - Round(MinY) + 1;
 end;
 
-{>>> Flag Don't Show Callbacks <<<} //7
+{>>> Flag Don't Show Callbacks <<<} //10
+
+function wbFlagBOOKTeachesSkillDontSHow(const aElement: IwbElement): Boolean;
+begin
+  Result := (aElement.ContainingMainRecord.ElementNativeValues['DATA\Flags'] and $4) <> 0 ;
+end;
+
+function wbFlagBOOKTeachesSpellDontShow(const aElement: IwbElement): Boolean;
+begin
+  Result := (aElement.ContainingMainRecord.ElementNativeValues['DATA\Flags'] and $1) <> 0;
+end;
 
 function wbFlagREFRInteriorDontShow(const aElement: IwbElement): Boolean;
 begin
@@ -1869,11 +1903,20 @@ begin
     Exit(True);
 end;
 
-{>>> Don't Show Callbacks <<<} //23
+{>>> Don't Show Callbacks <<<} //24
 
 function wbAlwaysDontShow(const aElement: IwbElement): Boolean;
 begin
   Result := True;
+end;
+
+function wbBookTeachesDontSHow(const aElement: IwbElement): Boolean;
+begin
+  var lFlags := aElement.Container.ElementByName['Flags'].NativeValue;
+  Result := (
+    ((lFlags and $1) = 0) and
+    ((lFlags and $4) = 0)
+    );
 end;
 
 function wbCellInteriorDontShow(const aElement: IwbElement): Boolean;

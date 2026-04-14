@@ -2335,6 +2335,7 @@ type
   IwbNamedDef = interface(IwbDef)
     ['{F8FEDE89-C089-42C5-B587-49A7D87055F0}']
     function GetName: string;
+    procedure SetName(const aName: string);
     function GetSummaryName: string;
     function GetFullName: string;
     function GetSingularName: string;
@@ -2362,7 +2363,8 @@ type
     function SetSummaryName(const aName: string): IwbNamedDef;
 
     property Name: string
-      read GetName;
+      read GetName
+      write SetName;
     property SummaryName: string
       read GetSummaryName;
     property FullName: string
@@ -5997,6 +5999,7 @@ type
 
     {---IwbNamedDef---}
     function GetName: string;
+    procedure SetName(const aName: string);
     function GetSummaryName: string;
     function GetFullName: string; virtual;
     function MakeSingularName(const aName: string): string;
@@ -10580,6 +10583,11 @@ end;
 function TwbNamedDef.GetName: string;
 begin
   Result := ndName;
+end;
+
+procedure TwbNamedDef.SetName(const aName: string);
+begin
+  ndName := aName;
 end;
 
 function TwbNamedDef.GetPath: string;

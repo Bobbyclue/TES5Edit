@@ -1319,16 +1319,23 @@ begin
 end;
 
 function wbBOOKTeachesDecider(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer;
-var
-  Container: IwbContainer;
-  i: Int64;
 begin
   Result := 0;
-  if not wbTryGetContainerFromUnion(aElement, Container) then
+  var lContainer: IwbContainer;
+  if not wbTryGetContainerFromUnion(aElement, lContainer) then
     Exit;
 
-  i := Container.ElementByName['Flags'].NativeValue;
-  if i and $00000004 <> 0 then Result := 1;
+  var lFlagsValue : Int64 := lContainer.ElementByName['Flags'].NativeValue;
+  if (lFlagsValue and $1) <> 0 then
+  begin
+    aElement.Def.Name := 'Skill';
+    Exit(1);
+  end
+  else if (lFlagsValue and $4) <> 0 then
+  begin
+    aElement.Def.Name := 'Spell';
+    Exit(2);
+  end;
 end;
 
 function wbEPFDDontShow(const aElement: IwbElement): Boolean;
@@ -2168,28 +2175,35 @@ end;
 
 procedure wbLIGHDataFlagsAfterSet(const aElement: IwbElement; const aOldValue, aNewValue: Variant);
 begin
+  if not wbCS then
+    Exit;
+
   if not Assigned(aElement) then
     Exit;
 
-  if VarSameValue(aOldValue, aNewValue) then
+  if VarSameValue(aOldValue and $4000, aNewValue and $4000) then
     Exit;
 
-  if not wbCS then
+  var lContainer := aElement.Container as IwbContainerElementRef;
+  if not Assigned(lContainer) then
     Exit;
 
   var lMainRecord := aElement.ContainingMainRecord;
   if not Assigned(lMainRecord) then
     Exit;
 
-  if wbBeginInternalEdit then try
-    if ((aOldValue and $4000) <> (aNewValue and $4000)) then begin
-      var lFNAMValue := lMainRecord.ElementNativeValues['FNAM'];
-      lMainRecord.RemoveElement('FNAM');
-      lMainRecord.Add('FNAM', True);
-      lMainRecord.ElementBySignature[FNAM].NativeValue := lFNAMValue;
-    end;
-  finally
-    wbEndInternalEdit;
+  var lFalloff := lContainer.ElementByMemoryOrder[4];
+  var lFOV := lContainer.ElementByMemoryOrder[5];
+  var lFNAM := lMainRecord.ElementBySignature[FNAM];
+
+  if (aNewValue and $4000) = 0 then begin
+    lFalloff.Def.Name := 'Falloff Exponent';
+    lFOV.Def.Name := 'FOV';
+    lFNAM.Def.Name := 'Fade Value';
+  end else begin
+    lFalloff.Def.Name := 'Inverse Square Falloff';
+    lFOV.Def.Name := 'Size';
+    lFNAM.Def.Name := 'Intensity';
   end;
 end;
 
@@ -3533,33 +3547,26 @@ begin
       ]);
 
   wbSkillEnum :=
-    wbEnum([
-      'Unknown 1',
-      'Unknown 2',
-      'Unknown 3',
-      'Unknown 4',
-      'Unknown 5',
-      'Unknown 6',
-      'One Handed',
-      'Two Handed',
-      'Archery',
-      'Block',
-      'Smithing',
-      'Heavy Armor',
-      'Light Armor',
-      'Pickpocket',
-      'Lockpicking',
-      'Sneak',
-      'Alchemy',
-      'Speech',
-      'Alteration',
-      'Conjuration',
-      'Destruction',
-      'Illusion',
-      'Restoration',
-      'Enchanting'
-    ], [
-    -1, 'None'
+    wbEnum([], [
+    -1, 'None',
+    6,  'One Handed',
+    7,  'Two Handed',
+    8,  'Archery',
+    9,  'Block',
+    10, 'Smithing',
+    11, 'Heavy Armor',
+    12, 'Light Armor',
+    13, 'Pickpocket',
+    14, 'Lockpicking',
+    15, 'Sneak',
+    16, 'Alchemy',
+    17, 'Speech',
+    18, 'Alteration',
+    19, 'Conjuration',
+    20, 'Destruction',
+    21, 'Illusion',
+    22, 'Restoration',
+    23, 'Enchanting'
     ]);
 
   wbCastEnum := wbEnum([
@@ -4209,27 +4216,29 @@ begin
     wbZNAM,
     wbKeywords,
     wbStruct(DATA, 'Data', [
-      wbInteger('Flags', itU8, wbFlags([
-       {0x01} 'Teaches Skill',
-       {0x02} 'Can''t be Taken',
-       {0x04} 'Teaches Spell',
-       {0x08} 'Unknown 4',
-       {0x10} 'Unknown 5',
-       {0x20} 'Unknown 6',
-       {0x40} 'Unknown 7',
-       {0x80} 'Unknown 8'
-      ])).IncludeFlag(dfCollapsed, wbCollapseFlags),
-      wbInteger('Type', itU8, wbEnum([], [
-        0, 'Book/Tome', 255, 'Note/Scroll'
-      ])),
+      wbInteger('Flags', itU8,
+        wbFlags([
+        {0} 'Teaches Skill',
+        {1} 'Can''t be Taken',
+        {2} 'Teaches Spell'
+        ]).SetFlagHasDontShow(0, wbFlagBOOKTeachesSkillDontShow)
+          .SetFlagHasDontShow(2, wbFlagBOOKTeachesSpellDontSHow)
+      ).SetAfterSet(wbBOOKDataFlagsAfterSet)
+       .IncludeFlag(dfCollapsed, wbCollapseFlags),
+      wbInteger('Type', itU8,
+        wbEnum([], [
+        0, 'Book/Tome',
+        255, 'Note/Scroll'
+        ])),
       wbUnused(2),
       wbUnion('Teaches', wbBOOKTeachesDecider, [
-        wbInteger('Skill', itS32, wbSkillEnum),
+        wbUnused(4),
+        wbInteger('Skill', itS32, wbSkillEnum).SetDefaultNativeValue(-1),
         wbFormIDCk('Spell', [SPEL])
-      ]),
+      ]).SetDontShow(wbBookTeachesDontSHow),
       wbInteger('Value', itU32),
       wbFloat('Weight')
-    ], cpNormal, True),
+    ]).SetRequired,
     wbFormIDCk(INAM, 'Inventory Art', [STAT]),
     wbLString(CNAM, 'Description', 0, cpTranslate)
   ]);
@@ -8001,14 +8010,8 @@ begin
         ])
       ).SetAfterSet(wbLIGHDataFlagsAfterSet)
        .IncludeFlag(dfCollapsed, wbCollapseFlags),
-      wbUnion('', wbLIGHInverseSquareDecider, [
-        wbFloat('Falloff Exponent', cpNormal, True, 1, 4),
-        wbFloat('Inverse Square Falloff', cpNormal, True, 1, 4)
-      ]).SetDontShow(wbLIGHFalloffDontShow),
-      wbUnion('', wbLIGHInverseSquareDecider, [
-        wbFloat('FOV', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0.001, 160), 90),
-        wbFloat('Size', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0.001, 160), 90)
-      ]).SetDontShow(wbLIGHShadowSpotDontShow),
+      wbFloat('Falloff Exponent', cpNormal, True, 1, 4).SetDontShow(wbLIGHFalloffDontShow),
+      wbFloat('FOV', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0.001, 160), 90).SetDontShow(wbLIGHShadowSpotDontShow),
       wbFloat('Near Clip', cpNormal, True, 1, 4)
         .SetDefaultNativeValue(1)
         .SetDontShow(wbLIGHShadowSpotDontShow),
@@ -8020,11 +8023,7 @@ begin
       wbInteger('Value', itU32).SetDontShow(wbLIGHCarryDontShow),
       wbFloat('Weight', cpNormal, True, 1, 4).SetDontShow(wbLIGHCarryDontShow)
     ]).SetRequired,
-    wbUnion(FNAM, '', wbLIGHInverseSquareDecider, [
-      wbFloat('Fade Value', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0, 10), 1),
-      wbFloat('Intensity', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0, 10), 1)
-    ]).IncludeFlagOnValue(dfUnionStaticResolve)
-      .SetRequired,
+    wbFloat(FNAM, 'Fade Value', cpNormal, True, 1, 4, nil, wbNormalizeToRange(0, 10), 1),
     wbFormIDCk(SNAM, 'Sound', [SNDR]),
     IsSSE(
       wbFormIDCk(LNAM, 'Lens Flare', [LENS]),
