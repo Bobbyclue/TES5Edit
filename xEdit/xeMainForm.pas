@@ -462,6 +462,7 @@ type
     lblReferencedByFilterFileName: TLabel;
     edReferencedByFilterFileName: TEdit;
     tmrReferencedByFilterApply: TTimer;
+    tmrViewFilterApply: TTimer;
 
     {--- Form ---}
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -754,6 +755,7 @@ type
     procedure tmrReferencedByFilterApplyTimer(Sender: TObject);
     procedure lvReferencedByOnDataStateChange(Sender: TObject; StartIndex,
       EndIndex: Integer; OldState, NewState: TItemStates);
+    procedure tmrViewFilterApplyTimer(Sender: TObject);
   protected
     OverrideViewFocusedNode: PVirtualNode;
     function GetViewFocusedNode: PVirtualNode;
@@ -6060,15 +6062,8 @@ end;
 
 procedure TfrmMain.edViewFilterChange(Sender: TObject);
 begin
-  with vstView do begin
-    BeginUpdate;
-    try
-      ApplyViewFilter;
-      UpdateColumnWidths;
-    finally
-      EndUpdate;
-    end;
-  end;
+  tmrViewFilterApply.Enabled := False;
+  tmrViewFilterApply.Enabled := True;
 end;
 
 procedure TfrmMain.edViewFilterNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -17597,6 +17592,20 @@ procedure TfrmMain.tmrUpdateColumnWidthsTimer(Sender: TObject);
 begin
   tmrUpdateColumnWidths.Enabled := False;
   UpdateColumnWidths;
+end;
+
+procedure TfrmMain.tmrViewFilterApplyTimer(Sender: TObject);
+begin
+  tmrViewFilterApply.Enabled := False;
+  with vstView do begin
+    BeginUpdate;
+    try
+      ApplyViewFilter;
+      UpdateColumnWidths;
+    finally
+      EndUpdate;
+    end;
+  end;
 end;
 
 procedure TfrmMain.UpdateColumnWidths;

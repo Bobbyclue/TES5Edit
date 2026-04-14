@@ -5972,7 +5972,14 @@ object frmMain: TfrmMain
     Enabled = False
     Interval = 250
     OnTimer = tmrReferencedByFilterApplyTimer
-    Left = 200
-    Top = 416
+    Left = 192
+    Top = 360
+  end
+  object tmrViewFilterApply: TTimer
+    Enabled = False
+    Interval = 250
+    OnTimer = tmrViewFilterApplyTimer
+    Left = 56
+    Top = 352
   end
 end
