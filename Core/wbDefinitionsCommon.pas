@@ -1241,6 +1241,8 @@ begin
     Exit;
 
   if wbBeginInternalEdit then try
+    wbUpdateSameParentUnions(aElement, aOldValue, aNewValue);
+
     var lNativeValue := aElement.NativeValue;
     if ((aOldValue and $1) = 0) and ((aNewValue and $1) <> 0) then
       aElement.NativeValue := lNativeValue xor $4;
