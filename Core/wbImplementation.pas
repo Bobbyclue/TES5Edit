@@ -5299,9 +5299,15 @@ begin
       if GetIsUpdateDirect and (GetIsLightDirect or GetIsMediumDirect) then
           SetIsUpdate(False);
 
-      if flModule.miExtension = meESP then
+      if flModule.miExtension = meESP then begin
         if GetIsLight or GetIsMedium then
           raise Exception.Create('".esp" modules must not be small or medium.');
+        if GetIsESM then
+        begin
+          flProgress(Format('%s .esp files must not have ESM flag. Removing.', [wbGameName]));
+          SetIsESM(False);
+        end;
+      end;
 
       if GetIsLight and GetIsMedium then
         raise Exception.Create('Small or medium flags are mutually exclusive. Modules cannot be both.');

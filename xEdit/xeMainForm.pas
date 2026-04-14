@@ -15,6 +15,7 @@ interface
 uses
   System.Actions,
   System.Generics.Collections,
+  System.Generics.Defaults,
   System.IniFiles,
   System.SysUtils,
   System.Classes,
@@ -156,6 +157,16 @@ type
   PLOOTPluginInfo = ^TLOOTPluginInfo;
 
   TwbSaveResult = (srAllDone, srNothingToDo, srAbort, srError);
+
+  TRefByListItem = class
+  public
+    Name: string;
+    Signature: string;
+    FileName: string;
+    LoadOrderFormID: string;
+    RawFileName: string;
+    Data: Pointer;
+  end;
 
   TfrmMain = class(TForm)
     vstNav: TVirtualEditTree;
@@ -441,6 +452,17 @@ type
     btnCancel: TButton;
     bnPinned: TSpeedButton;
     cbRegExFilter: TCheckBox;
+    pnlReferencedByTop: TPanel;
+    fpnlReferencedByFilter: TFlowPanel;
+    lblReferencedByFilterName: TLabel;
+    edReferencedByFilterName: TEdit;
+    cobReferencedByFilter: TComboBox;
+    lblReferencedByFilterSignature: TLabel;
+    edReferencedByFilterSignature: TEdit;
+    lblReferencedByFilterFileName: TLabel;
+    edReferencedByFilterFileName: TEdit;
+    tmrReferencedByFilterApply: TTimer;
+    tmrViewFilterApply: TTimer;
 
     {--- Form ---}
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -627,8 +649,6 @@ type
     procedure mniNavRaceLVLIsClick(Sender: TObject);
     procedure mniRefByCopyDisabledOverrideIntoClick(Sender: TObject);
     procedure lvReferencedByColumnClick(Sender: TObject; Column: TListColumn);
-    procedure lvReferencedByCompare(Sender: TObject; Item1, Item2: TListItem;
-      Data: Integer; var Compare: Integer);
     procedure mniNavUndeleteAndDisableReferencesClick(Sender: TObject);
     procedure mniNavMarkModifiedClick(Sender: TObject);
     procedure mniNavCreateMergedPatchClick(Sender: TObject);
@@ -728,6 +748,14 @@ type
       var Allowed: Boolean);
     procedure lvReferencedByOnSelect(Sender: TObject; Item: TListItem;
       Selected: Boolean);
+    procedure lvReferencedByLoadData(Sender: TObject; Item: TListItem);
+    procedure edReferencedByFilterNameKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure edReferencedByFilterChange(Sender: TObject);
+    procedure tmrReferencedByFilterApplyTimer(Sender: TObject);
+    procedure lvReferencedByOnDataStateChange(Sender: TObject; StartIndex,
+      EndIndex: Integer; OldState, NewState: TItemStates);
+    procedure tmrViewFilterApplyTimer(Sender: TObject);
   protected
     OverrideViewFocusedNode: PVirtualNode;
     function GetViewFocusedNode: PVirtualNode;
@@ -754,7 +782,7 @@ type
     TotalUsageTime: TDateTime;
     RateNoticeGiven: Integer;
     ReachableBuild: Boolean;
-    ReferencedBySortColumn: TListColumn;
+    ReferencedBySortColumn: Byte;
 
     FocusedColumnOverride : Integer;
 
@@ -1098,6 +1126,14 @@ type
     procedure SendLoaderDone(const aStartTime: TDateTime; aLoadOrder: Integer);
 
     procedure PostPluggyChange(const aFormID, aBaseFormID, aInventoryFormID, aEnchantmentFormID, aSpellFormID: TwbFormID);
+  private
+    lvReferencedByAllItems : TObjectList<TRefByListItem>;
+    lvReferencedByFilteredItems: TList<TRefByListItem>;
+    procedure ApplyReferencedByFilter;
+    procedure ApplyReferencedByAlphaSort;
+    procedure PopulateReferencedByListData(aMaster: IwbMainRecord);
+    procedure ClearReferencedByListData;
+    procedure UpdateReferencedByTabCaption;
   end;
 
   TLoaderThread = class(TThread)
@@ -4698,7 +4734,7 @@ begin
   try
     vstView.BeginUpdate;
     try
-      lvReferencedBy.Items.Clear;
+      ClearReferencedByListData;
       vstView.Clear;
       vstView.NodeDataSize := 0;
       SetLength(ActiveRecords, 0);
@@ -4862,6 +4898,8 @@ end;
 destructor TfrmMain.Destroy;
 begin
   inherited;
+  FreeAndNil(lvReferencedByAllItems);
+  FreeAndNil(lvReferencedByFilteredItems);
   FreeAndNil(NewMessages);
   FreeAndNil(ScriptHotkeys);
   FreeAndNil(Settings);
@@ -5997,17 +6035,35 @@ begin
     EditWarnOk := True;
 end;
 
+procedure TfrmMain.edReferencedByFilterNameKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+    case Key of
+    VK_RETURN:
+      if (ssCtrl in Shift) or (Sender = edReferencedByFilterFileName) then
+        lvReferencedBy.SetFocus
+      else if Sender = edReferencedByFilterName then
+        cobReferencedByFilter.SetFocus
+      else if Sender = cobReferencedByFilter then
+        edReferencedByFilterSignature.SetFocus
+      else if Sender = edReferencedByFilterSignature then
+        edReferencedByFilterFileName.SetFocus;
+    VK_DOWN:
+      if not (Sender = cobReferencedByFilter) then
+        lvReferencedBy.SetFocus;
+  end;
+end;
+
+procedure TfrmMain.edReferencedByFilterChange(Sender: TObject);
+begin
+  tmrReferencedByFilterApply.Enabled := false;
+  tmrReferencedByFilterApply.Enabled := true;
+end;
+
 procedure TfrmMain.edViewFilterChange(Sender: TObject);
 begin
-  with vstView do begin
-    BeginUpdate;
-    try
-      ApplyViewFilter;
-      UpdateColumnWidths;
-    finally
-      EndUpdate;
-    end;
-  end;
+  tmrViewFilterApply.Enabled := False;
+  tmrViewFilterApply.Enabled := True;
 end;
 
 procedure TfrmMain.edViewFilterNameKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -6540,6 +6596,9 @@ var
   i, j, k, l: Integer;
   Rect: TRect;
 begin
+  lvReferencedByAllItems := TObjectList<TRefByListItem>.Create(True);
+  lvReferencedByFilteredItems := TList<TRefByListItem>.Create;
+
   FocusedColumnOverride := -1;
 
   if wbThemesSupported then try
@@ -7910,20 +7969,59 @@ end;
 
 procedure TfrmMain.lvReferencedByColumnClick(Sender: TObject; Column: TListColumn);
 begin
-  if (ReferencedBySortColumn = Column) and (Column = lvReferencedBy.Columns[0]) then
-    ReferencedBySortColumn := lvReferencedBy.Columns[3]
+  if (ReferencedBySortColumn = Column.Index) and (Column.Index = 0) then
+    ReferencedBySortColumn := 3
+  else if (ReferencedBySortColumn = Column.Index) and (Column.Index = 2) then
+    ReferencedBySortColumn := 4
   else
-    ReferencedBySortColumn := Column;
+    ReferencedBySortColumn := Column.Index;
 
-  lvReferencedBy.AlphaSort;
+  ApplyReferencedByAlphaSort;
 end;
 
-procedure TfrmMain.lvReferencedByCompare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
+procedure TfrmMain.ApplyReferencedByAlphaSort;
 begin
-  if not Assigned(ReferencedBySortColumn) or (ReferencedBySortColumn.Index = 0) then
-    Compare := CompareText(Item1.Caption, Item2.Caption)
-  else
-    Compare := CompareText(Item1.SubItems[Pred(ReferencedBySortColumn.Index)], Item2.SubItems[Pred(ReferencedBySortColumn.Index)])
+  if lvReferencedByFilteredItems.Count = 0 then Exit;
+  Assert(not (ReferencedBySortColumn > 4), 'ApplyReferencedByAlphaSort.ReferencedBySortColumn Out of range');
+
+  // Sort the filtered list
+  lvReferencedByFilteredItems.Sort(TComparer<TRefByListItem>.Construct(
+    function(const Item1, Item2: TRefByListItem): Integer
+    var
+      S1, S2: string;
+    begin
+      case ReferencedBySortColumn of
+        0: begin // Name
+             S1 := Item1.Name;
+             S2 := Item2.Name;
+           end;
+        1: begin // Signature
+             S1 := Item1.Signature;
+             S2 := Item2.Signature;
+           end;
+        2: begin // FileName
+             S1 := Item1.FileName;
+             S2 := Item2.FileName;
+           end;
+        3: begin // LoadOrderFormID
+             S1 := Item1.LoadOrderFormID;
+             S2 := Item2.LoadOrderFormID;
+           end;
+        4: begin
+             S1 := Item1.RawFileName;
+             S2 := Item2.RawFileName;
+           end;
+      else
+        S1 := Item1.Name;
+        S2 := Item2.Name;
+      end;
+
+      Result := CompareText(S1, S2);
+    end));
+
+  // Refresh the ListView
+  lvReferencedBy.Invalidate;
+  lvReferencedBy.Refresh;
 end;
 
 procedure TfrmMain.lvReferencedByDblClick(Sender: TObject);
@@ -7986,10 +8084,34 @@ begin
   end;
 end;
 
+procedure TfrmMain.lvReferencedByLoadData(Sender: TObject; Item: TListItem);
+var
+  Data: TRefByListItem;
+begin
+  if (Item.Index < 0) or (Item.Index >= lvReferencedByFilteredItems.Count) then
+    Exit;
+
+  Data := lvReferencedByFilteredItems[Item.Index];
+
+  Item.Caption := Data.Name;
+  Item.SubItems.Add(Data.Signature);
+  Item.SubItems.Add(Data.FileName);
+  Item.SubItems.Add(Data.LoadOrderFormID);
+  Item.SubItems.Add(Data.RawFileName);
+  Item.Data := Data.Data;
+end;
+
+procedure TfrmMain.lvReferencedByOnDataStateChange(Sender: TObject; StartIndex,
+  EndIndex: Integer; OldState, NewState: TItemStates);
+begin
+  UpdateReferencedByTabCaption;
+end;
+
 procedure TfrmMain.lvReferencedByOnSelect(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
-  tbsReferencedBy.Caption := Format('Referenced by (%d) (S: %d)', [lvReferencedBy.Items.Count, lvReferencedBy.SelCount]);
+  if Assigned(Sender) then
+    UpdateReferencedByTabCaption;
 end;
 
 procedure TfrmMain.mniViewAddClick(Sender: TObject);
@@ -8642,6 +8764,121 @@ begin
     Script := nil;
     ScriptRunning := False;
   end;
+end;
+
+procedure TfrmMain.ApplyReferencedByFilter;
+var
+  Item: TRefByListItem;
+  FilterName, FilterSig, FilterFile: string;
+  UseName, UseSig, UseFile: Boolean;
+  NameMatch, SigMatch, FileMatch: Boolean;
+  UseOrBetweenNameAndSig: Boolean;
+begin
+  lvReferencedBy.Items.BeginUpdate;
+  try
+    lvReferencedByFilteredItems.Clear;
+
+    FilterName := Trim(LowerCase(edReferencedByFilterName.Text));
+    FilterSig  := Trim(LowerCase(edReferencedByFilterSignature.Text));
+    FilterFile := Trim(LowerCase(edReferencedByFilterFileName.Text));
+
+    UseName := FilterName <> '';
+    UseSig  := FilterSig  <> '';
+    UseFile := FilterFile <> '';
+
+    // If no filters at all, show everything
+    if not (UseName or UseSig or UseFile) then
+    begin
+      for Item in lvReferencedByAllItems do
+        lvReferencedByFilteredItems.Add(Item);
+    end
+    else
+    begin
+      // Get the operator for Name <-> Signature (0 = AND, 1 = OR)
+      UseOrBetweenNameAndSig := (cobReferencedByFilter.ItemIndex = 1);
+
+      for Item in lvReferencedByAllItems do
+      begin
+        NameMatch := not UseName or LowerCase(Item.Name).Contains(FilterName);
+        SigMatch  := not UseSig  or LowerCase(Item.Signature).Contains(FilterSig);
+        FileMatch := not UseFile or LowerCase(Item.FileName).Contains(FilterFile);
+
+        // Logic: (Name [AND/OR] Signature) AND File
+        if FileMatch then
+        begin
+          if UseOrBetweenNameAndSig then
+          begin
+            if NameMatch or SigMatch then
+              lvReferencedByFilteredItems.Add(Item);
+          end
+          else
+          begin
+            if NameMatch and SigMatch then
+              lvReferencedByFilteredItems.Add(Item);
+          end;
+        end;
+      end;
+    end;
+
+    lvReferencedBy.Items.Count := lvReferencedByFilteredItems.Count;
+  finally
+    lvReferencedBy.Items.EndUpdate;
+  end;
+  if lvReferencedBy.Items.Count > 0 then
+    ApplyReferencedByAlphaSort
+  else begin
+    lvReferencedBy.ItemIndex := -1;
+    lvReferencedBy.ClearSelection;
+  end;
+
+  lvReferencedBy.Invalidate;
+
+  UpdateReferencedByTabCaption;
+end;
+
+procedure TfrmMain.UpdateReferencedByTabCaption;
+begin
+    if tbsReferencedBy.TabVisible then
+      if pgMain.ActivePage = tbsReferencedBy then
+        tbsReferencedBy.Caption := Format('Referenced by (%d / F: %d / S: %d)', [lvReferencedByAllItems.Count, lvReferencedBy.Items.Count, lvReferencedBy.SelCount])
+      else
+        tbsReferencedBy.Caption := Format('Referenced By (%d)', [lvReferencedBy.Tag]);
+end;
+
+procedure TfrmMain.ClearReferencedByListData;
+begin
+  lvReferencedBy.Items.BeginUpdate;
+  try
+    lvReferencedByFilteredItems.Clear;
+    lvReferencedByAllItems.Clear;
+    lvReferencedBy.Items.Count := 0;
+    lvReferencedBy.ItemIndex := -1;
+    lvReferencedBy.ClearSelection;
+    lvReferencedBy.Invalidate;
+  finally
+    lvReferencedBy.Items.EndUpdate;
+  end;
+end;
+
+procedure TfrmMain.PopulateReferencedByListData(aMaster: IwbMainRecord);
+var
+  i : Integer;
+  Item : TRefByListItem;
+begin
+  ClearReferencedByListData;
+  if not Assigned(aMaster) then
+    Exit;
+  for i := 0 to Pred(aMaster.ReferencedByCount) do begin
+    Item := TRefByListItem.Create;
+    Item.Name := aMaster.ReferencedBy[i].Name;
+    Item.Signature := aMaster.ReferencedBy[i].Signature;
+    Item.FileName := aMaster.ReferencedBy[i]._File.Name;
+    Item.LoadOrderFormID := aMaster.ReferencedBy[i].LoadOrderFormID.ToString(True);
+    Item.RawFileName := aMaster.ReferencedBy[i]._File.FileName;
+    Item.Data := Pointer(aMaster.ReferencedBy[i]);
+    lvReferencedByAllItems.Add(Item);
+  end;
+
 end;
 
 procedure TfrmMain.ApplyViewFilter;
@@ -14976,32 +15213,19 @@ begin
 end;
 
 procedure TfrmMain.pgMainChange(Sender: TObject);
-var
-  i: Integer;
 begin
   if not ((pgMain.ActivePage = tbsWEAPSpreadsheet) or
       (pgMain.ActivePage = tbsAMMOSpreadsheet) or
       (pgMain.ActivePage = tbsARMOSpreadsheet)) then
         pnlNav.Show;
   if pgMain.ActivePage = tbsReferencedBy then begin
-    if lvReferencedBy.Tag <> lvReferencedBy.Items.Count then begin
+    if lvReferencedBy.Tag <> lvReferencedByAllItems.Count then begin
       lvReferencedBy.Items.BeginUpdate;
       try
-        lvReferencedBy.Items.Clear;
         if Assigned(ActiveMaster) then begin
           lvReferencedBy.Tag := ActiveMaster.ReferencedByCount;
-           begin
-            for i := 0 to Pred(ActiveMaster.ReferencedByCount) do
-              with lvReferencedBy.Items.Add do begin
-                Caption := ActiveMaster.ReferencedBy[i].Name;
-                SubItems.Add(ActiveMaster.ReferencedBy[i].Signature);
-                SubItems.Add(ActiveMaster.ReferencedBy[i]._File.Name);
-                SubItems.Add(ActiveMaster.ReferencedBy[i].LoadOrderFormID.ToString(True));
-                Data := Pointer(ActiveMaster.ReferencedBy[i]);
-              end;
-          end;
-          if Assigned(ReferencedBySortColumn) then
-            lvReferencedBy.AlphaSort;
+          PopulateReferencedByListData(ActiveMaster);
+          ApplyReferencedByFilter;
         end else
           lvReferencedBy.Tag := 0;
       finally
@@ -16369,7 +16593,7 @@ begin
   try
     vstView.BeginUpdate;
     try
-      lvReferencedBy.Items.Clear;
+      ClearReferencedByListData;
       vstView.Clear;
       vstView.NodeDataSize := 0;
       SetLength(ActiveRecords, 0);
@@ -16464,8 +16688,7 @@ begin
     end;
 
     tbsReferencedBy.TabVisible := wbLoaderDone and (lvReferencedBy.Items.Count > 0);
-    if tbsReferencedBy.TabVisible then
-      tbsReferencedBy.Caption := Format('Referenced By (%d)', [lvReferencedBy.Items.Count]);
+    UpdateReferencedByTabCaption;
   finally
     lvReferencedBy.Items.EndUpdate;
   end;
@@ -16786,7 +17009,7 @@ begin
       else
         ViewLabel := '';
 
-      lvReferencedBy.Items.Clear;
+      ClearReferencedByListData;
       vstView.Clear;
       vstView.NodeDataSize := 0;
       SetLength(ActiveRecords, 0);
@@ -16900,16 +17123,8 @@ begin
     if wbLoaderDone and Assigned(ActiveMaster) {$IFDEF USE_PARALLEL_BUILD_REFS}and not wbBuildingRefsParallel{$ENDIF} then begin
       lvReferencedBy.Tag := ActiveMaster.ReferencedByCount;
       if pgMain.ActivePage = tbsReferencedBy then begin
-        for i := 0 to Pred(ActiveMaster.ReferencedByCount) do
-          with lvReferencedBy.Items.Add do begin
-            Caption := ActiveMaster.ReferencedBy[i].Name;
-            SubItems.Add(ActiveMaster.ReferencedBy[i].Signature);
-            SubItems.Add(ActiveMaster.ReferencedBy[i]._File.Name);
-            SubItems.Add(ActiveMaster.ReferencedBy[i].LoadOrderFormID.ToString(True));
-            Data := Pointer(ActiveMaster.ReferencedBy[i]);
-          end;
-        if Assigned(ReferencedBySortColumn) then
-          lvReferencedBy.AlphaSort;
+        PopulateReferencedByListData(ActiveMaster);
+        ApplyReferencedByFilter;
       end;
     end else
       lvReferencedBy.Tag := 0;
@@ -16918,8 +17133,7 @@ begin
     tbsReferencedBy.TabVisible := wbLoaderDone and (lvReferencedBy.Tag > 0);
     if lCurrentPage = tbsReferencedBy then
       pgMain.ActivePage := tbsReferencedBy;
-    if tbsReferencedBy.TabVisible then
-      tbsReferencedBy.Caption := Format('Referenced By (%d)', [lvReferencedBy.Tag]);
+    UpdateReferencedByTabCaption;
   finally
     lvReferencedBy.Items.EndUpdate;
     Dec(ActiveRecordLock);
@@ -17378,6 +17592,20 @@ procedure TfrmMain.tmrUpdateColumnWidthsTimer(Sender: TObject);
 begin
   tmrUpdateColumnWidths.Enabled := False;
   UpdateColumnWidths;
+end;
+
+procedure TfrmMain.tmrViewFilterApplyTimer(Sender: TObject);
+begin
+  tmrViewFilterApply.Enabled := False;
+  with vstView do begin
+    BeginUpdate;
+    try
+      ApplyViewFilter;
+      UpdateColumnWidths;
+    finally
+      EndUpdate;
+    end;
+  end;
 end;
 
 procedure TfrmMain.UpdateColumnWidths;
@@ -17851,6 +18079,12 @@ begin
     DoSetActiveContainer(PendingContainer)
   else if Assigned(PendingMainRecords) then
     DoSetActiveRecord(Copy(PendingMainRecords));
+end;
+
+procedure TfrmMain.tmrReferencedByFilterApplyTimer(Sender: TObject);
+begin
+  tmrReferencedByFilterApply.Enabled := false;
+  ApplyReferencedByFilter;
 end;
 
 procedure TfrmMain.vstSpreadSheetAmmoInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
