@@ -783,6 +783,9 @@ type
     RateNoticeGiven: Integer;
     ReachableBuild: Boolean;
     ReferencedBySortColumn: Byte;
+    ReferencedBySortDirectionReversed: Boolean;
+    ReferencedByOriginalColumnCaption: string;
+    ReferencedByOriginalColumnIndex: Byte;
 
     FocusedColumnOverride : Integer;
 
@@ -7969,10 +7972,26 @@ end;
 
 procedure TfrmMain.lvReferencedByColumnClick(Sender: TObject; Column: TListColumn);
 begin
-  if (ReferencedBySortColumn = Column.Index) and (Column.Index = 0) then
-    ReferencedBySortColumn := 3
-  else if (ReferencedBySortColumn = Column.Index) and (Column.Index = 2) then
-    ReferencedBySortColumn := 4
+  // Restore previous column caption
+  if ReferencedByOriginalColumnCaption <> '' then
+    lvReferencedBy.Column[ReferencedByOriginalColumnIndex].Caption := ReferencedByOriginalColumnCaption;
+
+  // Set sort direction (Ctrl = descending)
+  if GetKeyState(VK_CONTROL) < 0 then
+    ReferencedBySortDirectionReversed := True  // Descending
+  else
+    ReferencedBySortDirectionReversed := False; // Ascending
+
+  // Determine sort column
+  if ReferencedBySortColumn = Column.Index then
+  begin
+    case Column.Index of
+      0: ReferencedBySortColumn := 3; // Record > FormID
+      2: ReferencedBySortColumn := 4; // File > RawFileName
+    else
+      ReferencedBySortColumn := Column.Index;
+    end;
+  end
   else
     ReferencedBySortColumn := Column.Index;
 
@@ -7980,47 +7999,88 @@ begin
 end;
 
 procedure TfrmMain.ApplyReferencedByAlphaSort;
+
+  procedure RestoreOriginalCaption;
+  begin
+    if ReferencedByOriginalColumnCaption <> '' then
+      lvReferencedBy.Column[ReferencedByOriginalColumnIndex].Caption :=
+        ReferencedByOriginalColumnCaption;
+  end;
+
+  procedure UpdateCaption;
+  var
+    CaptionSuffix: string;
+    CaptionColumn: Byte;
+  begin
+    case ReferencedBySortColumn of
+      0: begin CaptionSuffix := ' [Name]';     CaptionColumn := 0; end;
+      1: begin CaptionSuffix := '';            CaptionColumn := 1; end;
+      2: begin CaptionSuffix := ' [Prefixed]'; CaptionColumn := 2; end;
+      3: begin CaptionSuffix := ' [FormID]';   CaptionColumn := 0; end;
+      4: begin CaptionSuffix := ' [Raw]';      CaptionColumn := 2; end;
+    else
+      CaptionColumn := 0;
+      CaptionSuffix := '';
+    end;
+
+    ReferencedByOriginalColumnIndex := CaptionColumn;
+    ReferencedByOriginalColumnCaption :=
+      lvReferencedBy.Column[CaptionColumn].Caption;
+
+    if ReferencedBySortDirectionReversed then
+      CaptionSuffix := CaptionSuffix + ' ' + #$25BC
+    else
+      CaptionSuffix := CaptionSuffix + ' ' + #$25B2;
+
+    lvReferencedBy.Column[CaptionColumn].Caption :=
+      ReferencedByOriginalColumnCaption + CaptionSuffix;
+  end;
+
 begin
-  if lvReferencedByFilteredItems.Count = 0 then Exit;
-  Assert(not (ReferencedBySortColumn > 4), 'ApplyReferencedByAlphaSort.ReferencedBySortColumn Out of range');
+  // Initialize original caption once
+  if ReferencedByOriginalColumnCaption = '' then
+  begin
+    ReferencedBySortColumn := 0;
+    ReferencedByOriginalColumnIndex := 0;
+    ReferencedByOriginalColumnCaption :=
+      lvReferencedBy.Column[0].Caption;
+  end;
 
-  // Sort the filtered list
-  lvReferencedByFilteredItems.Sort(TComparer<TRefByListItem>.Construct(
-    function(const Item1, Item2: TRefByListItem): Integer
-    var
-      S1, S2: string;
-    begin
-      case ReferencedBySortColumn of
-        0: begin // Name
-             S1 := Item1.Name;
-             S2 := Item2.Name;
-           end;
-        1: begin // Signature
-             S1 := Item1.Signature;
-             S2 := Item2.Signature;
-           end;
-        2: begin // FileName
-             S1 := Item1.FileName;
-             S2 := Item2.FileName;
-           end;
-        3: begin // LoadOrderFormID
-             S1 := Item1.LoadOrderFormID;
-             S2 := Item2.LoadOrderFormID;
-           end;
-        4: begin
-             S1 := Item1.RawFileName;
-             S2 := Item2.RawFileName;
-           end;
-      else
-        S1 := Item1.Name;
-        S2 := Item2.Name;
-      end;
+  RestoreOriginalCaption;
 
-      Result := CompareText(S1, S2);
-    end));
+  if lvReferencedByFilteredItems.Count = 0 then
+    Exit;
 
-  // Refresh the ListView
-  lvReferencedBy.Invalidate;
+  Assert(ReferencedBySortColumn <= 4,
+    'ApplyReferencedByAlphaSort: Sort column out of range');
+
+  lvReferencedByFilteredItems.Sort(
+    TComparer<TRefByListItem>.Construct(
+      function(const Item1, Item2: TRefByListItem): Integer
+      var
+        S1, S2: string;
+      begin
+        case ReferencedBySortColumn of
+          0: begin S1 := Item1.Name;             S2 := Item2.Name; end;
+          1: begin S1 := Item1.Signature;        S2 := Item2.Signature; end;
+          2: begin S1 := Item1.FileName;         S2 := Item2.FileName; end;
+          3: begin S1 := Item1.LoadOrderFormID;  S2 := Item2.LoadOrderFormID; end;
+          4: begin S1 := Item1.RawFileName;      S2 := Item2.RawFileName; end;
+        else
+          S1 := Item1.Name;
+          S2 := Item2.Name;
+        end;
+
+        Result := CompareText(S1, S2);
+
+        if ReferencedBySortDirectionReversed then
+          Result := -Result;
+      end
+    )
+  );
+
+  UpdateCaption;
+
   lvReferencedBy.Refresh;
 end;
 
