@@ -18274,6 +18274,10 @@ begin
 
   FileID := Result.FileID;
 
+  OldCount := aOldCount.Total;
+  NewCount := aNewCount.Total;
+  Slot := FileID.FullSlot;
+
   if wbComplexFileFileID then
   case FileID.GetModuleType of
     mtFull: begin
@@ -18291,11 +18295,6 @@ begin
       NewCount := aNewCount.Light;
       Slot := FileID.LightSlot;
     end;
-  end
-  else begin
-    OldCount := aOldCount.Total;
-    NewCount := aNewCount.Total;
-    Slot := FileID.FullSlot;
   end;
 
   if NewCount > OldCount then
