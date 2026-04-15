@@ -689,13 +689,17 @@ end;
 procedure ScanForBookImages(e: IInterface);
 var
   regexp: TPerlRegEx;
+  t: string;
 begin
   regexp := TPerlRegEx.Create;
   regexp.RegEx := 'src=["''](img:\/\/)?(.+?)["'']';
   regexp.Options := [preCaseLess];
   regexp.Subject := GetEditValue(e);
-  while regexp.MatchAgain do
-    ProcessAssetEx(e, wbNormalizeResourceName(regexp.Groups[2], atTexture), 'Book text image for ' + Name(CurrentRecord), atTexture);
+  while regexp.MatchAgain do begin
+    t := regexp.Groups[2];
+    if wbGameMode = gmTES4 then t := 'Menus\' + t;
+    ProcessAssetEx(e, wbNormalizeResourceName(t, atTexture), 'Book text image for ' + Name(CurrentRecord), atTexture);
+  end;
   regexp.Free;
 end;
 
