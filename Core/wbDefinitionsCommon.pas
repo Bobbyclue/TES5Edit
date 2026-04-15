@@ -79,9 +79,7 @@ function wbWeatherCloudColorsCounter  (aBasePtr: Pointer; aEndPtr: Pointer; cons
 function wbWorldColumnsCounter        (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 function wbWorldRowsCounter           (aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Cardinal;
 
-{>>> Flag Don't Show Callbacks <<<} //10
-function wbFlagBOOKTeachesSkillDontSHow    (const aElement: IwbElement): Boolean;
-function wbFlagBOOKTeachesSpellDontShow    (const aElement: IwbElement): Boolean;
+{>>> Flag Don't Show Callbacks <<<} //8
 function wbFlagREFRInteriorDontShow        (const aElement: IwbElement): Boolean;
 function wbFlagNavmeshFilterDontSHow       (const aElement: IwbElement): Boolean;
 function wbFlagNavmeshBoundingBoxDontSHow  (const aElement: IwbElement): Boolean;
@@ -1245,10 +1243,12 @@ begin
 
     var lNativeValue := aElement.NativeValue;
     if ((aOldValue and $1) = 0) and ((aNewValue and $1) <> 0) then
-      aElement.NativeValue := lNativeValue xor $4;
+      if aNewValue and $4 <> 0 then
+        aElement.NativeValue := lNativeValue xor $4;
 
     if ((aOldValue and $4) = 0) and ((aNewValue and $4) <> 0) then
-      aElement.NativeValue := lNativeValue xor $1;
+      if aNewValue and $1 <> 0 then
+        aElement.NativeValue := lNativeValue xor $1;
   finally
     wbEndInternalEdit;
   end;
@@ -1804,17 +1804,7 @@ begin
   Result := Round(MaxY) - Round(MinY) + 1;
 end;
 
-{>>> Flag Don't Show Callbacks <<<} //10
-
-function wbFlagBOOKTeachesSkillDontSHow(const aElement: IwbElement): Boolean;
-begin
-  Result := (aElement.ContainingMainRecord.ElementNativeValues['DATA\Flags'] and $4) <> 0 ;
-end;
-
-function wbFlagBOOKTeachesSpellDontShow(const aElement: IwbElement): Boolean;
-begin
-  Result := (aElement.ContainingMainRecord.ElementNativeValues['DATA\Flags'] and $1) <> 0;
-end;
+{>>> Flag Don't Show Callbacks <<<} //8
 
 function wbFlagREFRInteriorDontShow(const aElement: IwbElement): Boolean;
 begin

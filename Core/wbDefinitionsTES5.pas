@@ -4221,8 +4221,7 @@ begin
         {0} 'Teaches Skill',
         {1} 'Can''t be Taken',
         {2} 'Teaches Spell'
-        ]).SetFlagHasDontShow(0, wbFlagBOOKTeachesSkillDontShow)
-          .SetFlagHasDontShow(2, wbFlagBOOKTeachesSpellDontSHow)
+        ])
       ).SetAfterSet(wbBOOKDataFlagsAfterSet)
        .IncludeFlag(dfCollapsed, wbCollapseFlags),
       wbInteger('Type', itU8,
