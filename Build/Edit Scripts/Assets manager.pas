@@ -526,8 +526,9 @@ begin
   sl.Clear;
   try
     GetNifAssets(aMesh, sl);
-  except on E: Exception do
-    AddMessage('Error reading Mesh: ' + E.Message + ' ' + aMesh + ' for ' + aDescr);
+  except //on E: Exception do
+    //Exit;
+	//AddMessage('Error reading Mesh: ' + E.Message + ' ' + aMesh + ' for ' + aDescr);
   end;
 
   // remove duplicates and empty
@@ -577,8 +578,10 @@ begin
     Exit;
 
   if wbGameMode = gmTES4 then
-    if Pos(Signature(CurrentRecord), sTES4IconSigs) <> 0 then
-      value := 'Textures\Menus\Icons\' + value;
+    if aType = atTexture then
+	  if Pos(Signature(CurrentRecord), sTES4IconSigs) <> 0 then
+	    if Pos('Menus', Value) = 0 then
+          value := 'Textures\Menus\Icons\' + value;
 
   if atype = atNone then
     atype := AssetTypeByFolder(value);
@@ -697,7 +700,8 @@ begin
   regexp.Subject := GetEditValue(e);
   while regexp.MatchAgain do begin
     t := regexp.Groups[2];
-    if wbGameMode = gmTES4 then t := 'Menus\' + t;
+    if wbGameMode = gmTES4 then 
+	  t := 'Menus\' + t;
     ProcessAssetEx(e, wbNormalizeResourceName(t, atTexture), 'Book text image for ' + Name(CurrentRecord), atTexture);
   end;
   regexp.Free;
@@ -862,12 +866,12 @@ begin
 
   else if (sig = 'NPC_') or (sig = 'CREA') then begin
     ents := ElementByPath(e, 'NIFZ');
-    for i := 0 to Pred(ElementCount(ents)) do
+    for i := 0 to ElementCount(ents) - 2 do
       ProcessAssetEx(ElementByIndex(ents, i), ExtractFilePath(GetElementEditValues(e, 'Model\MODL')) + GetEditValue(ElementByIndex(ents, i)), '', atMesh);
     ents := ElementByPath(e, 'KFFZ');
-    for i := 0 to Pred(ElementCount(ents)) do
+    for i := 0 to ElementCount(ents) - 2 do
       ProcessAssetEx(ElementByIndex(ents, i), ExtractFilePath(GetElementEditValues(e, 'Model\MODL')) + 'SpecialAnims\' + GetEditValue(ElementByIndex(ents, i)), '', atMesh);
-    ProcessAsset(ElementByPath(e, 'NAM0'), atTexture);
+    ProcessAsset(ElementByPath(e, 'NAM0'), atMesh);
     ProcessAsset(ElementByPath(e, 'NAM1'), atTexture);
   end
 
