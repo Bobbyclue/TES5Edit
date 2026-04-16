@@ -50,11 +50,8 @@ type
     procedure miPresetRemoveClick(Sender: TObject);
     procedure miPresetClick(Sender: TObject);
     procedure btnPresetClick(Sender: TObject);
-  private
-    { Private declarations }
   public
-    { Public declarations }
-    fPresets: TJSONObject;
+    fPresets: TJsonObject;
     fPreset: string;
     fPresetsChanged: Boolean;
     function AddPreset(const aPreset: string): TMenuItem;
@@ -306,7 +303,7 @@ begin
     Frame.chkOldValueCheckClick(nil);
   except end;
 
-  Frame.fPresets := TJSONObject.Create;
+  Frame.fPresets := TJsonObject.Create;
   try Frame.fPresets.FromJSON(StorageGetString('sPresets', cDefaultPresets)); except end;
   with TStringList.Create do try
     for var i := 0 to Pred(Frame.fPresets.Count) do
@@ -333,8 +330,8 @@ begin
   StorageSetBool('bReportOnly', Frame.chkReport.Checked);
   if Frame.fPresetsChanged then
     StorageSetString('sPresets', Frame.fPresets.ToJSON(True));
-  if Assigned(Frame.fPresets) then
-    Frame.fPresets.Free;
+
+  Frame.fPresets.Free;
 end;
 
 procedure TProcUniversalTweaker.OnStart;
@@ -372,14 +369,14 @@ begin
   end;
   fOldValueMode := TTweakOldValueMode(Frame.cmbOldValueMode.Items.Objects[Frame.cmbOldValueMode.ItemIndex]);
 
-  if (fValueMode = nvmReplace) and (not fOldValueCheck or not (fOldValueMode in [ovmContains, ovmStartsWith, ovmEndsWith, ovmRegExp]) or (fOldValue = '')) then
-    raise Exception.Create('When replacing, if field must be checked using "Contains", "Starts with", "Ends with" or "Regular Expr" with non-empty value');
-
   if fValueMode in [nvmAdd, nvmMul, nvmAnd, nvmAndNot, nvmOr, nvmRound] then try
     dfStrToFloat(fValue);
   except
     raise Exception.Create('Value must be a number');
   end;
+
+  if (fValueMode = nvmReplace) and not (fOldValueCheck and (fOldValueMode in [ovmContains, ovmStartsWith, ovmEndsWith, ovmRegExp]) and (fOldValue <> '') ) then
+    raise Exception.Create('When replacing, if field must be checked using "Contains", "Starts with", "Ends with" or "Regular Expr" with non-empty value');
 
   if fOldValueCheck and (fOldValueMode in [ovmGreater, ovmLesser, ovmAnd, ovmAndNot]) then try
     dfStrToFloat(fOldValue);
@@ -550,7 +547,7 @@ begin
   bChanged := False;
   nif := nil; BGSM := nil; BGEM := nil; Log := nil; regexp := nil; // suppress compiler warning
 
-  if fOldValueMode = ovmRegExp then begin
+  if fOldValueCheck and (fOldValueMode = ovmRegExp) then begin
     regexp := TPerlRegEx.Create;
     regexp.Options := [preCaseLess];
     regexp.RegEx := fOldValue;
@@ -628,11 +625,11 @@ begin
     end;
 
   finally
-    if Assigned(nif) then nif.Free;
-    if Assigned(BGSM) then BGSM.Free;
-    if Assigned(BGEM) then BGEM.Free;
-    if Assigned(Log) then Log.Free;
-    if Assigned(regexp) then regexp.Free;
+    nif.Free;
+    BGSM.Free;
+    BGEM.Free;
+    Log.Free;
+    regexp.Free;
   end;
 
 end;
