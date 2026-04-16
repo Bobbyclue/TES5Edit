@@ -177,6 +177,9 @@ begin
     end else
       if atype < baFO4 then bsa.SplitSize := bsa.BSA_MAX_OFFSET;
 
+    if wbFindCmdLineParam('f', s) and (s <> '') then
+      bsa.Filters := s.Split([',']);
+
     bsa.ShareData := not (wbFindCmdLineParam('share', s) and SameText(s, 'no'));
     bsa.MultiThreaded := not (wbFindCmdLineParam('mt', s) and SameText(s, 'no'));
 
@@ -209,7 +212,7 @@ begin
     ]));
 
     var sw := TStopwatch.StartNew;
-    if bsa.Multithreaded then
+    if bsa.MultiThreaded then
       TParallel.&For(0, Pred(bsa.ProcessCount),
         procedure(i: Integer; LoopState: TParallel.TLoopState)
         begin
@@ -310,7 +313,7 @@ begin
           raise Exception.Create('Can''t create destination folder: ' + dir);
     end;
 
-    if bsa.Multithreaded then
+    if bsa.MultiThreaded then
       TParallel.For(0, Pred(bsa.Count),
         procedure(i: Integer; LoopState: TParallel.TLoopState)
         begin
@@ -402,6 +405,7 @@ begin
                  zlib, lz4 or lz4f
                  When type is omitted use default compression for the game
                  Strings and audio files (except .fuz) are not compressed
+    -f:filters   Pack files only matching provided mask(s) separated by comma
     -share:yes|no Identical files will share the same data in archive to preserve space
                  "no" to disable sharing, default: yes
     -mt:yes|no   Use available CPU cores for faster multithreaded processing
@@ -428,8 +432,8 @@ begin
   EXAMPLES
     If <folder> or <archive> include spaces then embed them in quotes
 
-    * Create Skyrim SE/AE compressed archive, split by 2 GB
-        BSArch pack "d:\Skyrim AE\data" "d:\Skyrim AE\data\new.bsa" -sse -z
+    * Create Skyrim SE/AE compressed archive with meshes only, split by 2 GB
+        BSArch pack "d:\Skyrim AE\data" "d:\Skyrim AE\data\new.bsa" -sse -z -f:*.nif,*.hkx
     * Create Fallout NV uncompressed archive from multiple folders using custom flags, split by 2 GB
         BSArch pack "c:\FNV files\meshes"+d:\new\textures "d:\somewhere\mod.bsa" -fnv -af:0x83 -ff:0x113
     * Merge archives and overwrite with files from folder, compress with lz4, split by 4 GB

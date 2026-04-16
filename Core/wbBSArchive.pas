@@ -210,7 +210,6 @@ type
       'Misc'
     );
 
-  var
     class function IsArchive(const aFileName: string): Boolean;
     class function IsDDSArchive(aType: TwbBSArchiveType): Boolean; inline;
     class function FormatName(aType: TwbBSArchiveType): string; inline;
@@ -390,6 +389,7 @@ type
   TwbMultiSourcePacker = class(TwbSplitPacker)
   private
     fCompress: Boolean;
+    fFilters: TArray<string>;
     fSourceFiles: array of record
       AssetName: string;
       Hash: TwbLookupHash;
@@ -399,8 +399,9 @@ type
     end;
     fSourceFilesCount: Integer;
     fSourceArchives: array of TwbBSArchive;
-    procedure Add(const aAssetName, aSourceFileName: string; aSourceFileEntry: TwbBSFileEntry;
-      aCheck: Boolean = True);
+    procedure SetFilters(aFilters: TArray<string>);
+    function Add(const aAssetName, aSourceFileName: string; aSourceFileEntry: TwbBSFileEntry;
+      aCheck: Boolean = True): Boolean;
 
   protected
     function GetSourceFileData(const aFileName: string; aFileObject: Pointer): TBytes; override;
@@ -414,6 +415,7 @@ type
     function AddSourceArchive(const aArchive: string): Integer;
     function AddSource(const aPath: string): Integer;
     property Compress: Boolean read fCompress write fCompress;
+    property Filters: TArray<string> read fFilters write SetFilters;
     property SourceFilesCount: Integer read fSourceFilesCount;
   end;
 
@@ -501,7 +503,7 @@ type
       '.docx', '.7z', '.zip', '.rar', '.tmp'
     );
 
-    class function LastCharPos(const s: string; const Chr: char): Integer; inline;
+    class function LastCharPos(const s: string; const Chr: Char): Integer; inline;
     class function SplitDirName(const aFileName: string; var Dir, Name: string): Integer;
     class function SplitNameExt(const aFileName: string; var Name, Ext: string; aNoExtDot: Boolean = False): Integer;
     class function Split(const aFileName: string): TAssetParts;
@@ -621,7 +623,7 @@ end;
 
 {TwbAsset}
 
-class function TwbAsset.LastCharPos(const s: string; const Chr: char): Integer;
+class function TwbAsset.LastCharPos(const s: string; const Chr: Char): Integer;
 begin
   for Result := Length(s) downto 1 do
     if s[Result] = Chr then
@@ -2361,7 +2363,7 @@ begin
     fCompressionType := DefaultCompression(fType);
 
   // small gimmick for TES3 archives, repacked vanilla ones will be binary identical
-  if (fType = baTES3) and not fMultithreaded then
+  if (fType = baTES3) and not fMultiThreaded then
     aFilesList.CustomSort(AlphabeticalSort);
 
   SetLength(fFiles, aFilesList.Count);
@@ -2421,7 +2423,7 @@ var
   i: Integer;
 begin
   if Length(fArchives) > 1 then s := IntToStr(Length(fArchives)) else s := '';
-  Result := fFilename;
+  Result := fFileName;
   i := TwbAsset.LastCharPos(Result, '.');
   if i <> 0 then Insert(s, Result, i) else Result := Result + s;
 end;
@@ -2767,13 +2769,34 @@ begin
   end;
 end;
 
-procedure TwbMultiSourcePacker.Add(const aAssetName, aSourceFileName: string; aSourceFileEntry: TwbBSFileEntry;
-  aCheck: Boolean = True);
+procedure TwbMultiSourcePacker.SetFilters(aFilters: TArray<string>);
+begin
+  for var f in aFilters do
+    if Trim(f) <> '' then
+      fFilters := fFilters + [Trim(f)];
+end;
+
+function TwbMultiSourcePacker.Add(const aAssetName, aSourceFileName: string; aSourceFileEntry: TwbBSFileEntry;
+  aCheck: Boolean = True): Boolean;
 var
   i: Integer;
   Hash: TwbLookupHash;
   bFound: Boolean;
 begin
+  Result := False;
+  if Length(fFilters) <> 0 then begin
+    bFound := False;
+    var s := ExtractFileName(aAssetName);
+    for i := Low(fFilters) to High(fFilters) do begin
+      bFound := TPath.MatchesPattern(s, fFilters[i], False);
+      if bFound then
+        Break;
+    end;
+
+    if not bFound then
+      Exit;
+  end;
+
   bFound := False;
   Hash := TwbHash.LookupHash(aAssetName, True);
   i := 0; // suppress compiler warning
@@ -2799,15 +2822,15 @@ begin
   end;
   fSourceFiles[i].SourceFileName := aSourceFileName;
   fSourceFiles[i].SourceFileEntry := aSourceFileEntry;
+  Result := True;
 end;
 
 function TwbMultiSourcePacker.AddSourceFile(const aFileName: string): Integer;
 begin
   Result := 0;
-  if FileExists(aFileName) then begin
-    Add(TwbAsset.GetAssetName(aFileName), aFileName, nil);
-    Inc(Result);
-  end;
+  if FileExists(aFileName) then
+    if Add(TwbAsset.GetAssetName(aFileName), aFileName, nil) then
+      Inc(Result);
 end;
 
 function TwbMultiSourcePacker.AddSourceFolder(const aFolder: string): Integer;
@@ -2816,10 +2839,9 @@ begin
   var check := fSourceFilesCount <> 0;
   var path := IncludeTrailingPathDelimiter(aFolder);
   for var f in TDirectory.GetFiles(path, '*.*', TSearchOption.soAllDirectories) do
-    if not TwbAsset.DoNotPack(f) then begin
-      Add(TwbAsset.GetAssetName(f, path), f, nil, check);
-      Inc(Result);
-    end;
+    if not TwbAsset.DoNotPack(f) then
+      if Add(TwbAsset.GetAssetName(f, path), f, nil, check) then
+        Inc(Result);
 end;
 
 function TwbMultiSourcePacker.AddSourceArchive(const aArchive: string): Integer;
@@ -2843,9 +2865,8 @@ begin
   var check := fSourceFilesCount <> 0;
   fSourceArchives := fSourceArchives + [bsa];
   for var f in bsa do
-    Add(f.Name, '', f, check);
-
-  Result := bsa.Count;
+    if Add(f.Name, '', f, check) then
+      Inc(Result);
 end;
 
 function TwbMultiSourcePacker.AddSource(const aPath: string): Integer;
