@@ -16824,8 +16824,8 @@ begin
           end;
           for var i := Low(ActiveRecords) to High(ActiveRecords) do
             with Add do begin
-              Text := (ActiveRecords[i].Element as IwbMainRecord).EditorID;
-              Hint := (ActiveRecords[i].Element as IwbMainRecord).EditorID;
+              Text := (ActiveRecords[i].Element as IwbMainRecord).EditorID + ' [' + (ActiveRecords[i].Element as IwbMainRecord)._File.FileName + ']';
+              Hint := (ActiveRecords[i].Element as IwbMainRecord).EditorID + ' [' + (ActiveRecords[i].Element as IwbMainRecord)._File.FileName + ']';
               Style := vsOwnerDraw;
               Width := Trunc(ColumnWidth * (GetCurrentPPIScreen / PixelsPerInch));
               MinWidth := Width div 2;
