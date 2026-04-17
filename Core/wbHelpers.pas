@@ -16,6 +16,8 @@ uses
   System.Classes,
   System.IniFiles,
   System.SysUtils,
+  System.Variants,
+  JSonDataObjects,
 
   Vcl.Graphics,
 
@@ -44,6 +46,10 @@ function wbAssociateWithExtension(aExt: string; const aName, aDescr: string): Bo
 function ExecuteCaptureConsoleOutput(const aCommandLine: string): Cardinal;
 function wbExpandFileName(const aFileName: string): string;
 
+procedure SerializeArray(const aElement: IwbElement; const aJsonArray: TJsonArray);
+procedure SerializeElement(const aElement: IwbElement; const aJsonObj: TJsonObject);
+function  SerializeElementToJson(const aElement: IwbElement): TJsonObject;
+procedure SerializeStreamArray(const aElement: IwbElement; const aJsonArray: TJsonArray);
 
 type
   PnxLeveledListCheckCircularStack = ^TnxLeveledListCheckCircularStack;
@@ -1077,6 +1083,134 @@ begin
     Elements[i] := aElements[i];
   Result := Elements;
 end;
+
+// **************** PERK Challenge JSON serialization support
+procedure SerializeStreamArray(const aElement: IwbElement; const aJsonArray: TJsonArray);
+var
+  lContainer: IwbContainer;
+  i: Integer;
+begin
+  if not Supports(aElement, IwbContainer, lContainer) then Exit;
+
+  aJsonArray.Clear;
+
+  for i := 0 to Pred(lContainer.ElementCount) do
+  begin
+    var lChild := lContainer.Elements[i];
+    if Assigned(lChild) and (lChild.ElementType = etValue) then
+      aJsonArray.Add(IntToStr(lChild.NativeValue))
+    else
+      aJsonArray.AddObject(nil);
+  end;
+end;
+
+procedure SerializeArray(const aElement: IwbElement; const aJsonArray: TJsonArray);
+var
+  lContainer: IwbContainer;
+  lChild: IwbElement;
+  i: Integer;
+begin
+  if not Supports(aElement, IwbContainer, lContainer) then Exit;
+
+  for i := 0 to Pred(lContainer.ElementCount) do
+  begin
+    lChild := lContainer.Elements[i];
+
+    if not Assigned(lChild) then
+    begin
+      aJsonArray.AddObject(nil);
+      Continue;
+    end;
+
+    case lChild.ElementType of
+      etValue:
+        if VarIsNull(lChild.EditValue) or (lChild.EditValue = '') or
+           (lChild.EditValue = '<null>') then
+          aJsonArray.AddObject(nil)
+        else
+          aJsonArray.Add(lChild.EditValue);
+
+      etStruct, etArray:
+        aJsonArray.AddObject(SerializeElementToJson(lChild));
+    else
+      aJsonArray.Add(lChild.EditValue);
+    end;
+  end;
+end;
+
+procedure SerializeElement(const aElement: IwbElement; const aJsonObj: TJsonObject);
+var
+  lContainer: IwbContainer;
+  lChild: IwbElement;
+  i: Integer;
+  lName: string;
+begin
+  if not Assigned(aElement) or not Assigned(aJsonObj) then Exit;
+
+  if not Supports(aElement, IwbContainer, lContainer) then
+  begin
+    aJsonObj.S[aElement.Name] := aElement.EditValue;
+    Exit;
+  end;
+
+  for i := 0 to Pred(lContainer.ElementCount) do
+  begin
+    lChild := lContainer.Elements[i];
+    if not Assigned(lChild) then Continue;
+
+    lName := lChild.Name;
+
+    // ==================== SPECIAL HANDLING ====================
+    if SameText(lName, 'Type') then
+    begin
+      aJsonObj.S['Type'] := lChild.EditValue;
+      Continue;
+    end;
+
+    if SameText(lName, 'Stream') then
+    begin
+      SerializeStreamArray(lChild, aJsonObj.A['Stream']);
+      Continue;
+    end;
+    // ========================================================
+
+    case lChild.ElementType of
+      etValue:
+        begin
+          if VarIsNull(lChild.EditValue) or (lChild.EditValue = '') or
+             (lChild.EditValue = '<null>') or (lChild.EditValue = 'NULL') then
+            aJsonObj.O[lName] := nil
+          else
+            aJsonObj.S[lName] := lChild.EditValue;
+        end;
+
+      etStruct:
+        begin
+          // Most "Data" fields are structs
+          if SameText(lName, 'Data') then
+            aJsonObj.O[lName] := SerializeElementToJson(lChild)
+          else
+            aJsonObj.O[lName] := SerializeElementToJson(lChild);
+        end;
+
+      etArray:
+        begin
+          if not SameText(lName, 'Stream') then   // already handled above
+            SerializeArray(lChild, aJsonObj.A[lName]);
+        end
+    else
+      aJsonObj.S[lName] := lChild.EditValue;
+    end;
+  end;
+end;
+
+function SerializeElementToJson(const aElement: IwbElement): TJsonObject;
+begin
+  Result := TJsonObject.Create;
+  if Assigned(aElement) then
+    SerializeElement(aElement, Result);
+end;
+// **************** End PERK Challenge JSON serialization support
 
 initialization
   _CRC32AppLock.Initialize;
