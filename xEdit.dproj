@@ -124,6 +124,15 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4)'!=''">
         <DCC_Define>LiteVersion;$(DCC_Define)</DCC_Define>
+        <DCC_DynamicBase>true</DCC_DynamicBase>
+        <DCC_HighEntropyVa>true</DCC_HighEntropyVa>
+        <DCC_MapFileARM>2</DCC_MapFileARM>
+        <DCC_MaxStackSize>16777216</DCC_MaxStackSize>
+        <DCC_MinStackSize>4096</DCC_MinStackSize>
+        <DCC_MinimumEnumSize>4</DCC_MinimumEnumSize>
+        <DCC_OutputDRCFile>true</DCC_OutputDRCFile>
+        <DCC_OutputDependencies>true</DCC_OutputDependencies>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
         <DCC_UseMSBuildExternally>false</DCC_UseMSBuildExternally>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4_Win64)'!=''">
@@ -134,7 +143,6 @@
         <DCC_MinStackSize>4096</DCC_MinStackSize>
         <DCC_MinimumEnumSize>4</DCC_MinimumEnumSize>
         <DCC_OutputDRCFile>true</DCC_OutputDRCFile>
-        <DCC_OutputDependencies>true</DCC_OutputDependencies>
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_5)'!=''">

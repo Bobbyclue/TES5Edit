@@ -2,10 +2,10 @@
     <PropertyGroup>
         <Base>True</Base>
         <AppType>Console</AppType>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">LiteDebug</Config>
         <FrameworkType>None</FrameworkType>
         <MainSource>xDump.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectGuid>{8CD0A7C7-3B98-4D5D-892F-E91C7E50D144}</ProjectGuid>
         <ProjectName Condition="'$(ProjectName)'==''">xDump</ProjectName>
         <ProjectVersion>20.3</ProjectVersion>
@@ -61,13 +61,6 @@
     <PropertyGroup Condition="'$(Config)'=='LiteDebug' or '$(Cfg_4)'!=''">
         <Cfg_4>true</Cfg_4>
         <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win32)'!=''">
-        <Cfg_4_Win32>true</Cfg_4_Win32>
-        <CfgParent>Cfg_4</CfgParent>
-        <Cfg_4>true</Cfg_4>
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
@@ -138,11 +131,17 @@
         <ILINK_MapFileType>DetailedSegments</ILINK_MapFileType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4)'!=''">
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
         <DCC_Define>LiteVersion;$(DCC_Define)</DCC_Define>
+        <DCC_DynamicBase>true</DCC_DynamicBase>
+        <DCC_HighEntropyVa>true</DCC_HighEntropyVa>
+        <DCC_LargeAddressAware>true</DCC_LargeAddressAware>
+        <DCC_MaxStackSize>16777216</DCC_MaxStackSize>
+        <DCC_MinStackSize>4096</DCC_MinStackSize>
+        <DCC_MinimumEnumSize>4</DCC_MinimumEnumSize>
+        <DCC_Optimize>true</DCC_Optimize>
+        <DCC_OutputDRCFile>true</DCC_OutputDRCFile>
         <DCC_UseMSBuildExternally>false</DCC_UseMSBuildExternally>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
-        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

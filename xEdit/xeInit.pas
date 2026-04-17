@@ -33,6 +33,7 @@ var
   xeQuickClean             : Boolean;
   xeQuickEdit              : Boolean;
   xeQuickCleanAutoSave     : Boolean;
+  xeQuickSEQ               : Boolean;
   xeAutoLoad               : Boolean;
   xeAutoExit               : Boolean;
   xeAutoGameLink           : Boolean;
@@ -950,8 +951,7 @@ begin
     ToolSources        := [tsPlugins];
     wbLightName        := 'Small';
 
-    if    wbStarfieldIsABugInfestedHellhole
-      and FindCmdLineSwitch('ItJustWorksTM')
+    if    FindCmdLineSwitch('ItJustWorksTM')
       and FindCmdLineSwitch('ThisIsFine')
       and FindCmdLineSwitch('GiveMeTheRedPill')
     then begin
@@ -1079,6 +1079,7 @@ begin
     end;
     gmSF1: begin
       wbComplexFileFileID   := True;
+      wbEnforceAllMasters   := True;
       wbVWDInTemporary      := True;
       wbVWDAsQuestChildren  := True;
       wbLoadBSAs            := True;  // localization won't work otherwise
@@ -1378,9 +1379,8 @@ begin
   if FindCmdLineSwitch('MoreInfoForIndex') then
     wbMoreInfoForIndex := true;
 
-  if not (wbIsStarfield and wbStarfieldIsABugInfestedHellhole) then
-    if wbIKnowWhatImDoing and FindCmdLineSwitch('IKnowIllBreakMyGameWithThis') then
-      wbAllowEditGameMaster := True;
+  if wbIKnowWhatImDoing and FindCmdLineSwitch('IKnowIllBreakMyGameWithThis') then
+    wbAllowEditGameMaster := True;
 
   if FindCmdLineSwitch('TrackAllEditorID') then
     wbTrackAllEditorID := True;
@@ -1421,6 +1421,11 @@ begin
       ShowMessage(wbToolName+' is incompatible with quickedit request!')
     else
       xeQuickEdit := True;
+  end;
+
+  if wbFindCmdLineParam('generateseq', xePluginToUse) then begin
+    xeAutoLoad := True;
+    xeQuickSEQ := True;
   end;
 
   if wbToolMode in wbPluginModes then // look for the file name

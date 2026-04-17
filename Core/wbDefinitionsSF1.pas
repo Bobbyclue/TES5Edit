@@ -7922,8 +7922,8 @@ begin
       5,  'Slayton Aerospace',
       6,  'United Colonies',
       7,  'Crimson Fleet',
-      8,  'House Varuun',
-      9,  'Ship Upgrade',
+      9,  'House Varuun',
+      10,  'Ship Upgrade',
       11, 'Terran Armada'
     ]);
 

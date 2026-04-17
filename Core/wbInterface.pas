@@ -284,6 +284,7 @@ var
   wbCompareRawData                   : Boolean    = False;
   wbDisableFormIDCheck               : Boolean    = False;
   wbComplexFileFileID                : Boolean    = False;
+  wbEnforceAllMasters                : Boolean    = False;  // adds all masters of masters when adding a master and prevents cleaning them
 
   wbCS                               : Boolean    = False;
   wbOBME                             : Boolean    = False;
@@ -387,7 +388,7 @@ var
   wbMOProfile                        : string;
   wbMOHookFile                       : string;
 
-  wbStarfieldIsABugInfestedHellhole  : Boolean    = True;
+  wbStarfieldIsABugInfestedHellhole  : Boolean    = False;
   wbRedPill                          : Boolean    = False;
   wbAlwaysLoadGameMaster             : Boolean    = True;
 
@@ -913,6 +914,7 @@ type
     procedure Add(const aFile: IwbFile);
     procedure SortByLoadOrder;
     procedure SortByReverseLoadOrder;
+    function Find(const aFileName: string): IwbFile;
   end;
 
   TwbModuleType = (
@@ -1025,6 +1027,16 @@ type
 
   TwbFormIDs = TArray<TwbFormID>;
   TwbFormIDDictionary = TDictionary<TwbFormID, TwbNothing>;
+
+  TwbSlotCounts = record
+    Full   : Byte;
+    Light  : SmallInt;
+    Medium : Byte;
+
+    class operator Initialize(out aDest: TwbSlotCounts);
+    class function Create(const aMasters : TwbFiles): TwbSlotCounts; static;
+    function Total: SmallInt; inline;
+  end;
 
   TwbCRC32Helper = record helper for TwbCRC32
     function AssignFromString(const s: string): Boolean;
@@ -2323,6 +2335,7 @@ type
   IwbNamedDef = interface(IwbDef)
     ['{F8FEDE89-C089-42C5-B587-49A7D87055F0}']
     function GetName: string;
+    procedure SetName(const aName: string);
     function GetSummaryName: string;
     function GetFullName: string;
     function GetSingularName: string;
@@ -2350,7 +2363,8 @@ type
     function SetSummaryName(const aName: string): IwbNamedDef;
 
     property Name: string
-      read GetName;
+      read GetName
+      write SetName;
     property SummaryName: string
       read GetSummaryName;
     property FullName: string
@@ -2546,7 +2560,7 @@ type
     function SetRequired(const aRequired : Boolean = True): IwbRecordMemberDef{Self};
   end;
 
-  TwbUsedMasters = array[Byte] of Boolean;
+  TwbUsedMasters = array[0..4610] of Boolean;
   PwbUsedMasters = ^TwbUsedMasters;
 
   IwbValueDef = interface(IwbNamedDef)
@@ -2580,7 +2594,7 @@ type
     function IncludeFlag(aFlag: TwbDefFlag; aOnlyWhenTrue : Boolean = True): IwbValueDef{Self};
     function SetSummaryName(const aName: string): IwbValueDef;
 
-    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean;
+    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
     procedure FindUsedMasters(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aMasters: PwbUsedMasters);
     function CompareExchangeFormID(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean;
 
@@ -2947,7 +2961,7 @@ type
 
     function CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean;
 
-    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64;
+    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64;
     procedure FindUsedMasters(aInt: Int64; aMasters: PwbUsedMasters; const aElement: IwbElement);
     function CompareExchangeFormID(var aInt: Int64; aOldFormID: TwbFormID; aNewFormID: TwbFormID; const aElement: IwbElement): Boolean;
 
@@ -4884,7 +4898,7 @@ type
 
   TwbToolMode   = (tmView, tmEdit, tmDump, tmExport, tmOnamUpdate, tmMasterUpdate, tmMasterRestore, tmLODgen, tmScript,
                     tmTranslate, tmESMify, tmESPify, tmSortAndCleanMasters,
-                    tmCheckForErrors, tmCheckForITM, tmCheckForDR);
+                    tmCheckForErrors, tmCheckForITM, tmCheckForDR, tmGenerateSEQ);
   TwbToolSource = (tsPlugins, tsSaves);
   TwbSetOfMode  = set of TwbToolMode;
   TwbSetOfSource  = set of TwbToolSource;
@@ -4917,7 +4931,8 @@ var
     tmScript,
     tmCheckForErrors,
     tmCheckForITM,
-    tmCheckForDR
+    tmCheckForDR,
+    tmGenerateSEQ
   ];
 
   wbPluginModes: TwbSetOfMode = [ // Auto modes that require a specific plugin to be provided.
@@ -5049,7 +5064,7 @@ function wbIsInternalEdit: Boolean;
 function StrToSignature(const s: string): TwbSignature;
 function IntToSignature(aInt: Cardinal): TwbSignature; inline;
 
-function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
+function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; aAllowHardcodedRangeUse: Boolean): TwbFormID;
 
 threadvar
   _InternalEditCount: Integer;
@@ -5984,6 +5999,7 @@ type
 
     {---IwbNamedDef---}
     function GetName: string;
+    procedure SetName(const aName: string);
     function GetSummaryName: string;
     function GetFullName: string; virtual;
     function MakeSingularName(const aName: string): string;
@@ -6613,7 +6629,7 @@ type
     function IncludeFlag(aFlag: TwbDefFlag; aOnlyWhenTrue : Boolean = True): IwbValueDef{Self}; virtual;
     function SetSummaryName(const aName: string): IwbValueDef;
 
-    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean; virtual;
+    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; virtual;
     procedure FindUsedMasters(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aMasters: PwbUsedMasters); virtual;
     function CompareExchangeFormID(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean; virtual;
   end;
@@ -6855,7 +6871,7 @@ type
     procedure SetLinksTo(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aValue: IwbElement); override;
     procedure BuildRef(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement); override;
 
-    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean; override;
+    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aMasters: PwbUsedMasters); override;
     function SetToDefault(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement): Boolean; override;
   public
@@ -7087,7 +7103,7 @@ type
 
     function SetDefaultNativeValue(const aValue: Variant): IwbValueDef; override;
 
-    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean; override;
+    function MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean; override;
     procedure FindUsedMasters(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aMasters: PwbUsedMasters); override;
     function CompareExchangeFormID(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; aOldFormID: TwbFormID; aNewFormID: TwbFormID): Boolean; override;
 
@@ -7392,7 +7408,7 @@ type
 
     function CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean; override;
 
-    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64; virtual;
+    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64; virtual;
     procedure FindUsedMasters(aInt: Int64; aMasters: PwbUsedMasters; const aElement: IwbElement); virtual;
     function CompareExchangeFormID(var aInt: Int64; aOldFormID: TwbFormID; aNewFormID: TwbFormID; const aElement: IwbElement): Boolean; virtual;
 
@@ -7434,7 +7450,7 @@ type
     function CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean; override;
     function Assign(const aTarget: IwbElement; aIndex: Integer; const aSource: IwbElement; aOnlySK: Boolean): IwbElement; override;
 
-    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64; override;
+    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64; override;
     procedure FindUsedMasters(aInt: Int64; aMasters: PwbUsedMasters; const aElement: IwbElement); override;
     function CompareExchangeFormID(var aInt: Int64; aOldFormID: TwbFormID; aNewFormID: TwbFormID; const aElement: IwbElement): Boolean; override;
 
@@ -7496,7 +7512,7 @@ type
     function CanAssign(const aElement: IwbElement; aIndex: Integer; const aDef: IwbDef): Boolean; override;
     function Assign(const aTarget: IwbElement; aIndex: Integer; const aSource: IwbElement; aOnlySK: Boolean): IwbElement; override;
 
-    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64; override;
+    function MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64; override;
     procedure FindUsedMasters(aInt: Int64; aMasters: PwbUsedMasters; const aElement: IwbElement); override;
     function CompareExchangeFormID(var aInt: Int64; aOldFormID: TwbFormID; aNewFormID: TwbFormID; const aElement: IwbElement): Boolean; override;
 
@@ -10569,6 +10585,11 @@ begin
   Result := ndName;
 end;
 
+procedure TwbNamedDef.SetName(const aName: string);
+begin
+  ndName := aName;
+end;
+
 function TwbNamedDef.GetPath: string;
 var
   Parent: IwbDef;
@@ -13397,7 +13418,7 @@ begin
   end;
 end;
 
-function TwbIntegerDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean;
+function TwbIntegerDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   OldValue : Int64;
   NewValue : Int64;
@@ -18219,10 +18240,23 @@ begin
   Result := True;
 end;
 
-function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; aAllowHardcodedRangeUse: Boolean): TwbFormID;
+function FixupFormID(const aFormID: TwbFormID; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; aAllowHardcodedRangeUse: Boolean): TwbFormID;
 var
-  FileID : TwbFileID;
-  i      : Integer;
+  FileID    : TwbFileID;
+  i         : Integer;
+  OldCount  : SmallInt;
+  NewCount  : SmallInt;
+  Slot      : SmallInt;
+
+  function CreateByType(const aType: TwbModuleType; aInt: SmallInt): TwbFileID;
+  begin
+    case aType of
+      mtFull: Result := TwbFileID.CreateFull(aInt);
+      mtMedium: Result := TwbFileID.CreateMedium(aInt);
+      mtLight: Result := TwbFileID.CreateLight(aInt);
+    end;
+  end;
+
 begin
   Result := aFormID;
 
@@ -18240,9 +18274,32 @@ begin
 
   FileID := Result.FileID;
 
-  if aNewCount > aOldCount then
-    if FileID.FullSlot >= aOldCount then begin
-      FileID := TwbFileID.CreateFull(aNewCount);
+  OldCount := aOldCount.Total;
+  NewCount := aNewCount.Total;
+  Slot := FileID.FullSlot;
+
+  if wbComplexFileFileID then
+  case FileID.GetModuleType of
+    mtFull: begin
+      OldCount := aOldCount.Full;
+      NewCount := aNewCount.Full;
+      Slot := FileID.FullSlot;
+    end;
+    mtMedium: begin
+      OldCount := aOldCount.Medium;
+      NewCount := aNewCount.Medium;
+      Slot := FileID.MediumSlot;
+    end;
+    mtLight: begin
+      OldCount := aOldCount.Light;
+      NewCount := aNewCount.Light;
+      Slot := FileID.LightSlot;
+    end;
+  end;
+
+  if NewCount > OldCount then
+    if Slot >= OldCount then begin
+      FileID := CreateByType(FileID.GetModuleType, NewCount);
       Result.FileID := FileID;
       Exit;
     end;
@@ -18253,15 +18310,15 @@ begin
       Exit;
     end;
 
-  if aNewCount < aOldCount then
-    if FileID.FullSlot >= aOldCount then begin
-      FileID := TwbFileID.CreateFull(aNewCount);
+  if NewCount < OldCount then
+    if Slot >= OldCount then begin
+      FileID := CreateByType(FileID.GetModuleType, NewCount);
       Result.FileID := FileID;
       Exit;
     end;
 end;
 
-function TwbFormIDDefFormater.MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64;
+function TwbFormIDDefFormater.MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64;
 begin
   Result := aInt;
   if dfUseLoadOrder in defFlags then
@@ -19719,7 +19776,7 @@ begin
   Result := inherited IncludeFlag(aFlag, aOnlyWhenTrue) as IwbValueDef;
 end;
 
-function TwbValueDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean;
+function TwbValueDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 begin
   Result := False;
   {can be overriden}
@@ -20363,7 +20420,7 @@ begin
   Result := False;
 end;
 
-function TwbIntegerDefFormater.MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte; const aElement: IwbElement): Int64;
+function TwbIntegerDefFormater.MastersUpdated(aInt: Int64; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts; const aElement: IwbElement): Int64;
 begin
   Result := aInt;
 end;
@@ -21852,7 +21909,7 @@ begin
     Result := _File.RecordByEditorID[ToStringTransform(aBasePtr, aEndPtr, aElement, ttToSortKey)];
 end;
 
-function TwbStringMgefCodeDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: Byte): Boolean;
+function TwbStringMgefCodeDef.MastersUpdated(aBasePtr, aEndPtr: Pointer; const aElement: IwbElement; const aOld, aNew: TwbFileIDs; aOldCount, aNewCount: TwbSlotCounts): Boolean;
 var
   lLen, Len : NativeUInt;
   MgefCode  : PCardinal;
@@ -21889,9 +21946,9 @@ begin
   if (MgefCode^ and $80000000) <> 0 then begin
     { yes, it's a dynamic code }
 
-    if aNewCount > aOldCount then
-      if (MgefCode^ and $000000FF) >= aOldCount then begin
-        MgefCode^ := (MgefCode^ and $FFFFFF00) or Cardinal(aNewCount);
+    if aNewCount.Total > aOldCount.Total then
+      if (MgefCode^ and $000000FF) >= aOldCount.Total then begin
+        MgefCode^ := (MgefCode^ and $FFFFFF00) or Cardinal(aNewCount.Total);
         Result := True;
         Exit;
       end;
@@ -21904,9 +21961,9 @@ begin
         Exit;
       end;
 
-    if aNewCount < aOldCount then
-      if (MgefCode^ and $000000FF) >= aOldCount then begin
-        MgefCode^ := (MgefCode^ and $FFFFFF00) or Cardinal(aNewCount);
+    if aNewCount.Total < aOldCount.Total then
+      if (MgefCode^ and $000000FF) >= aOldCount.Total then begin
+        MgefCode^ := (MgefCode^ and $FFFFFF00) or Cardinal(aNewCount.Total);
         Result := True;
         Exit;
       end;
@@ -22497,8 +22554,8 @@ end;
 function TwbIntegerDefFormaterUnion.MastersUpdated(aInt      : Int64;
                                              const aOld      : TwbFileIDs;
                                              const aNew      : TwbFileIDs;
-                                                   aOldCount : Byte;
-                                                   aNewCount : Byte;
+                                                   aOldCount : TwbSlotCounts;
+                                                   aNewCount : TwbSlotCounts;
                                              const aElement  : IwbElement)
                                                              : Int64;
 var
@@ -23149,6 +23206,34 @@ begin
         Result := 'XX';
 end;
 
+{ TwbSlotCounts }
+
+class operator TwbSlotCounts.Initialize(out aDest: TwbSlotCounts);
+begin
+  FillChar(aDest, SizeOf(aDest), 0);
+end;
+
+class function TwbSlotCounts.Create(const aMasters : TwbFiles): TwbSlotCounts;
+begin
+  if wbComplexFileFileID then
+  begin
+    // need to build counts per type
+    for var lMaster in aMasters do
+      case lMaster.ModuleType of
+        mtFull   : Inc(Result.Full);
+        mtMedium : Inc(Result.Medium);
+        mtLight  : Inc(Result.Light);
+      end;
+  end
+  else
+    Result.Full := Length(aMasters);
+end;
+
+function TwbSlotCounts.Total: SmallInt;
+begin
+  Result := Full + Medium + Light;
+end;
+
 { TwbCRC32Helper }
 
 function TwbCRC32Helper.AssignFromString(const s: string): Boolean;
@@ -23653,6 +23738,17 @@ begin
   Len := Length(Self);
   SetLength(Self, Succ(Len));
   Self[Len] := aFile;
+end;
+
+function TwbFilesHelper.Find(const aFileName: string): IwbFile;
+var
+  i : integer;
+begin
+    for i := Low(Self) to High(Self) do
+      if SameText(aFileName, Self[i].FileName) then begin
+        Result := Self[i];
+        Break;
+      end;
 end;
 
 { TwbBaseStringDef }
