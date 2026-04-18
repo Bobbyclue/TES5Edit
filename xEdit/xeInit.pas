@@ -1433,6 +1433,9 @@ begin
   if FindCmdLineSwitch('SimpleFormIDs') then
     wbPrettyFormID := False;
 
+  if FindCmdLineSwitch('EnforceAllMasters') then
+    wbEnforceAllMasters := True;
+
   if wbFindCmdLineParam('quickedit', xePluginToUse) then begin
     if not (wbToolMode = tmEdit) then
       ShowMessage(wbToolName+' is incompatible with quickedit request!')
