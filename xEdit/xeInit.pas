@@ -1017,11 +1017,15 @@ begin
       wbVWDInTemporary      := True;
       wbLoadBSAs            := False;
       wbCanSortINFO         := True;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmFO3: begin
       wbVWDInTemporary      := True;
       wbLoadBSAs            := False;
       wbCanSortINFO         := True;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmTES3: begin
       wbLoadBSAs            := False;
@@ -1032,6 +1036,8 @@ begin
       wbBuildRefs           := False;
       wbVWDInTemporary      := True;
       wbCreateContainedIn   := False;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmTES4: begin
       if (not FileExists(wbDataPath + 'Oblivion.esm')) and FileExists(wbDataPath + 'Nehrim.esm') then begin
@@ -1041,12 +1047,16 @@ begin
       wbLoadBSAs            := True;
       wbAllowInternalEdit   := false;
       wbCanSortINFO         := True;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
       wbOBME                := FileExists(wbDataPath + 'OBSE\Plugins\OBME.dll');
     end;
     gmTES4R: begin
       wbLoadBSAs            := False;
       wbAllowInternalEdit   := False;
       wbCanSortINFO         := True;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmTES5, gmEnderal, gmTES5VR, gmSSE, gmEnderalSE: begin
       wbVWDInTemporary      := True;
@@ -1057,6 +1067,8 @@ begin
       wbHasAddedLightSupport := wbVRESL;
       wbHasAddedUpdateSupport := wbVRESL;
       wbCS                  := wbIsSkyrimSE and FileExists(wbDataPath + 'SKSE\Plugins\CommunityShaders.dll');
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmFO4, gmFO4VR: begin
       wbVWDInTemporary      := True;
@@ -1068,6 +1080,8 @@ begin
       wbVRESL               := (wbGameMode in [gmFO4VR]) and FileExists(wbDataPath + 'F4SE\Plugins\falloutvresl.dll');
       wbHasAddedLightSupport := wbVRESL;
       wbHasAddedUpdateSupport := wbVRESL;
+      wbAllowESPMasters     := True;
+      wbAllowESPMastersOnSave := True;
     end;
     gmFO76: begin
       wbVWDInTemporary      := True;
@@ -1174,6 +1188,9 @@ begin
         wbStripMasters := False;
       end;
     end;
+
+    if FindCmdLineSwitch('AllowESPMaster') then
+      wbAllowESPMasters := True;
   end;
 
   if wbToolMode = tmEdit then begin
@@ -1353,7 +1370,7 @@ begin
       tsPlugins: DefineTES4;
     end;
     gmTES4R: case wbToolSource of
-      tsPlugins: DefineTES4;           
+      tsPlugins: DefineTES4;
     end;
     gmTES5, gmTES5VR, gmEnderal, gmSSE, gmEnderalSE: case wbToolSource of
       tsSaves:   DefineTES5Saves;
@@ -1403,13 +1420,13 @@ begin
   else
     if FindCmdLineSwitch('PseudoUpdate') then
       wbPseudoUpdate := True;
-	  
+
   if wbComplexFileFileID then begin
     wbIgnoreLight := False;
-	wbPseudoLight := False;
-	wbIgnoreMedium := False;
-	wbPseudoMedium := False;
-	wbIgnoreUpdate := False;
+    wbPseudoLight := False;
+    wbIgnoreMedium := False;
+    wbPseudoMedium := False;
+    wbIgnoreUpdate := False;
     wbPseudoUpdate := False;
   end;
 

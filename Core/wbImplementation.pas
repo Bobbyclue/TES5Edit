@@ -2675,8 +2675,8 @@ begin;
       for i := 0 to Pred(aMasters.Count) do begin
         s := Trim(aMasters[i]);
         t := ExtractFileExt(s);
-        if SameText(t, '.esp') and wbIsStarfield then
-          raise Exception.CreateFmt('[AddMasters] You cannot add a .esp to a master in %s.', [wbGameName]);
+        if SameText(t, '.esp') and (not wbAllowESPMasters) then
+          raise Exception.CreateFmt('[AddMasters] You cannot add a .esp as a master in %s.', [wbGameName]);
         if SameText(t, '.esm') or SameText(t, '.esp') or (wbIsLightSupported and SameText(t, '.esl')) then
           lMasters.Add(s);
       end;
@@ -5294,6 +5294,11 @@ begin
       SetIsESM(True);
       SetIsLight(True);
     end;
+
+    if not wbAllowESPMastersOnSave then
+      for i := Low(flModule.miMasters) to High(flModule.miMasters) do
+        if flModule.miMasters[i].miExtension = meESP then
+          raise Exception.CreateFmt('%s modules must never have .esp masters.', [wbGameName]);
 
     if wbIsStarfield then begin
       if GetIsUpdateDirect and (GetIsLightDirect or GetIsMediumDirect) then
