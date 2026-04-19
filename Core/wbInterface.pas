@@ -388,6 +388,8 @@ var
   wbMOProfile                        : string;
   wbMOHookFile                       : string;
 
+  wbAllowESPMasters                  : Boolean    = False;
+  wbAllowESPMastersOnSave            : Boolean    = False;
   wbStarfieldIsABugInfestedHellhole  : Boolean    = False;
   wbRedPill                          : Boolean    = False;
   wbAlwaysLoadGameMaster             : Boolean    = True;

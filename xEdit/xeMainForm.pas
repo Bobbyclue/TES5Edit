@@ -8558,7 +8558,7 @@ begin
               if Result then
                 Result := sl.IndexOf(a._File.FileName) < 0;
               if Result then
-                Result := not (wbIsStarfield and SameText(ExtractFileExt(a._File.FileName), '.esp'));
+                Result := not ((not wbAllowESPMasters) and SameText(ExtractFileExt(a._File.FileName), '.esp'));
               if Result then
                 Result := not (wbIsStarfield and a._File.IsBlueprint);
             end;
