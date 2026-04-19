@@ -360,6 +360,7 @@ object frmMain: TfrmMain
                 Width = 0
               end>
             GridLines = True
+            HideSelection = False
             MultiSelect = True
             OwnerData = True
             ReadOnly = True
