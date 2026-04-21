@@ -8649,7 +8649,6 @@ begin
   if Result <> 0 then
   begin
     wbProgress(ScriptSelfTerminated + IntToStr(Result));
-    // Note: This will exit the calling procedure too since we're using Exit
     Exit;
   end;
 

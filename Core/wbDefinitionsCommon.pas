@@ -2296,9 +2296,7 @@ begin
   if not Assigned(aElement) then
     Exit;
 
-  var lContainer := aElement.Container;
-  if not Assigned(lContainer) then
-    Exit;
+  var lContainer := aElement as IwbContainerElementRef;
 
   Result := lContainer.ElementNativeValues['RDAT\Type'];
 end;
