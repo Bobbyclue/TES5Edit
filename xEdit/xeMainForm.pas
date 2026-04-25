@@ -902,6 +902,8 @@ type
     function SetAllToMaster: Boolean;
     function UpdateAllOnam: Boolean;
     function RestorePluginsFromMaster: Boolean;
+    function ScriptProcessSingleElement(const aElement: IwbElement; var aCount: Cardinal; const abShowMessages: boolean): Variant;
+    function ScriptCanProcessElement(const aElement: IwbElement): Boolean;
     procedure ApplyScriptToSelection(const aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean); overload;
     procedure ApplyScriptToSelection(const aSelection: TDynElements; aCount: Cardinal; const abShowMessages: boolean); overload;
     procedure ApplyScript(const aScriptName: string; const aScript: string; aRefByMode: Boolean = False);
@@ -1031,6 +1033,7 @@ type
     Script: IxeScript;
   public
     ScriptProcessElements: TwbElementTypes;
+    ScriptProcessSignatures: string;
     MonospaceFontName: string;
   private
     ScriptHotkeys: TStringList;
@@ -7995,6 +7998,7 @@ begin
   else
     ReferencedBySortColumn := Column.Index;
 
+  lvReferencedBy.ClearSelection;
   ApplyReferencedByAlphaSort;
 end;
 
@@ -8558,7 +8562,7 @@ begin
               if Result then
                 Result := sl.IndexOf(a._File.FileName) < 0;
               if Result then
-                Result := not (wbIsStarfield and SameText(ExtractFileExt(a._File.FileName), '.esp'));
+                Result := not ((not wbAllowESPMasters) and SameText(ExtractFileExt(a._File.FileName), '.esp'));
               if Result then
                 Result := not (wbIsStarfield and a._File.IsBlueprint);
             end;
@@ -8598,60 +8602,83 @@ begin
   end;
 end;
 
+function TfrmMain.ScriptCanProcessElement(const aElement: IwbElement): Boolean;
+var
+  Signature: TwbSignature;
+  CheckSignature: boolean;
+begin
+  Result := False;
+  CheckSignature := ScriptProcessSignatures <> '';
+
+  if not Assigned(aElement) then
+    Exit;
+
+  if not (aElement.ElementType in ScriptProcessElements) then
+    Exit;
+
+  if (aElement.ElementType = etMainRecord) and CheckSignature then
+  begin
+    Signature := (aElement as IwbMainRecord).Signature;
+    if not ContainsStr(ScriptProcessSignatures, Signature) then
+      Exit;
+  end;
+
+  Result := True;
+end;
+
+function TfrmMain.ScriptProcessSingleElement(const aElement: IwbElement; var aCount: Cardinal; const abShowMessages: boolean): Variant;
+begin
+  if not (aElement.ElementType in ScriptProcessElements) then
+    Exit;
+
+  if not abShowMessages then
+    wbProgressUnlock;
+
+  try
+    Inc(wbHideStartTime);
+    try
+      Result := Script.CallFunction('Process', [aElement]);
+    finally
+      Dec(wbHideStartTime);
+    end;
+  finally
+    if not abShowMessages then
+      wbProgressLock;
+  end;
+
+  if Result <> 0 then
+  begin
+    wbProgress(ScriptSelfTerminated + IntToStr(Result));
+    Exit;
+  end;
+
+  Inc(aCount);
+  wbCurrentProgress := 'Processed Records: ' + aCount.ToString;
+end;
+
 procedure TfrmMain.ApplyScriptToSelection(const aSelection: TNodeArray; aCount: Cardinal; const abShowMessages: boolean);
 var
-  Node        : PVirtualNode;
+  Node: PVirtualNode;
 begin
   for var i := Low(aSelection) to High(aSelection) do
   begin
-    var StartNode: PVirtualNode := aSelection[i];
+    var StartNode := aSelection[i];
+    if not Assigned(StartNode) then
+      Continue;
 
-    if Assigned(StartNode) then
-    begin
-      Node := vstNav.GetLast(StartNode);
-
-      if not Assigned(Node) then
-        Node := StartNode;
-    end
-    else
-      Node := nil;
+    Node := vstNav.GetLast(StartNode);
+    if not Assigned(Node) then
+      Node := StartNode;
 
     while Assigned(Node) do
     begin
-      var NextNode: PVirtualNode := vstNav.GetPrevious(Node);
+      var NextNode := vstNav.GetPrevious(Node);
       var NodeData: PNavNodeData := vstNav.GetNodeData(Node);
 
-      if Assigned(NodeData.Element) then
-        if NodeData.Element.ElementType in ScriptProcessElements then
-        begin
-          var Result: Variant;
-
-          if not abShowMessages then
-            wbProgressUnlock;
-
-          try
-            Inc(wbHideStartTime);
-
-            try
-              Result := Script.CallFunction('Process', [NodeData.Element]);
-            finally
-              Dec(wbHideStartTime);
-            end;
-          finally
-            if not abShowMessages then
-              wbProgressLock;
-          end;
-
-          if Result <> 0 then
-          begin
-            wbProgress(ScriptSelfTerminated + IntToStr(Result));
-            Exit;
-          end;
-
-          Inc(aCount);
-
-          wbCurrentProgress := 'Processed Records: ' + aCount.ToString;
-        end;
+      if Assigned(NodeData) and Assigned(NodeData.Element) then
+        if ScriptCanProcessElement(NodeData.Element) then
+            if ScriptProcessSingleElement(NodeData.Element, aCount, abShowMessages) <> 0 then
+              Exit;
 
       if Node = StartNode then
         Node := nil
@@ -8667,37 +8694,10 @@ procedure TfrmMain.ApplyScriptToSelection(const aSelection: TDynElements; aCount
 begin
   for var i := Low(aSelection) to High(aSelection) do
   begin
-    var Element: IwbElement := aSelection[i];
-
-    if Element.ElementType in ScriptProcessElements then
-    begin
-      var Result: Variant;
-
-      if not abShowMessages then
-        wbProgressUnlock;
-
-      try
-        Inc(wbHideStartTime);
-
-        try
-          Result := Script.CallFunction('Process', [Element]);
-        finally
-          Dec(wbHideStartTime);
-        end;
-      finally
-        if not abShowMessages then
-          wbProgressLock;
-      end;
-
-      if Result <> 0 then begin
-        wbProgress(ScriptSelfTerminated + IntToStr(Result));
-        Exit;
-      end;
-
-      Inc(aCount);
-
-      wbCurrentProgress := 'Processed Records: ' + aCount.ToString;
-    end;
+    if Assigned(aSelection[i]) then
+        if ScriptCanProcessElement(aSelection[i]) then
+            if ScriptProcessSingleElement(aSelection[i], aCount, abShowMessages) <> 0 then
+              Exit;
 
     wbTick;
   end;
@@ -8730,6 +8730,7 @@ begin
 
   Count := 0;
   ScriptProcessElements := [etMainRecord];
+  ScriptProcessSignatures := '';
 
   Script := TxeScriptHost.CreateScript(aScriptName, aScript);
   try

@@ -388,6 +388,8 @@ var
   wbMOProfile                        : string;
   wbMOHookFile                       : string;
 
+  wbAllowESPMasters                  : Boolean    = False;
+  wbAllowESPMastersOnSave            : Boolean    = False;
   wbStarfieldIsABugInfestedHellhole  : Boolean    = False;
   wbRedPill                          : Boolean    = False;
   wbAlwaysLoadGameMaster             : Boolean    = True;
@@ -716,7 +718,8 @@ type
     dfCanContainReflection,
     dfCanContainUnmappedFormID,
     dfIsReflection,
-    dfUnmappedFormID
+    dfUnmappedFormID,
+    dfAfterSetOnIDUpdate
   );
 
   TwbDefFlags = set of TwbDefFlag;
@@ -883,7 +886,9 @@ type
 
     //the following entries must match TwbElementErrorType:
     esReportedErrorReading,
-    esReportedErrorUnusedData
+    esReportedErrorUnusedData,
+
+    esInternalLoad
   );
 
   TwbElementStates = set of TwbElementState;
@@ -2320,7 +2325,7 @@ type
   TwbIntegerDefFormaterUnionDecider = reference to function(const aElement: IwbElement): Integer;
   TwbIntOverlayCallback             = reference to function(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): Int64;
   TwbIntToStrCallback               = reference to function(aInt: Int64; const aElement: IwbElement; aType: TwbCallbackType): string;
-  TwbIsRemovableCallback           = reference to function(const aElement: IwbElement): Boolean;
+  TwbIsRemovableCallback            = reference to function(const aElement: IwbElement): Boolean;
   TwbIsSortedCallback               = reference to function(const aContainer: IwbContainer): Boolean;
   TwbLinksToCallback                = reference to function(const aElement: IwbElement): IwbElement;
   TwbSetToDefaultCallback           = reference to function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Boolean;

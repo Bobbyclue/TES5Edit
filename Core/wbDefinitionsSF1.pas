@@ -30,6 +30,7 @@ uses
   wbDefinitionsCommon,
   wbDefinitionsReflection,
   wbDefinitionsSignatures,
+  wbHelpers,
   wbInterface;
 
 const
@@ -5075,6 +5076,776 @@ begin
     'Take Hit Damage'
     ];
 
+  var wbVirtualPerkActivityUpdateJSON := procedure(const aElement: IwbElement)
+  var
+    lATAV: IwbElement;
+    JsonRoot: TJsonObject;
+  begin
+    if not Assigned(aElement) then
+      Exit;
+
+    // get the NULL root
+    var lContainer := aElement.Container;
+    var lElement: IwbElement;
+    while Assigned(lContainer) do begin
+      lElement := lContainer.ElementBySignature['NULL'];
+      if Assigned(lElement) then
+        Break;
+      lContainer := lContainer.Container;
+    end;
+
+    if not Assigned(lElement) then
+      Exit;
+
+    lATAV := lContainer.ElementBySignature['ATAV'];
+    if not Assigned(lATAV) then Exit;
+
+    if wbBeginInternalEdit then
+    try
+      var lFirstChild := (lElement as IwbContainer).Elements[0];
+      JsonRoot := SerializeElementToJson(lFirstChild);
+      try
+        lATAV.EditValue := JsonRoot.ToJSON(False);
+      finally
+        JsonRoot.Free;
+      end;
+    finally
+      wbEndInternalEdit;
+    end;
+
+    lATAV.MarkModifiedRecursive(AllElementTypes);
+  end;
+
+  var wbPerkActivityLoadVirtualJSON := procedure(const aElement: IwbElement)
+  var
+    i, j, k                   : Integer;
+    JsonRoot, RootData        : TJsonObject;
+    RootStream                : TJsonArray;
+    RootType                  : string;
+    NewVirtualRoot            : IwbElement;
+    VirtualContainer          : IwbContainer;
+    VirtualStreamContainer    : IwbContainer;
+    TrackedDataContainer      : IwbContainer;
+    TrackedPointerContainer   : IwbContainer;
+  begin
+    if not Assigned(aElement) then
+      Exit;
+
+    if aElement.Value = '' then
+      Exit;
+
+    JsonRoot := TJsonObject.Create;
+    try
+      // get and remove virtual tree in case we're loading updated json data to start fresh
+      NewVirtualRoot := aElement.Container.ElementBySignature['NULL'];
+
+      if wbBeginInternalEdit then
+      try
+        // Create the virtual node if it doesn't exist
+        if not Assigned(NewVirtualRoot) then
+          NewVirtualRoot := aElement.Container.Add('NULL');
+
+        if not Supports(NewVirtualRoot, IwbContainer, VirtualContainer) then
+          Exit;
+
+        if VirtualContainer.Elements[0].Name = 'Unknown' then
+          Exit;
+
+        NewVirtualRoot.BeginUpdate;
+        NewVirtualRoot.SetElementState(esInternalLoad);
+
+        // Clear existing stream elements
+        VirtualStreamContainer := nil;
+        var lStreamElement := VirtualContainer.ElementByPath['[0]\Stream'];
+        if Supports(lStreamElement, IwbContainer, VirtualStreamContainer) then
+          while VirtualStreamContainer.ElementCount > 0 do
+            VirtualStreamContainer.RemoveElement(0);
+
+        // Parse JSON
+        JsonRoot.FromJSON(aElement.Value);
+
+        RootData   := JsonRoot.O['Data'];
+        RootStream := JsonRoot.A['Stream'];
+        RootType   := JsonRoot.S['Type'];
+
+        VirtualContainer.ElementEditValues['[0]\Type'] := RootType;
+
+        // Process Stream array
+        if Assigned(VirtualStreamContainer) then
+          for i := 0 to Pred(RootStream.Count) do
+          begin
+            var lValue: Cardinal := RootStream.I[i];
+            var lElement := VirtualStreamContainer.Assign(High(Integer), nil, False);
+            lElement.NativeValue := lValue;
+          end;
+
+        // Process Data object
+        for i := 0 to Pred(RootData.Count) do
+        begin
+          var lName := RootData.Names[i];
+          if RootData.IsNull(lName) then
+            Continue;
+
+          var lDataType := RootData.Types[lName];
+
+          if lDataType = jdtString then
+          begin
+            VirtualContainer.ElementEditValues['[0]\Data\' + lName] := RootData.S[lName];
+          end
+          else if lDataType = jdtObject then
+          begin
+            var lMatchedElement := VirtualContainer.ElementByPath['[0]\Data\' + lName];
+            if not Assigned(lMatchedElement) then
+              Continue;
+
+            if not Supports(lMatchedElement, IwbContainer, TrackedDataContainer) then
+              Continue;
+
+            var ljTrackedData := RootData.O[lName];
+
+            for j := 0 to Pred(ljTrackedData.Count) do
+            begin
+              lName := ljTrackedData.Names[j];
+              lDataType := ljTrackedData.Types[lName];
+
+              if lDataType = jdtArray then
+              begin
+                var lElement := TrackedDataContainer.ElementByPath[lName];
+                if not Assigned(lElement) or
+                   not Supports(lElement, IwbContainer, TrackedPointerContainer) then
+                  Continue;
+
+                // Clear existing array elements
+                while TrackedPointerContainer.ElementCount > 0 do
+                  TrackedPointerContainer.RemoveElement(0);
+
+                // The tracked data array is just a bunch of null
+                var ljArray := ljTrackedData.A[lName];
+                for k := 0 to Pred(ljArray.Count) do
+                  TrackedPointerContainer.Assign(High(Integer), nil, False);
+              end
+              else if lDataType = jdtString then
+              begin
+                TrackedDataContainer.ElementEditValues[lName] := ljTrackedData.S[lName];
+              end;
+            end;
+          end;
+        end;
+
+      finally
+        NewVirtualRoot.EndUpdate;
+        wbEndInternalEdit;
+        NewVirtualRoot.SetElementState(esInternalLoad, True); // Clear internal load flag
+      end;
+
+    finally
+      JsonRoot.Free;
+    end;
+  end;
+
+  // ATAV
+  var wbPerkActivityAfterLoad:TwbAfterLoadCallback := procedure(const aElement: IwbElement)
+  begin
+    if not Assigned(aElement) then
+      Exit;
+
+    wbPerkActivityLoadVirtualJSON(aElement);
+  end;
+
+  // ATAV
+  var wbPerkActivityAfterSet: TwbAfterSetCallback := procedure(const aElement: IwbElement; const aOldValue, aNewValue: Variant)
+  begin
+    if not Assigned(aElement) then
+      Exit;
+
+    if VarSameValue(aOldValue, aNewValue) then
+      Exit;
+
+    if wbIsInternalEdit then
+      Exit;
+
+    wbPerkActivityLoadVirtualJSON(aElement);
+  end;
+
+  // NULL
+  var wbVirtualPerkActivityAfterSet: TwbAfterSetCallback := procedure(const aElement: IwbElement; const aOldValue, aNewValue: Variant)
+  begin
+    if not Assigned(aElement) then
+      Exit;
+
+    if wbIsInternalEdit then Exit;
+
+    if not (esConstructionComplete in aElement.ElementStates) or
+      (esInternalLoad in aElement.ElementStates) or
+      (fsMastersUpdating in aElement._File.FileStates) then
+        Exit;
+
+    wbVirtualPerkActivityUpdateJSON(aElement);
+  end;
+
+  // Stream\Form element
+  var wbVirtualPerkStreamIDAfterSet: TwbAfterSetCallback := procedure(const aElement: IwbElement; const aOldValue, aNewValue: Variant)
+  begin
+
+    if not Assigned(aElement) then
+      Exit;
+
+    if VarSameValue(aOldValue, aNewValue) then
+      Exit;
+
+    // Don't update from here if not triggered from master update
+    // since the root NULL will trigger an update on manual edits.
+    if not (fsMastersUpdating in aElement._File.FileStates) then
+        Exit;
+
+    wbVirtualPerkActivityUpdateJSON(aElement);
+  end;
+
+  var wbVirtualPerkDeltaEnum :=
+    wbStringEnum([
+      'Any',
+      'Positive',
+      'Negative'
+    ]);
+
+  var wbVirtualPerkDeltaTargetEnum :=
+    wbStringEnum([
+      'TotalValue',
+      'Delta',
+      'DeltaAcc'
+    ]);
+
+  var wbVirtualPerkComparisonEnum :=
+    wbStringEnum([
+      'Equals',
+      'GreaterEquals',
+      'LesserEqual',
+      'NotEquals'
+    ]);
+
+  var wbVirtualPerkAVComparisonEnum :=
+    wbStringEnum([
+      'Any',
+      'Equals',
+      'GreaterEquals',
+      'LesserEqual',
+      'NotEquals'
+    ]);
+
+  var wbVirtualPerkTrackTypeEnum :=
+    wbStringEnum([
+      'TrackOnSource',
+      'TrackOnTarget',
+      'TrackOnBoth'
+    ]);
+
+  var wbVirtualPerkSuccessTypeEnum :=
+    wbStringEnum([
+      'Success',
+      'Failure',
+      'All'
+    ]);
+
+  var wbVirtualPerkTrackedData := function(const aName : string): IwbValueDef
+  begin
+    Result := wbStruct(aName, [
+      wbArray('Data', wbEmpty('NULL'), 0)
+        .IncludeFlag(dfArrayCanBeEmpty)
+        .IncludeFlag(dfCollapsed),
+      wbString('ElementType')
+        .SetFormater(wbStringEnum(['pointer']))
+        .SetDefaultEditValue('pointer'),
+      wbString('Type')
+        .SetFormater(wbStringEnum(['<collection>']))
+        .SetDefaultEditValue('<collection>')
+    ])
+      .IncludeFlag(dfCollapsed);
+  end;
+
+  var wbVirtualPerkActivity := wbUnion(NULL, 'Activity Data',
+    // decider
+    function(aBasePtr: Pointer; aEndPtr: Pointer; const aElement: IwbElement): Integer
+    begin
+      if not Assigned(aElement) then Exit(0);
+
+      var lActivityType:string := aElement.Container.Container.Elements[0].Value;
+      var lIndex: integer := IndexText(lActivityType, wbPerkActivityTypes);
+      if lIndex = -1 then Result := 0
+      else Result := lIndex + 1;
+
+    end,
+   [
+        // undefined
+        wbEmpty,
+        // Actor Value
+        wbStruct('Actor Value Activity', [
+          wbStruct('Data', [
+            wbString('AccumulateDelta')
+              .SetFormater(wbVirtualPerkDeltaEnum)
+              .SetDefaultEditValue('Any'),
+            wbString('ComparisonOperator')
+              .SetFormater(wbVirtualPerkAVComparisonEnum)
+              .SetDefaultEditValue('Any'),
+            wbString('ComparisonTarget')
+              .SetFormater(wbVirtualPerkDeltaTargetEnum)
+              .SetDefaultEditValue('TotalValue'),
+            wbInteger('IncrementByDelta', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('RequiresReset', itU8, wbBoolEnum),
+            wbString('ResetAccumulateDelta')
+              .SetFormater(wbVirtualPerkDeltaEnum)
+              .SetDefaultEditValue('Any'),
+            wbString('ResetComparisonOperator')
+              .SetFormater(wbVirtualPerkAVComparisonEnum)
+              .SetDefaultEditValue('Any'),
+            wbString('ResetComparisonTarget')
+              .SetFormater(wbVirtualPerkDeltaTargetEnum)
+              .SetDefaultEditValue('TotalValue'),
+            wbFloat('ResetTargetValue'),
+            wbFloat('TargetValue'),
+            wbInteger('TrackDamageModifier', itU8, wbBoolEnum),
+            wbInteger('TrackOnControlledRef', itU8, wbBoolEnum),
+            wbInteger('TrackOnOwner', itU8, wbBoolEnum),
+            wbInteger('UsePercentage', itU8, wbBoolEnum),
+            wbEmpty('pTrackedActorValue')
+          ]),
+          wbArray('Stream',
+            wbFormIDCk('Form', [AVIF])
+              .IncludeFlag(dfAfterSetOnIDUpdate)
+              .SetAfterSet(wbVirtualPerkStreamIDAfterSet)
+            , 0),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActorValueActivity']))
+            .SetDefaultEditValue('BGSActorValueActivity')
+        ]),
+
+        // Apply Magic Effect
+        wbStruct('Apply Magic Effect Activity', [
+          wbStruct('Data', [
+            wbInteger('FirstApplyOnly', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbStringEnum([
+                'TrackOnCaster',
+                'TrackOnTarget'
+                ]))
+              .SetDefaultEditValue('TrackOnTarget'),
+            wbVirtualPerkTrackedData('TrackedEffects'),
+            wbInteger('UniqueCasterTargets', itU8, wbBoolEnum)
+          ]),
+          wbArray('Stream',
+            wbFormIDCk('Form', [MGEF])
+              .IncludeFlag(dfAfterSetOnIDUpdate)
+              .SetAfterSet(wbVirtualPerkStreamIDAfterSet)
+            , 0),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSApplyMagicEffectActivity']))
+            .SetDefaultEditValue('BGSApplyMagicEffectActivity')
+        ]),
+
+        //Barter
+        wbStruct('Barter Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackCreditsEarned', itU8, wbBoolEnum),
+            wbInteger('TrackCreditsSpent', itU8, wbBoolEnum),
+            wbInteger('TrackItemsBought', itU8, wbBoolEnum),
+            wbInteger('TrackItemsSold', itU8, wbBoolEnum)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSBarterActivity']))
+            .SetDefaultEditValue('BGSBarterActivity')
+        ]),
+
+        //Bleedout
+        wbStruct('Bleedout Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbStringEnum([
+                'TrackOnAttacker',
+                'TrackOnBleeder',
+                'TrackOnBoth'
+                ]))
+              .SetDefaultEditValue('TrackOnAttacker')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSBleedoutActivity']))
+            .SetDefaultEditValue('BGSBleedoutActivity')
+        ]),
+
+        // Build Workshop Item
+        wbStruct('Build Workshop Item Activity', [
+          wbStruct('Data', [
+            wbInteger('FilterByCategory', itU8, wbBoolEnum),
+            wbString('ObjectCondition')
+              .SetFormater(wbStringEnum([
+                'AllObjects',
+                'PivotObjectOnly',
+                'OneObjectOnly'
+                ]))
+              .SetDefaultEditValue('AllObjects'),
+            wbInteger('OnlyUniquePlanets', itU8, wbBoolEnum),
+            wbInteger('OnlyUniqueTargets', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbStringEnum([
+                'Structure',
+                'Other',
+                'Decoration',
+                'Furniture'
+                ]))
+              .SetDefaultEditValue('Structure')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSBuildWorkshopActivity']))
+            .SetDefaultEditValue('BGSBuildWorkshopActivity')
+        ]),
+
+        //Consume
+        wbStruct('Consume Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSConsumeActivity']))
+            .SetDefaultEditValue('BGSConsumeActivity')
+        ]),
+
+        //Craft
+        wbStruct('Craft Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSCraftActivity']))
+            .SetDefaultEditValue('BGSCraftActivity')
+        ]),
+
+        //Cripple Limb
+        wbStruct('Cripple Limb Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkTrackTypeEnum)
+              .SetDefaultEditValue('TrackOnTarget'),
+            wbVirtualPerkTrackedData('TrackedLimbValues')
+          ]),
+          wbArray('Stream',
+            wbFormIDCk('Form', [AVIF])
+              .IncludeFlag(dfAfterSetOnIDUpdate)
+              .SetAfterSet(wbVirtualPerkStreamIDAfterSet)
+            , 0),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSCrippleLimbActivity']))
+            .SetDefaultEditValue('BGSCrippleLimbActivity')
+        ]),
+
+        //Destroy Ship
+        wbStruct('Destroy Ship Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Dock Ship
+        wbStruct('Dock Ship Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueTargets', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkTrackTypeEnum)
+              .SetDefaultEditValue('TrackOnSource')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSDockingActivity']))
+            .SetDefaultEditValue('BGSDockingActivity')
+        ]),
+
+        //Grav Jump
+        wbStruct('Grav Jump Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Harvest
+        wbStruct('Harvest Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueTargets', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSHarvestActivity']))
+            .SetDefaultEditValue('BGSHarvestActivity')
+        ]),
+
+        //Kill
+        wbStruct('Kill Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Land Planet
+        wbStruct('Land Planet Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniquePlanets', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSLandPlanetActivity']))
+            .SetDefaultEditValue('BGSLandPlanetActivity')
+        ]),
+
+        //Location Discovered
+        wbStruct('Location Discovered Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSLocationDiscoveredActivity')
+        ]),
+
+        //Lockpick
+        wbStruct('Lockpick Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkSuccessTypeEnum)
+              .SetDefaultEditValue('Success')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSLockPickActivity']))
+            .SetDefaultEditValue('BGSLockPickActivity')
+        ]),
+
+        //Loot Container
+        wbStruct('Loot Container Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Lose Enemy
+        wbStruct('Lose Enemy Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueTargets', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkTrackTypeEnum)
+              .SetDefaultEditValue('TrackOnSource')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSLoseEnemyActivity']))
+            .SetDefaultEditValue('BGSLoseEnemyActivity')
+        ]),
+
+        //Player Pickpocket
+        wbStruct('Player Pickpocket Activity', [
+          wbStruct('Data', [
+            wbInteger('CountStolenValue', itU8, wbBoolEnum),
+            wbInteger('OnlyUniqueContainers', itU8, wbBoolEnum),
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackPlaceItem', itU8, wbBoolEnum),
+            wbInteger('TrackTakeItem', itU8, wbBoolEnum)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSPlayerPickpocketActivity']))
+            .SetDefaultEditValue('BGSPlayerPickpocketActivity')
+        ]),
+
+        //Produce
+        wbStruct('Produce Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Reload Weapon
+        wbStruct('Reload Weapon Activity', [
+          wbStruct('Data', [
+            wbInteger('CountBulletsReloaded', itU8, wbBoolEnum),
+            wbInteger('OnlyEmptyClips', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSReloadWeaponActivity']))
+            .SetDefaultEditValue('BGSReloadWeaponActivity')
+        ]),
+
+        //Research Completed
+        wbStruct('Research Completed Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TierCompOp')
+              .SetFormater(wbVirtualPerkComparisonEnum)
+              .SetDefaultEditValue('GreaterEquals'),
+            wbString('TierCompVal')
+              .SetFormater(wbStringEnum([
+              'Tier0', 'Tier1', 'Tier2',
+              'Tier3', 'Tier4', 'Tier5'
+              ]))
+              .SetDefaultEditValue('Tier0')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSCompleteResearchActivity']))
+            .SetDefaultEditValue('BGSCompleteResearchActivity')
+        ]),
+
+        //Scan Planet
+        wbStruct('Scan Planet Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSActivity']))
+            .SetDefaultEditValue('BGSActivity')
+        ]),
+
+        //Scan Surface
+         wbStruct('Scan Surface Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackCompletionScansOnly', itU8, wbBoolEnum),
+            wbInteger('TrackMapMarkers', itU8, wbBoolEnum),
+            wbInteger('TrackObjects', itU8, wbBoolEnum),
+            wbInteger('TrackResources', itU8, wbBoolEnum)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSScanSurfaceActivity']))
+            .SetDefaultEditValue('BGSScanSurfaceActivity')
+        ]),
+
+        //ShipBuilder
+         wbStruct('ShipBuilder Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueItems', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackModulesAdded', itU8, wbBoolEnum),
+            wbInteger('TrackModulesRemoved', itU8, wbBoolEnum)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSShipbuilderActivity']))
+            .SetDefaultEditValue('BGSShipbuilderActivity')
+        ]),
+
+        //ShipCollection
+         wbStruct('ShipCollection Activity', [
+          wbStruct('Data', [
+            wbInteger('OnlyUniqueShips', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackShipsBought', itU8, wbBoolEnum),
+            wbInteger('TrackShipsRegistered', itU8, wbBoolEnum),
+            wbInteger('TrackShipsSold', itU8, wbBoolEnum)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSShipCollectionActivity']))
+            .SetDefaultEditValue('BGSShipCollectionActivity')
+        ]),
+
+        //Speech Challenge
+         wbStruct('Research Completed Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkSuccessTypeEnum)
+              .SetDefaultEditValue('Success')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSSpeechChallengeActivity']))
+            .SetDefaultEditValue('BGSSpeechChallengeActivity')
+        ]),
+
+        //Sprint
+        wbStruct('Sprint Activity', [
+          wbStruct('Data', [
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1)
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSSprintActivity']))
+            .SetDefaultEditValue('BGSSprintActivity')
+        ]),
+
+        //Take Actor Damage
+        wbStruct('Take Actor Damage Activity', [
+          wbStruct('Data', [
+            wbInteger('IncrementByDamageValue', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackFatalDamageOnly', itU8, wbBoolEnum),
+            wbString('TrackTarget')
+              .SetFormater(wbVirtualPerkTrackTypeEnum)
+              .SetDefaultEditValue('TrackOnSource'),
+            wbString('TrackedDamageCause')
+              .SetFormater(wbStringEnum([
+                'None',
+                'Explosion',
+                'Gun',
+                'Blunt_Weapon',
+                'Hand_to_Hand',
+                'Object_Impact',
+                'Poison',
+                'Decapitation',
+                'Falling',
+                'Drowning'
+              ]))
+              .SetDefaultEditValue('None')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSTakeActorDamageActivity']))
+            .SetDefaultEditValue('BGSTakeActorDamageActivity')
+        ]),
+
+        //Take Hit Damage
+        wbStruct('Activity', [
+          wbStruct('Data', [
+            wbInteger('IncrementByDamageValue', itU8, wbBoolEnum),
+            wbInteger('Repetitions', itU32).SetDefaultNativeValue(1),
+            wbInteger('TrackCriticalsOnly', itU8, wbBoolEnum),
+            wbInteger('TrackElectroMagneticDamage', itU8, wbBoolEnum),
+            wbInteger('TrackFatalDamageOnly', itU8, wbBoolEnum),
+            wbInteger('TrackHealthDamage', itU8, wbBoolEnum),
+            wbInteger('TrackShipHullDamage', itU8, wbBoolEnum),
+            wbInteger('TrackShipShieldDamage', itU8, wbBoolEnum),
+            wbInteger('TrackSneakAttacksOnly', itU8, wbBoolEnum),
+            wbString('TrackTarget')
+              .SetFormater(wbStringEnum([
+                'TrackOnVictim',
+                'TrackOnAggressor',
+                'TrackOnBoth'
+                ]))
+              .SetDefaultEditValue('TrackOnVictim')
+          ]),
+          wbString('Type')
+            .SetFormater(wbStringEnum(['BGSTakeDamageActivity']))
+            .SetDefaultEditValue('BGSTakeDamageActivity')
+        ])
+    ])
+    .SetAfterSet(wbVirtualPerkActivityAfterSet)
+    .SetRequired
+    .IncludeFlag(dfDontSave);
+
   var wbActivityTracker := wbRStruct('Activity Tracker', [
     wbInteger(ATCP, 'Activity Count', itU32, nil, cpBenign, True).IncludeFlag(dfSkipImplicitEdit),
     wbRArray('Activities',
@@ -5092,8 +5863,12 @@ begin
         wbRStruct('Progression Configuration', [
           wbString(ANAM).SetRequired,
           wbString(ATAV, 'Configuration')
+            .SetAfterLoad(wbPerkActivityAfterLoad)
+            .SetAfterSet(wbPerkActivityAfterSet)
+            .IncludeFlag(dfCanContainFormID)
             .IncludeFlag(dfNoZeroTerminator)
             .SetRequired,
+          wbVirtualPerkActivity,
           wbEmpty(ATAF, 'Unknown').SetRequired // always empty
         ]).SetRequired])
       ).SetCountPath(ATCP)

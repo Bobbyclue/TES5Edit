@@ -74,6 +74,22 @@ begin
       ScriptProcessElements := [etMainRecord];
     Done := True;
   end else
+  if SameText(Identifier, 'ScriptProcessSignatures') then begin
+    var sl := TStringList.Create;
+    try
+      sl.CommaText := Value;
+      for i := 0 to Pred(sl.Count) do begin
+        var s := Trim(sl[i]);
+        if Length(s) <> 4 then
+          JvInterpreterErrorN(ieDirectInvalidArgument, 0, Format('ScriptProcessSignatures expects a comma separated list of 4 character signatures. The signature "%s" is not a valid candidate.', [s])); // or ieNotEnoughParams, ieIncompatibleTypes or others.
+        sl[i] := UpperCase(s); // trimmed and semi-validated so set uppercase to simplify check later
+      end;
+      ScriptProcessSignatures := sl.CommaText;
+    finally
+      sl.free;
+    end;
+    Done := True;
+  end else
   if SameText(Identifier, 'wbOutputPath') then begin
     wbOutputPath := Value;
     Done := True;

@@ -2675,8 +2675,8 @@ begin;
       for i := 0 to Pred(aMasters.Count) do begin
         s := Trim(aMasters[i]);
         t := ExtractFileExt(s);
-        if SameText(t, '.esp') and wbIsStarfield then
-          raise Exception.CreateFmt('[AddMasters] You cannot add a .esp to a master in %s.', [wbGameName]);
+        if SameText(t, '.esp') and (not wbAllowESPMasters) then
+          raise Exception.CreateFmt('[AddMasters] You cannot add a .esp as a master in %s.', [wbGameName]);
         if SameText(t, '.esm') or SameText(t, '.esp') or (wbIsLightSupported and SameText(t, '.esl')) then
           lMasters.Add(s);
       end;
@@ -5294,6 +5294,11 @@ begin
       SetIsESM(True);
       SetIsLight(True);
     end;
+
+    if not wbAllowESPMastersOnSave then
+      for i := Low(flModule.miMasters) to High(flModule.miMasters) do
+        if flModule.miMasters[i].miExtension = meESP then
+          raise Exception.CreateFmt('%s modules must never have .esp masters.', [wbGameName]);
 
     if wbIsStarfield then begin
       if GetIsUpdateDirect and (GetIsLightDirect or GetIsMediumDirect) then
@@ -15594,6 +15599,8 @@ function TwbSubRecord.CompareExchangeFormID(aOldFormID, aNewFormID: TwbFormID): 
 var
   SelfRef     : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
+  OldValue    : Variant;
+  NewValue    : Variant;
 begin
   SelfRef := Self as IwbContainerElementRef;
   Result := False;
@@ -15606,11 +15613,16 @@ begin
   try
     Result := inherited CompareExchangeFormID(aOldFormID, aNewFormID);
 
+    OldValue := GetNativeValue;
     ResolvedDef := Resolve(srValueDef, GetDataBasePtr, dcDataEndPtr, Self);
     if Assigned(ResolvedDef) then
       if ResolvedDef.CompareExchangeFormID(GetDataBasePtr, dcDataEndPtr, Self, aOldFormID, aNewFormID) then begin
         SetModified(True);
         Result := True;
+        NewValue := GetNativeValue;
+        var lDef := GetDef;
+        if dfAfterSetOnIDUpdate in lDef.DefFlags then
+          DoAfterSet(OldValue, NewValue);
         //wbProgress('Replaced FormID [%s] with [%s] in "%s". New Value: %s', [aOldFormID.ToString, aNewFormID.ToString, GetPath, GetValue]);
       end;
   finally
@@ -22722,6 +22734,8 @@ function TwbUnion.CompareExchangeFormID(aOldFormID, aNewFormID: TwbFormID): Bool
 var
   SelfRef     : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
+  OldValue    : Variant;
+  NewValue    : Variant;
 begin
   SelfRef := Self as IwbContainerElementRef;
 
@@ -22731,11 +22745,16 @@ begin
   try
     Result := inherited CompareExchangeFormID(aOldFormID, aNewFormID);
 
+    OldValue := GetNativeValue;
     ResolvedDef := Resolve(vbValueDef, GetDataBasePtr, dcDataEndPtr, Self);
     if Assigned(ResolvedDef) then
       if ResolvedDef.CompareExchangeFormID(GetDataBasePtr, dcDataEndPtr, Self, aOldFormID, aNewFormID) then begin
         SetModified(True);
         Result := True;
+        NewValue := GetNativeValue;
+        var lDef := GetDef;
+        if dfAfterSetOnIDUpdate in lDef.DefFlags then
+          DoAfterSet(OldValue, NewValue);
         //wbProgress('Replaced FormID [%s] with [%s] in "%s". New Value: %s', [aOldFormID.ToString, aNewFormID.ToString, GetPath, GetValue]);
       end;
   finally
@@ -22882,6 +22901,8 @@ function TwbValue.CompareExchangeFormID(aOldFormID, aNewFormID: TwbFormID): Bool
 var
   SelfRef     : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
+  OldValue    : Variant;
+  NewValue    : Variant;
 begin
   SelfRef := Self as IwbContainerElementRef;
 
@@ -22891,11 +22912,16 @@ begin
   try
     Result := inherited CompareExchangeFormID(aOldFormID, aNewFormID);
 
+    OldValue := GetNativeValue;
     ResolvedDef := Resolve(vbValueDef, GetDataBasePtr, dcDataEndPtr, Self);
     if Assigned(ResolvedDef) then
       if ResolvedDef.CompareExchangeFormID(GetDataBasePtr, dcDataEndPtr, Self, aOldFormID, aNewFormID) then begin
         SetModified(True);
         Result := True;
+        NewValue := GetNativeValue;
+        var lDef := GetDef;
+        if dfAfterSetOnIDUpdate in lDef.DefFlags then
+          DoAfterSet(OldValue, NewValue);
         //wbProgress('Replaced FormID [%s] with [%s] in "%s". New Value: %s', [aOldFormID.ToString, aNewFormID.ToString, GetFullPath, GetValue]);
       end;
   finally
@@ -23050,6 +23076,8 @@ function TwbValue.MastersUpdated(const aOld, aNew: TwbFileIDs; aOldCount, aNewCo
 var
   SelfRef    : IwbContainerElementRef;
   ResolvedDef : IwbValueDef;
+  OldValue : Variant;
+  NewValue : Variant;
 begin
   SelfRef := Self as IwbContainerElementRef;
 
@@ -23059,12 +23087,17 @@ begin
 
     Result := inherited MastersUpdated(aOld, aNew, aOldCount, aNewCount);
 
+    OldValue := GetNativeValue;
     ResolvedDef := Resolve(vbValueDef, GetDataBasePtr, dcDataEndPtr, Self);
     if Assigned(ResolvedDef) then
       if ResolvedDef.MastersUpdated(GetDataBasePtr, dcDataEndPtr, Self, aOld, aNew, aOldCount, aNewCount) then begin
         Result := True;
         SetMastersUpdated(True);
         SetModified(True);
+        NewValue := GetNativeValue;
+        var lDef := GetDef;
+        if dfAfterSetOnIDUpdate in lDef.DefFlags then
+          DoAfterSet(OldValue, NewValue);
       end;
 
   finally

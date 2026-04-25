@@ -1227,12 +1227,12 @@ begin
   else if (sig = 'RACE') then begin
     ProcessAsset(ElementByPath(e, 'ANAM - Male Skeletal Model'), atMesh);
     ProcessAsset(ElementByPath(e, 'ANAM - Female Skeletal Model'), atMesh);
-    ents := ElementByPath(e, 'Body Data\Male Body Data\Parts');
-    for i := 0 to Pred(ElementCount(ents)) do
-      ProcessAsset(ElementByPath(ElementByIndex(ents, i), 'Model\MODL'), atMesh);
-    ents := ElementByPath(e, 'Body Data\Female Body Data\Parts');
-    for i := 0 to Pred(ElementCount(ents)) do
-      ProcessAsset(ElementByPath(ElementByIndex(ents, i), 'Model\MODL'), atMesh);
+    //ents := ElementByPath(e, 'Body Data\Male Body Data\Parts');
+    //for i := 0 to Pred(ElementCount(ents)) do
+      //ProcessAsset(ElementByPath(ElementByIndex(ents, i), 'Model\MODL'), atMesh);
+    //ents := ElementByPath(e, 'Body Data\Female Body Data\Parts');
+    //for i := 0 to Pred(ElementCount(ents)) do
+      //ProcessAsset(ElementByPath(ElementByIndex(ents, i), 'Model\MODL'), atMesh);
     ProcessAsset(ElementByPath(e, 'Male Behavior Graph\Model\MODL'), atMesh);
     ProcessAsset(ElementByPath(e, 'Female Behavior Graph\Model\MODL'), atMesh);
     ProcessAsset(ElementByPath(e, 'Head Data\Male Head Data\Model'), atMesh);
