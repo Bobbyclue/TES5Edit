@@ -3179,8 +3179,10 @@ begin
               mtMedium: Inc(nextMediumID);
             end;
             Inc(j);
-          end else
+          end else begin
+            flProgress('Removing unused master: ' + flMasters[i].FileName);
             MasterFiles[i].SortOrder := $1200;
+          end;
 
           case flMasters[i].GetModuleType of
             mtFull: Inc(lastFullID);
