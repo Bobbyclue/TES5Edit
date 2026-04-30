@@ -2296,7 +2296,13 @@ begin
   if not Assigned(aElement) then
     Exit;
 
-  var lContainer := aElement as IwbContainerElementRef;
+  var lContainer := aElement as IwbContainer;
+  while lContainer.Name <> 'Region Data Entry' do
+  begin
+    lContainer := lContainer.Container;
+    if not Assigned(lContainer) then
+      Exit;
+  end;
 
   Result := lContainer.ElementNativeValues['RDAT\Type'];
 end;

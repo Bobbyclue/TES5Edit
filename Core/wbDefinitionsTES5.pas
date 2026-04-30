@@ -5981,7 +5981,7 @@ begin
           wbUnused(2)
         ]),
         wbFormIDCk('Ability', [SPEL]),
-        wbStructSK([0, 1], 'Entry Point', [
+        wbStructExSK([0], [1], 'Entry Point', [
           wbInteger('Entry Point', itU8, wbEntryPointsEnum, cpNormal, True, nil{, wbPERKEntryPointAfterSet}),
           wbInteger('Function', itU8, wbEnum([
             {0} 'Unknown 0',
@@ -6007,7 +6007,7 @@ begin
 
       wbRArrayS('Perk Conditions', wbPerkConditions),
 
-      wbRStructSK([0,2,3], 'Function Parameters', [
+      wbRStructExSK([0,2], [3], 'Function Parameters', [
         wbInteger(EPFT, 'Type', itU8, wbEnum([
           {0} 'None',
           {1} 'Float',
