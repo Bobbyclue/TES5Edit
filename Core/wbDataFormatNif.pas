@@ -1536,6 +1536,9 @@ function TwbNifBlock.ApplyTransform(aRecursive: Boolean = False; aOptions: TwbAp
 
   function CanTransform(aBlock: TwbNifBlock): Boolean;
   begin
+    if aBlock = aBlock.NifFile.RootNode then
+      Exit(False);
+
     // skip skinned, animated and nodes with collision
     // also BSFurnitureMarker in extradata because it contains positions
     Result :=
