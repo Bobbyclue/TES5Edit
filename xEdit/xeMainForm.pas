@@ -1924,8 +1924,13 @@ begin
   Result := False;
   s := '';
   if InputQuery('New Module File', 'Filename without extension:', s) then begin
+    s := Trim(s);
     if s = '' then
       Exit;
+    if SameText(ExtractFileExt(s), '.esp') or
+       SameText(ExtractFileExt(s), '.esm') or
+       SameText(ExtractFileExt(s), '.esl') then
+      s := ChangeFileExt(s, '');
     if aIsLight then
       s := s + '.esl'
     else
@@ -1946,6 +1951,10 @@ begin
     s := Trim(s);
     if s = '' then
       Exit;
+    if SameText(ExtractFileExt(s), '.esp') or
+       SameText(ExtractFileExt(s), '.esm') or
+       SameText(ExtractFileExt(s), '.esl') then
+      s := ChangeFileExt(s, '');
     s := s + aTemplate.miExtension.ToString;
     aFile := AddNewFileName(s, aTemplate);
     if Assigned(aFile) and wbAlwaysLoadGameMaster then
