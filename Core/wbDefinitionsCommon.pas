@@ -4534,6 +4534,8 @@ begin
   if not Assigned(lBranchQuest) then
     Exit;
 
+  lBranchQuest := lBranchQuest.MasterOrSelf;
+
   var lElementQuest := aElement.LinksTo as IwbMainRecord;
   if not Assigned(lElementQuest) then
     Exit;
