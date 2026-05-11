@@ -45,7 +45,7 @@ begin
   inherited;
 
   fTitle := 'Unskin mesh';
-  fSupportedGames := [gtTES4, gtFO3, gtFNV, gtTES5, gtSSE, gtFO4];
+  fSupportedGames := [gtTES4, gtFO3, gtFNV, gtTES5];
   fExtensions := ['nif'];
 end;
 
@@ -95,7 +95,7 @@ begin
     for var b in nif.BlocksByType('NiTriBasedGeom', True) do
       UnSkin(b);
 
-    for var b in nif.BlocksByType('BSTriShape', True) do begin
+    {for var b in nif.BlocksByType('BSTriShape', True) do begin
       UnSkin(b);
 
       if b.NativeValues['VertexDesc\VF\VF_SKINNED'] then begin
@@ -107,7 +107,7 @@ begin
         nif.ConvertBlock(b.Index, 'BSTriShape');
         bChanged := True;
       end;
-    end;
+    end;}
 
     if bChanged then
       nif.SaveToData(Result);
@@ -116,6 +116,5 @@ begin
     nif.Free;
   end;
 end;
-
 
 end.

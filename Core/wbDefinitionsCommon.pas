@@ -4526,15 +4526,19 @@ begin
   if not Assigned(lBranch) then
     Exit;
 
-  var lBranchQuest := lBranch.ElementBySignature[QNAM].LinksTo as IwbMainRecord;
-  lBranchQuest := lBranchQuest.MasterOrSelf;
+  var lBranchQNAM := lBranch.ElementBySignature[QNAM];
+  if not Assigned(lBranchQNAM) then
+    Exit;
+
+  var lBranchQuest := lBranchQNAM.LinksTo as IwbMainRecord;
+  if not Assigned(lBranchQuest) then
+    Exit;
 
   var lElementQuest := aElement.LinksTo as IwbMainRecord;
   if not Assigned(lElementQuest) then
     Exit;
 
   lElementQuest := lElementQuest.MasterOrSelf;
-
   if lElementQuest = lBranchQuest then
     Exit;
 

@@ -731,7 +731,29 @@ begin
         Result := True;
       end;
     end;
+  end;
 
+  for var Collision in nif.BlocksByType('bhkCollisionObject', False) do
+  begin
+    if nif.NifVersion in [nfTES5, nfSSE, nfFO4] then
+      if Collision.NativeValues['Flags\SYNC_ON_UPDATE'] = False then
+      begin
+        Collision.NativeValues['Flags\SYNC_ON_UPDATE'] := True;
+        Log.Add(#9 + Collision.Name + ': Added Sync_On_Update flag');
+        Result := True;
+      end;
+
+    var Rigid := Collision.ElementByName('Body').LinksTo;
+    if not Assigned(Rigid) then
+      Exit;
+
+    if Rigid.NativeValues['Havok Filter\Layer'] = 2 then
+      if Collision.NativeValues['Flags\SET_LOCAL'] = False then
+        begin
+          Collision.NativeValues['Flags\SET_LOCAL'] := True;
+          Log.Add(#9 + Collision.Name + ': Added Set_Local flag');
+          Result := True;
+        end;
   end;
 
   // collision settings
@@ -739,6 +761,8 @@ begin
   for var rigid in nif.BlocksByType('bhkRigidBody', True) do begin
     var layer: Integer := rigid.NativeValues['Havok Filter\Layer'];
     var S := rigid.EditValues['Havok Filter\Layer'];
+
+    Result := UpdateElement(rigid, 'Havok Filter Copy\Layer', S, S) or Result;
 
     // static, tree and noncollidable layer
     if layer in  [1, 9, 15] then begin
